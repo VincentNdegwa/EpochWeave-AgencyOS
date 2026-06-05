@@ -1,4 +1,6 @@
 import type { Auth } from '@/types/auth';
+import type { Notification } from '@/types/models/notification';
+import type { Workspace } from '@/types/models/workspace';
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
@@ -18,6 +20,9 @@ declare module '@inertiajs/core' {
         sharedPageProps: {
             name: string;
             auth: Auth;
+            workspace: Workspace | null;
+            workspaces: Workspace[];
+            notifications: Notification[];
             sidebarOpen: boolean;
             [key: string]: unknown;
         };

@@ -41,6 +41,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'workspace' => $request->attributes->get('current_workspace'),
+            'workspaces' => $request->attributes->get('workspaces'),
+            'notifications' => $request->user()?->unreadNotifications ?? [],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
