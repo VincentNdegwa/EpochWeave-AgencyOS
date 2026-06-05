@@ -23,12 +23,11 @@ class WorkspaceService
                 'primary_color' => $data['primary_color'] ?? null,
             ]);
 
-            $adminRole = Role::updateOrCreate(
+            $adminRole = Role::firstOrCreate(
                 ['name' => 'admin'],
                 [
                     'display_name' => 'Administrator',
                     'description' => 'System administrator with full access',
-                    'workspace_id' => $workspace->id,
                 ]
             );
 
