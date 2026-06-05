@@ -4,7 +4,9 @@ namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use App\Models\Role;
 use App\Models\User;
+use App\Models\Workspace;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
@@ -24,10 +26,28 @@ class CreateNewUser implements CreatesNewUsers
             'password' => $this->passwordRules(),
         ])->validate();
 
-        return User::create([
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
         ]);
+
+        $adminRole = Role::updateOrCreate(
+            ['name' => 'admin'],
+            [
+                'display_name' => 'Administrator',
+                'description' => 'System administrator with full access'
+            ]
+        );
+
+        $workspace = Workspace::create([
+            'name' => strtolower(str_replace(' ', '-', $input['name'])) . '-workspace',
+            'display_name' => $input['name'] . "'s Workspace",
+            'description' => 'Personal workspace for ' . $input['name'],
+        ]);
+
+        $user->addRole($adminRole, $workspace);
+
+        return $user;
     }
 }
