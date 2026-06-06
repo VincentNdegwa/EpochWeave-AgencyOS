@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\AccountStatus;
+use App\Enums\BillingType;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -45,6 +47,10 @@ class HandleInertiaRequests extends Middleware
             'workspaces' => $request->attributes->get('workspaces'),
             'notifications' => $request->user()?->unreadNotifications ?? [],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'enums' => [
+                'accountStatuses' => collect(AccountStatus::cases())->keyBy(fn (AccountStatus $status) => $status->value),
+                'billingTypes' => collect(BillingType::cases())->keyBy(fn (BillingType $type) => $type->value),
+            ],
         ];
     }
 }

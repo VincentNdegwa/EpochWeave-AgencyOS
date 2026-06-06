@@ -45,21 +45,28 @@ const selectedWorkspace = computed(() =>
     workspaces.find((ws) => ws.id.toString() === value.value),
 );
 
-watch(() => page.props.workspace, (newWorkspace) => {
-    if (newWorkspace) {
-        value.value = newWorkspace.id?.toString() || '';
-    }
-});
+watch(
+    () => page.props.workspace,
+    (newWorkspace) => {
+        if (newWorkspace) {
+            value.value = newWorkspace.id?.toString() || '';
+        }
+    },
+);
 
 function selectWorkspace(selectedValue: string) {
     const ws = workspaces.find((w) => w.id.toString() === selectedValue);
 
     if (ws) {
-        router.post(switchMethod(ws.id).url, {}, {
-            onSuccess: () => {
-                window.location.reload();
+        router.post(
+            switchMethod(ws.id).url,
+            {},
+            {
+                onSuccess: () => {
+                    window.location.reload();
+                },
             },
-        });
+        );
     }
 
     open.value = false;
@@ -67,24 +74,28 @@ function selectWorkspace(selectedValue: string) {
 
 const createWorkspace = () => {
     if (!newWorkspaceName.value.trim()) {
-return;
-}
-    
+        return;
+    }
+
     isCreating.value = true;
-    
-    router.post(store().url, {
-        name: newWorkspaceName.value,
-        display_name: newWorkspaceName.value,
-    }, {
-        onSuccess: () => {
-            showCreateDialog.value = false;
-            newWorkspaceName.value = '';
-            window.location.reload();
+
+    router.post(
+        store().url,
+        {
+            name: newWorkspaceName.value,
+            display_name: newWorkspaceName.value,
         },
-        onFinish: () => {
-            isCreating.value = false;
+        {
+            onSuccess: () => {
+                showCreateDialog.value = false;
+                newWorkspaceName.value = '';
+                window.location.reload();
+            },
+            onFinish: () => {
+                isCreating.value = false;
+            },
         },
-    });
+    );
 };
 
 const openCreateDialog = () => {
@@ -103,13 +114,18 @@ const openCreateDialog = () => {
                     :aria-expanded="open"
                     class="justify-between"
                 >
-                    {{ selectedWorkspace?.display_name || 'Select workspace...' }}
+                    {{
+                        selectedWorkspace?.display_name || 'Select workspace...'
+                    }}
                     <ChevronsUpDownIcon class="opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent class="p-0">
                 <Command>
-                    <CommandInput class="h-9" placeholder="Search workspace..." />
+                    <CommandInput
+                        class="h-9"
+                        placeholder="Search workspace..."
+                    />
                     <CommandList>
                         <CommandEmpty>No workspace found.</CommandEmpty>
                         <CommandGroup>
@@ -117,16 +133,24 @@ const openCreateDialog = () => {
                                 v-for="ws in workspaces"
                                 :key="ws.id"
                                 :value="ws.id.toString()"
-                                @select="(ev) => {
-                                    selectWorkspace(ev.detail.value as string)
-                                }"
+                                @select="
+                                    (ev) => {
+                                        selectWorkspace(
+                                            ev.detail.value as string,
+                                        );
+                                    }
+                                "
                             >
                                 {{ ws.display_name }}
                                 <CheckIcon
-                                    :class="cn(
-                                        'ml-auto',
-                                        value === ws.id.toString() ? 'opacity-100' : 'opacity-0',
-                                    )"
+                                    :class="
+                                        cn(
+                                            'ml-auto',
+                                            value === ws.id.toString()
+                                                ? 'opacity-100'
+                                                : 'opacity-0',
+                                        )
+                                    "
                                 />
                             </CommandItem>
                         </CommandGroup>
@@ -161,7 +185,11 @@ const openCreateDialog = () => {
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button type="submit" @click="createWorkspace" :disabled="isCreating">
+                    <Button
+                        type="submit"
+                        @click="createWorkspace"
+                        :disabled="isCreating"
+                    >
                         {{ isCreating ? 'Creating...' : 'Create' }}
                     </Button>
                 </DialogFooter>

@@ -54,8 +54,12 @@ const getNotificationData = (notification: Notification) => {
                                 v-if="notifications.length === 0"
                                 class="flex flex-col items-center justify-center gap-2 py-12 text-center"
                             >
-                                <BellOffIcon class="h-12 w-12 text-muted-foreground" />
-                                <p class="text-sm text-muted-foreground">No notifications</p>
+                                <BellOffIcon
+                                    class="h-12 w-12 text-muted-foreground"
+                                />
+                                <p class="text-sm text-muted-foreground">
+                                    No notifications
+                                </p>
                             </div>
                             <CommandItem
                                 v-for="notification in notifications"
@@ -63,16 +67,29 @@ const getNotificationData = (notification: Notification) => {
                                 :key="notification.id"
                                 class="flex flex-col items-start gap-1 p-4"
                             >
-                                <div class="flex w-full items-center justify-between">
+                                <div
+                                    class="flex w-full items-center justify-between"
+                                >
                                     <span class="text-sm font-medium">
-                                        {{ getNotificationData(notification).title || 'Notification' }}
+                                        {{
+                                            getNotificationData(notification)
+                                                .title || 'Notification'
+                                        }}
                                     </span>
                                     <span class="text-xs text-muted-foreground">
-                                        {{ new Date(notification.created_at).toLocaleDateString() }}
+                                        {{
+                                            new Date(
+                                                notification.created_at,
+                                            ).toLocaleDateString()
+                                        }}
                                     </span>
                                 </div>
                                 <p class="text-sm text-muted-foreground">
-                                    {{ getNotificationData(notification).message || getNotificationData(notification) }}
+                                    {{
+                                        getNotificationData(notification)
+                                            .message ||
+                                        getNotificationData(notification)
+                                    }}
                                 </p>
                             </CommandItem>
                         </ScrollArea>

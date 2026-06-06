@@ -19,12 +19,12 @@ class SetCurrentWorkspace
         $workspace = null;
         $workspaces = [];
 
-        if ($request->session()->has('current_workspace_id')) {
-            $workspace = Workspace::find($request->session()->get('current_workspace_id'));
-        }
-
         if ($request->user()) {
             $workspaces = $request->user()->rolesTeams()->get();
+
+            if ($request->session()->has('current_workspace_id')) {
+                $workspace = Workspace::find($request->session()->get('current_workspace_id'));
+            }
 
             if (!$workspace && $workspaces->isNotEmpty()) {
                 $workspace = $workspaces->first();
