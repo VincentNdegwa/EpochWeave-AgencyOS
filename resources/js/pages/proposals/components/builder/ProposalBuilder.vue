@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import { usePage } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import BuilderSidebar from '@/pages/proposals/components/sidebar/BuilderSidebar.vue';
@@ -10,6 +11,7 @@ import type { Proposal } from '@/types/models/proposal';
 import type { BlockType } from '@/types/proposal-builder';
 import type { ProposalMeta } from '@/types/proposal-meta';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useWorkspaceStore } from '@/stores/workspace';
 
 const props = withDefaults(
   defineProps<{
@@ -23,6 +25,7 @@ const props = withDefaults(
 
 const builderStore = useProposalBuilderStore();
 const { blocks, isDirty, isSaving } = storeToRefs(builderStore);
+const workspaceStore = useWorkspaceStore();
 
 const title = ref(props.initialProposal?.title ?? 'Untitled proposal');
 const isPreview = ref(false);
@@ -36,6 +39,14 @@ const proposalMeta = reactive<ProposalMeta>({
 });
 const pickerOpen = ref(false);
 const insertAfterId = ref<string | null>(null);
+
+watch(
+  () => props.initialProposal?.workspace ?? usePage().props.workspace,
+  (workspace) => {
+    workspaceStore.setWorkspace(workspace ?? null);
+  },
+  { immediate: true }
+);
 
 watch(
   () => props.initialProposal?.content,
@@ -105,6 +116,7 @@ watchDebounced(
 
 onBeforeUnmount(() => {
   builderStore.clear();
+  workspaceStore.clear();
 });
 
 const isCanvasLocked = computed(() => props.mode === 'edit' && props.initialProposal?.status === 'accepted');

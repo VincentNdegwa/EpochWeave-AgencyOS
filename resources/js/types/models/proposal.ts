@@ -1,4 +1,5 @@
 import type { BaseBlock } from '../proposal-builder';
+import type { Workspace } from './workspace';
 
 export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
 export type DepositType = 'percentage' | 'fixed';
@@ -55,13 +56,6 @@ export interface Account {
   status: string;
   website: string | null;
   lifetime_value: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Workspace {
-  id: number;
-  name: string;
   created_at: string;
   updated_at: string;
 }
