@@ -5,6 +5,7 @@ use App\Http\Controllers\AccountContactController;
 use App\Http\Controllers\PortalSetupController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductUnitController;
+use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\WorkspaceController;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,8 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
 
     Route::resource('product-units', ProductUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+
+    Route::resource('proposals', ProposalController::class);
 });
 
 require __DIR__.'/settings.php';

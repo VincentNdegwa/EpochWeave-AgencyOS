@@ -18,6 +18,7 @@ import { dashboard } from '@/routes';
 import accounts from '@/routes/accounts';
 import products from '@/routes/products';
 import type { NavItem } from '@/types';
+import proposals from '@/routes/proposals';
 
 const mainNavItems: NavItem[] = [
     {
@@ -34,7 +35,11 @@ const mainNavItems: NavItem[] = [
         title: 'Catalog',
         href: products.index().url,
         icon: Box,
-    },
+    },{
+        title: 'Proposal',
+        href: proposals.index().url,
+        icon: LayoutGrid,
+    }
 ];
 
 const footerNavItems: NavItem[] = [];
