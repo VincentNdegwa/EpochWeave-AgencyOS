@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
+import { Plus } from '@lucide/vue';
 import { ref, watch } from 'vue';
 import ProductController from '@/actions/App/Http/Controllers/ProductController';
 import InputError from '@/components/InputError.vue';
@@ -39,6 +40,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
     'update:open': [value: boolean];
     success: [];
+    'create-unit': [];
 }>();
 
 const form = ref({
@@ -80,8 +82,8 @@ watch(
 </script>
 
 <template>
-    <Dialog :open="open" @update:open="emit('update:open', $event)">
-        <DialogContent class="max-w-lg">
+    <Dialog class="" :open="open" @update:open="emit('update:open', $event)">
+        <DialogContent class="sm:max-w-xl md:max-w-2xl">
             <DialogHeader>
                 <DialogTitle>{{
                     product ? 'Edit Product' : 'New Product'
@@ -103,108 +105,161 @@ watch(
                 "
                 v-slot="{ errors, processing }"
             >
-                <div class="grid gap-4 py-4">
-                    <div class="grid gap-2">
-                        <Label for="unit_id" required>Unit</Label>
-                        <Select name="unit_id" v-model="form.unit_id" required>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Select a unit" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem
-                                    v-for="unit in units"
-                                    :key="unit.id"
-                                    :value="unit.id.toString()"
+                <div class="grid gap-6 py-4">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="grid gap-2 sm:col-span-2">
+                            <Label for="name" required>Name</Label>
+                            <Input
+                                id="name"
+                                name="name"
+                                v-model="form.name"
+                                required
+                                placeholder="Web Development"
+                            />
+                            <InputError :message="errors.name" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <div class="flex items-center justify-between gap-3">
+                                <Label for="unit_id" required>Unit</Label>
+                                <Button
+                                    v-if="!units.length"
+                                    type="button"
+                                    variant="outline"
+                                    size="xs"
+                                    @click="emit('create-unit')"
                                 >
-                                    {{ unit.name }} ({{ unit.abbreviation }})
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <InputError :message="errors.unit_id" />
-                    </div>
+                                    <Plus class="mr-1 h-3.5 w-3.5" />
+                                    Create unit
+                                </Button>
+                            </div>
+                            <Select
+                                name="unit_id"
+                                v-model="form.unit_id"
+                                required
+                                :disabled="units.length === 0"
+                            >
+                                <SelectTrigger class="w-full">
+                                    <SelectValue
+                                        :placeholder="
+                                            units.length
+                                                ? 'Select a unit'
+                                                : 'Create a unit first'
+                                        "
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="unit in units"
+                                        :key="unit.id"
+                                        :value="unit.id.toString()"
+                                    >
+                                        {{ unit.name }} ({{ unit.abbreviation }})
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.unit_id" />
+                            <div
+                                v-if="!units.length"
+                                class="text-xs text-muted-foreground"
+                            >
+                                You need at least one unit before creating a
+                                product.
+                            </div>
+                        </div>
 
-                    <div class="grid gap-2">
-                        <Label for="name" required>Name</Label>
-                        <Input
-                            id="name"
-                            name="name"
-                            v-model="form.name"
-                            required
-                            placeholder="Web Development"
-                        />
-                        <InputError :message="errors.name" />
-                    </div>
+                        <div class="grid gap-2">
+                            <Label for="sku">SKU</Label>
+                            <Input
+                                id="sku"
+                                name="sku"
+                                v-model="form.sku"
+                                placeholder="WEB-001"
+                            />
+                            <InputError :message="errors.sku" />
+                        </div>
 
-                    <div class="grid gap-2">
-                        <Label for="description">Description</Label>
-                        <Textarea
-                            id="description"
-                            name="description"
-                            v-model="form.description"
-                            placeholder="Describe your product or service..."
-                            rows="3"
-                        />
-                        <InputError :message="errors.description" />
-                    </div>
+                        <div class="grid gap-2 sm:col-span-2">
+                            <Label for="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                name="description"
+                                v-model="form.description"
+                                placeholder="Describe your product or service..."
+                                rows="4"
+                            />
+                            <InputError :message="errors.description" />
+                        </div>
 
-                    <div class="grid gap-2">
-                        <Label for="sku">SKU</Label>
-                        <Input
-                            id="sku"
-                            name="sku"
-                            v-model="form.sku"
-                            placeholder="WEB-001"
-                        />
-                        <InputError :message="errors.sku" />
-                    </div>
-
-                    <div class="grid gap-2">
-                        <Label for="unit_price" required>Price</Label>
-                        <Input
-                            id="unit_price"
-                            name="unit_price"
-                            type="number"
-                            v-model="form.unit_price"
-                            required
-                            placeholder="5000"
-                            min="0"
-                        />
-                        <InputError :message="errors.unit_price" />
-                    </div>
-
-                    <div class="grid gap-2">
-                        <Label for="billing_type" required>Billing Type</Label>
-                        <Select
-                            name="billing_type"
-                            v-model="form.billing_type"
-                            required
-                        >
-                            <SelectTrigger>
-                                <SelectValue
-                                    placeholder="Select billing type"
+                        <div class="grid gap-2">
+                            <Label for="unit_price" required>Price</Label>
+                            <div class="relative">
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground"
+                                >
+                                    $
+                                </div>
+                                <Input
+                                    id="unit_price"
+                                    name="unit_price"
+                                    type="number"
+                                    v-model="form.unit_price"
+                                    required
+                                    placeholder="5000"
+                                    min="0"
+                                    class="pl-7"
                                 />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="one_time"
-                                    >One Time</SelectItem
-                                >
-                                <SelectItem value="recurring"
-                                    >Recurring</SelectItem
-                                >
-                            </SelectContent>
-                        </Select>
-                        <InputError :message="errors.billing_type" />
-                    </div>
+                            </div>
+                            <InputError :message="errors.unit_price" />
+                        </div>
 
-                    <div class="flex items-center gap-2">
-                        <Switch
-                            id="is_active"
-                            name="is_active"
-                            v-model="form.is_active"
-                        />
-                        <Label for="is_active" class="cursor-pointer"
-                            >Active</Label
+                        <div class="grid gap-2">
+                            <Label for="billing_type" required>
+                                Billing Type
+                            </Label>
+                            <Select
+                                name="billing_type"
+                                v-model="form.billing_type"
+                                required
+                            >
+                                <SelectTrigger class="w-full">
+                                    <SelectValue
+                                        placeholder="Select billing type"
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="one_time">
+                                        One Time
+                                    </SelectItem>
+                                    <SelectItem value="recurring">
+                                        Recurring
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.billing_type" />
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/30 px-3 py-2 sm:col-span-2"
                         >
+                            <div class="grid gap-0.5">
+                                <Label for="is_active" class="cursor-pointer">
+                                    Active
+                                </Label>
+                                <div class="text-xs text-muted-foreground">
+                                    Disable to hide this product from new proposals.
+                                </div>
+                            </div>
+                            <input
+                                type="hidden"
+                                name="is_active"
+                                :value="form.is_active ? '1' : '0'"
+                            />
+                            <Switch
+                                id="is_active"
+                                v-model="form.is_active"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -216,7 +271,7 @@ watch(
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" :disabled="processing">
+                    <Button type="submit" :disabled="processing || !units.length">
                         {{ product ? 'Update' : 'Create' }} Product
                     </Button>
                 </DialogFooter>

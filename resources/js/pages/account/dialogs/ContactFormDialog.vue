@@ -161,9 +161,13 @@ watch(
 
                     <div class="flex items-center gap-4">
                         <div class="flex items-center gap-2">
+                            <input
+                                type="hidden"
+                                name="is_primary"
+                                :value="form.is_primary ? '1' : '0'"
+                            />
                             <Switch
                                 id="is_primary"
-                                name="is_primary"
                                 v-model="form.is_primary"
                             />
                             <Label for="is_primary" class="cursor-pointer"
@@ -171,9 +175,13 @@ watch(
                             >
                         </div>
                         <div class="flex items-center gap-2">
+                            <input
+                                type="hidden"
+                                name="receives_billing"
+                                :value="form.receives_billing ? '1' : '0'"
+                            />
                             <Switch
                                 id="receives_billing"
-                                name="receives_billing"
                                 v-model="form.receives_billing"
                             />
                             <Label for="receives_billing" class="cursor-pointer"

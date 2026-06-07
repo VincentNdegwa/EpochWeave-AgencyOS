@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Product;
 
 use App\Enums\BillingType;
 use App\Models\Product;
@@ -19,7 +19,7 @@ class ProductTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->productService = new ProductService();
+        $this->productService = new ProductService;
     }
 
     public function test_can_create_product(): void

@@ -58,7 +58,11 @@ const handleSuccess = () => {
 
 const handleUnitSuccess = () => {
     unitDialogOpen.value = false;
-    router.reload();
+    router.reload({
+        only: ['units'],
+        preserveScroll: true,
+        preserveState: true,
+    });
 };
 
 defineOptions({
@@ -125,6 +129,7 @@ defineOptions({
             v-model:open="dialogOpen"
             :product="editingProduct"
             :units="units"
+            @create-unit="handleCreateUnit"
             @success="handleSuccess"
         />
 
