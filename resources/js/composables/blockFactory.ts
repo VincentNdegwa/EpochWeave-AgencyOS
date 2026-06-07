@@ -20,6 +20,7 @@ export function createDefaultBlock(type: BlockType): BaseBlock {
       title_color: '#000000',
       content_color: '#000000',
       background_color: '#ffffff',
+      full_width: true,
     },
     image: {
       url: '',

@@ -64,6 +64,7 @@ export interface RichTextBlockData {
   title_color?: string;
   content_color?: string;
   background_color?: string;
+  full_width: boolean;
 }
 
 export interface ImageBlockData {

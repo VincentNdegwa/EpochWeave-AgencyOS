@@ -4,11 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { ColorPresets } from '@/components/ui/color-presets';
+import { TextColorPicker } from '@/components/ui/text-color-picker';
 import { ImageIcon, LinkIcon, TypeIcon, ToggleLeftIcon } from '@lucide/vue';
 import type { CoverBlockData } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
@@ -96,47 +93,11 @@ const onBgTabChange = (value: string) => {
       </Tabs>
 
       <div v-if="bgTab === 'color'" class="mt-3">
-        <div class="flex items-center gap-3">
-          <div class="relative flex-shrink-0">
-            <div
-              class="h-9 w-9 rounded-md border border-border shadow-sm cursor-pointer overflow-hidden"
-              :style="{ backgroundColor: data.background_value }"
-            >
-              <input
-                type="color"
-                :value="data.background_value"
-                class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                @input="(e) => updateData({ background_value: (e.target as HTMLInputElement).value })"
-              />
-            </div>
-          </div>
-          <Input
-            :model-value="data.background_value"
-            placeholder="#0F172A"
-            class="h-9 font-mono text-xs flex-1"
-            @update:modelValue="(v) => updateData({ background_value: String(v ?? '#0F172A') })"
-          />
-        </div>
-
-        <div class="mt-3">
-          <p class="mb-2 text-[11px] text-muted-foreground">Presets</p>
-          <div class="flex flex-wrap gap-2">
-            <Tooltip v-for="swatch in swatches" :key="swatch.value">
-              <TooltipTrigger as-child>
-                <button
-                  type="button"
-                  class="h-6 w-6 rounded-md border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-ring"
-                  :style="{ backgroundColor: swatch.value }"
-                  :class="data.background_value === swatch.value
-                    ? 'border-primary scale-110'
-                    : 'border-transparent'"
-                  @click="updateData({ background_value: swatch.value })"
-                />
-              </TooltipTrigger>
-              <TooltipContent side="bottom" class="text-xs">{{ swatch.label }}</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
+        <ColorPresets
+          :model-value="data.background_value"
+          placeholder="#0F172A"
+          @update:model-value="(v) => updateData({ background_value: v })"
+        />
       </div>
 
       <div v-else class="mt-3 space-y-3">
@@ -200,44 +161,12 @@ const onBgTabChange = (value: string) => {
         Text colour
       </p>
 
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          class="flex h-9 flex-1 items-center justify-center gap-2 rounded-md border text-xs font-medium transition"
-          :class="data.text_color === '#FFFFFF'
-            ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-border bg-background text-foreground hover:bg-muted'"
-          @click="updateData({ text_color: '#FFFFFF' })"
-        >
-          <span class="inline-block h-3 w-3 rounded-full bg-white border border-border" />
-          Light
-        </button>
-        <button
-          type="button"
-          class="flex h-9 flex-1 items-center justify-center gap-2 rounded-md border text-xs font-medium transition"
-          :class="data.text_color === '#0F172A'
-            ? 'border-primary bg-primary text-primary-foreground'
-            : 'border-border bg-background text-foreground hover:bg-muted'"
-          @click="updateData({ text_color: '#0F172A' })"
-        >
-          <span class="inline-block h-3 w-3 rounded-full bg-slate-900 border border-border" />
-          Dark
-        </button>
-
-        <div class="relative flex-shrink-0">
-          <div
-            class="h-9 w-9 rounded-md border border-border cursor-pointer overflow-hidden shadow-sm"
-            :style="{ backgroundColor: data.text_color }"
-          >
-            <input
-              type="color"
-              :value="data.text_color"
-              class="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-              @input="(e) => updateData({ text_color: (e.target as HTMLInputElement).value })"
-            />
-          </div>
-        </div>
-      </div>
+      <TextColorPicker
+        :model-value="data.text_color"
+        light-color="#FFFFFF"
+        dark-color="#0F172A"
+        @update:model-value="(v) => updateData({ text_color: v })"
+      />
     </div>
 
     <div class="py-3">
@@ -270,17 +199,6 @@ const onBgTabChange = (value: string) => {
 </template>
 
 <script lang="ts">
-const swatches = [
-  { value: '#0F172A', label: 'Slate 900' },
-  { value: '#1E293B', label: 'Slate 800' },
-  { value: '#0F766E', label: 'Teal 700' },
-  { value: '#1D4ED8', label: 'Blue 700' },
-  { value: '#7C3AED', label: 'Violet 600' },
-  { value: '#BE185D', label: 'Pink 700' },
-  { value: '#B45309', label: 'Amber 700' },
-  { value: '#FFFFFF', label: 'White' },
-];
-
 const toggles = [
   {
     key: 'show_logo',

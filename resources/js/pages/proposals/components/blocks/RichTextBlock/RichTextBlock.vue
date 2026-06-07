@@ -3,7 +3,6 @@ import { computed, watch, ref } from 'vue';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
-import BlockEmptyPlaceholder from '@/pages/proposals/components/blocks/shared/BlockEmptyPlaceholder.vue';
 import type { BaseBlock, RichTextBlockData } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
@@ -14,69 +13,102 @@ const props = defineProps<{
 }>();
 
 const store = useProposalBuilderStore();
-
 const editorContent = ref(props.data.content);
+const isFocused = ref(false);
 
 const updateData = (changes: Partial<RichTextBlockData>) => {
-  store.updateBlockData(props.block.id, {
-    ...props.data,
-    ...changes,
-  });
+  store.updateBlockData(props.block.id, { ...props.data, ...changes });
 };
 
 const handleContentUpdate = (content: string) => {
   updateData({ content });
 };
 
+// Keep local ref in sync when store updates externally (e.g. undo/redo)
 watch(
   () => props.data.content,
-  (newContent) => {
-    if (editorContent.value !== newContent) {
-      editorContent.value = newContent;
+  (incoming) => {
+    if (editorContent.value !== incoming) {
+      editorContent.value = incoming;
     }
-  }
+  },
 );
 
-const titleColor = computed(() => props.data.title_color ?? '#111827');
-const contentColor = computed(() => props.data.content_color ?? '#374151');
-const backgroundColor = computed(() => props.data.background_color ?? '#ffffff');
+const isEmpty = computed(
+  () => !props.data.content || props.data.content === '<p><br></p>' || props.data.content.trim() === '',
+);
 
 const sectionStyle = computed(() => ({
-  backgroundColor: backgroundColor.value,
+  backgroundColor: props.data.background_color ?? 'transparent',
 }));
 
 const contentStyle = computed(() => ({
-  color: contentColor.value,
+  color: props.data.content_color ?? 'inherit',
 }));
+
+// Quill toolbar — minimal but complete
+const toolbarOptions = [
+  [{ header: [1, 2, 3, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  ['blockquote', 'link'],
+  ['clean'],
+];
 </script>
 
 <template>
-  <section class="space-y-4 p-6" :style="sectionStyle">
+  <section class="group/richtext px-8 py-6" :style="sectionStyle">
+
+    <!-- Optional section title -->
     <BlockTitle
-      v-if="props.data.show_title"
-      :model-value="props.data.title"
-      placeholder="Add a section title"
-      :is-locked="props.isLocked"
-      :color="titleColor"
-      @update:model-value="(value) => updateData({ title: value })"
+      v-if="data.show_title"
+      :model-value="data.title"
+      placeholder="Section title…"
+      :is-locked="isLocked"
+      :color="data.title_color ?? 'inherit'"
+      class="mb-4"
+      @update:model-value="(v) => updateData({ title: v })"
     />
-    <div v-if="!props.isLocked" class="border border-border cursor-text transition-colors">
+
+    <!-- ── Edit mode ──────────────────────────────────────────── -->
+    <div
+      v-if="!isLocked"
+      class="richtext-editor-wrap relative rounded-md transition-all duration-150"
+      :class="isFocused
+        ? 'ring-2 ring-primary ring-offset-1 ring-offset-background'
+        : 'ring-1 ring-transparent hover:ring-border'"
+    >
       <QuillEditor
         v-model:content="editorContent"
         theme="snow"
-        toolbar="minimal"
-        :disabled="props.isLocked"
-        contentType="html"
-        @update:content="handleContentUpdate"
+        content-type="html"
+        :options="{ modules: { toolbar: toolbarOptions }, placeholder: 'Start writing…' }"
         :style="contentStyle"
+        @update:content="handleContentUpdate"
+        @focus="isFocused = true"
+        @blur="isFocused = false"
       />
-      <BlockEmptyPlaceholder v-if="!props.data.content" message="Write your content" action-label="Start typing" />
     </div>
+
+    <!-- ── Locked / preview mode ──────────────────────────────── -->
     <div
       v-else
-      class="ql-editor prose prose-sm max-w-none"
+      class="ql-editor prose prose-sm max-w-none leading-relaxed
+             [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:mb-3
+             [&_h2]:text-xl  [&_h2]:font-semibold [&_h2]:mb-2
+             [&_h3]:text-base [&_h3]:font-semibold [&_h3]:mb-2
+             [&_p]:mb-3 [&_p]:leading-relaxed
+             [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-3
+             [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-3
+             [&_blockquote]:border-l-4 [&_blockquote]:border-border
+             [&_blockquote]:pl-4 [&_blockquote]:italic
+             [&_blockquote]:text-muted-foreground [&_blockquote]:my-3
+             [&_a]:text-primary [&_a]:underline
+             [&_strong]:font-semibold"
       :style="contentStyle"
-      v-html="props.data.content || '<p class=\'text-muted-foreground\'>No content</p>'"
-    ></div>
+      v-html="isEmpty
+        ? '<p class=\'text-muted-foreground italic\'>No content added.</p>'
+        : data.content"
+    />
   </section>
 </template>
