@@ -3,6 +3,9 @@ import {
   LayoutPanelTop,
   AlignLeft,
   Image as ImageIcon,
+  Building as BuildingIcon,
+  Minus as MinusIcon,
+  MoveVertical,
 } from '@lucide/vue';
 import type { BlockType } from '@/types/proposal-builder';
 import CoverBlock from '@/pages/proposals/components/blocks/CoverBlock/CoverBlock.vue';
@@ -11,6 +14,12 @@ import RichTextBlock from '@/pages/proposals/components/blocks/RichTextBlock/Ric
 import RichTextBlockSettings from '@/pages/proposals/components/blocks/RichTextBlock/RichTextBlockSettings.vue';
 import ImageBlock from '@/pages/proposals/components/blocks/ImageBlock/ImageBlock.vue';
 import ImageBlockSettings from '@/pages/proposals/components/blocks/ImageBlock/ImageBlockSettings.vue';
+import LogoBlock from '@/pages/proposals/components/blocks/LogoBlock/LogoBlock.vue';
+import LogoBlockSettings from '@/pages/proposals/components/blocks/LogoBlock/LogoBlockSettings.vue';
+import DividerBlock from '@/pages/proposals/components/blocks/DividerBlock/DividerBlock.vue';
+import DividerBlockSettings from '@/pages/proposals/components/blocks/DividerBlock/DividerBlockSettings.vue';
+import SpacerBlock from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlock.vue';
+import SpacerBlockSettings from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlockSettings.vue';
 
 export type BlockCategory = 'layout' | 'content';
 
@@ -56,6 +65,33 @@ export const blockRegistry: BlockRegistryEntry[] = [
     icon: ImageIcon,
     component: ImageBlock,
     settings: ImageBlockSettings,
+  },
+  {
+    type: 'logo',
+    label: 'Logos',
+    category: 'layout',
+    description: 'Place workspace and client logos side-by-side.',
+    icon: BuildingIcon,
+    component: LogoBlock,
+    settings: LogoBlockSettings,
+  },
+  {
+    type: 'divider',
+    label: 'Divider',
+    category: 'layout',
+    description: 'Horizontal rule to separate sections.',
+    icon: MinusIcon,
+    component: DividerBlock,
+    settings: DividerBlockSettings,
+  },
+  {
+    type: 'spacer',
+    label: 'Spacer',
+    category: 'layout',
+    description: 'Adjustable vertical whitespace.',
+    icon: MoveVertical,
+    component: SpacerBlock,
+    settings: SpacerBlockSettings,
   },
 ];
 

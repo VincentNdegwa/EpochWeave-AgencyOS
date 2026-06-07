@@ -19,6 +19,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   const isDirty = ref(false);
   const isSaving = ref(false);
   const selectedBlockId = ref<string | null>(null);
+  const sidebarTab = ref<'block' | 'proposal'>('proposal');
   const lastSavedAt = ref<Date | null>(null);
 
   const proposalTitle = ref('Untitled proposal');
@@ -67,6 +68,8 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
     blocks.value.splice(insertAfterIndex + 1, 0, newBlock);
     reindexBlocks();
+    selectedBlockId.value = newBlock.id;
+    sidebarTab.value = 'block';
     isDirty.value = true;
   }
 
@@ -121,6 +124,10 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     }
   }
 
+  function setSidebarTab(tab: 'block' | 'proposal') {
+    sidebarTab.value = tab;
+  }
+
   function selectBlock(blockId: string | null) {
     selectedBlockId.value = blockId;
   }
@@ -171,6 +178,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     isDirty,
     isSaving,
     selectedBlockId,
+    sidebarTab,
     lastSavedAt,
     proposalTitle,
     proposalMeta,
@@ -188,6 +196,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     reorderBlocks,
     duplicateBlock,
     selectBlock,
+    setSidebarTab,
     markAsClean,
     clear,
     reindexBlocks,
