@@ -14,13 +14,12 @@ withDefaults(
   }
 );
 
-const activeTab = ref<'block' | 'proposal'>('proposal');
 const store = useProposalBuilderStore();
-const { selectedBlockId } = storeToRefs(store);
+const { selectedBlockId, sidebarTab } = storeToRefs(store);
 
 watch(selectedBlockId, (newValue) => {
   if (newValue) {
-    activeTab.value = 'block';
+    store.setSidebarTab('block');
   }
 });
 </script>
@@ -30,24 +29,24 @@ watch(selectedBlockId, (newValue) => {
     <div class="flex border-b border-border text-sm font-medium">
       <button
         class="flex-1 border-b-2 px-3 py-2 text-center capitalize"
-        :class="activeTab === 'block' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'"
+        :class="sidebarTab === 'block' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'"
         type="button"
-        @click="activeTab = 'block'"
+        @click="store.setSidebarTab('block')"
       >
         Block
       </button>
       <button
         class="flex-1 border-b-2 px-3 py-2 text-center capitalize"
-        :class="activeTab === 'proposal' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'"
+        :class="sidebarTab === 'proposal' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'"
         type="button"
-        @click="activeTab = 'proposal'"
+        @click="store.setSidebarTab('proposal')"
       >
         Proposal
       </button>
     </div>
 
     <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-      <BlockSettingsPanel v-if="activeTab === 'block'" class="h-full" />
+      <BlockSettingsPanel v-if="sidebarTab === 'block'" class="h-full" />
       <ProposalMetaPanel v-else class="h-full" />
     </div>
   </aside>
