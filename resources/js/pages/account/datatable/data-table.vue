@@ -32,6 +32,12 @@ import { valueUpdater } from '@/components/ui/table/utils';
 const props = defineProps<{
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    searchValue?: string;
+    dateFrom?: string;
+    dateTo?: string;
+    onSearchUpdate?: (value: string) => void;
+    onDateFromUpdate?: (value: string) => void;
+    onDateToUpdate?: (value: string) => void;
 }>();
 
 const sorting = ref<SortingState>([]);
@@ -71,21 +77,36 @@ const table = useVueTable({
 <template>
     <div class="w-full">
         <div class="flex items-center gap-2 py-4">
-            <Input
-                placeholder="Filter accounts..."
-                :model-value="
-                    (table
-                        .getColumn('company_name')
-                        ?.getFilterValue() as string) ?? ''
-                "
-                class="max-w-sm"
-                @update:model-value="
-                    table.getColumn('company_name')?.setFilterValue($event)
-                "
-            />
+            <div class="flex items-center gap-2 flex-1">
+                <Input
+                    v-if="onSearchUpdate"
+                    placeholder="Search by company name..."
+                    :model-value="searchValue"
+                    class="max-w-sm"
+                    @update:model-value="onSearchUpdate(String($event))"
+                />
+                <div v-if="onDateFromUpdate" class="flex items-center gap-2">
+                    <span class="text-sm text-muted-foreground">From:</span>
+                    <Input
+                        type="date"
+                        :model-value="dateFrom"
+                        class="w-40"
+                        @update:model-value="onDateFromUpdate(String($event))"
+                    />
+                </div>
+                <div v-if="onDateToUpdate" class="flex items-center gap-2">
+                    <span class="text-sm text-muted-foreground">To:</span>
+                    <Input
+                        type="date"
+                        :model-value="dateTo"
+                        class="w-40"
+                        @update:model-value="onDateToUpdate(String($event))"
+                    />
+                </div>
+            </div>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                    <Button variant="outline" class="ml-auto">
+                    <Button variant="outline">
                         Columns
                         <ChevronDown class="ml-2 h-4 w-4" />
                     </Button>

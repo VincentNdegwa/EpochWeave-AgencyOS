@@ -19,10 +19,24 @@ class AccountController extends Controller
     public function index(Request $request)
     {
         $workspace = $request->attributes->get('current_workspace');
-        $accounts = $this->accountService->getAccountsByWorkspace($workspace->id);
+
+        $result = $this->accountService->getFilteredAccounts(
+            $workspace->id,
+            $request->query('status'),
+            $request->query('search'),
+            $request->query('date_from'),
+            $request->query('date_to')
+        );
 
         return Inertia::render('account/index', [
-            'accounts' => $accounts,
+            'accounts' => $result['accounts'],
+            'stats' => $result['stats'],
+            'filters' => [
+                'status' => $request->query('status', 'all'),
+                'search' => $request->query('search'),
+                'date_from' => $request->query('date_from'),
+                'date_to' => $request->query('date_to'),
+            ],
         ]);
     }
 
@@ -50,7 +64,7 @@ class AccountController extends Controller
     {
         $account = $this->accountService->getAccountById($id);
 
-        if (!$account) {
+        if (! $account) {
             abort(404);
         }
 
@@ -63,7 +77,7 @@ class AccountController extends Controller
     {
         $account = $this->accountService->getAccountById($id);
 
-        if (!$account) {
+        if (! $account) {
             abort(404);
         }
 
@@ -77,7 +91,7 @@ class AccountController extends Controller
         try {
             $account = $this->accountService->getAccountById($id);
 
-            if (!$account) {
+            if (! $account) {
                 abort(404);
             }
 
@@ -88,6 +102,7 @@ class AccountController extends Controller
             return redirect()->route('accounts.show', $account->id);
         } catch (AccountException $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -97,7 +112,7 @@ class AccountController extends Controller
         try {
             $account = $this->accountService->getAccountById($id);
 
-            if (!$account) {
+            if (! $account) {
                 abort(404);
             }
 
@@ -108,6 +123,7 @@ class AccountController extends Controller
             return redirect()->route('accounts.index');
         } catch (AccountException $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }

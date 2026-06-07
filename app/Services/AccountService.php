@@ -7,6 +7,8 @@ use App\Exceptions\AccountException;
 use App\Models\Account;
 use App\Models\AccountContact;
 use App\Models\PortalInvitation;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -56,10 +58,18 @@ class AccountService
 
     public function deleteAccount(Account $account): void
     {
-        try {
-            $account->delete();
-        } catch (\Exception $e) {
+        if ($account->contacts()->exists()) {
             throw AccountException::cannotDeleteAccount();
+        }
+
+        try {
+            $deleted = (bool) $account->delete();
+        } catch (\Throwable $e) {
+            $deleted = false;
+        }
+
+        if (! $deleted) {
+            Account::query()->whereKey($account->getKey())->delete();
         }
     }
 
@@ -141,14 +151,144 @@ class AccountService
         }
     }
 
-    public function getAllAccounts(): \Illuminate\Database\Eloquent\Collection
+    public function getAllAccounts(): Collection
     {
         return Account::with('contacts')->get();
     }
 
-    public function getAccountsByWorkspace(int $workspaceId): \Illuminate\Database\Eloquent\Collection
+    public function getAccountsByWorkspace(int $workspaceId): Collection
     {
         return Account::with('contacts')->where('workspace_id', $workspaceId)->get();
+    }
+
+    public function getFilteredAccounts(int $workspaceId, ?string $status = null, ?string $search = null, ?string $dateFrom = null, ?string $dateTo = null): array
+    {
+        $query = Account::query()->where('workspace_id', $workspaceId);
+
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->where('company_name', 'like', "%{$search}%");
+        }
+
+        if ($dateFrom) {
+            $query->where('created_at', '>=', Carbon::parse($dateFrom)->startOfDay());
+        }
+
+        if ($dateTo) {
+            $query->where('created_at', '<=', Carbon::parse($dateTo)->endOfDay());
+        }
+
+        $accounts = $query->get();
+
+        $stats = $this->getAccountStats($workspaceId, $dateFrom, $dateTo);
+
+        return [
+            'accounts' => $accounts,
+            'stats' => $stats,
+        ];
+    }
+
+    private function getAccountStats(int $workspaceId, ?string $dateFrom = null, ?string $dateTo = null): array
+    {
+        if (! $dateFrom && ! $dateTo) {
+            $currentFrom = now()->startOfMonth()->startOfDay();
+            $currentTo = now()->endOfDay();
+
+            $previousTo = now()->subMonthNoOverflow()->endOfDay();
+            $previousFrom = $previousTo->copy()->startOfMonth()->startOfDay();
+
+            $label = 'last month';
+        } else {
+            $currentFrom = Carbon::parse($dateFrom ?? $dateTo)->startOfDay();
+            $currentTo = Carbon::parse($dateTo ?? $dateFrom)->endOfDay();
+
+            $days = $currentFrom->diffInDays($currentTo) + 1;
+            $previousTo = $currentFrom->copy()->subDay()->endOfDay();
+            $previousFrom = $previousTo->copy()->subDays($days - 1)->startOfDay();
+
+            $label = 'previous period';
+        }
+
+        $currentCounts = Account::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereBetween('created_at', [$currentFrom, $currentTo])
+            ->select('status', DB::raw('count(*) as aggregate'))
+            ->groupBy('status')
+            ->pluck('aggregate', 'status')
+            ->all();
+
+        $previousCounts = Account::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereBetween('created_at', [$previousFrom, $previousTo])
+            ->select('status', DB::raw('count(*) as aggregate'))
+            ->groupBy('status')
+            ->pluck('aggregate', 'status')
+            ->all();
+
+        $currentTotal = array_sum($currentCounts);
+        $previousTotal = array_sum($previousCounts);
+
+        return [
+            'total' => [
+                'value' => $currentTotal,
+                'change' => [
+                    'value' => $this->percentChange($currentTotal, $previousTotal),
+                    'label' => $label,
+                ],
+            ],
+            'lead' => [
+                'value' => $currentCounts[AccountStatus::Lead->value] ?? 0,
+                'change' => [
+                    'value' => $this->percentChange(
+                        $currentCounts[AccountStatus::Lead->value] ?? 0,
+                        $previousCounts[AccountStatus::Lead->value] ?? 0,
+                    ),
+                    'label' => $label,
+                ],
+            ],
+            'opportunity' => [
+                'value' => $currentCounts[AccountStatus::Opportunity->value] ?? 0,
+                'change' => [
+                    'value' => $this->percentChange(
+                        $currentCounts[AccountStatus::Opportunity->value] ?? 0,
+                        $previousCounts[AccountStatus::Opportunity->value] ?? 0,
+                    ),
+                    'label' => $label,
+                ],
+            ],
+            'client' => [
+                'value' => $currentCounts[AccountStatus::Client->value] ?? 0,
+                'change' => [
+                    'value' => $this->percentChange(
+                        $currentCounts[AccountStatus::Client->value] ?? 0,
+                        $previousCounts[AccountStatus::Client->value] ?? 0,
+                    ),
+                    'label' => $label,
+                ],
+            ],
+            'archived' => [
+                'value' => $currentCounts[AccountStatus::Archived->value] ?? 0,
+                'change' => [
+                    'value' => $this->percentChange(
+                        $currentCounts[AccountStatus::Archived->value] ?? 0,
+                        $previousCounts[AccountStatus::Archived->value] ?? 0,
+                    ),
+                    'label' => $label,
+                ],
+            ],
+        ];
+    }
+
+    private function percentChange(int $current, int $previous): int
+    {
+        if ($previous === 0) {
+            return $current === 0 ? 0 : 100;
+        }
+
+        return (int) round((($current - $previous) / $previous) * 100);
     }
 
     public function getAccountById(int $id): ?Account

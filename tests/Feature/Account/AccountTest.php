@@ -6,6 +6,7 @@ use App\Models\Account;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class AccountTest extends TestCase
@@ -42,11 +43,45 @@ class AccountTest extends TestCase
         $role = \App\Models\Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
+        Account::factory()->create([
+            'workspace_id' => $workspace->id,
+            'status' => 'lead',
+            'created_at' => now()->subDays(2),
+        ]);
+
+        Account::factory()->create([
+            'workspace_id' => $workspace->id,
+            'status' => 'client',
+            'created_at' => now()->subDays(1),
+        ]);
+
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
             ->get('/accounts');
 
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('account/index')
+                ->has('stats.total.value')
+                ->has('stats.total.change.value')
+                ->has('stats.total.change.label')
+                ->has('stats.lead.value')
+                ->has('stats.opportunity.value')
+                ->has('stats.client.value')
+                ->has('stats.archived.value'),
+            );
+
+        $responseWithDates = $this->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->get('/accounts?date_from='.now()->subDays(2)->toDateString().'&date_to='.now()->toDateString());
+
+        $responseWithDates->assertStatus(200)
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('account/index')
+                ->has('stats.total.value')
+                ->has('stats.total.change.value')
+                ->has('stats.total.change.label'),
+            );
     }
 
     public function test_user_can_view_single_account(): void
