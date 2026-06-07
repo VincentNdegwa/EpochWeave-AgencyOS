@@ -4,7 +4,6 @@ import { storeToRefs } from 'pinia';
 import BlockSettingsPanel from '@/pages/proposals/components/sidebar/BlockSettingsPanel.vue';
 import ProposalMetaPanel from '@/pages/proposals/components/sidebar/ProposalMetaPanel.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
-import type { ProposalMeta } from '@/types/proposal-meta';
 
 withDefaults(
   defineProps<{
@@ -14,18 +13,6 @@ withDefaults(
     mode: 'create',
   }
 );
-
-const title = defineModel<string>('title', { default: 'Untitled proposal' });
-const proposalMeta = defineModel<ProposalMeta>('proposalMeta', {
-  default: () => ({
-    currency: 'USD',
-    validUntil: null,
-    proposalNumber: 'DRAFT',
-    depositEnabled: false,
-    depositType: 'percentage',
-    depositValue: 0,
-  }),
-});
 
 const activeTab = ref<'block' | 'proposal'>('proposal');
 const store = useProposalBuilderStore();
@@ -61,7 +48,7 @@ watch(selectedBlockId, (newValue) => {
 
     <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
       <BlockSettingsPanel v-if="activeTab === 'block'" class="h-full" />
-      <ProposalMetaPanel v-else v-model:title="title" v-model:proposal-meta="proposalMeta" class="h-full" />
+      <ProposalMetaPanel v-else class="h-full" />
     </div>
   </aside>
 </template>

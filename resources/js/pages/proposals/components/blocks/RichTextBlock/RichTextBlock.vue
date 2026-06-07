@@ -5,6 +5,7 @@ import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
 import type { BaseBlock, RichTextBlockData } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockMeta } from '@/pages/proposals/components/blocks/shared/blockMetaContext';
 
 const props = defineProps<{
   data: RichTextBlockData;
@@ -12,6 +13,7 @@ const props = defineProps<{
   isLocked: boolean;
 }>();
 
+const blockMeta = useBlockMeta();
 const store = useProposalBuilderStore();
 const editorContent = ref(props.data.content);
 const isFocused = ref(false);
@@ -39,7 +41,7 @@ const isEmpty = computed(
 );
 
 const sectionStyle = computed(() => ({
-  backgroundColor: props.data.background_color ?? 'transparent',
+  backgroundColor: blockMeta.value.background_color ?? 'transparent',
 }));
 
 const contentStyle = computed(() => ({
@@ -57,7 +59,7 @@ const toolbarOptions = [
 </script>
 
 <template>
-  <section class="group/richtext px-8 py-6" :style="sectionStyle">
+  <section class="group/richtext px-8" :style="sectionStyle">
 
     <!-- Optional section title -->
     <BlockTitle

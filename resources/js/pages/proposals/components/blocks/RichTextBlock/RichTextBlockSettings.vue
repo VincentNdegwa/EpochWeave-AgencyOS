@@ -3,7 +3,6 @@ import { computed } from 'vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ColorPresets } from '@/components/ui/color-presets';
 import { TextColorPicker } from '@/components/ui/text-color-picker';
 import { TypeIcon, PaletteIcon, ToggleLeftIcon } from '@lucide/vue';
 import type { RichTextBlockData } from '@/types/proposal-builder';
@@ -94,19 +93,7 @@ const updateData = (changes: Partial<RichTextBlockData>) => {
         />
       </div>
 
-      <!-- Background colour -->
-      <div class="grid gap-2">
-        <Label class="text-xs text-muted-foreground">Block background</Label>
-        <ColorPresets
-          :model-value="data.background_color ?? 'transparent'"
-          placeholder="transparent"
-          :supports-transparent="true"
-          @update:model-value="(v) => updateData({ background_color: v })"
-        />
-        <p class="text-[11px] text-muted-foreground mt-0.5">
-          Set a background to visually separate this section from others.
-        </p>
-      </div>
+      <!-- Background now controlled via block meta panel -->
     </div>
 
     <!-- ══════════════════════════════════════════════

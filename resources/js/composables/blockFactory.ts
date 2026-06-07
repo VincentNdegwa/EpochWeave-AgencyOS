@@ -1,5 +1,6 @@
 import { nanoid } from 'nanoid';
 import type { BaseBlock, BlockType } from '@/types/proposal-builder';
+import { defaultBlockMeta } from '@/types/proposal-builder';
 
 export function createDefaultBlock(type: BlockType): BaseBlock {
     const defaults: Record<BlockType, any> = {
@@ -14,12 +15,20 @@ export function createDefaultBlock(type: BlockType): BaseBlock {
             show_proposal_number: true,
         },
         rich_text: {
-            title: null,
-            content: '<p>Start writing your content here...</p>',
+            title: 'Project overview',
+            content: `
+                <p>Thanks for considering us for this engagement. Below is a quick summary of what to expect.</p>
+                <h3>What you can expect</h3>
+                <ol>
+                    <li>Clear milestones with transparent communication.</li>
+                    <li>Dedicated point of contact for day-to-day updates.</li>
+                    <li>Actionable insights delivered at the end of each phase.</li>
+                </ol>
+                <p>Review the details in the following sections and let us know if any adjustments are needed.</p>
+            `.trim(),
             show_title: true,
             title_color: '#000000',
             content_color: '#000000',
-            background_color: '#ffffff',
             full_width: true,
         },
         image: {
@@ -113,8 +122,7 @@ export function createDefaultBlock(type: BlockType): BaseBlock {
         is_locked: false,
         data: defaults[type],
         meta: {
-            padding_top: 'md',
-            padding_bottom: 'md',
+            ...defaultBlockMeta,
         },
     };
 }

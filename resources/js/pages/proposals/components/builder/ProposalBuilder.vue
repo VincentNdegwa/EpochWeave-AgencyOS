@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePage } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
@@ -9,7 +9,6 @@ import BuilderTopbar from '@/pages/proposals/components/builder/BuilderTopbar.vu
 import BlockPickerModal from '@/pages/proposals/components/block-picker/BlockPickerModal.vue';
 import type { Proposal } from '@/types/models/proposal';
 import type { BlockType } from '@/types/proposal-builder';
-import type { ProposalMeta } from '@/types/proposal-meta';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
 
@@ -24,19 +23,10 @@ const props = withDefaults(
 );
 
 const builderStore = useProposalBuilderStore();
-const { blocks, isDirty, isSaving } = storeToRefs(builderStore);
+const { blocks, isDirty, isSaving, proposalTitle, proposalMeta } = storeToRefs(builderStore);
 const workspaceStore = useWorkspaceStore();
 
-const title = ref(props.initialProposal?.title ?? 'Untitled proposal');
 const isPreview = ref(false);
-const proposalMeta = reactive<ProposalMeta>({
-  currency: props.initialProposal?.currency ?? 'USD',
-  validUntil: props.initialProposal?.valid_until ?? null,
-  proposalNumber: props.initialProposal?.token ?? 'DRAFT',
-  depositEnabled: false,
-  depositType: 'percentage' as 'percentage' | 'fixed',
-  depositValue: 30,
-});
 const pickerOpen = ref(false);
 const insertAfterId = ref<string | null>(null);
 
@@ -57,28 +47,20 @@ watch(
 );
 
 watch(
-  () => props.initialProposal?.title,
-  (newTitle) => {
-    if (newTitle) {
-      title.value = newTitle;
-    }
-  }
-);
-
-watch(
-  () => props.initialProposal?.currency,
-  (currency) => {
-    if (currency) {
-      proposalMeta.currency = currency;
-    }
-  },
-  { immediate: true }
-);
-
-watch(
-  () => props.initialProposal?.valid_until,
-  (validUntil) => {
-    proposalMeta.validUntil = validUntil ?? null;
+  () => props.initialProposal,
+  (proposal) => {
+    builderStore.setProposalTitle(proposal?.title ?? 'Untitled proposal', false);
+    builderStore.setProposalMeta(
+      {
+        currency: proposal?.currency ?? 'USD',
+        validUntil: proposal?.valid_until ?? null,
+        proposalNumber: proposal?.token ?? proposal?.proposal_number ?? 'DRAFT',
+        depositEnabled: proposal?.requires_deposit ?? false,
+        depositType: proposal?.deposit_type ?? 'percentage',
+        depositValue: proposal?.deposit_value ?? 0,
+      },
+      false
+    );
   },
   { immediate: true }
 );
@@ -97,7 +79,7 @@ const handleBlockPicked = (type: BlockType) => {
 watchDebounced(
   () => ({
     blocks: blocks.value,
-    title: title.value,
+    title: proposalTitle.value,
   }),
   () => {
     if (!isDirty.value) {
@@ -129,7 +111,7 @@ const togglePreview = () => {
 <template>
   <div class="flex h-full flex-col bg-background">
     <BuilderTopbar
-      v-model:title="title"
+      v-model:title="proposalTitle"
       :mode="mode"
       :status="props.initialProposal?.status ?? 'draft'"
       :is-dirty="isDirty"
@@ -142,9 +124,7 @@ const togglePreview = () => {
       <ProposalCanvas class="flex-1" :is-locked="isCanvasLocked || isPreview" @add-block="handleAddBlockRequest" />
       <BuilderSidebar
         v-if="!isPreview"
-        class="hidden w-80 border-l border-border lg:block"
-        v-model:title="title"
-        v-model:proposal-meta="proposalMeta"
+        class="hidden w-80 border-l border-border lg:flex"
         :mode="mode"
       />
     </div>

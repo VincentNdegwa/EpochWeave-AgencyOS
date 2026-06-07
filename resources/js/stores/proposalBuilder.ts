@@ -2,7 +2,17 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { nanoid } from 'nanoid';
 import type { BaseBlock, BlockType } from '@/types/proposal-builder';
+import type { ProposalMeta } from '@/types/proposal-meta';
 import { createDefaultBlock } from '@/composables/blockFactory';
+
+const defaultProposalMeta = (): ProposalMeta => ({
+  currency: 'USD',
+  validUntil: null,
+  proposalNumber: 'DRAFT',
+  depositEnabled: false,
+  depositType: 'percentage',
+  depositValue: 0,
+});
 
 export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   const blocks = ref<BaseBlock[]>([]);
@@ -10,6 +20,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   const isSaving = ref(false);
   const selectedBlockId = ref<string | null>(null);
   const lastSavedAt = ref<Date | null>(null);
+
+  const proposalTitle = ref('Untitled proposal');
+  const proposalMeta = ref<ProposalMeta>(defaultProposalMeta());
 
   const orderedBlocks = computed(() =>
     [...blocks.value].sort((a, b) => a.sort_order - b.sort_order)
@@ -22,6 +35,28 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   function loadBlocks(newBlocks: BaseBlock[]) {
     blocks.value = newBlocks;
     isDirty.value = false;
+  }
+
+  function setProposalTitle(value: string, markDirty = true) {
+    const nextValue = value?.trim() ? value : 'Untitled proposal';
+    proposalTitle.value = nextValue;
+    if (markDirty) {
+      isDirty.value = true;
+    }
+  }
+
+  function setProposalMeta(meta: ProposalMeta, markDirty = true) {
+    proposalMeta.value = { ...defaultProposalMeta(), ...meta };
+    if (markDirty) {
+      isDirty.value = true;
+    }
+  }
+
+  function updateProposalMeta(changes: Partial<ProposalMeta>, markDirty = true) {
+    proposalMeta.value = { ...proposalMeta.value, ...changes };
+    if (markDirty) {
+      isDirty.value = true;
+    }
   }
 
   function addBlock(type: BlockType, afterBlockId?: string) {
@@ -99,6 +134,8 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     blocks.value = [];
     isDirty.value = false;
     selectedBlockId.value = null;
+    proposalTitle.value = 'Untitled proposal';
+    proposalMeta.value = defaultProposalMeta();
   }
 
   function reindexBlocks() {
@@ -135,9 +172,14 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     isSaving,
     selectedBlockId,
     lastSavedAt,
+    proposalTitle,
+    proposalMeta,
     orderedBlocks,
     selectedBlock,
     loadBlocks,
+    setProposalTitle,
+    setProposalMeta,
+    updateProposalMeta,
     addBlock,
     updateBlock,
     updateBlockData,

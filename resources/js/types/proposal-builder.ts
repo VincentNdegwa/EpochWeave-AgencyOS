@@ -15,6 +15,32 @@ export type BlockType =
   | 'video_embed'
   | 'file_attachment';
 
+
+export type PaddingSize = 'none' | 'sm' | 'md' | 'lg' | 'xl'
+ 
+export interface BlockMeta {
+  padding_top:    PaddingSize
+  padding_bottom: PaddingSize
+ 
+  background_color: string | null   // hex or null (transparent)
+  border_top:    boolean            // thin divider line above the block
+  border_bottom: boolean            // thin divider line below the block
+ 
+  is_hidden: boolean                // hides block on canvas (greyed out in editor, gone in preview)
+ 
+  notes: string | null              // agency-only note, never shown to client
+}
+ 
+export const defaultBlockMeta: BlockMeta = {
+  padding_top:      'md',
+  padding_bottom:   'md',
+  background_color: '#FFFFFF',
+  border_top:       false,
+  border_bottom:    false,
+  is_hidden:        false,
+  notes:            null,
+}
+
 export interface BaseBlock {
   id: string;
   type: BlockType;
@@ -24,10 +50,6 @@ export interface BaseBlock {
   meta: BlockMeta;
 }
 
-export interface BlockMeta {
-  padding_top: 'none' | 'sm' | 'md' | 'lg';
-  padding_bottom: 'none' | 'sm' | 'md' | 'lg';
-}
 
 export type BlockData =
   | CoverBlockData
@@ -63,7 +85,6 @@ export interface RichTextBlockData {
   show_title: boolean;
   title_color?: string;
   content_color?: string;
-  background_color?: string;
   full_width: boolean;
 }
 

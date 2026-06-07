@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, provide } from 'vue';
 import { storeToRefs } from 'pinia';
-import type { BaseBlock } from '@/types/proposal-builder';
+import type { BaseBlock, BlockMeta } from '@/types/proposal-builder';
+import { defaultBlockMeta } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import BlockToolbar from '@/pages/proposals/components/canvas/BlockToolbar.vue';
 import BlockLockedOverlay from '@/pages/proposals/components/canvas/BlockLockedOverlay.vue';
+import BlockSurface from '@/pages/proposals/components/canvas/BlockSurface.vue';
+import { blockMetaInjectionKey } from '@/pages/proposals/components/blocks/shared/blockMetaContext';
 
 const props = defineProps<{
   block: BaseBlock;
@@ -14,6 +17,13 @@ const props = defineProps<{
 const store = useProposalBuilderStore();
 const { selectedBlockId } = storeToRefs(store);
 const isSelected = computed(() => selectedBlockId.value === props.block.id);
+
+const meta = computed<BlockMeta>(() => ({
+  ...defaultBlockMeta,
+  ...props.block.meta,
+}));
+
+provide(blockMetaInjectionKey, meta);
 
 const handleSelect = () => {
   if (props.isLocked) {
@@ -32,7 +42,9 @@ const handleSelect = () => {
     @click.stop="handleSelect"
   >
     <BlockToolbar v-if="!props.isLocked" :block="props.block" :is-selected="isSelected" />
-    <slot />
+    <BlockSurface :meta="meta" :is-locked="props.isLocked">
+      <slot />
+    </BlockSurface>
     <BlockLockedOverlay v-if="props.block.is_locked && props.isLocked" />
   </div>
 </template>
