@@ -5,6 +5,7 @@ namespace Tests\Feature\Portal;
 use App\Models\Account;
 use App\Models\AccountContact;
 use App\Models\PortalInvitation;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Services\AccountService;
@@ -19,10 +20,10 @@ class PortalInvitationFlowTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
-        $role = \App\Models\Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
-        $accountService = new AccountService();
+        $accountService = new AccountService;
 
         $account = $accountService->createAccount([
             'workspace_id' => $workspace->id,
@@ -185,7 +186,7 @@ class PortalInvitationFlowTest extends TestCase
     public function test_invitation_created_with_send_invitation_flag(): void
     {
         $workspace = Workspace::factory()->create();
-        $accountService = new AccountService();
+        $accountService = new AccountService;
 
         $account = $accountService->createAccount([
             'workspace_id' => $workspace->id,
@@ -207,7 +208,7 @@ class PortalInvitationFlowTest extends TestCase
     public function test_invitation_not_created_without_send_invitation_flag(): void
     {
         $workspace = Workspace::factory()->create();
-        $accountService = new AccountService();
+        $accountService = new AccountService;
 
         $account = $accountService->createAccount([
             'workspace_id' => $workspace->id,

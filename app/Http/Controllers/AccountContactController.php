@@ -21,7 +21,7 @@ class AccountContactController extends Controller
         try {
             $account = $this->accountService->getAccountById($accountId);
 
-            if (!$account) {
+            if (! $account) {
                 abort(404);
             }
 
@@ -32,6 +32,7 @@ class AccountContactController extends Controller
             return redirect()->route('accounts.show', $accountId);
         } catch (AccountException $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -41,13 +42,13 @@ class AccountContactController extends Controller
         try {
             $account = $this->accountService->getAccountById($accountId);
 
-            if (!$account) {
+            if (! $account) {
                 abort(404);
             }
 
             $contact = AccountContact::where('account_id', $account->id)->where('id', $contactId)->first();
 
-            if (!$contact) {
+            if (! $contact) {
                 abort(404);
             }
 
@@ -58,6 +59,7 @@ class AccountContactController extends Controller
             return redirect()->route('accounts.show', $accountId);
         } catch (AccountException $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -67,13 +69,13 @@ class AccountContactController extends Controller
         try {
             $account = $this->accountService->getAccountById($accountId);
 
-            if (!$account) {
+            if (! $account) {
                 abort(404);
             }
 
             $contact = AccountContact::where('account_id', $account->id)->where('id', $contactId)->first();
 
-            if (!$contact) {
+            if (! $contact) {
                 abort(404);
             }
 
@@ -84,6 +86,7 @@ class AccountContactController extends Controller
             return redirect()->route('accounts.show', $accountId);
         } catch (AccountException $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }

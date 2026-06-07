@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreWorkspaceRequest;
 use App\Models\Workspace;
 use App\Services\WorkspaceService;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class WorkspaceController extends Controller

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { Plus } from '@lucide/vue';
-import { create as accountCreate } from '@/actions/App/Http/Controllers/AccountController';
+import { ref } from 'vue';
 import AccountController from '@/actions/App/Http/Controllers/AccountController';
 import { Button } from '@/components/ui/button';
 import { StatsCard } from '@/components/ui/stats-card';
@@ -9,6 +9,7 @@ import { useCurrency } from '@/composables/useCurrency';
 import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import type { Account } from '@/types/models/account';
+import AccountFormDialog from './dialogs/AccountFormDialog.vue';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
 
@@ -31,12 +32,19 @@ defineProps<{
 
 const { all: accountStatuses } = useAccountStatuses();
 const { format: formatCurrency } = useCurrency();
+const isCreateDialogOpen = ref(false);
+const isEditDialogOpen = ref(false);
+const editingAccount = ref<Account | undefined>(undefined);
 const columns = createColumns(
     accountStatuses,
     (account) => {
         router.delete(AccountController.destroy(account.id).url);
     },
     formatCurrency,
+    (account) => {
+        editingAccount.value = account;
+        isEditDialogOpen.value = true;
+    },
 );
 
 const statusTabs = [
@@ -83,12 +91,10 @@ defineOptions({
                     Manage your client accounts and their contacts.
                 </p>
             </div>
-            <Link :href="accountCreate().url">
-                <Button>
-                    <Plus class="mr-2 h-4 w-4" />
-                    New Account
-                </Button>
-            </Link>
+            <Button type="button" @click="isCreateDialogOpen = true">
+                <Plus class="mr-2 h-4 w-4" />
+                New Account
+            </Button>
         </div>
 
         <!-- Overview Cards -->
@@ -127,6 +133,16 @@ defineOptions({
             :on-search-update="(value) => updateFilters({ status: filters.status === 'all' ? undefined : filters.status, search: value || undefined, date_from: filters.date_from, date_to: filters.date_to })"
             :on-date-from-update="(value) => updateFilters({ status: filters.status === 'all' ? undefined : filters.status, search: filters.search, date_from: value || undefined, date_to: filters.date_to })"
             :on-date-to-update="(value) => updateFilters({ status: filters.status === 'all' ? undefined : filters.status, search: filters.search, date_from: filters.date_from, date_to: value || undefined })"
+        />
+
+        <AccountFormDialog
+            :open="isCreateDialogOpen"
+            @update:open="isCreateDialogOpen = $event"
+        />
+        <AccountFormDialog
+            :open="isEditDialogOpen"
+            :account="editingAccount"
+            @update:open="isEditDialogOpen = $event"
         />
     </div>
 </template>

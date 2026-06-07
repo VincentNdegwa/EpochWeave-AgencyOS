@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
     Route::post('/workspaces/{workspace}/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
 
-    Route::resource('accounts', AccountController::class);
+    Route::resource('accounts', AccountController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::post('/accounts/{account}/contacts', [AccountContactController::class, 'store'])
         ->name('accounts.contacts.store');
     Route::put('/accounts/{account}/contacts/{contact}', [AccountContactController::class, 'update'])

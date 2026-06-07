@@ -6,6 +6,7 @@ use App\Services\ProposalService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ProposalController extends Controller
@@ -46,7 +47,7 @@ class ProposalController extends Controller
                 'status' => 'draft',
                 'blocks' => [],
                 'total_amount' => 0,
-                'token' => \Illuminate\Support\Str::uuid(),
+                'token' => Str::uuid(),
             ]);
 
             $proposal = $this->proposalService->createProposal($data);
@@ -56,6 +57,7 @@ class ProposalController extends Controller
             return redirect()->route('proposals.show', $proposal->id);
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -64,7 +66,7 @@ class ProposalController extends Controller
     {
         $proposal = $this->proposalService->getProposalById($id);
 
-        if (!$proposal) {
+        if (! $proposal) {
             abort(404);
         }
 
@@ -77,7 +79,7 @@ class ProposalController extends Controller
     {
         $proposal = $this->proposalService->getProposalById($id);
 
-        if (!$proposal) {
+        if (! $proposal) {
             abort(404);
         }
 
@@ -91,7 +93,7 @@ class ProposalController extends Controller
         try {
             $proposal = $this->proposalService->getProposalById($id);
 
-            if (!$proposal) {
+            if (! $proposal) {
                 abort(404);
             }
 
@@ -111,6 +113,7 @@ class ProposalController extends Controller
             return redirect()->route('proposals.show', $proposal->id);
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -120,7 +123,7 @@ class ProposalController extends Controller
         try {
             $proposal = $this->proposalService->getProposalById($id);
 
-            if (!$proposal) {
+            if (! $proposal) {
                 abort(404);
             }
 
@@ -131,6 +134,7 @@ class ProposalController extends Controller
             return redirect()->route('proposals.index');
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }

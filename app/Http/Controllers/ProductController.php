@@ -42,6 +42,7 @@ class ProductController extends Controller
             return redirect()->route('products.show', $product);
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -50,7 +51,7 @@ class ProductController extends Controller
     {
         $product = $this->productService->getProductById($id);
 
-        if (!$product) {
+        if (! $product) {
             abort(404);
         }
 
@@ -64,7 +65,7 @@ class ProductController extends Controller
         try {
             $product = $this->productService->getProductById($id);
 
-            if (!$product) {
+            if (! $product) {
                 abort(404);
             }
 
@@ -75,6 +76,7 @@ class ProductController extends Controller
             return redirect()->route('products.show', $product->id);
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -84,7 +86,7 @@ class ProductController extends Controller
         try {
             $product = $this->productService->getProductById($id);
 
-            if (!$product) {
+            if (! $product) {
                 abort(404);
             }
 
@@ -95,6 +97,7 @@ class ProductController extends Controller
             return redirect()->route('products.index');
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }

@@ -39,7 +39,7 @@ class WorkspaceService
 
     public function switchWorkspace(User $user, Workspace $workspace): void
     {
-        if (!$user->rolesTeams()->where('id', $workspace->id)->exists()) {
+        if (! $user->rolesTeams()->where('id', $workspace->id)->exists()) {
             abort(403, 'You do not have access to this workspace.');
         }
 

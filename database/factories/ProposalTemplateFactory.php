@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\ProposalTemplate;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -20,7 +21,7 @@ class ProposalTemplateFactory extends Factory
     {
         return [
             'id' => Str::uuid(),
-            'workspace_id' => \App\Models\Workspace::factory(),
+            'workspace_id' => Workspace::factory(),
             'name' => fake()->sentence(3),
             'description' => fake()->paragraph(),
             'thumbnail_url' => null,

@@ -6,7 +6,6 @@ import { watchDebounced } from '@vueuse/core';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import BuilderSidebar from '@/pages/proposals/components/sidebar/BuilderSidebar.vue';
 import BuilderTopbar from '@/pages/proposals/components/builder/BuilderTopbar.vue';
-import BlockPickerModal from '@/pages/proposals/components/block-picker/BlockPickerModal.vue';
 import type { Proposal } from '@/types/models/proposal';
 import type { BlockType } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
@@ -27,8 +26,6 @@ const { blocks, isDirty, isSaving, proposalTitle, proposalMeta } = storeToRefs(b
 const workspaceStore = useWorkspaceStore();
 
 const isPreview = ref(false);
-const pickerOpen = ref(false);
-const insertAfterId = ref<string | null>(null);
 
 watch(
   () => props.initialProposal?.workspace ?? usePage().props.workspace,
@@ -65,15 +62,8 @@ watch(
   { immediate: true }
 );
 
-const handleAddBlockRequest = (afterBlockId: string | null) => {
-  insertAfterId.value = afterBlockId;
-  pickerOpen.value = true;
-};
-
-const handleBlockPicked = (type: BlockType) => {
-  builderStore.addBlock(type, insertAfterId.value ?? undefined);
-  pickerOpen.value = false;
-  insertAfterId.value = null;
+const handleAddBlockRequest = (afterBlockId: string | null, blockType: string) => {
+  builderStore.addBlock(blockType as BlockType, afterBlockId ?? undefined);
 };
 
 watchDebounced(
@@ -128,6 +118,5 @@ const togglePreview = () => {
         :mode="mode"
       />
     </div>
-    <BlockPickerModal v-model:open="pickerOpen" @select="handleBlockPicked" />
   </div>
 </template>

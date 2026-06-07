@@ -12,7 +12,7 @@ class SetCurrentWorkspace
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -26,7 +26,7 @@ class SetCurrentWorkspace
                 $workspace = Workspace::find($request->session()->get('current_workspace_id'));
             }
 
-            if (!$workspace && $workspaces->isNotEmpty()) {
+            if (! $workspace && $workspaces->isNotEmpty()) {
                 $workspace = $workspaces->first();
                 $request->session()->put('current_workspace_id', $workspace->id);
             }

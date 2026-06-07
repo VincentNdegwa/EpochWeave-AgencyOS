@@ -40,15 +40,6 @@ class AccountController extends Controller
         ]);
     }
 
-    public function create(Request $request)
-    {
-        $workspace = $request->attributes->get('current_workspace');
-
-        return Inertia::render('account/create', [
-            'workspace_id' => $workspace->id,
-        ]);
-    }
-
     public function store(StoreAccountRequest $request): RedirectResponse
     {
         $workspace = $request->attributes->get('current_workspace');
@@ -69,19 +60,6 @@ class AccountController extends Controller
         }
 
         return Inertia::render('account/show', [
-            'account' => $account,
-        ]);
-    }
-
-    public function edit(int $id)
-    {
-        $account = $this->accountService->getAccountById($id);
-
-        if (! $account) {
-            abort(404);
-        }
-
-        return Inertia::render('account/edit', [
             'account' => $account,
         ]);
     }

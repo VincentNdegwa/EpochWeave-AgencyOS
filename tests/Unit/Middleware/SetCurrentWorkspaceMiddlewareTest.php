@@ -20,7 +20,7 @@ class SetCurrentWorkspaceMiddlewareTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->middleware = new SetCurrentWorkspace();
+        $this->middleware = new SetCurrentWorkspace;
     }
 
     public function test_middleware_sets_workspace_from_session(): void
@@ -35,7 +35,7 @@ class SetCurrentWorkspaceMiddlewareTest extends TestCase
         $request->setLaravelSession(session()->driver());
         session(['current_workspace_id' => $workspace->id]);
 
-        $response = $this->middleware->handle($request, fn () => new Response());
+        $response = $this->middleware->handle($request, fn () => new Response);
 
         $this->assertEquals($workspace->id, $request->attributes->get('current_workspace')->id);
         $this->assertNotEmpty($request->attributes->get('workspaces'));
@@ -52,7 +52,7 @@ class SetCurrentWorkspaceMiddlewareTest extends TestCase
         $request->setUserResolver(fn () => $user);
         $request->setLaravelSession(session()->driver());
 
-        $response = $this->middleware->handle($request, fn () => new Response());
+        $response = $this->middleware->handle($request, fn () => new Response);
 
         $this->assertEquals($workspace->id, $request->attributes->get('current_workspace')->id);
         $this->assertEquals($workspace->id, session('current_workspace_id'));
@@ -66,7 +66,7 @@ class SetCurrentWorkspaceMiddlewareTest extends TestCase
         $request->setUserResolver(fn () => $user);
         $request->setLaravelSession(session()->driver());
 
-        $response = $this->middleware->handle($request, fn () => new Response());
+        $response = $this->middleware->handle($request, fn () => new Response);
 
         $this->assertNull($request->attributes->get('current_workspace'));
         $this->assertEmpty($request->attributes->get('workspaces'));
@@ -77,7 +77,7 @@ class SetCurrentWorkspaceMiddlewareTest extends TestCase
         $request = Request::create('/dashboard', 'GET');
         $request->setLaravelSession(session()->driver());
 
-        $response = $this->middleware->handle($request, fn () => new Response());
+        $response = $this->middleware->handle($request, fn () => new Response);
 
         $this->assertNull($request->attributes->get('current_workspace'));
         $this->assertEmpty($request->attributes->get('workspaces'));
@@ -94,7 +94,7 @@ class SetCurrentWorkspaceMiddlewareTest extends TestCase
         $request->setUserResolver(fn () => $user);
         $request->setLaravelSession(session()->driver());
 
-        $this->middleware->handle($request, fn () => new Response());
+        $this->middleware->handle($request, fn () => new Response);
 
         $this->assertEquals($workspace->id, session('current_workspace_id'));
     }
@@ -112,7 +112,7 @@ class SetCurrentWorkspaceMiddlewareTest extends TestCase
         $request->setUserResolver(fn () => $user);
         $request->setLaravelSession(session()->driver());
 
-        $this->middleware->handle($request, fn () => new Response());
+        $this->middleware->handle($request, fn () => new Response);
 
         $workspaces = $request->attributes->get('workspaces');
         $this->assertCount(2, $workspaces);

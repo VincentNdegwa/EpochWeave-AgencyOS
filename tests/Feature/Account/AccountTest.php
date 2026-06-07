@@ -3,6 +3,7 @@
 namespace Tests\Feature\Account;
 
 use App\Models\Account;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +18,7 @@ class AccountTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
-        $role = \App\Models\Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
         $response = $this->actingAs($user)
@@ -25,7 +26,6 @@ class AccountTest extends TestCase
             ->post('/accounts', [
                 'company_name' => 'Test Company',
                 'website' => 'https://example.com',
-                'status' => 'lead',
                 'lifetime_value' => 10000,
             ]);
 
@@ -40,7 +40,7 @@ class AccountTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
-        $role = \App\Models\Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
         Account::factory()->create([
@@ -88,7 +88,7 @@ class AccountTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
-        $role = \App\Models\Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
         $account = Account::factory()->create(['workspace_id' => $workspace->id]);
@@ -104,7 +104,7 @@ class AccountTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
-        $role = \App\Models\Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
         $account = Account::factory()->create(['workspace_id' => $workspace->id]);
@@ -126,7 +126,7 @@ class AccountTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
-        $role = \App\Models\Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
         $account = Account::factory()->create(['workspace_id' => $workspace->id]);

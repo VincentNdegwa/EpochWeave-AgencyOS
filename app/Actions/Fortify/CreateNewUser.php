@@ -38,14 +38,14 @@ class CreateNewUser implements CreatesNewUsers
                 ['name' => 'admin'],
                 [
                     'display_name' => 'Administrator',
-                    'description' => 'System administrator with full access'
+                    'description' => 'System administrator with full access',
                 ]
             );
 
             $workspace = Workspace::create([
-                'name' => strtolower(str_replace(' ', '-', $input['name'])) . '-workspace',
-                'display_name' => $input['name'] . "'s Workspace",
-                'description' => 'Personal workspace for ' . $input['name'],
+                'name' => strtolower(str_replace(' ', '-', $input['name'])).'-workspace',
+                'display_name' => $input['name']."'s Workspace",
+                'description' => 'Personal workspace for '.$input['name'],
             ]);
 
             $user->addRole($adminRole, $workspace);

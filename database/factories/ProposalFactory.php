@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Account;
 use App\Models\Proposal;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,8 +20,8 @@ class ProposalFactory extends Factory
     public function definition(): array
     {
         return [
-            'workspace_id' => \App\Models\Workspace::factory(),
-            'account_id' => \App\Models\Account::factory(),
+            'workspace_id' => Workspace::factory(),
+            'account_id' => Account::factory(),
             'title' => fake()->sentence(4),
             'status' => 'draft',
             'valid_until' => fake()->date(),

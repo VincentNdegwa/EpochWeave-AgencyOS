@@ -22,8 +22,8 @@ class ProductService
                 'billing_type' => $data['billing_type'] ?? BillingType::OneTime->value,
                 'is_active' => $data['is_active'] ?? true,
             ]);
-        } catch (\Exception $e) {
-            throw new Exception('Failed to create product: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to create product: '.$e->getMessage());
         }
     }
 
@@ -41,8 +41,8 @@ class ProductService
             ]);
 
             return $product;
-        } catch (\Exception $e) {
-            throw new Exception('Failed to update product: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to update product: '.$e->getMessage());
         }
     }
 
@@ -50,8 +50,8 @@ class ProductService
     {
         try {
             $product->delete();
-        } catch (\Exception $e) {
-            throw new Exception('Failed to delete product: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to delete product: '.$e->getMessage());
         }
     }
 

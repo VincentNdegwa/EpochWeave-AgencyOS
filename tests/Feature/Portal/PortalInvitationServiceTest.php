@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Portal;
 
-use App\PortalInvitationService;
 use App\Models\Account;
 use App\Models\AccountContact;
 use App\Models\ClientProfile;
 use App\Models\PortalInvitation;
 use App\Models\Workspace;
+use App\PortalInvitationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,7 +20,7 @@ class PortalInvitationServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new PortalInvitationService();
+        $this->service = new PortalInvitationService;
     }
 
     public function test_create_invitation_generates_secure_token(): void
@@ -143,7 +143,7 @@ class PortalInvitationServiceTest extends TestCase
     {
         $workspace = Workspace::factory()->create();
         $account = Account::factory()->create(['workspace_id' => $workspace->id]);
-        
+
         $existingProfile = ClientProfile::factory()->create([
             'email' => 'existing@example.com',
             'password' => bcrypt('oldpassword'),

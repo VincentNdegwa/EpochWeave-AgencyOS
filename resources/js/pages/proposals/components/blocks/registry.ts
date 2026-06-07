@@ -6,6 +6,14 @@ import {
   Building as BuildingIcon,
   Minus as MinusIcon,
   MoveVertical,
+  Coins,
+  Timer,
+  Users,
+  Quote,
+  FileText,
+  PenLine,
+  MousePointerClick,
+  Video,
 } from '@lucide/vue';
 import type { BlockType } from '@/types/proposal-builder';
 import CoverBlock from '@/pages/proposals/components/blocks/CoverBlock/CoverBlock.vue';
@@ -20,6 +28,22 @@ import DividerBlock from '@/pages/proposals/components/blocks/DividerBlock/Divid
 import DividerBlockSettings from '@/pages/proposals/components/blocks/DividerBlock/DividerBlockSettings.vue';
 import SpacerBlock from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlock.vue';
 import SpacerBlockSettings from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlockSettings.vue';
+import PricingTableBlock from '@/pages/proposals/components/blocks/PricingTableBlock/PricingTableBlock.vue';
+import PricingTableBlockSettings from '@/pages/proposals/components/blocks/PricingTableBlock/PricingTableBlockSettings.vue';
+import TimelineBlock from '@/pages/proposals/components/blocks/TimelineBlock/TimelineBlock.vue';
+import TimelineBlockSettings from '@/pages/proposals/components/blocks/TimelineBlock/TimelineBlockSettings.vue';
+import TeamMemberBlock from '@/pages/proposals/components/blocks/TeamMemberBlock/TeamMemberBlock.vue';
+import TeamMemberBlockSettings from '@/pages/proposals/components/blocks/TeamMemberBlock/TeamMemberBlockSettings.vue';
+import TestimonialBlock from '@/pages/proposals/components/blocks/TestimonialBlock/TestimonialBlock.vue';
+import TestimonialBlockSettings from '@/pages/proposals/components/blocks/TestimonialBlock/TestimonialBlockSettings.vue';
+import TermsBlock from '@/pages/proposals/components/blocks/TermsBlock/TermsBlock.vue';
+import TermsBlockSettings from '@/pages/proposals/components/blocks/TermsBlock/TermsBlockSettings.vue';
+import SignatureBlock from '@/pages/proposals/components/blocks/SignatureBlock/SignatureBlock.vue';
+import SignatureBlockSettings from '@/pages/proposals/components/blocks/SignatureBlock/SignatureBlockSettings.vue';
+import CtaBlock from '@/pages/proposals/components/blocks/CtaBlock/CtaBlock.vue';
+import CtaBlockSettings from '@/pages/proposals/components/blocks/CtaBlock/CtaBlockSettings.vue';
+import VideoEmbedBlock from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlock.vue';
+import VideoEmbedBlockSettings from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlockSettings.vue';
 
 export type BlockCategory = 'layout' | 'content';
 
@@ -92,6 +116,78 @@ export const blockRegistry: BlockRegistryEntry[] = [
     icon: MoveVertical,
     component: SpacerBlock,
     settings: SpacerBlockSettings,
+  },
+  {
+    type: 'pricing_table',
+    label: 'Pricing table',
+    category: 'content',
+    description: 'Line items, discounts, taxes, and totals.',
+    icon: Coins,
+    component: PricingTableBlock,
+    settings: PricingTableBlockSettings,
+  },
+  {
+    type: 'timeline',
+    label: 'Timeline',
+    category: 'content',
+    description: 'Project phases and milestones.',
+    icon: Timer,
+    component: TimelineBlock,
+    settings: TimelineBlockSettings,
+  },
+  {
+    type: 'team_member',
+    label: 'Team members',
+    category: 'content',
+    description: 'Show your team with photos and bios.',
+    icon: Users,
+    component: TeamMemberBlock,
+    settings: TeamMemberBlockSettings,
+  },
+  {
+    type: 'testimonial',
+    label: 'Testimonials',
+    category: 'content',
+    description: 'Client quotes and social proof.',
+    icon: Quote,
+    component: TestimonialBlock,
+    settings: TestimonialBlockSettings,
+  },
+  {
+    type: 'terms',
+    label: 'Terms',
+    category: 'content',
+    description: 'Legal terms and conditions.',
+    icon: FileText,
+    component: TermsBlock,
+    settings: TermsBlockSettings,
+  },
+  {
+    type: 'signature',
+    label: 'Signature',
+    category: 'content',
+    description: 'Client sign-off acceptance.',
+    icon: PenLine,
+    component: SignatureBlock,
+    settings: SignatureBlockSettings,
+  },
+  {
+    type: 'cta',
+    label: 'Call to action',
+    category: 'content',
+    description: 'Button with heading and description.',
+    icon: MousePointerClick,
+    component: CtaBlock,
+    settings: CtaBlockSettings,
+  },
+  {
+    type: 'video_embed',
+    label: 'Video',
+    category: 'content',
+    description: 'Embed YouTube, Vimeo, or custom videos.',
+    icon: Video,
+    component: VideoEmbedBlock,
+    settings: VideoEmbedBlockSettings,
   },
 ];
 
