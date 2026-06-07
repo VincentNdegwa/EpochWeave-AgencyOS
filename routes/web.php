@@ -1,12 +1,14 @@
 <?php
 
-use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AccountContactController;
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PortalSetupController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductUnitController;
 use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\WorkspaceSettings\GeneralController as WorkspaceGeneralSettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -32,6 +34,16 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
 
     Route::resource('proposals', ProposalController::class);
+
+    Route::post('uploads', [UploadController::class, 'store'])->name('uploads.store');
+    Route::delete('uploads/{key}', [UploadController::class, 'destroy'])->name('uploads.destroy');
+
+    Route::redirect('workspace/settings', '/workspace/settings/general')
+        ->name('workspace-settings.index');
+    Route::get('workspace/settings/general', [WorkspaceGeneralSettingsController::class, 'edit'])
+        ->name('workspace-settings.general');
+    Route::patch('workspace/settings/general', [WorkspaceGeneralSettingsController::class, 'update'])
+        ->name('workspace-settings.general.update');
 });
 
 require __DIR__.'/settings.php';

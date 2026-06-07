@@ -19,4 +19,8 @@ class Workspace extends LaratrustTeam
         'logo_url',
         'primary_color',
     ];
+
+    protected $casts = [
+        'white_label' => 'boolean',
+    ];
 }
