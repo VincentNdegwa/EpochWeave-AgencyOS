@@ -67,13 +67,22 @@ export interface RichTextBlockData {
   full_width: boolean;
 }
 
+export interface ImageItem {
+  id: string
+  url: string
+  alt_text: string | null
+  caption: string | null
+  link_url: string | null
+}
+ 
 export interface ImageBlockData {
-  url: string;
-  alt_text: string | null;
-  caption: string | null;
-  alignment: 'left' | 'center' | 'right' | 'full';
-  width_percent: number;
-  link_url: string | null;
+  images: ImageItem[]
+  columns: 1 | 2 | 3
+  alignment: 'left' | 'center' | 'right' | 'full'   // applies only when columns = 1
+  width_percent: number                               // applies only when columns = 1 and alignment !== 'full'
+  aspect_ratio: 'auto' | 'square' | 'video' | 'portrait'
+  rounded: boolean
+  show_captions: boolean
 }
 
 export interface LogoBlockData {
