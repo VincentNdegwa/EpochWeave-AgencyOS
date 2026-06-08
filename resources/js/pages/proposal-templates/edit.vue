@@ -4,25 +4,28 @@ import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
-import proposals from '@/routes/proposals';
+import proposalTemplates from '@/routes/proposal-templates';
+import ProposalTemplateController from '@/actions/App/Http/Controllers/ProposalTemplateController';
 import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
-import type { Proposal } from '@/types/models/proposal';
+import type { Proposal, ProposalStatus, ProposalTemplate } from '@/types/models/proposal';
 
-
+const props = defineProps<{
+  template: ProposalTemplate;
+}>();
 
 const workspace_id = usePage().props.workspace?.id;
 const initialProposal = computed<Proposal>(() => ({
-  id: 0,
+  id: props.template.id,
   workspace_id: workspace_id ?? 0,
   account_id: null,
   created_by: null,
   template_id: null,
-  title: 'Untitled proposal',
+  title: props.template.name,
   proposal_number: null,
-  status: 'draft',
+  status: 'draft' as ProposalStatus,
   valid_until: null,
-  content: [],
+  content: props.template.content || [],
   currency: 'USD',
   subtotal: 0,
   discount_total: 0,
@@ -50,8 +53,9 @@ const initialProposal = computed<Proposal>(() => ({
   decided_at: null,
   expired_at: null,
   decline_reason: null,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
+  created_at: props.template.created_at,
+  updated_at: props.template.updated_at,
+  mode: 'template' as const, // Distinguish this as a template
 }));
 
 const isSaving = ref(false);
@@ -65,22 +69,18 @@ const handleSave = async () => {
   try {
     // Get the current proposal data from the builder store
     const builderStore = useProposalBuilderStore();
-    const { proposalTitle, proposalMeta, blocks, templateId } = storeToRefs(builderStore);
+    const { proposalTitle, proposalMeta, blocks } = storeToRefs(builderStore);
     
-    const proposalData = {
-      title: proposalTitle.value,
-      currency: proposalMeta.value.currency,
-      valid_until: proposalMeta.value.validUntil,
-      requires_deposit: proposalMeta.value.depositEnabled,
-      deposit_type: proposalMeta.value.depositType,
-      deposit_value: proposalMeta.value.depositValue,
-      template_id: templateId.value,
+    const templateData = {
+      name: proposalTitle.value,
+      description: (proposalMeta.value as any).templateDescription || props.template.description,
+      thumbnail_url: (proposalMeta.value as any).thumbnailUrl || props.template.thumbnail_url,
       content: blocks.value,
     };
     
-    await router.post(proposals.store().url, proposalData);
+    await router.put(proposalTemplates.update(props.template.id), templateData);
   } catch (error) {
-    console.error('Failed to save proposal:', error);
+    console.error('Failed to save template:', error);
   } finally {
     isSaving.value = false;
   }
@@ -93,21 +93,22 @@ defineExpose({
 });
 
 setLayoutProps({
-  title: 'create proposal',
-  description: 'Launch a new interactive proposal.',
+  title: 'edit template',
+  description: 'Modify your reusable proposal template.',
   breadcrumbs: [
     { title: 'dashboard', href: dashboard() },
-    { title: 'proposals', href: '/proposals' },
-    { title: 'create' },
+    { title: 'templates', href: proposalTemplates.index() },
+    { title: props.template.name, href: proposalTemplates.show(props.template.id) },
+    { title: 'edit' },
   ],
 });
 </script>
 
 <template>
-  <Head title="Create proposal" />
+  <Head :title="`Edit ${template.name}`" />
   <div class="-mx-4 -mb-4 h-[calc(100vh-64px)]">
     <ProposalBuilder 
-      mode="create" 
+      mode="edit" 
       :initial-proposal="initialProposal"
       :on-save="handleSave"
       :is-saving="isSaving"

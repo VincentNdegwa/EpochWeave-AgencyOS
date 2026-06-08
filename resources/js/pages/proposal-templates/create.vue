@@ -4,12 +4,11 @@ import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
-import proposals from '@/routes/proposals';
+import proposalTemplates from '@/routes/proposal-templates';
+import ProposalTemplateController from '@/actions/App/Http/Controllers/ProposalTemplateController';
 import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
-import type { Proposal } from '@/types/models/proposal';
-
-
+import type { Proposal, ProposalStatus } from '@/types/models/proposal';
 
 const workspace_id = usePage().props.workspace?.id;
 const initialProposal = computed<Proposal>(() => ({
@@ -18,9 +17,9 @@ const initialProposal = computed<Proposal>(() => ({
   account_id: null,
   created_by: null,
   template_id: null,
-  title: 'Untitled proposal',
+  title: 'Untitled Template',
   proposal_number: null,
-  status: 'draft',
+  status: 'draft' as ProposalStatus,
   valid_until: null,
   content: [],
   currency: 'USD',
@@ -52,6 +51,7 @@ const initialProposal = computed<Proposal>(() => ({
   decline_reason: null,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString(),
+  mode: 'template' as const, // Distinguish this as a template
 }));
 
 const isSaving = ref(false);
@@ -65,22 +65,18 @@ const handleSave = async () => {
   try {
     // Get the current proposal data from the builder store
     const builderStore = useProposalBuilderStore();
-    const { proposalTitle, proposalMeta, blocks, templateId } = storeToRefs(builderStore);
+    const { proposalTitle, proposalMeta, blocks } = storeToRefs(builderStore);
     
-    const proposalData = {
-      title: proposalTitle.value,
-      currency: proposalMeta.value.currency,
-      valid_until: proposalMeta.value.validUntil,
-      requires_deposit: proposalMeta.value.depositEnabled,
-      deposit_type: proposalMeta.value.depositType,
-      deposit_value: proposalMeta.value.depositValue,
-      template_id: templateId.value,
+    const templateData = {
+      name: proposalTitle.value,
+      description: (proposalMeta.value as any).templateDescription || null,
+      thumbnail_url: (proposalMeta.value as any).thumbnailUrl || null,
       content: blocks.value,
     };
     
-    await router.post(proposals.store().url, proposalData);
+    await router.post(ProposalTemplateController.store().url, templateData);
   } catch (error) {
-    console.error('Failed to save proposal:', error);
+    console.error('Failed to save template:', error);
   } finally {
     isSaving.value = false;
   }
@@ -93,18 +89,18 @@ defineExpose({
 });
 
 setLayoutProps({
-  title: 'create proposal',
-  description: 'Launch a new interactive proposal.',
+  title: 'create template',
+  description: 'Launch a new reusable proposal template.',
   breadcrumbs: [
     { title: 'dashboard', href: dashboard() },
-    { title: 'proposals', href: '/proposals' },
+    { title: 'templates', href: proposalTemplates.index() },
     { title: 'create' },
   ],
 });
 </script>
 
 <template>
-  <Head title="Create proposal" />
+  <Head title="Create Template" />
   <div class="-mx-4 -mb-4 h-[calc(100vh-64px)]">
     <ProposalBuilder 
       mode="create" 

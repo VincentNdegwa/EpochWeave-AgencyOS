@@ -1,21 +1,28 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import BlockSettingsPanel from '@/pages/proposals/components/sidebar/BlockSettingsPanel.vue';
 import ProposalMetaPanel from '@/pages/proposals/components/sidebar/ProposalMetaPanel.vue';
+import TemplateMetaPanel from '@/pages/proposal-templates/components/TemplateMetaPanel.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     mode: 'create' | 'edit';
+    builderMode: string;
   }>(),
   {
     mode: 'create',
+    builderMode: 'proposal',
   }
 );
 
 const store = useProposalBuilderStore();
 const { selectedBlockId, sidebarTab } = storeToRefs(store);
+
+const metaTabLabel = computed(() => {
+  return props.builderMode === 'template' ? 'Template' : 'Proposal';
+});
 
 watch(selectedBlockId, (newValue) => {
   if (newValue) {
@@ -41,12 +48,13 @@ watch(selectedBlockId, (newValue) => {
         type="button"
         @click="store.setSidebarTab('proposal')"
       >
-        Proposal
+        {{ metaTabLabel }}
       </button>
     </div>
 
     <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
       <BlockSettingsPanel v-if="sidebarTab === 'block'" class="h-full" />
+      <TemplateMetaPanel v-else-if="builderMode === 'template'" class="h-full" />
       <ProposalMetaPanel v-else class="h-full" />
     </div>
   </aside>

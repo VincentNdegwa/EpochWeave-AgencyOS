@@ -24,6 +24,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   const proposalTitle = ref('Untitled proposal');
   const proposalMeta = ref<ProposalMeta>(defaultProposalMeta());
+  const templateId = ref<number | null>(null);
+  const selectedTemplateId = ref<string | null>(null);
+  const selectedAccountId = ref<string | null>(null);
 
   const orderedBlocks = computed(() =>
     [...blocks.value].sort((a, b) => a.sort_order - b.sort_order)
@@ -60,6 +63,22 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     }
   }
 
+  function setTemplateId(id: number | null, markDirty = true) {
+    templateId.value = id;
+    if (markDirty) {
+      isDirty.value = true;
+    }
+  }
+
+  function setSelectedAccountId(id: string | null) {
+    selectedAccountId.value = id;
+  }
+
+  function setSelectedTemplateId(id: string | null) {
+    selectedTemplateId.value = id;
+  }
+
+  
   function addBlock(type: BlockType, afterBlockId?: string) {
     const newBlock = createDefaultBlock(type);
     const insertAfterIndex = afterBlockId
@@ -143,6 +162,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     selectedBlockId.value = null;
     proposalTitle.value = 'Untitled proposal';
     proposalMeta.value = defaultProposalMeta();
+    templateId.value = null;
+    selectedTemplateId.value = null;
+    selectedAccountId.value = null;
   }
 
   function reindexBlocks() {
@@ -182,12 +204,18 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     lastSavedAt,
     proposalTitle,
     proposalMeta,
+    templateId,
+    selectedTemplateId,
+    selectedAccountId,
     orderedBlocks,
     selectedBlock,
     loadBlocks,
     setProposalTitle,
     setProposalMeta,
     updateProposalMeta,
+    setTemplateId,
+    setSelectedTemplateId,
+    setSelectedAccountId,
     addBlock,
     updateBlock,
     updateBlockData,
@@ -206,3 +234,4 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     },
   };
 });
+

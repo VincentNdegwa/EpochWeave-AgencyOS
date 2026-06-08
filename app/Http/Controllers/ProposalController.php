@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProposalRequest;
+use App\Http\Requests\UpdateProposalRequest;
 use App\Services\ProposalService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -31,21 +33,15 @@ class ProposalController extends Controller
         return Inertia::render('proposals/create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreProposalRequest $request): RedirectResponse
     {
         try {
             $workspace = $request->attributes->get('current_workspace');
-            $data = $request->validate([
-                'account_id' => 'required|exists:accounts,id',
-                'title' => 'required|string|max:255',
-                'currency' => 'required|string',
-                'valid_until' => 'nullable|date',
-            ]);
+            $data = $request->validated();
 
             $data = array_merge($data, [
                 'workspace_id' => $workspace->id,
                 'status' => 'draft',
-                'blocks' => [],
                 'total_amount' => 0,
                 'token' => Str::uuid(),
             ]);
@@ -88,7 +84,7 @@ class ProposalController extends Controller
         ]);
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(UpdateProposalRequest $request, int $id): RedirectResponse
     {
         try {
             $proposal = $this->proposalService->getProposalById($id);
@@ -97,14 +93,7 @@ class ProposalController extends Controller
                 abort(404);
             }
 
-            $data = $request->validate([
-                'title' => 'sometimes|required|string|max:255',
-                'currency' => 'sometimes|required|string',
-                'valid_until' => 'nullable|date',
-                'status' => 'sometimes|required|string',
-                'total_amount' => 'sometimes|required|numeric',
-                'blocks' => 'sometimes|array',
-            ]);
+            $data = $request->validated();
 
             $this->proposalService->updateProposal($proposal, $data);
 

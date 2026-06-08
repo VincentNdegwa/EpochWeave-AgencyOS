@@ -2,10 +2,12 @@
 
 use App\Http\Controllers\AccountContactController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\BuilderDataController;
 use App\Http\Controllers\PortalSetupController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductUnitController;
 use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\ProposalTemplateController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceSettings\GeneralController as WorkspaceGeneralSettingsController;
@@ -34,6 +36,17 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
 
     Route::resource('proposals', ProposalController::class);
+    Route::resource('proposal-templates', ProposalTemplateController::class);
+    Route::post('proposal-templates/{template}/duplicate', [ProposalTemplateController::class, 'duplicate'])->name('proposal-templates.duplicate');
+    Route::post('proposal-templates/{template}/set-default', [ProposalTemplateController::class, 'setDefault'])->name('proposal-templates.set-default');
+
+    Route::prefix('builder-data')->name('builder-data.')->group(function () {
+        Route::get('products', [BuilderDataController::class, 'products'])->name('products');
+        Route::get('units', [BuilderDataController::class, 'units'])->name('units');
+        Route::get('templates', [BuilderDataController::class, 'templates'])->name('templates');
+        Route::get('templates/{template}', [BuilderDataController::class, 'template'])->name('templates.show');
+        Route::get('accounts', [BuilderDataController::class, 'accounts'])->name('accounts');
+    });
 
     Route::post('uploads', [UploadController::class, 'store'])->name('uploads.store');
     Route::delete('uploads/{key}', [UploadController::class, 'destroy'])->name('uploads.destroy');

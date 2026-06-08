@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   FileTextIcon,
   CoinsIcon,
@@ -11,12 +13,52 @@ import {
   HashIcon,
   BanknoteIcon,
   AlertCircleIcon,
+  FileIcon,
 } from '@lucide/vue';
 import type { ProposalMeta } from '@/types/proposal-meta';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBuilderDataStore } from '@/stores/builderData';
 
 const builderStore = useProposalBuilderStore();
-const { proposalTitle, proposalMeta } = storeToRefs(builderStore);
+const { proposalTitle, proposalMeta, selectedTemplateId, selectedAccountId } = storeToRefs(builderStore);
+const builderDataStore = useBuilderDataStore();
+const { templates, accounts } = storeToRefs(builderDataStore);
+
+const isApplyingTemplate = ref(false);
+
+// Load templates and accounts when component mounts
+const { fetchTemplates, fetchAccounts } = builderDataStore;
+fetchTemplates();
+fetchAccounts();
+
+const applyTemplate = async () => {
+  if (!selectedTemplateId.value || isApplyingTemplate.value) return;
+  
+  isApplyingTemplate.value = true;
+  try {
+    const templateId = parseInt(selectedTemplateId.value, 10);
+    if (isNaN(templateId)) {
+      throw new Error('Invalid template ID');
+    }
+    
+    const template = await builderDataStore.fetchTemplate(templateId);
+    
+    // Apply template content to builder
+    if (template.content && Array.isArray(template.content)) {
+      builderStore.loadBlocks(template.content);
+    }
+    
+    // Set template_id in the proposal builder store
+    builderStore.setTemplateId(templateId);
+    
+    // Reset selection
+    builderStore.setSelectedTemplateId(null);
+  } catch (error) {
+    console.error('Failed to apply template:', error);
+  } finally {
+    isApplyingTemplate.value = false;
+  }
+};
 
 const currencies = [
   { value: 'KES', label: 'KES', name: 'Kenyan Shilling', flag: '🇰🇪' },
@@ -92,6 +134,20 @@ const depositValueModel = computed({
     updateMeta({ depositValue: Number.isFinite(numericValue) ? numericValue : 0 });
   },
 });
+
+const selectedTemplateModel = computed({
+  get: () => builderStore.templateId?.toString() ?? null,
+  set: (value: string | null) => {
+    builderStore.setSelectedTemplateId(value);
+  },
+});
+
+const selectedAccountModel = computed({
+  get: () => selectedAccountId.value,
+  set: (value: string | null) => {
+    builderStore.setSelectedAccountId(value);
+  },
+});
 </script>
 
 <template>
@@ -120,6 +176,70 @@ const depositValueModel = computed({
           {{ proposalMeta.proposalNumber ?? 'DRAFT' }}
         </span>
       </div>
+    </div>
+
+    <div class="px-4 py-3 border-b border-border">
+      <p class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <BanknoteIcon class="h-3 w-3" />
+        Account
+      </p>
+
+      <div class="mb-3">
+        <Label class="mb-1.5 block text-xs text-muted-foreground">Select account</Label>
+        <Select v-model="selectedAccountModel">
+          <SelectTrigger class="w-full">
+            <SelectValue placeholder="Choose an account..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="account in accounts"
+              :key="account.id"
+              :value="account.id.toString()"
+            >
+              {{ account.name }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+
+    <div class="px-4 py-3 border-b border-border">
+      <p class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <FileIcon class="h-3 w-3" />
+        Template
+      </p>
+
+      <div class="mb-3">
+        <Label class="mb-1.5 block text-xs text-muted-foreground">Select template</Label>
+        <Select
+          v-model="selectedTemplateModel"
+          :disabled="isApplyingTemplate"
+        >
+          <SelectTrigger class="w-full">
+            <SelectValue placeholder="Choose a template..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem
+              v-for="template in templates"
+              :key="template.id"
+              :value="template.id.toString()"
+            >
+              {{ template.name }}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <Button
+        v-if="selectedTemplateId"
+        @click="applyTemplate"
+        :disabled="isApplyingTemplate"
+        size="sm"
+        class="w-full"
+      >
+        <FileIcon class="h-3 w-3 mr-1.5" />
+        {{ isApplyingTemplate ? 'Applying...' : 'Apply Template' }}
+      </Button>
     </div>
 
     <div class="px-4 py-3 border-b border-border">

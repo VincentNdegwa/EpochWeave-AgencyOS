@@ -142,14 +142,23 @@ export interface PricingTableBlockData {
 
 export interface PricingLineItem {
   id: string;
-  description: string;
+  description: string;              // the name shown on the table row
+  item_description: string | null;  // sub-description shown below the name
   unit: string;
   quantity: number;
   unit_price: number;
-  subtotal: number;
-  is_optional: boolean;
+  subtotal: number;                 // computed: (qty × price - discount + tax)
+ 
   billing_type: 'one_time' | 'recurring';
-  product_id: string | null;
+  product_id: number | null;        // null = custom item
+ 
+  is_optional: boolean;
+ 
+  item_discount_type:  'none' | 'percentage' | 'fixed';
+  item_discount_value: number;      // e.g. 10 for 10% or fixed amount
+ 
+  item_tax_type:  'none' | 'percentage' | 'fixed';
+  item_tax_value: number;
 }
 
 export interface PricingDiscount {

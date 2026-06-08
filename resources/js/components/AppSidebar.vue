@@ -20,6 +20,7 @@ import products from '@/routes/products';
 import { index as workspaceSettings } from '@/routes/workspace-settings';
 import type { NavItem } from '@/types';
 import proposals from '@/routes/proposals';
+import proposalTemplates from '@/routes/proposal-templates';
 
 const mainNavItems: NavItem[] = [
     {
@@ -39,6 +40,11 @@ const mainNavItems: NavItem[] = [
     },{
         title: 'Proposal',
         href: proposals.index().url,
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Templates',
+        href: proposalTemplates.index().url,
         icon: LayoutGrid,
     }
 ];

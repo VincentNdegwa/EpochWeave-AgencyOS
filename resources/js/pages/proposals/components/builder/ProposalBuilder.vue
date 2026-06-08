@@ -15,9 +15,13 @@ const props = withDefaults(
   defineProps<{
     mode: 'create' | 'edit';
     initialProposal?: Proposal | null;
+    onSave?: () => Promise<void>;
+    isSaving?: boolean;
   }>(),
   {
     initialProposal: null,
+    onSave: undefined,
+    isSaving: false,
   }
 );
 
@@ -26,6 +30,7 @@ const { blocks, isDirty, isSaving, proposalTitle, proposalMeta } = storeToRefs(b
 const workspaceStore = useWorkspaceStore();
 
 const isPreview = ref(false);
+const builderMode = computed(() => (props.initialProposal?.mode as string) ?? 'proposal');
 
 watch(
   () => props.initialProposal?.workspace ?? usePage().props.workspace,
@@ -105,17 +110,25 @@ const togglePreview = () => {
       :mode="mode"
       :status="props.initialProposal?.status ?? 'draft'"
       :is-dirty="isDirty"
-      :is-saving="isSaving"
+      :is-saving="props.isSaving || isSaving"
       :is-preview="isPreview"
       :proposal-id="props.initialProposal?.id ?? null"
+      :builder-mode="builderMode"
+      :on-save="props.onSave"
       @toggle-preview="togglePreview"
     />
     <div class="flex h-[calc(100vh-56px)] flex-1 overflow-hidden">
-      <ProposalCanvas class="flex-1" :is-locked="isCanvasLocked || isPreview" @add-block="handleAddBlockRequest" />
+      <ProposalCanvas 
+        class="flex-1" 
+        :is-locked="isCanvasLocked || isPreview" 
+        :builder-mode="builderMode"
+        @add-block="handleAddBlockRequest" 
+      />
       <BuilderSidebar
         v-if="!isPreview"
         class="hidden w-80 border-l border-border lg:flex"
         :mode="mode"
+        :builder-mode="builderMode"
       />
     </div>
   </div>
