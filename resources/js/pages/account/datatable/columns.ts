@@ -13,13 +13,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { EnumOption } from '@/composables/useEnums';
 import { show as accountShow } from '@/routes/accounts';
-import { edit as accountEdit } from '@/routes/accounts';
 import type { Account } from '@/types/models/account';
 
 export function createColumns(
     accountStatuses: Record<string, EnumOption>,
     onDelete?: (account: Account) => void,
     formatCurrency?: (value: number) => string,
+    onEdit?: (account: Account) => void,
 ): ColumnDef<Account>[] {
     return [
         {
@@ -72,8 +72,16 @@ return h('span', { class: 'text-muted-foreground' }, '—');
                     | 'secondary'
                     | 'destructive'
                     | 'outline';
+                const colorClass = statusOption?.color;
 
-                return h(Badge, { variant }, () => label);
+                return h(
+                    Badge,
+                    {
+                        variant,
+                        class: colorClass,
+                    },
+                    () => label,
+                );
             },
         },
         {
@@ -121,12 +129,12 @@ return h('span', { class: 'text-muted-foreground' }, '—');
                                     () => 'View',
                                 ),
                             ),
-                            h(DropdownMenuItem, { asChild: true }, () =>
-                                h(
-                                    Link,
-                                    { href: accountEdit(account.id).url },
-                                    () => 'Edit',
-                                ),
+                            h(
+                                DropdownMenuItem,
+                                {
+                                    onClick: () => onEdit?.(account),
+                                },
+                                () => 'Edit',
                             ),
                             h(DropdownMenuSeparator),
                             h(

@@ -28,54 +28,45 @@ const table = useVueTable({
 
 <template>
     <div class="w-full">
-        <div class="rounded-md border">
-            <Table>
-                <TableHeader>
-                    <TableRow
-                        v-for="headerGroup in table.getHeaderGroups()"
-                        :key="headerGroup.id"
+        <Table>
+            <TableHeader>
+                <TableRow
+                    v-for="headerGroup in table.getHeaderGroups()"
+                    :key="headerGroup.id"
+                    class="bg-muted/30 hover:bg-muted/30"
+                >
+                    <TableHead
+                        v-for="header in headerGroup.headers"
+                        :key="header.id"
+                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
                     >
-                        <TableHead
-                            v-for="header in headerGroup.headers"
-                            :key="header.id"
+                        <FlexRender
+                            v-if="!header.isPlaceholder"
+                            :render="header.column.columnDef.header"
+                            :props="header.getContext()"
+                        />
+                    </TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                <template v-if="table.getRowModel().rows?.length">
+                    <TableRow
+                        v-for="row in table.getRowModel().rows"
+                        :key="row.id"
+                        class="transition-colors"
+                    >
+                        <TableCell
+                            v-for="cell in row.getVisibleCells()"
+                            :key="cell.id"
                         >
                             <FlexRender
-                                v-if="!header.isPlaceholder"
-                                :render="header.column.columnDef.header"
-                                :props="header.getContext()"
+                                :render="cell.column.columnDef.cell"
+                                :props="cell.getContext()"
                             />
-                        </TableHead>
+                        </TableCell>
                     </TableRow>
-                </TableHeader>
-                <TableBody>
-                    <template v-if="table.getRowModel().rows?.length">
-                        <TableRow
-                            v-for="row in table.getRowModel().rows"
-                            :key="row.id"
-                        >
-                            <TableCell
-                                v-for="cell in row.getVisibleCells()"
-                                :key="cell.id"
-                            >
-                                <FlexRender
-                                    :render="cell.column.columnDef.cell"
-                                    :props="cell.getContext()"
-                                />
-                            </TableCell>
-                        </TableRow>
-                    </template>
-                    <template v-else>
-                        <TableRow>
-                            <TableCell
-                                :colspan="columns.length"
-                                class="h-24 text-center"
-                            >
-                                No contacts added yet.
-                            </TableCell>
-                        </TableRow>
-                    </template>
-                </TableBody>
-            </Table>
-        </div>
+                </template>
+            </TableBody>
+        </Table>
     </div>
 </template>

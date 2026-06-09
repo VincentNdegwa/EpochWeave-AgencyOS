@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\BillingFrequency;
+use App\Enums\BillingType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +19,7 @@ class ProposalItem extends Model
         'description',
         'unit_label',
         'billing_type',
+        'billing_frequency',
         'quantity',
         'unit_price',
         'subtotal',
@@ -30,6 +33,8 @@ class ProposalItem extends Model
     ];
 
     protected $casts = [
+        'billing_type' => BillingType::class,
+        'billing_frequency' => BillingFrequency::class,
         'quantity' => 'decimal:2',
         'discount_value' => 'decimal:2',
         'is_optional' => 'boolean',

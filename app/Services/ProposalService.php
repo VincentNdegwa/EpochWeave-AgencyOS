@@ -12,8 +12,8 @@ class ProposalService
     {
         try {
             return Proposal::create($data);
-        } catch (\Exception $e) {
-            throw new Exception('Failed to create proposal: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to create proposal: '.$e->getMessage());
         }
     }
 
@@ -21,9 +21,10 @@ class ProposalService
     {
         try {
             $proposal->update($data);
+
             return $proposal->fresh();
-        } catch (\Exception $e) {
-            throw new Exception('Failed to update proposal: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to update proposal: '.$e->getMessage());
         }
     }
 
@@ -31,14 +32,14 @@ class ProposalService
     {
         try {
             $proposal->delete();
-        } catch (\Exception $e) {
-            throw new Exception('Failed to delete proposal: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to delete proposal: '.$e->getMessage());
         }
     }
 
     public function getProposalById(int $id): ?Proposal
     {
-        return Proposal::find($id);
+        return Proposal::with(['account', 'workspace', 'template'])->find($id);
     }
 
     public function getProposalsByWorkspace(int $workspaceId): Collection
@@ -60,9 +61,10 @@ class ProposalService
     {
         try {
             $proposal->update(['blocks' => $blocks]);
+
             return $proposal->fresh();
-        } catch (\Exception $e) {
-            throw new Exception('Failed to update proposal blocks: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to update proposal blocks: '.$e->getMessage());
         }
     }
 
@@ -71,9 +73,10 @@ class ProposalService
         try {
             $blocks = $proposal->blocks ?? [];
             $blocks[] = $block;
+
             return $this->updateBlocks($proposal, $blocks);
-        } catch (\Exception $e) {
-            throw new Exception('Failed to add block: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to add block: '.$e->getMessage());
         }
     }
 
@@ -85,11 +88,13 @@ class ProposalService
                 if ($block['id'] === $blockId) {
                     return array_merge($block, $blockData);
                 }
+
                 return $block;
             }, $blocks);
+
             return $this->updateBlocks($proposal, $blocks);
-        } catch (\Exception $e) {
-            throw new Exception('Failed to update block: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to update block: '.$e->getMessage());
         }
     }
 
@@ -101,9 +106,10 @@ class ProposalService
                 return $block['id'] !== $blockId;
             });
             $blocks = array_values($blocks); // Re-index array
+
             return $this->updateBlocks($proposal, $blocks);
-        } catch (\Exception $e) {
-            throw new Exception('Failed to delete block: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to delete block: '.$e->getMessage());
         }
     }
 
@@ -123,8 +129,8 @@ class ProposalService
             }
 
             return $this->updateBlocks($proposal, $reorderedBlocks);
-        } catch (\Exception $e) {
-            throw new Exception('Failed to reorder blocks: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to reorder blocks: '.$e->getMessage());
         }
     }
 }

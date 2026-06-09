@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreAccountRequest extends FormRequest
 {
@@ -17,7 +16,6 @@ class StoreAccountRequest extends FormRequest
         return [
             'company_name' => ['required', 'string', 'max:255'],
             'website' => ['nullable', 'url', 'max:255'],
-            'status' => ['nullable', 'string', 'in:lead,opportunity,client,archived'],
             'lifetime_value' => ['nullable', 'integer', 'min:0'],
             'contacts' => ['nullable', 'array'],
             'contacts.*.first_name' => ['required', 'string', 'max:100'],

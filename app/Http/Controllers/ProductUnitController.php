@@ -35,9 +35,10 @@ class ProductUnitController extends Controller
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Product unit created successfully.']);
 
-            return redirect()->route('product-units.index');
+            return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -47,7 +48,7 @@ class ProductUnitController extends Controller
         try {
             $productUnit = $this->productUnitService->getProductUnitById($id);
 
-            if (!$productUnit) {
+            if (! $productUnit) {
                 abort(404);
             }
 
@@ -55,9 +56,10 @@ class ProductUnitController extends Controller
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Product unit updated successfully.']);
 
-            return redirect()->route('product-units.index');
+            return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -67,7 +69,7 @@ class ProductUnitController extends Controller
         try {
             $productUnit = $this->productUnitService->getProductUnitById($id);
 
-            if (!$productUnit) {
+            if (! $productUnit) {
                 abort(404);
             }
 
@@ -75,9 +77,10 @@ class ProductUnitController extends Controller
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Product unit deleted successfully.']);
 
-            return redirect()->route('product-units.index');
+            return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }

@@ -67,7 +67,8 @@ export interface ProposalItem {
   item_name: string;
   description: string | null;
   unit_label: string | null;
-  billing_type: string;
+  billing_type: 'one_time' | 'recurring';
+  billing_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
   quantity: number;
   unit_price: number;
   subtotal: number;

@@ -19,6 +19,8 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
+        $billingType = fake()->randomElement(['one_time', 'recurring']);
+
         return [
             'workspace_id' => Workspace::factory(),
             'unit_id' => ProductUnit::factory(),
@@ -26,7 +28,10 @@ class ProductFactory extends Factory
             'description' => fake()->sentence(),
             'sku' => fake()->bothify('???-###'),
             'unit_price' => fake()->randomNumber(4),
-            'billing_type' => fake()->randomElement(['one_time', 'recurring']),
+            'billing_type' => $billingType,
+            'billing_frequency' => $billingType === 'one_time'
+                ? 'none'
+                : fake()->randomElement(['daily', 'weekly', 'monthly', 'yearly']),
             'is_active' => true,
         ];
     }

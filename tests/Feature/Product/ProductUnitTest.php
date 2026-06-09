@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Product;
 
 use App\Models\ProductUnit;
 use App\Models\Workspace;
@@ -17,7 +17,7 @@ class ProductUnitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->productUnitService = new ProductUnitService();
+        $this->productUnitService = new ProductUnitService;
     }
 
     public function test_can_create_product_unit(): void

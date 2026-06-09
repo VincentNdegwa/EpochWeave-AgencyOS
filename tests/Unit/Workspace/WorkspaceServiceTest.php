@@ -5,8 +5,11 @@ namespace Tests\Unit\Workspace;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Models\WorkspaceSetting;
 use App\Services\WorkspaceService;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class WorkspaceServiceTest extends TestCase
@@ -18,7 +21,7 @@ class WorkspaceServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new WorkspaceService();
+        $this->service = app(WorkspaceService::class);
     }
 
     public function test_create_workspace_creates_workspace_and_assigns_admin_role(): void
@@ -42,13 +45,23 @@ class WorkspaceServiceTest extends TestCase
         ]);
 
         $this->assertTrue($user->hasRole('admin', $workspace));
+
+        $this->assertDatabaseHas('workspace_settings', [
+            'workspace_id' => $workspace->id,
+            'submodule' => WorkspaceSetting::SUBMODULE_PROPOSALS,
+        ]);
+
+        $this->assertDatabaseHas('workspace_settings', [
+            'workspace_id' => $workspace->id,
+            'submodule' => WorkspaceSetting::SUBMODULE_NOTIFICATIONS,
+        ]);
     }
 
     public function test_create_workspace_uses_transaction_on_failure(): void
     {
         $user = User::factory()->create();
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         $this->service->createWorkspace($user, [
             'name' => null, // This should fail validation
@@ -79,7 +92,7 @@ class WorkspaceServiceTest extends TestCase
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $this->service->switchWorkspace($user, $workspace);
     }

@@ -28,7 +28,7 @@ class PortalInvitationService
             ->where('invitation_token', $token)
             ->first();
 
-        if (!$invitation || !$invitation->isValid()) {
+        if (! $invitation || ! $invitation->isValid()) {
             return null;
         }
 
@@ -39,7 +39,7 @@ class PortalInvitationService
     {
         $invitation = $this->validateInvitation($token);
 
-        if (!$invitation) {
+        if (! $invitation) {
             throw new \Exception('Invalid or expired invitation token.');
         }
 

@@ -1,72 +1,110 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { nanoid } from 'nanoid';
 import type { BaseBlock, BlockType } from '@/types/proposal-builder';
-import type { ProposalMeta } from '@/types/proposal-meta';
+import type { Proposal } from '@/types/models/proposal';
 import { createDefaultBlock } from '@/composables/blockFactory';
 
-const defaultProposalMeta = (): ProposalMeta => ({
-  currency: 'USD',
-  validUntil: null,
-  proposalNumber: 'DRAFT',
-  depositEnabled: false,
-  depositType: 'percentage',
-  depositValue: 0,
-});
+type BuilderMode = 'proposal' | 'template';
+
+export interface TemplateSettings {
+  description: string | null;
+  thumbnailUrl: string | null;
+}
+
+const cloneProposal = (payload: Proposal): Proposal => {
+  return JSON.parse(JSON.stringify(payload)) as Proposal;
+};
+
+const createDefaultProposal = (workspaceId = 0): Proposal => {
+  const timestamp = new Date().toISOString();
+
+  return {
+    id: 0,
+    workspace_id: workspaceId,
+    account_id: null,
+    created_by: null,
+    template_id: null,
+    title: 'Untitled proposal',
+    proposal_number: null,
+    status: 'draft',
+    valid_until: null,
+    content: [],
+    currency: 'USD',
+    subtotal: 0,
+    discount_total: 0,
+    tax_rate: 0,
+    tax_amount: 0,
+    grand_total: 0,
+    requires_deposit: false,
+    deposit_type: null,
+    deposit_value: null,
+    deposit_amount: null,
+    token: null,
+    password_hash: null,
+    signer_name: null,
+    signer_email: null,
+    signer_company: null,
+    signature_data: null,
+    signed_ip: null,
+    signed_user_agent: null,
+    deposit_invoice_id: null,
+    project_id: null,
+    sent_at: null,
+    viewed_at: null,
+    last_viewed_at: null,
+    view_count: 0,
+    decided_at: null,
+    expired_at: null,
+    decline_reason: null,
+    created_at: timestamp,
+    updated_at: timestamp,
+  };
+};
 
 export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
-  const blocks = ref<BaseBlock[]>([]);
   const isDirty = ref(false);
   const isSaving = ref(false);
   const selectedBlockId = ref<string | null>(null);
   const sidebarTab = ref<'block' | 'proposal'>('proposal');
   const lastSavedAt = ref<Date | null>(null);
+  const builderMode = ref<BuilderMode>('proposal');
+  const hydrating = ref(false);
 
-  const proposalTitle = ref('Untitled proposal');
-  const proposalMeta = ref<ProposalMeta>(defaultProposalMeta());
+  const proposal = ref<Proposal>(createDefaultProposal());
+  const templateSettings = ref<TemplateSettings>({ description: null, thumbnailUrl: null });
 
   const orderedBlocks = computed(() =>
-    [...blocks.value].sort((a, b) => a.sort_order - b.sort_order)
+    [...proposal.value.content].sort((a, b) => a.sort_order - b.sort_order)
   );
 
   const selectedBlock = computed(() =>
-    blocks.value.find((b) => b.id === selectedBlockId.value) ?? null
+    proposal.value.content.find((b) => b.id === selectedBlockId.value) ?? null
+  );
+
+  watch(
+    proposal,
+    () => {
+      if (hydrating.value) {
+        return;
+      }
+      isDirty.value = true;
+    },
+    { deep: true }
   );
 
   function loadBlocks(newBlocks: BaseBlock[]) {
-    blocks.value = newBlocks;
+    proposal.value.content = [...newBlocks];
     isDirty.value = false;
-  }
-
-  function setProposalTitle(value: string, markDirty = true) {
-    const nextValue = value?.trim() ? value : 'Untitled proposal';
-    proposalTitle.value = nextValue;
-    if (markDirty) {
-      isDirty.value = true;
-    }
-  }
-
-  function setProposalMeta(meta: ProposalMeta, markDirty = true) {
-    proposalMeta.value = { ...defaultProposalMeta(), ...meta };
-    if (markDirty) {
-      isDirty.value = true;
-    }
-  }
-
-  function updateProposalMeta(changes: Partial<ProposalMeta>, markDirty = true) {
-    proposalMeta.value = { ...proposalMeta.value, ...changes };
-    if (markDirty) {
-      isDirty.value = true;
-    }
   }
 
   function addBlock(type: BlockType, afterBlockId?: string) {
     const newBlock = createDefaultBlock(type);
     const insertAfterIndex = afterBlockId
-      ? blocks.value.findIndex((b) => b.id === afterBlockId)
-      : blocks.value.length - 1;
+      ? proposal.value.content.findIndex((b) => b.id === afterBlockId)
+      : proposal.value.content.length - 1;
 
-    blocks.value.splice(insertAfterIndex + 1, 0, newBlock);
+    proposal.value.content.splice(insertAfterIndex + 1, 0, newBlock);
     reindexBlocks();
     selectedBlockId.value = newBlock.id;
     sidebarTab.value = 'block';
@@ -74,9 +112,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   }
 
   function updateBlock(blockId: string, updates: Partial<BaseBlock>) {
-    const index = blocks.value.findIndex((b) => b.id === blockId);
+    const index = proposal.value.content.findIndex((b) => b.id === blockId);
     if (index !== -1) {
-      blocks.value[index] = { ...blocks.value[index], ...updates };
+      proposal.value.content[index] = { ...proposal.value.content[index], ...updates };
       isDirty.value = true;
     }
   }
@@ -90,13 +128,13 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   }
 
   function deleteBlock(blockId: string) {
-    blocks.value = blocks.value.filter((b) => b.id !== blockId);
+    proposal.value.content = proposal.value.content.filter((b) => b.id !== blockId);
     reindexBlocks();
     isDirty.value = true;
   }
 
   function reorderBlocks(blockIds: string[]) {
-    const blockMap = new Map(blocks.value.map((b) => [b.id, b]));
+    const blockMap = new Map(proposal.value.content.map((b) => [b.id, b]));
     const reorderedBlocks: BaseBlock[] = [];
 
     for (const [index, blockId] of blockIds.entries()) {
@@ -106,19 +144,19 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
       }
     }
 
-    blocks.value = reorderedBlocks;
+    proposal.value.content = reorderedBlocks;
     isDirty.value = true;
   }
 
   function duplicateBlock(blockId: string) {
-    const block = blocks.value.find((b) => b.id === blockId);
+    const block = proposal.value.content.find((b) => b.id === blockId);
     if (block) {
       const newBlock = {
         ...JSON.parse(JSON.stringify(block)),
         id: nanoid(),
         sort_order: block.sort_order + 1,
       };
-      blocks.value.splice(block.sort_order + 1, 0, newBlock);
+      proposal.value.content.splice(block.sort_order + 1, 0, newBlock);
       reindexBlocks();
       isDirty.value = true;
     }
@@ -137,36 +175,63 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     lastSavedAt.value = new Date();
   }
 
+  function resetProposal(workspaceId = 0, overrides: Partial<Proposal> = {}) {
+    hydrating.value = true;
+    proposal.value = cloneProposal({
+      ...createDefaultProposal(workspaceId),
+      ...overrides,
+    });
+    nextTick(() => {
+      hydrating.value = false;
+      markAsClean();
+    });
+  }
+
+  function hydrateProposal(payload: Proposal, options?: { mode?: BuilderMode; template?: TemplateSettings }) {
+    hydrating.value = true;
+    proposal.value = cloneProposal(payload);
+    if (options?.mode) {
+      builderMode.value = options.mode;
+    }
+    if (options?.template) {
+      templateSettings.value = { ...options.template };
+    }
+    nextTick(() => {
+      hydrating.value = false;
+      markAsClean();
+    });
+  }
+
   function clear() {
-    blocks.value = [];
-    isDirty.value = false;
+    resetProposal();
     selectedBlockId.value = null;
-    proposalTitle.value = 'Untitled proposal';
-    proposalMeta.value = defaultProposalMeta();
+    sidebarTab.value = 'proposal';
+    builderMode.value = 'proposal';
+    templateSettings.value = { description: null, thumbnailUrl: null };
   }
 
   function reindexBlocks() {
-    blocks.value = blocks.value.map((block, index) => ({
+    proposal.value.content = proposal.value.content.map((block, index) => ({
       ...block,
       sort_order: index,
     }));
   }
 
   function moveBlock(blockId: string, direction: 'up' | 'down') {
-    const currentIndex = blocks.value.findIndex((block) => block.id === blockId);
+    const currentIndex = proposal.value.content.findIndex((block) => block.id === blockId);
     if (currentIndex === -1) {
       return;
     }
 
     const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-    if (nextIndex < 0 || nextIndex >= blocks.value.length) {
+    if (nextIndex < 0 || nextIndex >= proposal.value.content.length) {
       return;
     }
 
-    const updated = [...blocks.value];
+    const updated = [...proposal.value.content];
     const [removed] = updated.splice(currentIndex, 1);
     updated.splice(nextIndex, 0, removed);
-    blocks.value = updated.map((block, index) => ({
+    proposal.value.content = updated.map((block, index) => ({
       ...block,
       sort_order: index,
     }));
@@ -174,20 +239,23 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   }
 
   return {
-    blocks,
+    proposal,
+    get blocks() {
+      return proposal.value.content;
+    },
+    set blocks(value: BaseBlock[]) {
+      proposal.value.content = value;
+    },
     isDirty,
     isSaving,
     selectedBlockId,
     sidebarTab,
     lastSavedAt,
-    proposalTitle,
-    proposalMeta,
+    builderMode,
+    templateSettings,
     orderedBlocks,
     selectedBlock,
     loadBlocks,
-    setProposalTitle,
-    setProposalMeta,
-    updateProposalMeta,
     addBlock,
     updateBlock,
     updateBlockData,
@@ -198,6 +266,8 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     selectBlock,
     setSidebarTab,
     markAsClean,
+    resetProposal,
+    hydrateProposal,
     clear,
     reindexBlocks,
     moveBlock,
@@ -206,3 +276,4 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     },
   };
 });
+

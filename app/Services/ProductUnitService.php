@@ -16,8 +16,8 @@ class ProductUnitService
                 'name' => $data['name'],
                 'abbreviation' => $data['abbreviation'],
             ]);
-        } catch (\Exception $e) {
-            throw new Exception('Failed to create product unit: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to create product unit: '.$e->getMessage());
         }
     }
 
@@ -30,8 +30,8 @@ class ProductUnitService
             ]);
 
             return $productUnit;
-        } catch (\Exception $e) {
-            throw new Exception('Failed to update product unit: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to update product unit: '.$e->getMessage());
         }
     }
 
@@ -42,8 +42,8 @@ class ProductUnitService
                 throw new Exception('Cannot delete product unit with existing products.');
             }
             $productUnit->delete();
-        } catch (\Exception $e) {
-            throw new Exception('Failed to delete product unit: ' . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception('Failed to delete product unit: '.$e->getMessage());
         }
     }
 

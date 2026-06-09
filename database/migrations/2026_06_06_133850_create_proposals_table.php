@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('proposal_number');
             $table->string('status')->default('draft');
             $table->date('valid_until')->nullable();
-            $table->json('content')->default('{"version":"1.0","blocks":[]}');
+            $table->json('content');
 
             $table->string('currency')->default('KES');
             $table->bigInteger('subtotal')->default(0);
@@ -46,8 +46,8 @@ return new class extends Migration
             $table->string('signed_ip')->nullable();
             $table->text('signed_user_agent')->nullable();
 
-            $table->foreignId('deposit_invoice_id')->nullable()->constrained('invoices')->onDelete('set null');
-            $table->foreignId('project_id')->nullable()->constrained('projects')->onDelete('set null');
+            $table->foreignId('deposit_invoice_id')->nullable();
+            $table->foreignId('project_id')->nullable();
 
             $table->timestamp('sent_at')->nullable();
             $table->timestamp('viewed_at')->nullable();

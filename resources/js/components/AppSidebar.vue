@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Box, Building, LayoutGrid } from '@lucide/vue';
+import { Box, Building, LayoutGrid, Settings } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -17,8 +17,10 @@ import {
 import { dashboard } from '@/routes';
 import accounts from '@/routes/accounts';
 import products from '@/routes/products';
+import { index as workspaceSettings } from '@/routes/workspace-settings';
 import type { NavItem } from '@/types';
 import proposals from '@/routes/proposals';
+import proposalTemplates from '@/routes/proposal-templates';
 
 const mainNavItems: NavItem[] = [
     {
@@ -39,10 +41,21 @@ const mainNavItems: NavItem[] = [
         title: 'Proposal',
         href: proposals.index().url,
         icon: LayoutGrid,
+    },
+    {
+        title: 'Templates',
+        href: proposalTemplates.index().url,
+        icon: LayoutGrid,
     }
 ];
 
-const footerNavItems: NavItem[] = [];
+const footerNavItems: NavItem[] = [
+    {
+        title: 'Business settings',
+        href: workspaceSettings(),
+        icon: Settings,
+    },
+];
 </script>
 
 <template>

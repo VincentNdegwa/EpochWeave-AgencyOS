@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { ArrowLeft, Eye, Edit, Send, MoreVertical } from '@lucide/vue';
+import { ArrowLeft, Eye, Edit, Send, MoreVertical, Save } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import BuilderSaveStatus from '@/pages/proposals/components/builder/BuilderSaveStatus.vue';
@@ -18,10 +18,14 @@ const props = withDefaults(
     isSaving: boolean;
     isPreview: boolean;
     proposalId?: number | null;
+    builderMode: string;
+    onSave?: () => Promise<void>;
   }>(),
   {
     proposalId: null,
     isPreview: false,
+    builderMode: 'proposal',
+    onSave: undefined,
   }
 );
 
@@ -30,6 +34,15 @@ const editableRef = ref<HTMLDivElement | null>(null);
 
 const previewButtonText = computed(() => props.isPreview ? 'Edit' : 'Preview');
 const previewButtonIcon = computed(() => props.isPreview ? Edit : Eye);
+
+const isTemplateMode = computed(() => props.builderMode === 'template');
+const saveButtonText = computed(() => props.mode === 'create' ? 'Create' : 'Save');
+
+const handleSave = async () => {
+  if (props.onSave) {
+    await props.onSave();
+  }
+};
 
 const handleInput = () => {
   if (!editableRef.value) {
@@ -83,11 +96,35 @@ watch(
         <component :is="previewButtonIcon" class="h-4 w-4" />
         {{ previewButtonText }}
       </Button>
-      <Button size="sm" class="hidden gap-2 md:inline-flex" :disabled="mode === 'create'">
-        <Send class="h-4 w-4" />
-        Send
+      
+      <!-- Template mode: Show Save button -->
+      <Button 
+        v-if="isTemplateMode"
+        size="sm" 
+        class="hidden gap-2 md:inline-flex"
+        :disabled="isSaving"
+        @click="handleSave"
+      >
+        <Save v-if="!isSaving" class="h-4 w-4" />
+        <div v-else class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+        {{ isSaving ? 'Saving...' : saveButtonText }}
       </Button>
-      <BuilderActionMenu>
+      
+      <!-- Proposal mode: Show Create or Send button -->
+      <Button 
+        v-else
+        size="sm" 
+        class="hidden gap-2 md:inline-flex"
+        @click="handleSave"
+        :disabled="isSaving"
+      >
+        <Save v-if="!isSaving" class="h-4 w-4" />
+        <div v-else class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+        {{ mode === 'create' ? (isSaving ? 'Creating...' : 'Create') : (isSaving ? 'Saving...' : 'Send') }}
+      </Button>
+      
+      <!-- Hide action menu in template mode -->
+      <BuilderActionMenu v-if="!isTemplateMode">
         <Button variant="outline" size="icon">
           <MoreVertical class="h-4 w-4" />
           <span class="sr-only">Open actions</span>

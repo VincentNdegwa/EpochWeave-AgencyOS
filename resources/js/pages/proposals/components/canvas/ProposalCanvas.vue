@@ -8,7 +8,7 @@ import CanvasEmpty from '@/pages/proposals/components/canvas/CanvasEmpty.vue';
 import BlockAddButton from '@/pages/proposals/components/canvas/BlockAddButton.vue';
 
 const emit = defineEmits<{
-  (e: 'add-block', afterBlockId: string | null): void;
+  (e: 'add-block', afterBlockId: string | null, blockType: string): void;
 }>();
 
 const props = defineProps<{
@@ -20,11 +20,11 @@ const { orderedBlocks } = storeToRefs(store);
 
 const hasBlocks = computed(() => orderedBlocks.value.length > 0);
 
-const handleAddClick = (afterBlockId: string | null) => {
+const handleAddClick = (afterBlockId: string | null, blockType: string) => {
   if (props.isLocked) {
     return;
   }
-  emit('add-block', afterBlockId);
+  emit('add-block', afterBlockId, blockType);
 };
 </script>
 
@@ -58,7 +58,7 @@ const handleAddClick = (afterBlockId: string | null) => {
             />
           </template>
         </div>
-        <CanvasEmpty v-else :is-locked="isLocked" @add-first="handleAddClick(null)" />
+        <CanvasEmpty v-else :is-locked="isLocked" @add-first="(blockType: string) => handleAddClick(null, blockType)" />
       </div>
     </div>
   </div>

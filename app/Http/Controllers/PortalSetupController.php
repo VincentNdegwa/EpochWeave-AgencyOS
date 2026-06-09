@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\PortalInvitationService;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PortalSetupController extends Controller
@@ -17,7 +17,7 @@ class PortalSetupController extends Controller
     {
         $invitation = $this->invitationService->getInvitationByToken($token);
 
-        if (!$invitation || !$invitation->isValid()) {
+        if (! $invitation || ! $invitation->isValid()) {
             abort(404, 'Invalid or expired invitation link.');
         }
 

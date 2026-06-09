@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enums\AccountStatus;
+use App\Enums\BillingFrequency;
 use App\Enums\BillingType;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -50,6 +51,7 @@ class HandleInertiaRequests extends Middleware
             'enums' => [
                 'accountStatuses' => collect(AccountStatus::cases())->keyBy(fn (AccountStatus $status) => $status->value),
                 'billingTypes' => collect(BillingType::cases())->keyBy(fn (BillingType $type) => $type->value),
+                'billingFrequencies' => collect(BillingFrequency::cases())->keyBy(fn (BillingFrequency $frequency) => $frequency->value),
             ],
         ];
     }

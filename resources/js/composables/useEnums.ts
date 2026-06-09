@@ -8,9 +8,27 @@ export interface EnumOption {
     variant: BadgeVariants['variant'];
 }
 
+export function useBillingFrequencies() {
+    const { billingFrequencies } = useEnums();
+
+    return {
+        all: billingFrequencies,
+        getByValue: (value: string): EnumOption | undefined =>
+            billingFrequencies[value],
+        getLabel: (value: string): string =>
+            billingFrequencies[value]?.label || value,
+        getVariant: (value: string): BadgeVariants['variant'] =>
+            billingFrequencies[value]?.variant || 'default',
+        getColor: (value: string): string =>
+            billingFrequencies[value]?.color || '',
+        values: Object.values(billingFrequencies),
+    };
+}
+
 export interface Enums {
     accountStatuses: Record<string, EnumOption>;
     billingTypes: Record<string, EnumOption>;
+    billingFrequencies: Record<string, EnumOption>;
 }
 
 export function useEnums() {
@@ -20,6 +38,7 @@ export function useEnums() {
     return {
         accountStatuses: enums?.accountStatuses || {},
         billingTypes: enums?.billingTypes || {},
+        billingFrequencies: enums?.billingFrequencies || {},
     };
 }
 

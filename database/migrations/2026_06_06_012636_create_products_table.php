@@ -18,8 +18,12 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('sku', 100)->nullable();
+
             $table->bigInteger('unit_price')->default(0);
-            $table->string('billing_type')->default('one_time');
+
+            $table->string('billing_type', 30)->default('one_time');
+            $table->string('billing_frequency', 30)->default('none');
+
             $table->boolean('is_active')->default(true);
             $table->timestamps();
             $table->index('workspace_id');

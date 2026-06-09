@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
 {
@@ -23,7 +23,8 @@ class StoreProductRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'sku' => ['nullable', 'string', 'max:100'],
             'unit_price' => ['required', 'integer', 'min:0'],
-            'billing_type' => ['required', 'string', 'in:one_time,recurring'],
+            'billing_type' => ['required', 'string', Rule::in(['one_time', 'recurring'])],
+            'billing_frequency' => ['required', 'string', Rule::in(['none', 'daily', 'weekly', 'monthly', 'yearly'])],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

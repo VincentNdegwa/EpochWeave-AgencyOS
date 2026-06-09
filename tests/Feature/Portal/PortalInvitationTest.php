@@ -6,6 +6,8 @@ use App\Models\Account;
 use App\Models\AccountContact;
 use App\Models\PortalInvitation;
 use App\Models\Workspace;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -122,7 +124,7 @@ class PortalInvitationTest extends TestCase
             'invitation_token' => 'unique-token-123',
         ]);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
 
         PortalInvitation::factory()->create([
             'account_id' => $account->id,
@@ -159,6 +161,6 @@ class PortalInvitationTest extends TestCase
             'expires_at' => '2026-12-31 23:59:59',
         ]);
 
-        $this->assertInstanceOf(\Carbon\CarbonImmutable::class, $invitation->expires_at);
+        $this->assertInstanceOf(CarbonImmutable::class, $invitation->expires_at);
     }
 }

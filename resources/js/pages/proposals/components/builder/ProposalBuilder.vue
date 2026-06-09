@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePage } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import BuilderSidebar from '@/pages/proposals/components/sidebar/BuilderSidebar.vue';
 import BuilderTopbar from '@/pages/proposals/components/builder/BuilderTopbar.vue';
-import BlockPickerModal from '@/pages/proposals/components/block-picker/BlockPickerModal.vue';
-import type { Proposal } from '@/types/models/proposal';
 import type { BlockType } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
@@ -15,71 +13,39 @@ import { useWorkspaceStore } from '@/stores/workspace';
 const props = withDefaults(
   defineProps<{
     mode: 'create' | 'edit';
-    initialProposal?: Proposal | null;
+    onSave?: () => Promise<void>;
+    isSaving?: boolean;
   }>(),
   {
-    initialProposal: null,
+    onSave: undefined,
+    isSaving: false,
   }
 );
 
 const builderStore = useProposalBuilderStore();
-const { blocks, isDirty, isSaving, proposalTitle, proposalMeta } = storeToRefs(builderStore);
+const { proposal, isDirty, isSaving, builderMode } = storeToRefs(builderStore);
 const workspaceStore = useWorkspaceStore();
 
+const workspace = usePage().props.workspace;
+workspaceStore.setWorkspace(workspace ?? null);
+
 const isPreview = ref(false);
-const pickerOpen = ref(false);
-const insertAfterId = ref<string | null>(null);
 
-watch(
-  () => props.initialProposal?.workspace ?? usePage().props.workspace,
-  (workspace) => {
-    workspaceStore.setWorkspace(workspace ?? null);
+const proposalTitleModel = computed({
+  get: () => proposal.value.title,
+  set: (value: string) => {
+    proposal.value.title = value?.trim() ? value : 'Untitled proposal';
   },
-  { immediate: true }
-);
+});
 
-watch(
-  () => props.initialProposal?.content,
-  (incoming) => {
-    builderStore.loadBlocks(incoming ?? []);
-  },
-  { immediate: true, deep: true }
-);
-
-watch(
-  () => props.initialProposal,
-  (proposal) => {
-    builderStore.setProposalTitle(proposal?.title ?? 'Untitled proposal', false);
-    builderStore.setProposalMeta(
-      {
-        currency: proposal?.currency ?? 'USD',
-        validUntil: proposal?.valid_until ?? null,
-        proposalNumber: proposal?.token ?? proposal?.proposal_number ?? 'DRAFT',
-        depositEnabled: proposal?.requires_deposit ?? false,
-        depositType: proposal?.deposit_type ?? 'percentage',
-        depositValue: proposal?.deposit_value ?? 0,
-      },
-      false
-    );
-  },
-  { immediate: true }
-);
-
-const handleAddBlockRequest = (afterBlockId: string | null) => {
-  insertAfterId.value = afterBlockId;
-  pickerOpen.value = true;
-};
-
-const handleBlockPicked = (type: BlockType) => {
-  builderStore.addBlock(type, insertAfterId.value ?? undefined);
-  pickerOpen.value = false;
-  insertAfterId.value = null;
+const handleAddBlockRequest = (afterBlockId: string | null, blockType: string) => {
+  builderStore.addBlock(blockType as BlockType, afterBlockId ?? undefined);
 };
 
 watchDebounced(
   () => ({
-    blocks: blocks.value,
-    title: proposalTitle.value,
+    blocks: proposal.value.content,
+    title: proposal.value.title,
   }),
   () => {
     if (!isDirty.value) {
@@ -101,33 +67,43 @@ onBeforeUnmount(() => {
   workspaceStore.clear();
 });
 
-const isCanvasLocked = computed(() => props.mode === 'edit' && props.initialProposal?.status === 'accepted');
+const isCanvasLocked = computed(() => props.mode === 'edit' && proposal.value.status === 'accepted');
 
 const togglePreview = () => {
   isPreview.value = !isPreview.value;
 };
+
+const proposalStatus = computed(() => proposal.value.status ?? 'draft');
+const proposalId = computed(() => proposal.value.id ?? null);
 </script>
 
 <template>
   <div class="flex h-full flex-col bg-background">
     <BuilderTopbar
-      v-model:title="proposalTitle"
+      v-model:title="proposalTitleModel"
       :mode="mode"
-      :status="props.initialProposal?.status ?? 'draft'"
+      :status="proposalStatus"
       :is-dirty="isDirty"
-      :is-saving="isSaving"
+      :is-saving="props.isSaving || isSaving"
       :is-preview="isPreview"
-      :proposal-id="props.initialProposal?.id ?? null"
+      :proposal-id="proposalId"
+      :builder-mode="builderMode"
+      :on-save="props.onSave"
       @toggle-preview="togglePreview"
     />
     <div class="flex h-[calc(100vh-56px)] flex-1 overflow-hidden">
-      <ProposalCanvas class="flex-1" :is-locked="isCanvasLocked || isPreview" @add-block="handleAddBlockRequest" />
+      <ProposalCanvas 
+        class="flex-1" 
+        :is-locked="isCanvasLocked || isPreview" 
+        :builder-mode="builderMode"
+        @add-block="handleAddBlockRequest" 
+      />
       <BuilderSidebar
         v-if="!isPreview"
         class="hidden w-80 border-l border-border lg:flex"
         :mode="mode"
+        :builder-mode="builderMode"
       />
     </div>
-    <BlockPickerModal v-model:open="pickerOpen" @select="handleBlockPicked" />
   </div>
 </template>

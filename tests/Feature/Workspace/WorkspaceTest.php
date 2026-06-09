@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Workspace;
 
+use App\Models\Role;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,7 +36,7 @@ class WorkspaceTest extends TestCase
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
-        $role = \App\Models\Role::create([
+        $role = Role::create([
             'name' => 'admin',
             'display_name' => 'Administrator',
         ]);

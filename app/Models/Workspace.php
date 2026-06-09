@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laratrust\Models\Team as LaratrustTeam;
 
 class Workspace extends LaratrustTeam
@@ -19,4 +20,13 @@ class Workspace extends LaratrustTeam
         'logo_url',
         'primary_color',
     ];
+
+    protected $casts = [
+        'white_label' => 'boolean',
+    ];
+
+    public function settings(): HasMany
+    {
+        return $this->hasMany(WorkspaceSetting::class);
+    }
 }

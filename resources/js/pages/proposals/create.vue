@@ -1,57 +1,58 @@
 <script setup lang="ts">
 import { Head, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
+import proposals from '@/routes/proposals';
 import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
-import type { BaseBlock } from '@/types/proposal-builder';
-import type { Proposal } from '@/types/models/proposal';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
-const props = defineProps<{
-  template_blocks?: BaseBlock[];
-}>();
+const workspaceId = usePage().props.workspace?.id ?? 0;
+const builderStore = useProposalBuilderStore();
+builderStore.resetProposal(workspaceId);
 
-const workspace_id = usePage().props.workspace?.id;
-const initialProposal = computed<Proposal>(() => ({
-  id: 0,
-  workspace_id: workspace_id ?? 0,
-  account_id: null,
-  created_by: null,
-  template_id: null,
-  title: 'Untitled proposal',
-  proposal_number: null,
-  status: 'draft',
-  valid_until: null,
-  content: props.template_blocks ?? [],
-  currency: 'USD',
-  subtotal: 0,
-  discount_total: 0,
-  tax_rate: 0,
-  tax_amount: 0,
-  grand_total: 0,
-  requires_deposit: false,
-  deposit_type: null,
-  deposit_value: null,
-  deposit_amount: null,
-  token: null,
-  password_hash: null,
-  signer_name: null,
-  signer_email: null,
-  signer_company: null,
-  signature_data: null,
-  signed_ip: null,
-  signed_user_agent: null,
-  deposit_invoice_id: null,
-  project_id: null,
-  sent_at: null,
-  viewed_at: null,
-  last_viewed_at: null,
-  view_count: 0,
-  decided_at: null,
-  expired_at: null,
-  decline_reason: null,
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-}));
+const { proposal } = storeToRefs(builderStore);
+
+const isSaving = ref(false);
+
+const handleSave = async () => {
+  if (isSaving.value) return;
+  
+  isSaving.value = true;
+  
+  try {
+    const numericAccountId = proposal.value.account_id ?? null;
+
+    if (!numericAccountId || Number.isNaN(numericAccountId)) {
+      throw new Error('Please select an account before saving.');
+    }
+    
+    const proposalData = {
+      title: proposal.value.title,
+      currency: proposal.value.currency,
+      valid_until: proposal.value.valid_until,
+      requires_deposit: proposal.value.requires_deposit,
+      deposit_type: proposal.value.deposit_type,
+      deposit_value: proposal.value.deposit_value,
+      template_id: proposal.value.template_id,
+      account_id: numericAccountId,
+      blocks: proposal.value.content,
+    };
+    
+    await router.post(proposals.store().url, proposalData);
+  } catch (error) {
+    console.error('Failed to save proposal:', error);
+  } finally {
+    isSaving.value = false;
+  }
+};
+
+// Provide save functionality to child components
+defineExpose({
+  handleSave,
+  isSaving,
+});
 
 setLayoutProps({
   title: 'create proposal',
@@ -67,6 +68,10 @@ setLayoutProps({
 <template>
   <Head title="Create proposal" />
   <div class="-mx-4 -mb-4 h-[calc(100vh-64px)]">
-    <ProposalBuilder mode="create" :initial-proposal="initialProposal" />
+    <ProposalBuilder 
+      mode="create" 
+      :on-save="handleSave"
+      :is-saving="isSaving"
+    />
   </div>
 </template>

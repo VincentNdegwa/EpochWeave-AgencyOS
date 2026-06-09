@@ -2,16 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProposalRequest;
+use App\Http\Requests\UpdateProposalRequest;
+use App\Models\Proposal;
+use App\Models\WorkspaceSetting;
 use App\Services\ProposalService;
+use App\Services\WorkspaceSettingService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class ProposalController extends Controller
 {
     public function __construct(
-        private ProposalService $proposalService
+        private ProposalService $proposalService,
+        private WorkspaceSettingService $workspaceSettingService
     ) {}
 
     public function index(Request $request)
@@ -30,32 +37,42 @@ class ProposalController extends Controller
         return Inertia::render('proposals/create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreProposalRequest $request): RedirectResponse
     {
         try {
             $workspace = $request->attributes->get('current_workspace');
-            $data = $request->validate([
-                'account_id' => 'required|exists:accounts,id',
-                'title' => 'required|string|max:255',
-                'currency' => 'required|string',
-                'valid_until' => 'nullable|date',
-            ]);
+            $data = $request->validated();
+            $content = $this->pullBlocksFromPayload($data) ?? [];
+
+            $settings = $this->workspaceSettingService->getOrCreate(
+                $workspace->id,
+                WorkspaceSetting::SUBMODULE_PROPOSALS
+            );
+
+            $numberingSettings = $settings->settings['numbering'] ?? [];
+            $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
+            $proposalNumber = $this->generateProposalNumber($numberingSettings);
+            unset($data['proposal_number']);
 
             $data = array_merge($data, [
                 'workspace_id' => $workspace->id,
+                'created_by' => $request->user()->id,
+                'proposal_number' => $proposalNumber,
                 'status' => 'draft',
-                'blocks' => [],
-                'total_amount' => 0,
-                'token' => \Illuminate\Support\Str::uuid(),
+                'content' => $content,
+                'token' => Str::uuid(),
             ]);
 
             $proposal = $this->proposalService->createProposal($data);
+
+            $this->workspaceSettingService->incrementNumberingSequence($settings, $nextSequenceNumber);
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal created successfully.']);
 
             return redirect()->route('proposals.show', $proposal->id);
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -64,11 +81,11 @@ class ProposalController extends Controller
     {
         $proposal = $this->proposalService->getProposalById($id);
 
-        if (!$proposal) {
+        if (! $proposal) {
             abort(404);
         }
 
-        return Inertia::render('proposal/show', [
+        return Inertia::render('proposals/show', [
             'proposal' => $proposal,
         ]);
     }
@@ -77,32 +94,29 @@ class ProposalController extends Controller
     {
         $proposal = $this->proposalService->getProposalById($id);
 
-        if (!$proposal) {
+        if (! $proposal) {
             abort(404);
         }
 
-        return Inertia::render('proposal/edit', [
+        return Inertia::render('proposals/edit', [
             'proposal' => $proposal,
         ]);
     }
 
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(UpdateProposalRequest $request, int $id): RedirectResponse
     {
         try {
             $proposal = $this->proposalService->getProposalById($id);
 
-            if (!$proposal) {
+            if (! $proposal) {
                 abort(404);
             }
 
-            $data = $request->validate([
-                'title' => 'sometimes|required|string|max:255',
-                'currency' => 'sometimes|required|string',
-                'valid_until' => 'nullable|date',
-                'status' => 'sometimes|required|string',
-                'total_amount' => 'sometimes|required|numeric',
-                'blocks' => 'sometimes|array',
-            ]);
+            $data = $request->validated();
+
+            if (($content = $this->pullBlocksFromPayload($data)) !== null) {
+                $data['content'] = $content;
+            }
 
             $this->proposalService->updateProposal($proposal, $data);
 
@@ -111,6 +125,7 @@ class ProposalController extends Controller
             return redirect()->route('proposals.show', $proposal->id);
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back()->withInput();
         }
     }
@@ -120,7 +135,7 @@ class ProposalController extends Controller
         try {
             $proposal = $this->proposalService->getProposalById($id);
 
-            if (!$proposal) {
+            if (! $proposal) {
                 abort(404);
             }
 
@@ -131,7 +146,40 @@ class ProposalController extends Controller
             return redirect()->route('proposals.index');
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
+    }
+
+    private function generateProposalNumber(array $numberingSettings): string
+    {
+        $format = $numberingSettings['format'] ?? '{PREFIX}{DELIMITER}{SEQUENCE}';
+        $prefix = $numberingSettings['prefix'] ?? 'PROP';
+        $delimiter = $numberingSettings['delimiter'] ?? '-';
+        $sequencePadding = max(0, (int) ($numberingSettings['sequence_padding'] ?? 4));
+        $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
+
+        $sequence = $sequencePadding > 0
+            ? str_pad((string) $nextSequenceNumber, $sequencePadding, '0', STR_PAD_LEFT)
+            : (string) $nextSequenceNumber;
+
+        return strtr($format, [
+            '{PREFIX}' => $prefix,
+            '{YEAR}' => now()->format('Y'),
+            '{DELIMITER}' => $delimiter,
+            '{SEQUENCE}' => $sequence,
+        ]);
+    }
+
+    private function pullBlocksFromPayload(array &$data): ?array
+    {
+        if (! array_key_exists('blocks', $data)) {
+            return null;
+        }
+
+        $blocks = $data['blocks'] ?? [];
+        unset($data['blocks']);
+
+        return $blocks;
     }
 }

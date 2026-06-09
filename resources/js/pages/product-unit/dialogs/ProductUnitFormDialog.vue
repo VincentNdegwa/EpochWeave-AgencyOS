@@ -51,6 +51,18 @@ watch(
         }
     },
 );
+
+watch(
+    () => props.open,
+    (isOpen) => {
+        if (isOpen && !props.unit) {
+            form.value = {
+                name: '',
+                abbreviation: '',
+            };
+        }
+    },
+);
 </script>
 
 <template>
@@ -77,6 +89,8 @@ watch(
                           })
                         : ProductUnitController.store.form()) as any
                 "
+                :options="{ preserveScroll: true, preserveState: true }"
+                @success="emit('success'); emit('update:open', false)"
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-4 py-4">
