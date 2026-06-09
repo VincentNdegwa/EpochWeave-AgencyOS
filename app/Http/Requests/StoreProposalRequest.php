@@ -28,7 +28,7 @@ class StoreProposalRequest extends FormRequest
             'proposal_number' => 'nullable|string|max:255',
             'currency' => 'required|string|size:3',
             'valid_until' => 'nullable|date|after:now',
-            'blocks' => 'array',
+            'blocks' => 'required|array|min:1',
             'blocks.*.id' => 'required|string',
             'blocks.*.type' => [
                 'required',

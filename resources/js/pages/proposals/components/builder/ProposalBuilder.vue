@@ -26,7 +26,7 @@ const props = withDefaults(
 );
 
 const builderStore = useProposalBuilderStore();
-const { blocks, isDirty, isSaving, proposalTitle, proposalMeta } = storeToRefs(builderStore);
+const { blocks, isDirty, isSaving, proposalTitle, proposalMeta, proposalNumber } = storeToRefs(builderStore);
 const workspaceStore = useWorkspaceStore();
 
 const isPreview = ref(false);
@@ -56,13 +56,13 @@ watch(
       {
         currency: proposal?.currency ?? 'USD',
         validUntil: proposal?.valid_until ?? null,
-        proposalNumber: proposal?.token ?? proposal?.proposal_number ?? 'DRAFT',
         depositEnabled: proposal?.requires_deposit ?? false,
         depositType: proposal?.deposit_type ?? 'percentage',
         depositValue: proposal?.deposit_value ?? 0,
       },
       false
     );
+    proposalNumber.value = proposal?.proposal_number ?? proposal?.token ?? 'DRAFT';
   },
   { immediate: true }
 );

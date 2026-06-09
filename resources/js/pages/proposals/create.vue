@@ -83,7 +83,7 @@ const handleSave = async () => {
       deposit_value: proposalMeta.value.depositValue,
       template_id: templateId.value,
       account_id: numericAccountId,
-      content: blocks.value,
+      blocks: blocks.value,
     };
     
     await router.post(proposals.store().url, proposalData);

@@ -39,7 +39,7 @@ class ProposalService
 
     public function getProposalById(int $id): ?Proposal
     {
-        return Proposal::find($id);
+        return Proposal::with(['account', 'workspace', 'template'])->find($id);
     }
 
     public function getProposalsByWorkspace(int $workspaceId): Collection

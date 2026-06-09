@@ -8,7 +8,6 @@ import { createDefaultBlock } from '@/composables/blockFactory';
 const defaultProposalMeta = (): ProposalMeta => ({
   currency: 'USD',
   validUntil: null,
-  proposalNumber: 'DRAFT',
   depositEnabled: false,
   depositType: 'percentage',
   depositValue: 0,
@@ -24,6 +23,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   const proposalTitle = ref('Untitled proposal');
   const proposalMeta = ref<ProposalMeta>(defaultProposalMeta());
+  const proposalNumber = ref<string | null>('DRAFT');
   const templateId = ref<number | null>(null);
   const selectedTemplateId = ref<string | null>(null);
   const selectedAccountId = ref<string | null>(null);
@@ -162,6 +162,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     selectedBlockId.value = null;
     proposalTitle.value = 'Untitled proposal';
     proposalMeta.value = defaultProposalMeta();
+    proposalNumber.value = 'DRAFT';
     templateId.value = null;
     selectedTemplateId.value = null;
     selectedAccountId.value = null;
@@ -204,6 +205,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     lastSavedAt,
     proposalTitle,
     proposalMeta,
+    proposalNumber,
     templateId,
     selectedTemplateId,
     selectedAccountId,

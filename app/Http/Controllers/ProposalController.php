@@ -42,8 +42,7 @@ class ProposalController extends Controller
         try {
             $workspace = $request->attributes->get('current_workspace');
             $data = $request->validated();
-            $content = $data['blocks'] ?? [];
-            unset($data['blocks']);
+            $content = $this->pullBlocksFromPayload($data) ?? [];
 
             $settings = $this->workspaceSettingService->getOrCreate(
                 $workspace->id,
@@ -86,7 +85,7 @@ class ProposalController extends Controller
             abort(404);
         }
 
-        return Inertia::render('proposal/show', [
+        return Inertia::render('proposals/show', [
             'proposal' => $proposal,
         ]);
     }
@@ -99,7 +98,7 @@ class ProposalController extends Controller
             abort(404);
         }
 
-        return Inertia::render('proposal/edit', [
+        return Inertia::render('proposals/edit', [
             'proposal' => $proposal,
         ]);
     }
@@ -114,6 +113,10 @@ class ProposalController extends Controller
             }
 
             $data = $request->validated();
+
+            if (($content = $this->pullBlocksFromPayload($data)) !== null) {
+                $data['content'] = $content;
+            }
 
             $this->proposalService->updateProposal($proposal, $data);
 
@@ -166,5 +169,17 @@ class ProposalController extends Controller
             '{DELIMITER}' => $delimiter,
             '{SEQUENCE}' => $sequence,
         ]);
+    }
+
+    private function pullBlocksFromPayload(array &$data): ?array
+    {
+        if (! array_key_exists('blocks', $data)) {
+            return null;
+        }
+
+        $blocks = $data['blocks'] ?? [];
+        unset($data['blocks']);
+
+        return $blocks;
     }
 }

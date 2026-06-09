@@ -20,7 +20,7 @@ import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useBuilderDataStore } from '@/stores/builderData';
 
 const builderStore = useProposalBuilderStore();
-const { proposalTitle, proposalMeta, selectedTemplateId, selectedAccountId } = storeToRefs(builderStore);
+const { proposalTitle, proposalMeta, selectedTemplateId, selectedAccountId, proposalNumber } = storeToRefs(builderStore);
 const builderDataStore = useBuilderDataStore();
 const { templates, accounts } = storeToRefs(builderDataStore);
 
@@ -173,7 +173,7 @@ const selectedAccountModel = computed({
           Proposal number
         </div>
         <span class="font-mono text-xs font-semibold text-foreground">
-          {{ proposalMeta.proposalNumber ?? 'DRAFT' }}
+          {{ proposalNumber ?? 'DRAFT' }}
         </span>
       </div>
     </div>
