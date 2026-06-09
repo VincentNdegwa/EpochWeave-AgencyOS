@@ -1,0 +1,12 @@
+.git
+.gitignore
+node_modules
+vendor
+storage/*.sqlite
+storage/debugbar
+npm-debug.log
+pnpm-lock.yaml
+yarn.lock
+.DS_Store
+.env
+.env.*

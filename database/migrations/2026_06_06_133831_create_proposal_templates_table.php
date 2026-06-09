@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->text('thumbnail_url')->nullable();
-            $table->json('content')->default('{"version":"1.0","blocks":[]}');
+            $table->json('content');
             $table->boolean('is_default')->default(false);
             $table->timestamps();
 

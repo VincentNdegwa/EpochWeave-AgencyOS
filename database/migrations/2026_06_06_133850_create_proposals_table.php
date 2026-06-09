@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('proposal_number');
             $table->string('status')->default('draft');
             $table->date('valid_until')->nullable();
-            $table->json('content')->default('{"version":"1.0","blocks":[]}');
+            $table->json('content');
 
             $table->string('currency')->default('KES');
             $table->bigInteger('subtotal')->default(0);

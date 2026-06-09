@@ -58,7 +58,12 @@ class LaratrustSetupTables extends Migration
             $table->foreign('workspace_id')->references('id')->on('workspaces')
                 ->onUpdate('cascade')->onDelete('cascade');
 
-            $table->unique(['user_id', 'role_id', 'user_type', 'workspace_id']);
+            $table->unique([
+                'user_id',
+                'role_id',
+                'user_type',
+                'workspace_id',
+            ], 'role_user_unique_combo');
         });
 
         // Create table for associating permissions to users (Many To Many Polymorphic)
@@ -73,7 +78,12 @@ class LaratrustSetupTables extends Migration
             $table->foreign('workspace_id')->references('id')->on('workspaces')
                 ->onUpdate('cascade')->onDelete('cascade');
 
-            $table->unique(['user_id', 'permission_id', 'user_type', 'workspace_id']);
+            $table->unique([
+                'user_id',
+                'permission_id',
+                'user_type',
+                'workspace_id',
+            ], 'perm_user_unique_combo');
         });
 
         // Create table for associating permissions to roles (Many-to-Many)
