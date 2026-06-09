@@ -196,7 +196,7 @@ const selectedAccountModel = computed({
               :key="account.id"
               :value="account.id.toString()"
             >
-              {{ account.name }}
+              {{ account.company_name ?? account.name }}
             </SelectItem>
           </SelectContent>
         </Select>

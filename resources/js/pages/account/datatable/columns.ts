@@ -72,8 +72,16 @@ return h('span', { class: 'text-muted-foreground' }, '—');
                     | 'secondary'
                     | 'destructive'
                     | 'outline';
+                const colorClass = statusOption?.color;
 
-                return h(Badge, { variant }, () => label);
+                return h(
+                    Badge,
+                    {
+                        variant,
+                        class: colorClass,
+                    },
+                    () => label,
+                );
             },
         },
         {

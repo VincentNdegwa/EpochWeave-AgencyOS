@@ -12,6 +12,9 @@ import type { Proposal } from '@/types/models/proposal';
 
 
 const workspace_id = usePage().props.workspace?.id;
+const builderStore = useProposalBuilderStore();
+const { proposalTitle, proposalMeta, blocks, templateId, selectedAccountId } =
+    storeToRefs(builderStore);
 const initialProposal = computed<Proposal>(() => ({
   id: 0,
   workspace_id: workspace_id ?? 0,
@@ -63,9 +66,13 @@ const handleSave = async () => {
   isSaving.value = true;
   
   try {
-    // Get the current proposal data from the builder store
-    const builderStore = useProposalBuilderStore();
-    const { proposalTitle, proposalMeta, blocks, templateId } = storeToRefs(builderStore);
+    const numericAccountId = selectedAccountId.value
+      ? Number(selectedAccountId.value)
+      : null;
+
+    if (!numericAccountId || Number.isNaN(numericAccountId)) {
+      throw new Error('Please select an account before saving.');
+    }
     
     const proposalData = {
       title: proposalTitle.value,
@@ -75,6 +82,7 @@ const handleSave = async () => {
       deposit_type: proposalMeta.value.depositType,
       deposit_value: proposalMeta.value.depositValue,
       template_id: templateId.value,
+      account_id: numericAccountId,
       content: blocks.value,
     };
     

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
 import {
     Edit,
     Trash2,
@@ -22,6 +21,7 @@ import { index as accountIndex } from '@/routes/accounts';
 import type { Account, AccountContact } from '@/types/models/account';
 import { createContactColumns } from './contacts-datatable/columns';
 import ContactsDataTable from './contacts-datatable/data-table.vue';
+import AccountFormDialog from './dialogs/AccountFormDialog.vue';
 import ContactFormDialog from './dialogs/ContactFormDialog.vue';
 
 const props = defineProps<{
@@ -31,6 +31,7 @@ const props = defineProps<{
 const { getVariant, getLabel } = useAccountStatuses();
 const { format: formatCurrency } = useCurrency();
 
+const accountDialogOpen = ref(false);
 const contactDialogOpen = ref(false);
 const editingContact = ref<AccountContact | null>(null);
 
@@ -47,6 +48,10 @@ const contactColumns = createContactColumns(
 const openNewContactDialog = () => {
     editingContact.value = null;
     contactDialogOpen.value = true;
+};
+
+const deleteAccount = () => {
+    router.delete(AccountController.destroy(props.account.id).url);
 };
 
 defineOptions({
@@ -87,13 +92,11 @@ defineOptions({
                 </div>
             </div>
             <div class="flex gap-2">
-                <Link :href="AccountController.edit(props.account.id).url">
-                    <Button variant="outline">
-                        <Edit class="mr-2 h-4 w-4" />
-                        Edit
-                    </Button>
-                </Link>
-                <Button variant="destructive">
+                <Button type="button" variant="outline" @click="accountDialogOpen = true">
+                    <Edit class="mr-2 h-4 w-4" />
+                    Edit
+                </Button>
+                <Button type="button" variant="destructive" @click="deleteAccount">
                     <Trash2 class="mr-2 h-4 w-4" />
                     Delete
                 </Button>
@@ -199,6 +202,11 @@ defineOptions({
             v-model:open="contactDialogOpen"
             :account-id="props.account.id"
             :contact="editingContact"
+        />
+        <AccountFormDialog
+            :open="accountDialogOpen"
+            :account="props.account"
+            @update:open="accountDialogOpen = $event"
         />
     </div>
 </template>

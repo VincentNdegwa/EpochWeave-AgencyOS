@@ -55,6 +55,8 @@ function blankContact(): ContactForm {
 }
 
 const contacts = ref<ContactForm[]>([blankContact()]);
+const companyName = ref(props.account?.company_name ?? '');
+const website = ref(props.account?.website ?? '');
 
 const addContact = () => {
     contacts.value.push(blankContact());
@@ -71,10 +73,35 @@ const formAction = computed(() => {
     return accountStore.form();
 });
 
+const resetPrimaryFields = () => {
+    if (props.account) {
+        companyName.value = props.account.company_name ?? '';
+        website.value = props.account.website ?? '';
+        return;
+    }
+
+    companyName.value = '';
+    website.value = '';
+};
+
+watch(
+    () => props.account,
+    () => {
+        resetPrimaryFields();
+    },
+    { immediate: true },
+);
+
 watch(
     () => props.open,
     (isOpen) => {
-        if (isOpen) {
+        if (!isOpen) {
+            return;
+        }
+
+        resetPrimaryFields();
+
+        if (!props.account) {
             contacts.value = [blankContact()];
         }
     },
@@ -107,7 +134,7 @@ watch(
                                 id="company_name"
                                 name="company_name"
                                 required
-                                :value="account?.company_name"
+                                v-model="companyName"
                                 placeholder="Acme Corporation"
                             />
                             <InputError :message="errors.company_name" />
@@ -119,7 +146,7 @@ watch(
                                 id="website"
                                 name="website"
                                 type="url"
-                                :value="account?.website"
+                                v-model="website"
                                 placeholder="https://example.com"
                             />
                             <InputError :message="errors.website" />
