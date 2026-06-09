@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProposalRequest;
 use App\Http\Requests\UpdateProposalRequest;
+use App\Models\Proposal;
+use App\Models\WorkspaceSetting;
 use App\Services\ProposalService;
+use App\Services\WorkspaceSettingService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,7 +17,8 @@ use Inertia\Inertia;
 class ProposalController extends Controller
 {
     public function __construct(
-        private ProposalService $proposalService
+        private ProposalService $proposalService,
+        private WorkspaceSettingService $workspaceSettingService
     ) {}
 
     public function index(Request $request)
@@ -38,15 +42,31 @@ class ProposalController extends Controller
         try {
             $workspace = $request->attributes->get('current_workspace');
             $data = $request->validated();
+            $content = $data['blocks'] ?? [];
+            unset($data['blocks']);
+
+            $settings = $this->workspaceSettingService->getOrCreate(
+                $workspace->id,
+                WorkspaceSetting::SUBMODULE_PROPOSALS
+            );
+
+            $numberingSettings = $settings->settings['numbering'] ?? [];
+            $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
+            $proposalNumber = $this->generateProposalNumber($numberingSettings);
+            unset($data['proposal_number']);
 
             $data = array_merge($data, [
                 'workspace_id' => $workspace->id,
+                'created_by' => $request->user()->id,
+                'proposal_number' => $proposalNumber,
                 'status' => 'draft',
-                'total_amount' => 0,
+                'content' => $content,
                 'token' => Str::uuid(),
             ]);
 
             $proposal = $this->proposalService->createProposal($data);
+
+            $this->workspaceSettingService->incrementNumberingSequence($settings, $nextSequenceNumber);
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal created successfully.']);
 
@@ -126,5 +146,25 @@ class ProposalController extends Controller
 
             return redirect()->back();
         }
+    }
+
+    private function generateProposalNumber(array $numberingSettings): string
+    {
+        $format = $numberingSettings['format'] ?? '{PREFIX}{DELIMITER}{SEQUENCE}';
+        $prefix = $numberingSettings['prefix'] ?? 'PROP';
+        $delimiter = $numberingSettings['delimiter'] ?? '-';
+        $sequencePadding = max(0, (int) ($numberingSettings['sequence_padding'] ?? 4));
+        $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
+
+        $sequence = $sequencePadding > 0
+            ? str_pad((string) $nextSequenceNumber, $sequencePadding, '0', STR_PAD_LEFT)
+            : (string) $nextSequenceNumber;
+
+        return strtr($format, [
+            '{PREFIX}' => $prefix,
+            '{YEAR}' => now()->format('Y'),
+            '{DELIMITER}' => $delimiter,
+            '{SEQUENCE}' => $sequence,
+        ]);
     }
 }

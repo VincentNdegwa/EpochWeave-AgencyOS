@@ -5,12 +5,14 @@ use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BuilderDataController;
 use App\Http\Controllers\PortalSetupController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProductUnitController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ProposalTemplateController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceSettings\GeneralController as WorkspaceGeneralSettingsController;
+use App\Http\Controllers\WorkspaceSettings\ProposalController as WorkspaceProposalSettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -35,6 +37,7 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('product-units', ProductUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
 
+    Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('proposals', ProposalController::class);
     Route::resource('proposal-templates', ProposalTemplateController::class);
     Route::post('proposal-templates/{template}/duplicate', [ProposalTemplateController::class, 'duplicate'])->name('proposal-templates.duplicate');
@@ -57,6 +60,10 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('workspace-settings.general');
     Route::patch('workspace/settings/general', [WorkspaceGeneralSettingsController::class, 'update'])
         ->name('workspace-settings.general.update');
+    Route::get('workspace/settings/proposals', [WorkspaceProposalSettingsController::class, 'edit'])
+        ->name('workspace-settings.proposals');
+    Route::patch('workspace/settings/proposals', [WorkspaceProposalSettingsController::class, 'update'])
+        ->name('workspace-settings.proposals.update');
 });
 
 require __DIR__.'/settings.php';

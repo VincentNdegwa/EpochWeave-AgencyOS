@@ -28,15 +28,21 @@ const editingItem = ref<PricingLineItem | null>(null);
 
 const openAddDialog = () => {
   editingItem.value = {
-    id:           nanoid(8),
-    description:  '',
-    unit:         builderDataStore.units[0]?.abbreviation ?? 'hr',
-    quantity:     1,
-    unit_price:   0,
-    subtotal:     0,
-    is_optional:  false,
-    billing_type: 'one_time',
-    product_id:   null,
+    id:               nanoid(8),
+    description:      '',
+    item_description: null,
+    unit:             builderDataStore.units[0]?.abbreviation ?? 'hr',
+    quantity:         1,
+    unit_price:       0,
+    subtotal:         0,
+    is_optional:      false,
+    billing_type:     'one_time',
+    billing_frequency:'none',
+    product_id:       null,
+    item_discount_type: 'none',
+    item_discount_value: 0,
+    item_tax_type: 'none',
+    item_tax_value: 0,
   };
   dialogOpen.value = true;
 };
@@ -172,7 +178,7 @@ const gridCols = computed(() => {
                   v-if="item.billing_type === 'recurring'"
                   class="rounded-full bg-blue-50 px-1.5 py-0.5 text-[10px] text-blue-600
                          dark:bg-blue-950/60 dark:text-blue-400"
-                >Recurring</span>
+                >Recurring · {{ item.billing_frequency }}</span>
               </div>
             </div>
 

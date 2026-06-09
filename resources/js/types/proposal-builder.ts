@@ -150,6 +150,7 @@ export interface PricingLineItem {
   subtotal: number;                 // computed: (qty × price - discount + tax)
  
   billing_type: 'one_time' | 'recurring';
+  billing_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
   product_id: number | null;        // null = custom item
  
   is_optional: boolean;

@@ -1,4 +1,5 @@
 export type BillingType = 'one_time' | 'recurring';
+export type BillingFrequency = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
 
 export interface BaseProductUnit {
     id: number;
@@ -27,6 +28,7 @@ export interface BaseProduct {
     sku: string | null;
     unit_price: number;
     billing_type: BillingType;
+    billing_frequency: BillingFrequency;
     is_active: boolean;
     created_at: string;
     updated_at: string;
@@ -58,6 +60,7 @@ export type CreateProductForm = Pick<
     | 'sku'
     | 'unit_price'
     | 'billing_type'
+    | 'billing_frequency'
     | 'is_active'
 >;
 
@@ -70,6 +73,7 @@ export type UpdateProductForm = Partial<
         | 'sku'
         | 'unit_price'
         | 'billing_type'
+        | 'billing_frequency'
         | 'is_active'
     >
 >;

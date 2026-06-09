@@ -12,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useCurrency } from '@/composables/useCurrency';
-import { useBillingTypes } from '@/composables/useEnums';
+import { useBillingFrequencies, useBillingTypes } from '@/composables/useEnums';
 import { show as productShow } from '@/routes/products';
 import type { Product } from '@/types/models/product';
 
@@ -21,6 +21,7 @@ export function createColumns(
     onDelete?: (product: Product) => void,
 ): ColumnDef<Product>[] {
     const { all: billingTypes } = useBillingTypes();
+    const { all: billingFrequencies } = useBillingFrequencies();
     const { format: formatCurrency } = useCurrency();
 
     return [
@@ -89,6 +90,22 @@ return h('span', { class: 'text-muted-foreground' }, '—');
                 const typeOption = billingTypes[billingType];
                 const label = typeOption?.label || billingType;
                 const variant = (typeOption?.variant || 'default') as
+                    | 'default'
+                    | 'secondary'
+                    | 'destructive'
+                    | 'outline';
+
+                return h(Badge, { variant }, () => label);
+            },
+        },
+        {
+            accessorKey: 'billing_frequency',
+            header: 'Frequency',
+            cell: ({ row }) => {
+                const value = row.getValue('billing_frequency') as string;
+                const option = billingFrequencies[value];
+                const label = option?.label || value;
+                const variant = (option?.variant || 'outline') as
                     | 'default'
                     | 'secondary'
                     | 'destructive'

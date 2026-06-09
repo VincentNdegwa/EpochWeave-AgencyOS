@@ -27,13 +27,22 @@ import {
   ToggleLeftIcon,
 } from '@lucide/vue';
 import type { PricingLineItem } from '@/types/proposal-builder';
+import { useBillingFrequencies } from '@/composables/useEnums';
+import type { AcceptableValue } from 'reka-ui';
 
 // ── Props / emits ─────────────────────────────────────────────
 const props = defineProps<{
   open: boolean;
   item: PricingLineItem;
   currency: string;
-  products: Array<{ id: number; name: string; unit?: { abbreviation: string }; unit_price: number; billing_type: string }>;
+  products: Array<{
+    id: number;
+    name: string;
+    unit?: { abbreviation: string };
+    unit_price: number;
+    billing_type: PricingLineItem['billing_type'];
+    billing_frequency: PricingLineItem['billing_frequency'];
+  }>;
   units: Array<{ id: number; abbreviation: string; name?: string }>;
 }>();
 
@@ -57,6 +66,7 @@ const form = reactive<PricingLineItem & {
   item_discount_value: (props.item as any).item_discount_value ?? 0,
   item_tax_type:       (props.item as any).item_tax_type       ?? 'none',
   item_tax_value:      (props.item as any).item_tax_value      ?? 0,
+  billing_frequency:   props.item.billing_frequency ?? 'none',
 });
 
 // Sync form when dialog opens with a new item
@@ -68,12 +78,21 @@ watch(() => props.item, (newItem) => {
     item_discount_value: (newItem as any).item_discount_value ?? 0,
     item_tax_type:       (newItem as any).item_tax_type       ?? 'none',
     item_tax_value:      (newItem as any).item_tax_value      ?? 0,
+    billing_frequency:   newItem.billing_frequency ?? 'none',
   });
 }, { immediate: true });
 
 // ── Product catalog selection ─────────────────────────────────
-const handleProductSelect = (value: string) => {
-  if (!value || value === 'custom') {
+const { values: billingFrequencyOptions } = useBillingFrequencies();
+
+const handleProductSelect = (rawValue: AcceptableValue) => {
+  if (typeof rawValue === 'object') {
+    return;
+  }
+
+  const value = String(rawValue);
+
+  if (value === 'custom') {
     form.product_id = null;
     return;
   }
@@ -85,8 +104,20 @@ const handleProductSelect = (value: string) => {
     form.unit         = product.unit?.abbreviation ?? form.unit;
     form.unit_price   = product.unit_price;
     form.billing_type = product.billing_type as PricingLineItem['billing_type'];
+    form.billing_frequency = product.billing_frequency;
   }
 };
+
+watch(
+  () => form.billing_type,
+  (type) => {
+    if (type === 'one_time') {
+      form.billing_frequency = 'none';
+    } else if (form.billing_frequency === 'none') {
+      form.billing_frequency = 'monthly';
+    }
+  },
+);
 
 // ── Live computed financials ──────────────────────────────────
 const lineSubtotal = computed(() => form.quantity * form.unit_price);
@@ -216,29 +247,57 @@ const isNew = computed(() => !props.products.some((p) => p.id === form.product_i
             </div>
 
             <!-- Billing type -->
-            <div class="grid gap-1.5">
-              <Label class="text-xs text-muted-foreground">Billing type</Label>
-              <div class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
-                <button
-                  type="button"
-                  class="rounded py-1.5 text-xs font-medium transition"
-                  :class="form.billing_type === 'one_time'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'"
-                  @click="form.billing_type = 'one_time'"
+            <div class="grid gap-3">
+              <div class="grid gap-1.5">
+                <Label class="text-xs text-muted-foreground">Billing type</Label>
+                <div class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                  <button
+                    type="button"
+                    class="rounded py-1.5 text-xs font-medium transition"
+                    :class="form.billing_type === 'one_time'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'"
+                    @click="form.billing_type = 'one_time'"
+                  >
+                    One-time
+                  </button>
+                  <button
+                    type="button"
+                    class="rounded py-1.5 text-xs font-medium transition"
+                    :class="form.billing_type === 'recurring'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'"
+                    @click="form.billing_type = 'recurring'"
+                  >
+                    Recurring
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid gap-1.5">
+                <Label class="text-xs text-muted-foreground">Billing frequency</Label>
+                <Select
+                  v-model="form.billing_frequency"
+                  :disabled="form.billing_type === 'one_time'"
                 >
-                  One-time
-                </button>
-                <button
-                  type="button"
-                  class="rounded py-1.5 text-xs font-medium transition"
-                  :class="form.billing_type === 'recurring'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'"
-                  @click="form.billing_type = 'recurring'"
-                >
-                  Recurring
-                </button>
+                  <SelectTrigger class="h-9">
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="option in billingFrequencyOptions"
+                      :key="option.value"
+                      :value="option.value"
+                      :disabled="option.value !== 'none' && form.billing_type === 'one_time'"
+                    >
+                      {{ option.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p class="text-[11px] text-muted-foreground">
+                  Recurring items require a frequency. One-time items are
+                  always billed once.
+                </p>
               </div>
             </div>
           </div>

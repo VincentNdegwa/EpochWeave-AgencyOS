@@ -18,8 +18,10 @@ return new class extends Migration
 
             $table->string('item_name');
             $table->text('description')->nullable();
-            $table->string('unit_label');
-            $table->string('billing_type');
+            $table->string('unit_label')->nullable();
+
+            $table->string('billing_type', 30);
+            $table->string('billing_frequency', 30)->default('none');
 
             $table->decimal('quantity', 10, 2)->default(1);
             $table->bigInteger('unit_price');
@@ -36,6 +38,8 @@ return new class extends Migration
             $table->integer('position')->default(0);
 
             $table->timestamps();
+
+            $table->index('proposal_id');
         });
     }
 

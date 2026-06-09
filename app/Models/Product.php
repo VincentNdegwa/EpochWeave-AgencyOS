@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BillingFrequency;
 use App\Enums\BillingType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,11 +20,13 @@ class Product extends Model
         'sku',
         'unit_price',
         'billing_type',
+        'billing_frequency',
         'is_active',
     ];
 
     protected $casts = [
         'billing_type' => BillingType::class,
+        'billing_frequency' => BillingFrequency::class,
         'unit_price' => 'integer',
         'is_active' => 'boolean',
     ];

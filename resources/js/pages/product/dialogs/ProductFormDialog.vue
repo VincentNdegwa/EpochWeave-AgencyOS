@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useBillingFrequencies } from '@/composables/useEnums';
 import type { Product, ProductUnit } from '@/types/models/product';
 
 interface Props {
@@ -43,6 +44,8 @@ const emit = defineEmits<{
     'create-unit': [];
 }>();
 
+const { values: billingFrequencyOptions } = useBillingFrequencies();
+
 const form = ref({
     unit_id: props.product?.unit_id || '',
     name: props.product?.name || '',
@@ -50,6 +53,9 @@ const form = ref({
     sku: props.product?.sku || '',
     unit_price: props.product?.unit_price || '',
     billing_type: props.product?.billing_type || 'one_time',
+    billing_frequency:
+        props.product?.billing_frequency ||
+        (props.product?.billing_type === 'recurring' ? 'monthly' : 'none'),
     is_active: props.product?.is_active ?? true,
 });
 
@@ -64,6 +70,9 @@ watch(
                 sku: newProduct.sku || '',
                 unit_price: newProduct.unit_price,
                 billing_type: newProduct.billing_type,
+                billing_frequency:
+                    newProduct.billing_frequency ||
+                    (newProduct.billing_type === 'recurring' ? 'monthly' : 'none'),
                 is_active: newProduct.is_active,
             };
         } else {
@@ -74,8 +83,20 @@ watch(
                 sku: '',
                 unit_price: '',
                 billing_type: 'one_time',
+                billing_frequency: 'none',
                 is_active: true,
             };
+        }
+    },
+);
+
+watch(
+    () => form.value.billing_type,
+    (type) => {
+        if (type === 'one_time') {
+            form.value.billing_frequency = 'none';
+        } else if (form.value.billing_frequency === 'none') {
+            form.value.billing_frequency = 'monthly';
         }
     },
 );
@@ -237,6 +258,54 @@ watch(
                                 </SelectContent>
                             </Select>
                             <InputError :message="errors.billing_type" />
+                        </div>
+
+                        <input
+                            type="hidden"
+                            name="billing_frequency"
+                            :value="form.billing_frequency"
+                        />
+
+                        <div class="grid gap-2">
+                            <Label for="billing_frequency" required>
+                                Billing Frequency
+                            </Label>
+
+                            <template v-if="form.billing_type === 'recurring'">
+                                <Select
+                                    name="billing_frequency"
+                                    v-model="form.billing_frequency"
+                                    required
+                                >
+                                    <SelectTrigger class="w-full">
+                                        <SelectValue
+                                            placeholder="Select billing frequency"
+                                        />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem
+                                            v-for="option in billingFrequencyOptions"
+                                            :key="option.value"
+                                            :value="option.value"
+                                            :disabled="option.value === 'none'"
+                                        >
+                                            {{ option.label }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <InputError :message="errors.billing_frequency" />
+                                <p class="text-xs text-muted-foreground">
+                                    Recurring items must specify how often they
+                                    renew.
+                                </p>
+                            </template>
+
+                            <template v-else>
+                                <div class="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
+                                    Billing frequency set to <strong>None</strong>
+                                    for one-time charges.
+                                </div>
+                            </template>
                         </div>
 
                         <div

@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrency } from '@/composables/useCurrency';
-import { useBillingTypes } from '@/composables/useEnums';
+import { useBillingFrequencies, useBillingTypes } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import { index as productIndex } from '@/routes/products';
 import type { Product } from '@/types/models/product';
@@ -23,6 +23,7 @@ const props = defineProps<{
 }>();
 
 const { getVariant, getLabel } = useBillingTypes();
+const { getLabel: getFrequencyLabel } = useBillingFrequencies();
 const { format: formatCurrency } = useCurrency();
 
 defineOptions({
@@ -102,6 +103,22 @@ defineOptions({
                 <CardContent>
                     <Badge :variant="getVariant(props.product.billing_type)">
                         {{ getLabel(props.product.billing_type) }}
+                    </Badge>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader
+                    class="flex flex-row items-center justify-between space-y-0 pb-2"
+                >
+                    <CardTitle class="text-sm font-medium"
+                        >Billing Frequency</CardTitle
+                    >
+                    <Clock class="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <Badge variant="secondary">
+                        {{ getFrequencyLabel(props.product.billing_frequency) }}
                     </Badge>
                 </CardContent>
             </Card>

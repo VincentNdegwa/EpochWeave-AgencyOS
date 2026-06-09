@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\BillingFrequency;
 use App\Enums\BillingType;
 use App\Models\Product;
 use Exception;
@@ -20,6 +21,7 @@ class ProductService
                 'sku' => $data['sku'] ?? null,
                 'unit_price' => $data['unit_price'] ?? 0,
                 'billing_type' => $data['billing_type'] ?? BillingType::OneTime->value,
+                'billing_frequency' => $data['billing_frequency'] ?? BillingFrequency::None->value,
                 'is_active' => $data['is_active'] ?? true,
             ]);
         } catch (Exception $e) {
@@ -36,7 +38,8 @@ class ProductService
                 'description' => $data['description'] ?? $product->description,
                 'sku' => $data['sku'] ?? $product->sku,
                 'unit_price' => $data['unit_price'] ?? $product->unit_price,
-                'billing_type' => $data['billing_type'] ?? $product->billing_type,
+                'billing_type' => $data['billing_type'] ?? $product->billing_type?->value ?? $product->billing_type,
+                'billing_frequency' => $data['billing_frequency'] ?? $product->billing_frequency?->value ?? $product->billing_frequency,
                 'is_active' => $data['is_active'] ?? $product->is_active,
             ]);
 

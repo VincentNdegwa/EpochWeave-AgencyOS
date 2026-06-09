@@ -13,7 +13,21 @@ return new class extends Migration
     {
         Schema::create('attachments', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
+            $table->morphs('attachable');
+            $table->foreignId('uploaded_by')->constrained('users')->cascadeOnDelete();
+
+            $table->string('disk', 50)->default('public');
+            $table->string('path');
+            $table->string('original_name');
+            $table->string('extension', 10)->nullable();
+            $table->string('mime_type', 100)->nullable();
+            $table->unsignedBigInteger('size')->default(0);
+            $table->json('meta')->nullable();
+
+            $table->timestampsTz();
+
+            $table->index('uploaded_by', 'idx_attachments_uploaded_by');
         });
     }
 

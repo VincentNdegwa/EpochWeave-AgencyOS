@@ -25,6 +25,7 @@ class StoreProposalRequest extends FormRequest
         return [
             'account_id' => 'required|exists:accounts,id',
             'title' => 'required|string|max:255',
+            'proposal_number' => 'nullable|string|max:255',
             'currency' => 'required|string|size:3',
             'valid_until' => 'nullable|date|after:now',
             'blocks' => 'array',

@@ -5,10 +5,13 @@ namespace App\Services;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Services\WorkspaceSettingService;
 use Illuminate\Support\Facades\DB;
 
 class WorkspaceService
 {
+    public function __construct(private WorkspaceSettingService $workspaceSettingService) {}
+
     public function createWorkspace(User $user, array $data): Workspace
     {
         return DB::transaction(function () use ($user, $data) {
@@ -32,6 +35,8 @@ class WorkspaceService
             );
 
             $user->addRole($adminRole, $workspace);
+
+            $this->workspaceSettingService->ensureDefaults($workspace);
 
             return $workspace;
         });

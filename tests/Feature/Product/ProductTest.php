@@ -34,6 +34,7 @@ class ProductTest extends TestCase
             'sku' => 'WEB-001',
             'unit_price' => 5000,
             'billing_type' => BillingType::OneTime->value,
+            'billing_frequency' => 'none',
             'is_active' => true,
         ];
 
@@ -58,11 +59,13 @@ class ProductTest extends TestCase
         $product = Product::factory()->create([
             'workspace_id' => $workspace->id,
             'unit_id' => $productUnit->id,
+            'billing_frequency' => 'monthly',
         ]);
         $data = [
             'name' => 'Updated Product Name',
             'unit_price' => 7500,
             'billing_type' => BillingType::Recurring->value,
+            'billing_frequency' => 'monthly',
         ];
 
         $updatedProduct = $this->productService->updateProduct($product, $data);
