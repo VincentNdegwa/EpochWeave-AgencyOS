@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import type { Ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,50 +16,44 @@ import {
   AlertCircleIcon,
   FileIcon,
 } from '@lucide/vue';
-import type { ProposalMeta } from '@/types/proposal-meta';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useBuilderDataStore } from '@/stores/builderData';
+import type { Proposal } from '@/types/models/proposal';
 
 const builderStore = useProposalBuilderStore();
-const { proposalTitle, proposalMeta, selectedTemplateId, selectedAccountId, proposalNumber } = storeToRefs(builderStore);
+const { proposal } = storeToRefs(builderStore) as { proposal: Ref<Proposal> };
 const builderDataStore = useBuilderDataStore();
 const { templates, accounts } = storeToRefs(builderDataStore);
 
 const isApplyingTemplate = ref(false);
+const selectedTemplateId = ref<string | null>(null);
 
-// Load templates and accounts when component mounts
 const { fetchTemplates, fetchAccounts } = builderDataStore;
 fetchTemplates();
 fetchAccounts();
 
-const applyTemplate = async () => {
-  if (!selectedTemplateId.value || isApplyingTemplate.value) return;
-  
-  isApplyingTemplate.value = true;
-  try {
-    const templateId = parseInt(selectedTemplateId.value, 10);
-    if (isNaN(templateId)) {
-      throw new Error('Invalid template ID');
-    }
-    
-    const template = await builderDataStore.fetchTemplate(templateId);
-    
-    // Apply template content to builder
-    if (template.content && Array.isArray(template.content)) {
-      builderStore.loadBlocks(template.content);
-    }
-    
-    // Set template_id in the proposal builder store
-    builderStore.setTemplateId(templateId);
-    
-    // Reset selection
-    builderStore.setSelectedTemplateId(null);
-  } catch (error) {
-    console.error('Failed to apply template:', error);
-  } finally {
-    isApplyingTemplate.value = false;
-  }
-};
+const proposalTitleModel = computed({
+  get: () => proposal.value.title,
+  set: (value: string) => {
+    proposal.value.title = value?.trim() ? value : 'Untitled proposal';
+  },
+});
+
+const displayProposalNumber = computed(() => proposal.value.proposal_number ?? proposal.value.token ?? 'DRAFT');
+
+const selectedAccountModel = computed({
+  get: () => (proposal.value.account_id ? proposal.value.account_id.toString() : null),
+  set: (value: string | null) => {
+    proposal.value.account_id = value ? Number(value) : null;
+  },
+});
+
+const selectedTemplateModel = computed({
+  get: () => selectedTemplateId.value,
+  set: (value: string | null) => {
+    selectedTemplateId.value = value;
+  },
+});
 
 const currencies = [
   { value: 'KES', label: 'KES', name: 'Kenyan Shilling', flag: '🇰🇪' },
@@ -70,25 +65,21 @@ const currencies = [
 ] as const;
 
 const selectedCurrency = computed(() =>
-  currencies.find((currency) => currency.value === proposalMeta.value.currency) ?? currencies[0]
+  currencies.find((currency) => currency.value === proposal.value.currency) ?? currencies[0]
 );
 
 const today = new Date().toISOString().split('T')[0];
-const isExpired = computed(() =>
-  proposalMeta.value.validUntil ? proposalMeta.value.validUntil < today : false
-);
+const isExpired = computed(() => (proposal.value.valid_until ? proposal.value.valid_until < today : false));
 
 const daysUntil = computed(() => {
-  if (!proposalMeta.value.validUntil) {
+  if (!proposal.value.valid_until) {
     return null;
   }
-  return Math.ceil(
-    (new Date(proposalMeta.value.validUntil).getTime() - Date.now()) / 86_400_000
-  );
+  return Math.ceil((new Date(proposal.value.valid_until).getTime() - Date.now()) / 86_400_000);
 });
 
 const validityHint = computed(() => {
-  if (!proposalMeta.value.validUntil) {
+  if (!proposal.value.valid_until) {
     return null;
   }
   if (isExpired.value) {
@@ -105,49 +96,74 @@ const validityHint = computed(() => {
 
 const depositPresets = [10, 25, 50] as const;
 
-const updateMeta = (changes: Partial<ProposalMeta>) => {
-  builderStore.updateProposalMeta(changes);
-};
-
 const setValidityDays = (days: number) => {
   const future = new Date();
   future.setDate(future.getDate() + days);
-  updateMeta({ validUntil: future.toISOString().split('T')[0] });
+  proposal.value.valid_until = future.toISOString().split('T')[0];
 };
 
-const clearValidity = () => updateMeta({ validUntil: null });
-
-const titleModel = computed({
-  get: () => proposalTitle.value,
-  set: (value: string) => builderStore.setProposalTitle(value),
-});
+const clearValidity = () => {
+  proposal.value.valid_until = null;
+};
 
 const validUntilModel = computed({
-  get: () => proposalMeta.value.validUntil ?? '',
-  set: (value: string) => updateMeta({ validUntil: value || null }),
+  get: () => proposal.value.valid_until ?? '',
+  set: (value: string) => {
+    proposal.value.valid_until = value || null;
+  },
 });
 
 const depositValueModel = computed({
-  get: () => proposalMeta.value.depositValue,
+  get: () => proposal.value.deposit_value ?? 0,
   set: (value: number | string) => {
     const numericValue = typeof value === 'number' ? value : Number(value);
-    updateMeta({ depositValue: Number.isFinite(numericValue) ? numericValue : 0 });
+    proposal.value.deposit_value = Number.isFinite(numericValue) ? numericValue : 0;
   },
 });
 
-const selectedTemplateModel = computed({
-  get: () => builderStore.templateId?.toString() ?? null,
-  set: (value: string | null) => {
-    builderStore.setSelectedTemplateId(value);
-  },
-});
+const toggleDepositRequirement = (value: boolean) => {
+  proposal.value.requires_deposit = value;
+  if (value && !proposal.value.deposit_type) {
+    proposal.value.deposit_type = 'percentage';
+    proposal.value.deposit_value = proposal.value.deposit_value ?? 0;
+  }
+  if (!value) {
+    proposal.value.deposit_type = null;
+    proposal.value.deposit_value = null;
+  }
+};
 
-const selectedAccountModel = computed({
-  get: () => selectedAccountId.value,
-  set: (value: string | null) => {
-    builderStore.setSelectedAccountId(value);
-  },
-});
+const setDepositType = (type: 'percentage' | 'fixed') => {
+  proposal.value.deposit_type = type;
+  if (proposal.value.deposit_value == null) {
+    proposal.value.deposit_value = 0;
+  }
+};
+
+const applyTemplate = async () => {
+  if (!selectedTemplateId.value || isApplyingTemplate.value) return;
+
+  isApplyingTemplate.value = true;
+  try {
+    const templateId = parseInt(selectedTemplateId.value, 10);
+    if (Number.isNaN(templateId)) {
+      throw new Error('Invalid template ID');
+    }
+
+    const template = await builderDataStore.fetchTemplate(templateId);
+
+    if (template.content && Array.isArray(template.content)) {
+      builderStore.loadBlocks(template.content);
+    }
+
+    proposal.value.template_id = templateId;
+    selectedTemplateId.value = null;
+  } catch (error) {
+    console.error('Failed to apply template:', error);
+  } finally {
+    isApplyingTemplate.value = false;
+  }
+};
 </script>
 
 <template>
@@ -161,7 +177,7 @@ const selectedAccountModel = computed({
       <div class="mb-3 grid gap-1.5">
         <Label class="text-xs text-muted-foreground">Title</Label>
         <Input
-          v-model="titleModel"
+          v-model="proposalTitleModel"
           placeholder="e.g. Brand Identity Package"
           class="h-8 text-sm font-medium"
         />
@@ -173,7 +189,7 @@ const selectedAccountModel = computed({
           Proposal number
         </div>
         <span class="font-mono text-xs font-semibold text-foreground">
-          {{ proposalNumber ?? 'DRAFT' }}
+          {{ displayProposalNumber }}
         </span>
       </div>
     </div>
@@ -262,10 +278,10 @@ const selectedAccountModel = computed({
           :key="currency.value"
           type="button"
           class="flex items-center gap-1.5 rounded-md border px-2 py-1.5 text-xs font-medium transition"
-          :class="proposalMeta.currency === currency.value
+          :class="proposal.currency === currency.value
             ? 'border-primary bg-primary/5 text-primary'
             : 'border-border bg-background text-muted-foreground hover:border-muted-foreground hover:text-foreground'"
-          @click="updateMeta({ currency: currency.value })"
+          @click="proposal.currency = currency.value"
         >
           <span class="text-sm leading-none">{{ currency.flag }}</span>
           {{ currency.label }}
@@ -310,7 +326,7 @@ const selectedAccountModel = computed({
           +{{ days }}d
         </button>
         <button
-          v-if="proposalMeta.validUntil"
+          v-if="proposal.valid_until"
           type="button"
           class="rounded-md border border-border bg-background px-2 py-1 text-[11px] text-muted-foreground transition hover:border-destructive hover:text-destructive"
           @click="clearValidity"
@@ -328,7 +344,7 @@ const selectedAccountModel = computed({
 
       <label
         class="flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2.5 transition-colors"
-        :class="proposalMeta.depositEnabled
+        :class="proposal.requires_deposit
           ? 'border-primary bg-primary/5'
           : 'border-border hover:bg-muted/50'"
       >
@@ -337,32 +353,32 @@ const selectedAccountModel = computed({
           <p class="text-[11px] text-muted-foreground">Client pays before work begins</p>
         </div>
         <Switch
-          :model-value="proposalMeta.depositEnabled"
-          @update:model-value="(value: boolean) => updateMeta({ depositEnabled: value })"
+          :model-value="proposal.requires_deposit"
+          @update:model-value="toggleDepositRequirement"
         />
       </label>
 
-      <div v-if="proposalMeta.depositEnabled" class="mt-3 space-y-3">
+      <div v-if="proposal.requires_deposit" class="mt-3 space-y-3">
         <div>
           <Label class="mb-1.5 block text-xs text-muted-foreground">Deposit type</Label>
           <div class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
             <button
               type="button"
               class="rounded py-1.5 text-xs font-medium transition"
-              :class="proposalMeta.depositType === 'percentage'
+              :class="proposal.deposit_type === 'percentage'
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'"
-              @click="updateMeta({ depositType: 'percentage' })"
+              @click="setDepositType('percentage')"
             >
               Percentage %
             </button>
             <button
               type="button"
               class="rounded py-1.5 text-xs font-medium transition"
-              :class="proposalMeta.depositType === 'fixed'
+              :class="proposal.deposit_type === 'fixed'
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'"
-              @click="updateMeta({ depositType: 'fixed' })"
+              @click="setDepositType('fixed')"
             >
               Fixed {{ selectedCurrency.label }}
             </button>
@@ -371,27 +387,27 @@ const selectedAccountModel = computed({
 
         <div>
           <Label class="mb-1.5 block text-xs text-muted-foreground">
-            {{ proposalMeta.depositType === 'percentage' ? 'Percentage' : 'Amount' }}
+            {{ proposal.deposit_type === 'percentage' ? 'Percentage' : 'Amount' }}
           </Label>
 
-          <template v-if="proposalMeta.depositType === 'percentage'">
+          <template v-if="proposal.deposit_type === 'percentage'">
             <div class="mb-2 grid grid-cols-4 gap-1">
               <button
                 v-for="preset in depositPresets"
                 :key="preset"
                 type="button"
                 class="rounded-md border py-1.5 text-xs font-medium transition"
-                :class="proposalMeta.depositValue === preset
+                :class="proposal.deposit_value === preset
                   ? 'border-primary bg-primary/5 text-primary'
                   : 'border-border bg-background text-muted-foreground hover:border-muted-foreground'"
-                @click="updateMeta({ depositValue: preset })"
+                @click="proposal.deposit_value = preset"
               >
                 {{ preset }}%
               </button>
               <button
                 type="button"
                 class="rounded-md border py-1.5 text-xs font-medium text-muted-foreground"
-                :class="!depositPresets.includes(proposalMeta.depositValue as typeof depositPresets[number])
+                :class="!depositPresets.includes(proposal.deposit_value as typeof depositPresets[number])
                   ? 'border-primary bg-primary/5 text-primary'
                   : 'border-border bg-background hover:border-muted-foreground hover:text-foreground'"
               >
@@ -432,11 +448,11 @@ const selectedAccountModel = computed({
           <p class="text-[11px] text-muted-foreground">
             Client pays
             <span class="font-semibold text-foreground">
-              <template v-if="proposalMeta.depositType === 'percentage'">
-                {{ proposalMeta.depositValue }}%
+              <template v-if="proposal.deposit_type === 'percentage'">
+                {{ proposal.deposit_value }}%
               </template>
               <template v-else>
-                {{ selectedCurrency.label }} {{ (proposalMeta.depositValue ?? 0).toLocaleString() }}
+                {{ selectedCurrency.label }} {{ (proposal.deposit_value ?? 0).toLocaleString() }}
               </template>
             </span>
             upfront before work begins.

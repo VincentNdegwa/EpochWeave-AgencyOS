@@ -15,36 +15,34 @@ import {
 } from '@lucide/vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useTemporaryUploads } from '@/composables/useTemporaryUploads';
-import type { ProposalMeta } from '@/types/proposal-meta';
-
-// Extend ProposalMeta for template-specific properties
-interface TemplateMeta extends ProposalMeta {
-  templateDescription?: string;
-  thumbnailUrl?: string;
-}
 
 const builderStore = useProposalBuilderStore();
-const { proposalTitle, proposalMeta } = storeToRefs(builderStore);
+const { proposal, templateSettings } = storeToRefs(builderStore);
 
 const { upload, isUploading } = useTemporaryUploads();
 
 const thumbnailTab = ref<'upload' | 'url'>('upload');
 const uploadError = ref<string | null>(null);
 
-// Template metadata
 const templateName = computed<string>({
-  get: () => proposalTitle.value,
-  set: (value: string) => builderStore.setProposalTitle(value),
+  get: () => proposal.value.title,
+  set: (value: string) => {
+    proposal.value.title = value?.trim() ? value : 'Untitled template';
+  },
 });
 
 const templateDescription = computed<string>({
-  get: () => (proposalMeta.value as TemplateMeta).templateDescription ?? '',
-  set: (value: string) => builderStore.updateProposalMeta({ templateDescription: value } as Partial<TemplateMeta>),
+  get: () => templateSettings.value.description ?? '',
+  set: (value: string) => {
+    templateSettings.value.description = value || null;
+  },
 });
 
 const thumbnailUrl = computed<string>({
-  get: () => (proposalMeta.value as TemplateMeta).thumbnailUrl ?? '',
-  set: (value: string) => builderStore.updateProposalMeta({ thumbnailUrl: value } as Partial<TemplateMeta>),
+  get: () => templateSettings.value.thumbnailUrl ?? '',
+  set: (value: string) => {
+    templateSettings.value.thumbnailUrl = value || null;
+  },
 });
 
 const handleFileUpload = async (event: Event) => {

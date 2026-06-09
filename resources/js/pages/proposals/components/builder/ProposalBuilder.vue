@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { usePage } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import BuilderSidebar from '@/pages/proposals/components/sidebar/BuilderSidebar.vue';
 import BuilderTopbar from '@/pages/proposals/components/builder/BuilderTopbar.vue';
-import type { Proposal } from '@/types/models/proposal';
 import type { BlockType } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
@@ -14,58 +13,30 @@ import { useWorkspaceStore } from '@/stores/workspace';
 const props = withDefaults(
   defineProps<{
     mode: 'create' | 'edit';
-    initialProposal?: Proposal | null;
     onSave?: () => Promise<void>;
     isSaving?: boolean;
   }>(),
   {
-    initialProposal: null,
     onSave: undefined,
     isSaving: false,
   }
 );
 
 const builderStore = useProposalBuilderStore();
-const { blocks, isDirty, isSaving, proposalTitle, proposalMeta, proposalNumber } = storeToRefs(builderStore);
+const { proposal, isDirty, isSaving, builderMode } = storeToRefs(builderStore);
 const workspaceStore = useWorkspaceStore();
 
+const workspace = usePage().props.workspace;
+workspaceStore.setWorkspace(workspace ?? null);
+
 const isPreview = ref(false);
-const builderMode = computed(() => (props.initialProposal?.mode as string) ?? 'proposal');
 
-watch(
-  () => props.initialProposal?.workspace ?? usePage().props.workspace,
-  (workspace) => {
-    workspaceStore.setWorkspace(workspace ?? null);
+const proposalTitleModel = computed({
+  get: () => proposal.value.title,
+  set: (value: string) => {
+    proposal.value.title = value?.trim() ? value : 'Untitled proposal';
   },
-  { immediate: true }
-);
-
-watch(
-  () => props.initialProposal?.content,
-  (incoming) => {
-    builderStore.loadBlocks(incoming ?? []);
-  },
-  { immediate: true, deep: true }
-);
-
-watch(
-  () => props.initialProposal,
-  (proposal) => {
-    builderStore.setProposalTitle(proposal?.title ?? 'Untitled proposal', false);
-    builderStore.setProposalMeta(
-      {
-        currency: proposal?.currency ?? 'USD',
-        validUntil: proposal?.valid_until ?? null,
-        depositEnabled: proposal?.requires_deposit ?? false,
-        depositType: proposal?.deposit_type ?? 'percentage',
-        depositValue: proposal?.deposit_value ?? 0,
-      },
-      false
-    );
-    proposalNumber.value = proposal?.proposal_number ?? proposal?.token ?? 'DRAFT';
-  },
-  { immediate: true }
-);
+});
 
 const handleAddBlockRequest = (afterBlockId: string | null, blockType: string) => {
   builderStore.addBlock(blockType as BlockType, afterBlockId ?? undefined);
@@ -73,8 +44,8 @@ const handleAddBlockRequest = (afterBlockId: string | null, blockType: string) =
 
 watchDebounced(
   () => ({
-    blocks: blocks.value,
-    title: proposalTitle.value,
+    blocks: proposal.value.content,
+    title: proposal.value.title,
   }),
   () => {
     if (!isDirty.value) {
@@ -96,23 +67,26 @@ onBeforeUnmount(() => {
   workspaceStore.clear();
 });
 
-const isCanvasLocked = computed(() => props.mode === 'edit' && props.initialProposal?.status === 'accepted');
+const isCanvasLocked = computed(() => props.mode === 'edit' && proposal.value.status === 'accepted');
 
 const togglePreview = () => {
   isPreview.value = !isPreview.value;
 };
+
+const proposalStatus = computed(() => proposal.value.status ?? 'draft');
+const proposalId = computed(() => proposal.value.id ?? null);
 </script>
 
 <template>
   <div class="flex h-full flex-col bg-background">
     <BuilderTopbar
-      v-model:title="proposalTitle"
+      v-model:title="proposalTitleModel"
       :mode="mode"
-      :status="props.initialProposal?.status ?? 'draft'"
+      :status="proposalStatus"
       :is-dirty="isDirty"
       :is-saving="props.isSaving || isSaving"
       :is-preview="isPreview"
-      :proposal-id="props.initialProposal?.id ?? null"
+      :proposal-id="proposalId"
       :builder-mode="builderMode"
       :on-save="props.onSave"
       @toggle-preview="togglePreview"

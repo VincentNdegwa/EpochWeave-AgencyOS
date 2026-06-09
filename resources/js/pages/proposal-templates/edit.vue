@@ -1,31 +1,33 @@
 <script setup lang="ts">
 import { Head, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
 import { router } from '@inertiajs/vue3';
 import { dashboard } from '@/routes';
 import proposalTemplates from '@/routes/proposal-templates';
-import ProposalTemplateController from '@/actions/App/Http/Controllers/ProposalTemplateController';
 import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
-import type { Proposal, ProposalStatus, ProposalTemplate } from '@/types/models/proposal';
+import type { Proposal, ProposalTemplate } from '@/types/models/proposal';
 
 const props = defineProps<{
   template: ProposalTemplate;
 }>();
 
-const workspace_id = usePage().props.workspace?.id;
-const initialProposal = computed<Proposal>(() => ({
-  id: props.template.id,
-  workspace_id: workspace_id ?? 0,
+const workspaceId = usePage().props.workspace?.id ?? 0;
+const builderStore = useProposalBuilderStore();
+const { proposal, templateSettings } = storeToRefs(builderStore);
+
+const toProposal = (template: ProposalTemplate): Proposal => ({
+  id: template.id,
+  workspace_id: workspaceId,
   account_id: null,
   created_by: null,
   template_id: null,
-  title: props.template.name,
+  title: template.name,
   proposal_number: null,
-  status: 'draft' as ProposalStatus,
+  status: 'draft',
   valid_until: null,
-  content: props.template.content || [],
+  content: template.content || [],
   currency: 'USD',
   subtotal: 0,
   discount_total: 0,
@@ -53,13 +55,25 @@ const initialProposal = computed<Proposal>(() => ({
   decided_at: null,
   expired_at: null,
   decline_reason: null,
-  created_at: props.template.created_at,
-  updated_at: props.template.updated_at,
-  mode: 'template' as const, // Distinguish this as a template
-}));
+  created_at: template.created_at,
+  updated_at: template.updated_at,
+});
+
+watch(
+  () => props.template,
+  (template) => {
+    builderStore.hydrateProposal(toProposal(template), {
+      mode: 'template',
+      template: {
+        description: template.description ?? null,
+        thumbnailUrl: template.thumbnail_url ?? null,
+      },
+    });
+  },
+  { immediate: true, deep: true }
+);
 
 const isSaving = ref(false);
-const isDirty = ref(false);
 
 const handleSave = async () => {
   if (isSaving.value) return;
@@ -67,18 +81,14 @@ const handleSave = async () => {
   isSaving.value = true;
   
   try {
-    // Get the current proposal data from the builder store
-    const builderStore = useProposalBuilderStore();
-    const { proposalTitle, proposalMeta, blocks } = storeToRefs(builderStore);
-    
     const templateData = {
-      name: proposalTitle.value,
-      description: (proposalMeta.value as any).templateDescription || props.template.description,
-      thumbnail_url: (proposalMeta.value as any).thumbnailUrl || props.template.thumbnail_url,
-      content: blocks.value,
+      name: proposal.value.title,
+      description: templateSettings.value.description ?? props.template.description,
+      thumbnail_url: templateSettings.value.thumbnailUrl ?? props.template.thumbnail_url,
+      content: proposal.value.content,
     };
     
-    await router.put(proposalTemplates.update(props.template.id), templateData);
+    await router.put(proposalTemplates.update(props.template.id), templateData as any);
   } catch (error) {
     console.error('Failed to save template:', error);
   } finally {
@@ -86,10 +96,9 @@ const handleSave = async () => {
   }
 };
 
-// Provide save functionality to child components
 defineExpose({
   handleSave,
-  isSaving: computed(() => isSaving.value),
+  isSaving,
 });
 
 setLayoutProps({
@@ -109,7 +118,6 @@ setLayoutProps({
   <div class="-mx-4 -mb-4 h-[calc(100vh-64px)]">
     <ProposalBuilder 
       mode="edit" 
-      :initial-proposal="initialProposal"
       :on-save="handleSave"
       :is-saving="isSaving"
     />

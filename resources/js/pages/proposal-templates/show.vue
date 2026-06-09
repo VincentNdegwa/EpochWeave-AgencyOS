@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { computed, onMounted } from 'vue';
-import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 import { dashboard } from '@/routes';
 import proposalTemplates from '@/routes/proposal-templates';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
@@ -9,24 +8,27 @@ import { Button } from '@/components/ui/button';
 import { Edit } from '@lucide/vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
-import type { Proposal, ProposalStatus, ProposalTemplate } from '@/types/models/proposal';
+import type { Proposal, ProposalTemplate } from '@/types/models/proposal';
 
 const props = defineProps<{
   template: ProposalTemplate;
 }>();
 
-const workspace_id = usePage().props.workspace?.id;
-const proposalData = computed<Proposal>(() => ({
-  id: props.template.id,
-  workspace_id: workspace_id ?? 0,
+const workspaceId = usePage().props.workspace?.id ?? 0;
+const builderStore = useProposalBuilderStore();
+const workspaceStore = useWorkspaceStore();
+
+const toProposal = (template: ProposalTemplate): Proposal => ({
+  id: template.id,
+  workspace_id: workspaceId,
   account_id: null,
   created_by: null,
   template_id: null,
-  title: props.template.name,
+  title: template.name,
   proposal_number: null,
-  status: 'draft' as ProposalStatus,
+  status: 'draft',
   valid_until: null,
-  content: props.template.content || [],
+  content: template.content || [],
   currency: 'USD',
   subtotal: 0,
   discount_total: 0,
@@ -54,35 +56,19 @@ const proposalData = computed<Proposal>(() => ({
   decided_at: null,
   expired_at: null,
   decline_reason: null,
-  created_at: props.template.created_at,
-  updated_at: props.template.updated_at,
-  mode: 'template' as const, // Distinguish this as a template
-}));
+  created_at: template.created_at,
+  updated_at: template.updated_at,
+});
 
-const builderStore = useProposalBuilderStore();
-const workspaceStore = useWorkspaceStore();
-
-// Initialize builder store with template data
 onMounted(() => {
-  // Set workspace
-  workspaceStore.setWorkspace({
-    id: workspace_id,
-    name: '',
+  workspaceStore.setWorkspace(usePage().props.workspace ?? null);
+  builderStore.hydrateProposal(toProposal(props.template), {
+    mode: 'template',
+    template: {
+      description: props.template.description ?? null,
+      thumbnailUrl: props.template.thumbnail_url ?? null,
+    },
   });
-  
-  // Load template content into builder
-  builderStore.loadBlocks(props.template.content || []);
-  
-  // Set template title and meta
-  builderStore.setProposalTitle(props.template.name, false);
-  builderStore.setProposalMeta({
-    currency: 'USD',
-    validUntil: null,
-    proposalNumber: null,
-    depositEnabled: false,
-    depositType: 'percentage',
-    depositValue: 0,
-  }, false);
 });
 
 setLayoutProps({

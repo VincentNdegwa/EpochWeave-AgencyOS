@@ -13,28 +13,14 @@ const props = defineProps<{
 }>();
 
 const builderStore = useProposalBuilderStore();
-const {
-  blocks,
-  proposalTitle,
-  proposalMeta,
-  templateId,
-  selectedAccountId,
-} = storeToRefs(builderStore);
+const { proposal } = storeToRefs(builderStore);
 
 watch(
-  () => props.proposal.account_id,
-  (accountId) => {
-    builderStore.setSelectedAccountId(accountId ? accountId.toString() : null);
+  () => props.proposal,
+  (incoming) => {
+    builderStore.hydrateProposal(incoming);
   },
-  { immediate: true },
-);
-
-watch(
-  () => props.proposal.template_id,
-  (templateIdValue) => {
-    builderStore.setTemplateId(templateIdValue ?? null, false);
-  },
-  { immediate: true },
+  { immediate: true, deep: true }
 );
 
 const isSaving = ref(false);
@@ -42,7 +28,7 @@ const isSaving = ref(false);
 const breadcrumbs = computed(() => [
   { title: 'dashboard', href: dashboard() },
   { title: 'proposals', href: '/proposals' },
-  { title: props.proposal.title },
+  { title: proposal.value.title },
 ]);
 
 const applyLayout = () => {
@@ -56,7 +42,7 @@ const applyLayout = () => {
 applyLayout();
 
 watch(
-  () => props.proposal.title,
+  () => proposal.value.title,
   () => applyLayout(),
 );
 
@@ -68,23 +54,22 @@ const handleSave = async () => {
   isSaving.value = true;
 
   try {
-    const activeAccountId = selectedAccountId.value ?? (props.proposal.account_id ? props.proposal.account_id.toString() : null);
-    const numericAccountId = activeAccountId ? Number(activeAccountId) : null;
+    const numericAccountId = proposal.value.account_id ?? null;
 
     if (!numericAccountId || Number.isNaN(numericAccountId)) {
       throw new Error('Please select an account before saving.');
     }
 
     const payload = {
-      title: proposalTitle.value,
-      currency: proposalMeta.value.currency,
-      valid_until: proposalMeta.value.validUntil,
-      requires_deposit: proposalMeta.value.depositEnabled,
-      deposit_type: proposalMeta.value.depositType,
-      deposit_value: proposalMeta.value.depositValue,
-      template_id: templateId.value,
+      title: proposal.value.title,
+      currency: proposal.value.currency,
+      valid_until: proposal.value.valid_until,
+      requires_deposit: proposal.value.requires_deposit,
+      deposit_type: proposal.value.deposit_type,
+      deposit_value: proposal.value.deposit_value,
+      template_id: proposal.value.template_id,
       account_id: numericAccountId,
-      blocks: blocks.value,
+      blocks: proposal.value.content,
     };
 
     await router.put(proposals.update(props.proposal.id).url, payload, {
@@ -104,7 +89,6 @@ const handleSave = async () => {
   <div class="-mx-4 -mb-4 h-[calc(100vh-64px)]">
     <ProposalBuilder
       mode="edit"
-      :initial-proposal="props.proposal"
       :on-save="handleSave"
       :is-saving="isSaving"
     />

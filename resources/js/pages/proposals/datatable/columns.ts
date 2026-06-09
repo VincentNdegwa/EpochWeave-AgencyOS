@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { MoreHorizontal } from '@lucide/vue';
 import type { ColumnDef } from '@tanstack/vue-table';
 import { h } from 'vue';
@@ -16,7 +16,7 @@ import ProposalController from '@/actions/App/Http/Controllers/ProposalControlle
 import { edit as proposalEdit } from '@/routes/proposals';
 import type { Proposal } from '@/types/models/proposal';
 
-export function createColumns(onEdit: (proposal: Proposal) => void, onDelete: (proposal: Proposal) => void): ColumnDef<Proposal>[] {
+export function createColumns(onDelete: (proposal: Proposal) => void): ColumnDef<Proposal>[] {
   const { format: formatCurrency } = useCurrency();
 
   return [
@@ -102,16 +102,16 @@ export function createColumns(onEdit: (proposal: Proposal) => void, onDelete: (p
               h(
                 DropdownMenuItem,
                 {
-                  onClick: () => onEdit(proposal),
+                  onClick: () => router.visit(proposalEdit(proposal.id).url),
                 },
                 () => 'Edit'
               ),
               h(
                 DropdownMenuItem,
                 {
-                  onClick: () => window.open(ProposalController.show(proposal.id).url, '_blank'),
+                  onClick: () => router.visit(ProposalController.show(proposal.id).url),
                 },
-                () => 'Open viewer'
+                () => 'View'
               ),
               h(DropdownMenuSeparator),
               h(

@@ -13,10 +13,7 @@ const props = defineProps<{
   proposals: Proposal[];
 }>();
 
-const columns = createColumns(
-  (proposal) => router.visit(ProposalController.edit(proposal.id).url),
-  (proposal) => router.delete(ProposalController.destroy(proposal.id).url)
-);
+const columns = createColumns((proposal) => router.delete(ProposalController.destroy(proposal.id).url));
 
 defineOptions({
   layout: {
