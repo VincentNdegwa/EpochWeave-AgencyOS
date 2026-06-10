@@ -194,232 +194,155 @@ const toolbarOptions = [
             class="space-y-6"
             v-slot="{ errors, processing }"
         >
-            <!-- Hidden field for auto_archive -->
-            <input type="hidden" name="auto_archive" :value="autoArchive ? '1' : '0'" />
-            <!-- Hidden field for terms (Quill manages the value) -->
-            <input type="hidden" name="default_terms" :value="termsContent" />
+            <fieldset :disabled="!canUpdate" class="space-y-6">
+                <input type="hidden" name="auto_archive" :value="autoArchive ? '1' : '0'" />
+                <input type="hidden" name="default_terms" :value="termsContent" />
 
-            <fieldset :disabled="!canUpdate" class="space-y-4">
-
-                <!-- ══════════════════════════════════════════
-                     SECTION 1 — TIMELINE & PAYMENT
-                ══════════════════════════════════════════ -->
-                <div class="overflow-hidden rounded-xl border border-border bg-card">
-                    <div class="flex items-center gap-3 border-b border-border bg-muted/30 px-5 py-3.5">
+                <!-- Timeline & Payment Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
                             <ClockIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-foreground">Timeline & payment</p>
-                            <p class="text-[11px] text-muted-foreground">Default windows applied to every new proposal</p>
+                            <h3 class="text-sm font-semibold text-foreground">Timeline & payment</h3>
+                            <p class="text-xs text-muted-foreground">Default windows applied to every new proposal</p>
                         </div>
                     </div>
 
-                    <div class="grid gap-0 divide-y divide-border sm:grid-cols-2 sm:divide-x sm:divide-y-0">
-                        <!-- Validity window -->
-                        <div class="space-y-2 p-5">
-                            <Label for="default_validity_days" class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Validity window
-                            </Label>
-                            <div class="relative">
-                                <Input
-                                    id="default_validity_days"
-                                    name="default_validity_days"
-                                    type="number"
-                                    min="0"
-                                    max="365"
-                                    :default-value="proposalSettings?.default_validity_days ?? 14"
-                                    class="h-10 pr-14"
-                                />
-                                <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
-                                             text-xs text-muted-foreground">days</span>
-                            </div>
-                            <p class="text-[11px] text-muted-foreground">
-                                How long clients have to accept before the proposal expires.
-                            </p>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid gap-2">
+                            <Label for="default_validity_days">Validity window</Label>
+                            <Input
+                                id="default_validity_days"
+                                name="default_validity_days"
+                                type="number"
+                                min="0"
+                                max="365"
+                                :default-value="proposalSettings?.default_validity_days ?? 14"
+                                placeholder="14"
+                            />
                             <InputError :message="errors.default_validity_days" />
                         </div>
 
-                        <!-- Payment due -->
-                        <div class="space-y-2 p-5">
-                            <Label for="payment_due_days" class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Payment due
-                            </Label>
-                            <div class="relative">
-                                <Input
-                                    id="payment_due_days"
-                                    name="payment_due_days"
-                                    type="number"
-                                    min="0"
-                                    max="365"
-                                    :default-value="proposalSettings?.payment_due_days ?? 7"
-                                    class="h-10 pr-14"
-                                />
-                                <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
-                                             text-xs text-muted-foreground">days</span>
-                            </div>
-                            <p class="text-[11px] text-muted-foreground">
-                                Days after acceptance before payment is due.
-                            </p>
+                        <div class="grid gap-2">
+                            <Label for="payment_due_days">Payment due</Label>
+                            <Input
+                                id="payment_due_days"
+                                name="payment_due_days"
+                                type="number"
+                                min="0"
+                                max="365"
+                                :default-value="proposalSettings?.payment_due_days ?? 7"
+                                placeholder="7"
+                            />
                             <InputError :message="errors.payment_due_days" />
                         </div>
                     </div>
                 </div>
 
-                <!-- ══════════════════════════════════════════
-                     SECTION 2 — DEPOSIT
-                ══════════════════════════════════════════ -->
-                <div class="overflow-hidden rounded-xl border border-border bg-card">
-                    <div class="flex items-center gap-3 border-b border-border bg-muted/30 px-5 py-3.5">
+                <!-- Default Deposit Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
                             <BanknoteIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-foreground">Default deposit</p>
-                            <p class="text-[11px] text-muted-foreground">Pre-filled when a new proposal is created</p>
+                            <h3 class="text-sm font-semibold text-foreground">Default deposit</h3>
+                            <p class="text-xs text-muted-foreground">Pre-filled when a new proposal is created</p>
                         </div>
                     </div>
 
-                    <div class="p-5">
-                        <div class="max-w-xs space-y-2">
-                            <Label for="default_deposit_percentage" class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Deposit percentage
-                            </Label>
-                            <div class="relative">
-                                <Input
-                                    id="default_deposit_percentage"
-                                    name="default_deposit_percentage"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    :default-value="proposalSettings?.default_deposit_percentage ?? 50"
-                                    class="h-10 pr-8"
-                                />
-                                <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
-                                             text-xs text-muted-foreground">%</span>
-                            </div>
-                            <InputError :message="errors.default_deposit_percentage" />
-                        </div>
-
-                        <!-- Visual slider preview -->
-                        <div class="mt-4 space-y-1.5">
-                            <div class="flex justify-between text-[11px] text-muted-foreground">
-                                <span>Deposit</span>
-                                <span>Remaining on completion</span>
-                            </div>
-                            <div class="flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                                <div
-                                    class="bg-primary transition-all"
-                                    :style="{ width: `${proposalSettings?.default_deposit_percentage ?? 50}%` }"
-                                />
-                            </div>
-                            <div class="flex justify-between text-[11px] font-medium text-foreground">
-                                <span>{{ proposalSettings?.default_deposit_percentage ?? 50 }}%</span>
-                                <span>{{ 100 - (proposalSettings?.default_deposit_percentage ?? 50) }}%</span>
-                            </div>
-                        </div>
+                    <div class="grid gap-2">
+                        <Label for="default_deposit_percentage">Deposit percentage</Label>
+                        <Input
+                            id="default_deposit_percentage"
+                            name="default_deposit_percentage"
+                            type="number"
+                            min="0"
+                            max="100"
+                            :default-value="proposalSettings?.default_deposit_percentage ?? 50"
+                            placeholder="50"
+                        />
+                        <InputError :message="errors.default_deposit_percentage" />
                     </div>
                 </div>
 
-                <!-- ══════════════════════════════════════════
-                     SECTION 3 — SENDER
-                ══════════════════════════════════════════ -->
-                <div class="overflow-hidden rounded-xl border border-border bg-card">
-                    <div class="flex items-center gap-3 border-b border-border bg-muted/30 px-5 py-3.5">
+                <!-- Sender Details Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
                             <UserIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-foreground">Sender details</p>
-                            <p class="text-[11px] text-muted-foreground">Appears on the proposal cover and email</p>
+                            <h3 class="text-sm font-semibold text-foreground">Sender details</h3>
+                            <p class="text-xs text-muted-foreground">Appears on the proposal cover and email</p>
                         </div>
                     </div>
 
-                    <div class="grid gap-0 divide-y divide-border p-0 sm:grid-cols-2 sm:divide-x sm:divide-y-0">
-                        <div class="space-y-2 p-5">
-                            <Label for="sender_name" class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Full name
-                            </Label>
+                    <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid gap-2">
+                            <Label for="sender_name">Full name</Label>
                             <Input
                                 id="sender_name"
                                 name="sender_name"
                                 :default-value="proposalSettings?.sender_name ?? ''"
                                 placeholder="e.g. Jane Doe"
-                                class="h-10"
                             />
                             <InputError :message="errors.sender_name" />
                         </div>
-                        <div class="space-y-2 p-5">
-                            <Label for="sender_title" class="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                                Job title
-                            </Label>
+
+                        <div class="grid gap-2">
+                            <Label for="sender_title">Job title</Label>
                             <Input
                                 id="sender_title"
                                 name="sender_title"
                                 :default-value="proposalSettings?.sender_title ?? ''"
                                 placeholder="e.g. Director of Delivery"
-                                class="h-10"
                             />
                             <InputError :message="errors.sender_title" />
                         </div>
                     </div>
                 </div>
 
-                <!-- ══════════════════════════════════════════
-                     SECTION 4 — BEHAVIOUR
-                ══════════════════════════════════════════ -->
-                <div class="overflow-hidden rounded-xl border border-border bg-card">
-                    <div class="flex items-center gap-3 border-b border-border bg-muted/30 px-5 py-3.5">
+                <!-- Behaviour Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
                             <SparklesIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-foreground">Behaviour</p>
-                            <p class="text-[11px] text-muted-foreground">Automation rules for proposal lifecycle</p>
+                            <h3 class="text-sm font-semibold text-foreground">Behaviour</h3>
+                            <p class="text-xs text-muted-foreground">Automation rules for proposal lifecycle</p>
                         </div>
                     </div>
 
-                    <div class="p-5">
-                        <label
-                            class="flex cursor-pointer items-center justify-between rounded-lg border px-4 py-3.5 transition-colors hover:bg-muted/40"
-                            :class="autoArchive ? 'border-primary bg-primary/5' : 'border-border'"
-                        >
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-background">
-                                    <ArchiveIcon class="h-4 w-4 text-muted-foreground" />
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium text-foreground">Auto-archive expired proposals</p>
-                                    <p class="text-[11px] text-muted-foreground">
-                                        Move proposals out of active views once they pass the validity window
-                                    </p>
-                                </div>
-                            </div>
-                            <Switch id="auto_archive" v-model="autoArchive" />
-                        </label>
+                    <div class="flex items-center justify-between rounded-lg border p-4">
+                        <div class="space-y-0.5">
+                            <Label for="auto_archive">Auto-archive expired proposals</Label>
+                            <p class="text-sm text-muted-foreground">
+                                Move proposals out of active views once they pass the validity window
+                            </p>
+                        </div>
+                        <Switch id="auto_archive" v-model="autoArchive" />
                     </div>
                 </div>
 
-                <!-- ══════════════════════════════════════════
-                     SECTION 5 — DEFAULT TERMS
-                ══════════════════════════════════════════ -->
-                <div class="overflow-hidden rounded-xl border border-border bg-card">
-                    <div class="flex items-center justify-between border-b border-border bg-muted/30 px-5 py-3.5">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
-                                <ScrollTextIcon class="h-3.5 w-3.5 text-primary" />
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-foreground">Default terms & conditions</p>
-                                <p class="text-[11px] text-muted-foreground">Pre-populated in every new proposal's Terms block</p>
-                            </div>
+                <!-- Default Terms Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                            <ScrollTextIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
-                        <Badge variant="outline" class="text-[11px]">Optional</Badge>
+                        <div>
+                            <h3 class="text-sm font-semibold text-foreground">Default terms & conditions</h3>
+                            <p class="text-xs text-muted-foreground">Pre-populated in every new proposal's Terms block</p>
+                        </div>
                     </div>
 
-                    <div class="p-5">
+                    <div class="grid gap-2">
                         <div
-                            class="richtext-editor-wrap overflow-hidden rounded-lg border border-border
+                            class="overflow-hidden rounded-lg border border-border
                                    transition-shadow focus-within:ring-2 focus-within:ring-primary
                                    focus-within:ring-offset-1"
                         >
@@ -433,32 +356,26 @@ const toolbarOptions = [
                                 }"
                             />
                         </div>
-                        <p class="mt-2 text-[11px] text-muted-foreground">
-                            Supports rich text — headings, lists, and links.
-                        </p>
                         <InputError :message="errors.default_terms" />
                     </div>
                 </div>
 
-                <!-- ══════════════════════════════════════════
-                     SECTION 6 — NUMBERING
-                ══════════════════════════════════════════ -->
-                <div class="overflow-hidden rounded-xl border border-border bg-card">
-                    <div class="flex items-center gap-3 border-b border-border bg-muted/30 px-5 py-3.5">
+                <!-- Proposal Numbering Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
                         <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
                             <HashIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-foreground">Proposal numbering</p>
-                            <p class="text-[11px] text-muted-foreground">Build the format of auto-generated proposal numbers</p>
+                            <h3 class="text-sm font-semibold text-foreground">Proposal numbering</h3>
+                            <p class="text-xs text-muted-foreground">Build the format of auto-generated proposal numbers</p>
                         </div>
                     </div>
 
-                    <div class="space-y-5 p-5">
-
-                        <!-- ① Live preview -->
+                    <div class="space-y-4">
+                        <!-- Live preview -->
                         <div class="flex items-center justify-between rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3">
-                            <span class="flex items-center gap-2 text-[11px] text-muted-foreground">
+                            <span class="flex items-center gap-2 text-xs text-muted-foreground">
                                 <EyeIcon class="h-3.5 w-3.5" />
                                 Next proposal
                             </span>
@@ -467,21 +384,16 @@ const toolbarOptions = [
                             </code>
                         </div>
 
-                        <!-- ② Format builder -->
-                        <div>
-                            <p class="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">Format</p>
-
-                            <!-- Builder zone -->
+                        <!-- Format builder -->
+                        <div class="grid gap-2">
+                            <Label>Format</Label>
                             <div
                                 class="min-h-14 rounded-lg border-2 border-dashed border-border bg-muted/20 px-3 py-3 transition-colors"
                                 :class="formatTokens.length === 0 ? 'flex items-center justify-center' : ''"
                             >
-                                <!-- Empty state -->
-                                <p v-if="formatTokens.length === 0" class="select-none text-[11px] text-muted-foreground">
+                                <p v-if="formatTokens.length === 0" class="select-none text-xs text-muted-foreground">
                                     Click a token below to start building the format
                                 </p>
-
-                                <!-- Token pills -->
                                 <div v-else class="flex flex-wrap items-center gap-2">
                                     <div
                                         v-for="(token, i) in formatTokens"
@@ -489,12 +401,8 @@ const toolbarOptions = [
                                         class="group flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-shadow"
                                         :class="getTokenDef(token)?.pillClass"
                                     >
-                                        <!-- Resolved value (live) -->
                                         <span class="font-mono font-semibold tracking-tight">{{ getTokenPreview(token) }}</span>
-                                        <!-- Token label -->
                                         <span class="text-[9px] font-normal opacity-50">{{ getTokenDef(token)?.label }}</span>
-
-                                        <!-- Controls (appear on hover) -->
                                         <span class="ml-0.5 flex items-center gap-0.5">
                                             <button
                                                 v-if="i > 0"
@@ -526,10 +434,8 @@ const toolbarOptions = [
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Token palette -->
-                            <div class="mt-2.5 flex flex-wrap items-center gap-2">
-                                <span class="text-[11px] text-muted-foreground">Add:</span>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs text-muted-foreground">Add:</span>
                                 <button
                                     v-for="def in tokenDefs"
                                     :key="def.token"
@@ -552,60 +458,39 @@ const toolbarOptions = [
                                     <span class="font-normal opacity-60">{{ def.description }}</span>
                                 </button>
                             </div>
-
-                            <!-- Hidden format string submitted with the form -->
                             <input type="hidden" name="numbering[format]" :value="computedFormatString" />
                             <InputError :message="errors['numbering.format']" />
                         </div>
 
-                        <Separator />
-
-                        <!-- ③ Configuration fields -->
                         <div class="grid gap-4 sm:grid-cols-2">
-                            <div class="space-y-2">
-                                <Label for="numbering_prefix" class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Prefix
-                                </Label>
+                            <div class="grid gap-2">
+                                <Label for="numbering_prefix">Prefix</Label>
                                 <Input
                                     id="numbering_prefix"
                                     name="numbering[prefix]"
                                     :model-value="localPrefix"
                                     placeholder="PROP"
-                                    class="h-9 font-mono text-sm"
+                                    class="font-mono text-sm"
                                     @update:model-value="localPrefix = String($event)"
                                 />
-                                <p class="text-[11px] text-muted-foreground">
-                                    Resolved by the
-                                    <code class="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px] text-foreground">{PREFIX}</code>
-                                    token
-                                </p>
                                 <InputError :message="errors['numbering.prefix']" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="numbering_delimiter" class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Delimiter
-                                </Label>
+                            <div class="grid gap-2">
+                                <Label for="numbering_delimiter">Delimiter</Label>
                                 <Input
                                     id="numbering_delimiter"
                                     name="numbering[delimiter]"
                                     :model-value="localDelimiter"
                                     placeholder="-"
-                                    class="h-9 font-mono text-sm"
+                                    class="font-mono text-sm"
                                     @update:model-value="localDelimiter = String($event)"
                                 />
-                                <p class="text-[11px] text-muted-foreground">
-                                    Resolved by the
-                                    <code class="rounded border border-border bg-muted px-1 py-0.5 font-mono text-[10px] text-foreground">{DELIMITER}</code>
-                                    token
-                                </p>
                                 <InputError :message="errors['numbering.delimiter']" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="numbering_sequence_padding" class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Sequence padding
-                                </Label>
+                            <div class="grid gap-2">
+                                <Label for="numbering_sequence_padding">Sequence padding</Label>
                                 <Input
                                     id="numbering_sequence_padding"
                                     name="numbering[sequence_padding]"
@@ -613,59 +498,44 @@ const toolbarOptions = [
                                     min="0"
                                     max="10"
                                     :model-value="localPadding"
-                                    class="h-9 font-mono text-sm"
+                                    class="font-mono text-sm"
                                     @update:model-value="localPadding = Number($event)"
                                 />
-                                <p class="text-[11px] text-muted-foreground">
-                                    Pads the counter with leading zeros — e.g. padding
-                                    <code class="font-mono text-[10px] text-foreground">{{ localPadding }}</code>
-                                    turns 1 into
-                                    <code class="font-mono text-[10px] text-foreground">{{ String(1).padStart(localPadding, '0') }}</code>
-                                </p>
                                 <InputError :message="errors['numbering.sequence_padding']" />
                             </div>
 
-                            <div class="space-y-2">
-                                <Label for="numbering_next_sequence_number" class="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                                    Next sequence number
-                                </Label>
+                            <div class="grid gap-2">
+                                <Label for="numbering_next_sequence_number">Next sequence number</Label>
                                 <Input
                                     id="numbering_next_sequence_number"
                                     name="numbering[next_sequence_number]"
                                     type="number"
                                     min="1"
                                     :model-value="localNextSeq"
-                                    class="h-9 font-mono text-sm"
+                                    class="font-mono text-sm"
                                     @update:model-value="localNextSeq = Number($event)"
                                 />
-                                <p class="text-[11px] text-muted-foreground">
-                                    Counter assigned to the next proposal created.
-                                </p>
                                 <InputError :message="errors['numbering.next_sequence_number']" />
                             </div>
                         </div>
                     </div>
                 </div>
-
             </fieldset>
 
-            <!-- ── Save bar ──────────────────────────────────── -->
-            <div class="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-4">
-                <p v-if="!canUpdate" class="text-sm text-muted-foreground">
-                    You don't have permission to edit these settings.
-                </p>
-                <div v-else class="text-[11px] text-muted-foreground">
-                    Changes apply to all new proposals going forward.
-                </div>
+            <div class="flex items-center gap-4">
                 <Button
                     :disabled="processing || !canUpdate"
                     data-test="update-proposal-settings-button"
-                    class="min-w-24"
                 >
-                    {{ processing ? 'Saving…' : 'Save changes' }}
+                    Save
                 </Button>
+                <p
+                    v-if="!canUpdate"
+                    class="text-sm text-muted-foreground"
+                >
+                    You don't have permission to edit these settings.
+                </p>
             </div>
-
         </Form>
     </div>
 </template>

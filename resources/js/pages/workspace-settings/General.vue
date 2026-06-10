@@ -14,6 +14,14 @@ import { useTemporaryUploads } from '@/composables/useTemporaryUploads';
 import { dashboard } from '@/routes';
 import { index } from '@/routes/workspace-settings';
 import type { Workspace } from '@/types/models/workspace';
+import {
+    BuildingIcon,
+    FileTextIcon,
+    DollarSignIcon,
+    ImageIcon,
+    PaletteIcon,
+    EyeIcon,
+} from '@lucide/vue';
 
 defineOptions({
     layout: {
@@ -134,104 +142,147 @@ const handleSuccess = async (): Promise<void> => {
                     :value="primaryColor"
                 />
 
-                <div class="grid gap-2">
-                    <Label for="name">Name</Label>
-                    <Input
-                        id="name"
-                        name="name"
-                        :default-value="workspace?.name"
-                        required
-                        placeholder="Workspace name"
-                    />
-                    <InputError class="mt-2" :message="errors.name" />
-                </div>
+                <!-- Basic Information Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                            <BuildingIcon class="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-foreground">Basic information</h3>
+                            <p class="text-xs text-muted-foreground">Core details about your workspace</p>
+                        </div>
+                    </div>
 
-                <div class="grid gap-2">
-                    <Label for="description">Description</Label>
-                    <Textarea
-                        id="description"
-                        name="description"
-                        :default-value="workspace?.description || ''"
-                        placeholder="What is this workspace for?"
-                    />
-                    <InputError class="mt-2" :message="errors.description" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="currency">Currency</Label>
-                    <Input
-                        id="currency"
-                        name="currency"
-                        :default-value="workspace?.currency || ''"
-                        placeholder="e.g. USD"
-                    />
-                    <InputError class="mt-2" :message="errors.currency" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label>Logo</Label>
-                    <div class="flex items-center gap-4">
-                        <div class="h-12 w-12 overflow-hidden rounded-lg border bg-muted">
-                            <img
-                                v-if="logoUrl"
-                                :src="logoUrl"
-                                alt="Workspace logo"
-                                class="h-full w-full object-cover"
+                    <div class="grid gap-4">
+                        <div class="grid gap-2">
+                            <Label for="name">Name</Label>
+                            <Input
+                                id="name"
+                                name="name"
+                                :default-value="workspace?.name"
+                                required
+                                placeholder="Workspace name"
                             />
+                            <InputError :message="errors.name" />
                         </div>
 
-                        <div class="flex-1 space-y-2">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                :disabled="uploads.isUploading.value"
-                                class="dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-lg border bg-transparent px-2.5 py-1 text-base transition-colors file:h-6 file:text-sm file:font-medium focus-visible:ring-3 aria-invalid:ring-3 md:text-sm w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-                                @change="uploadLogo"
+                        <div class="grid gap-2">
+                            <Label for="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                name="description"
+                                :default-value="workspace?.description || ''"
+                                placeholder="What is this workspace for?"
                             />
-                            <InputError class="mt-2" :message="errors.logo_url" />
-                            <p
-                                v-if="(uploads.errors.value?.length || 0) > 0"
-                                class="text-sm text-destructive"
-                            >
-                                {{ uploads.errors.value?.[0] }}
+                            <InputError :message="errors.description" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="currency">Currency</Label>
+                            <Input
+                                id="currency"
+                                name="currency"
+                                :default-value="workspace?.currency || ''"
+                                placeholder="e.g. USD"
+                            />
+                            <InputError :message="errors.currency" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branding Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                            <PaletteIcon class="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-foreground">Branding</h3>
+                            <p class="text-xs text-muted-foreground">Customize the visual appearance of your workspace</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="grid gap-2">
+                            <Label>Logo</Label>
+                            <div class="flex items-center gap-4">
+                                <div class="h-12 w-12 overflow-hidden rounded-lg border bg-muted">
+                                    <img
+                                        v-if="logoUrl"
+                                        :src="logoUrl"
+                                        alt="Workspace logo"
+                                        class="h-full w-full object-cover"
+                                    />
+                                </div>
+
+                                <div class="flex-1 space-y-2">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        :disabled="uploads.isUploading.value"
+                                        class="dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-lg border bg-transparent px-2.5 py-1 text-base transition-colors file:h-6 file:text-sm file:font-medium focus-visible:ring-3 aria-invalid:ring-3 md:text-sm w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                                        @change="uploadLogo"
+                                    />
+                                    <InputError :message="errors.logo_url" />
+                                    <p
+                                        v-if="(uploads.errors.value?.length || 0) > 0"
+                                        class="text-sm text-destructive"
+                                    >
+                                        {{ uploads.errors.value?.[0] }}
+                                    </p>
+                                </div>
+
+                                <Button
+                                    v-if="logoUrl"
+                                    type="button"
+                                    variant="outline"
+                                    @click="removeLogo"
+                                >
+                                    Remove
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label>Primary color</Label>
+                            <ColorPresets v-model="primaryColor" />
+                            <InputError :message="errors.primary_color" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                            <EyeIcon class="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-semibold text-foreground">Privacy</h3>
+                            <p class="text-xs text-muted-foreground">Control platform visibility and branding</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between rounded-lg border p-4">
+                        <div class="space-y-0.5">
+                            <Label for="white_label">White label</Label>
+                            <p class="text-sm text-muted-foreground">
+                                Hide platform branding in client-facing views.
                             </p>
                         </div>
 
-                        <Button
-                            v-if="logoUrl"
-                            type="button"
-                            variant="outline"
-                            @click="removeLogo"
-                        >
-                            Remove
-                        </Button>
-                    </div>
-                </div>
-
-                <div class="grid gap-2">
-                    <Label>Primary color</Label>
-                    <ColorPresets v-model="primaryColor" />
-                    <InputError class="mt-2" :message="errors.primary_color" />
-                </div>
-
-                <div class="flex items-center justify-between rounded-lg border p-3">
-                    <div class="space-y-0.5">
-                        <Label for="white_label">White label</Label>
-                        <p class="text-sm text-muted-foreground">
-                            Hide platform branding in client-facing views.
-                        </p>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <input
-                            type="hidden"
-                            name="white_label"
-                            :value="whiteLabel ? '1' : '0'"
-                        />
-                        <Switch
-                            id="white_label"
-                            v-model="whiteLabel"
-                        />
+                        <div class="flex items-center gap-2">
+                            <input
+                                type="hidden"
+                                name="white_label"
+                                :value="whiteLabel ? '1' : '0'"
+                            />
+                            <Switch
+                                id="white_label"
+                                v-model="whiteLabel"
+                            />
+                        </div>
                     </div>
                 </div>
             </fieldset>

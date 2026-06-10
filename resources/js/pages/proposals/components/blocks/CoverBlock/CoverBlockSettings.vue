@@ -16,7 +16,17 @@ const store  = useProposalBuilderStore();
 const isUploading = ref(false);
 
 const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<CoverBlockData | null>(() => (block.value?.data as CoverBlockData) ?? null);
+const data  = computed<CoverBlockData | null>(() => {
+  const blockData = block.value?.data;
+  if (!blockData) return null;
+  
+  // Handle reactive wrapper
+  if (blockData && '_custom' in blockData && (blockData as any)._custom?.value) {
+    return (blockData as any)._custom.value as CoverBlockData;
+  }
+  
+  return blockData as CoverBlockData;
+});
 
 const updateData = (changes: Partial<CoverBlockData>) => {
   if (!block.value || !data.value) return;

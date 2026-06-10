@@ -238,14 +238,11 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     isDirty.value = true;
   }
 
+  const blocks = computed(() => proposal.value.content);
+
   return {
     proposal,
-    get blocks() {
-      return proposal.value.content;
-    },
-    set blocks(value: BaseBlock[]) {
-      proposal.value.content = value;
-    },
+    blocks,
     isDirty,
     isSaving,
     selectedBlockId,
