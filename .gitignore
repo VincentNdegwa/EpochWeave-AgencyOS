@@ -28,3 +28,9 @@ yarn-error.log
 /.vscode
 /.zed
 *.database.sqlite
+
+# Ghost deploying-laravel-cloud skill files
+.agents/skills/deploying-laravel-cloud
+.claude/skills/deploying-laravel-cloud
+.cursor/skills/deploying-laravel-cloud
+nul
