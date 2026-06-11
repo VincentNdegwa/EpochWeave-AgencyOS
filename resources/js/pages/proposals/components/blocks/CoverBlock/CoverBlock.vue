@@ -9,7 +9,15 @@ const props = defineProps<{
   isLocked: boolean;
 }>();
 
+const emit = defineEmits<{
+  'update:data': [data: Partial<CoverBlockData>];
+}>();
+
 const workspaceStore = useWorkspaceStore();
+
+const updateData = (changes: Partial<CoverBlockData>) => {
+  emit('update:data', changes);
+};
 
 const containerStyle = computed(() => {
   if (props.data.background_type === 'image') {
@@ -57,7 +65,7 @@ const shortId = computed(() => props.block.id.slice(-6).toUpperCase());
           v-if="workspaceStore.logoUrl"
           :src="workspaceStore.logoUrl"
           alt="Workspace logo"
-          class="h-9 w-auto object-contain"
+          class="h-24 w-auto object-contain"
         />
         <span
           v-else
@@ -77,19 +85,46 @@ const shortId = computed(() => props.block.id.slice(-6).toUpperCase());
     </header>
 
     <div class="relative z-10 flex flex-1 flex-col items-start justify-center pb-14">
-      <h1 class="max-w-2xl text-5xl font-bold leading-tight tracking-tight">
-        {{ data.heading || 'Proposal Title' }}
-      </h1>
+      <h1
+        :contenteditable="!isLocked"
+        :class="[
+          'max-w-2xl text-5xl font-bold leading-tight tracking-tight outline-none',
+          !isLocked
+            ? 'cursor-text rounded focus:ring-2 focus:ring-white/30 focus:ring-offset-0'
+            : '',
+        ]"
+        :suppressContentEditableWarning="true"
+        @blur="(e) => updateData({ heading: (e.target as HTMLElement).innerText.trim() || 'Proposal Title' })"
+        @keydown.enter.prevent="($event.target as HTMLElement).blur()"
+      >{{ data.heading || 'Proposal Title' }}</h1>
 
       <p
-        v-if="data.subheading"
-        class="mt-4 max-w-xl text-lg leading-relaxed opacity-75"
-      >
-        {{ data.subheading }}
-      </p>
+        :contenteditable="!isLocked"
+        :class="[
+          'mt-4 max-w-xl text-lg leading-relaxed outline-none',
+          !isLocked
+            ? 'cursor-text rounded focus:ring-2 focus:ring-white/30'
+            : '',
+          !data.subheading && !isLocked ? 'opacity-40' : 'opacity-75',
+        ]"
+        :data-placeholder="!isLocked ? 'Add a subtitle…' : ''"
+        :suppressContentEditableWarning="true"
+        @blur="(e) => {
+          const v = (e.target as HTMLElement).innerText.trim();
+          updateData({ subheading: v || null });
+        }"
+      >{{ data.subheading || (!isLocked ? '' : '') }}</p>
 
       <div class="mt-8 h-[3px] w-16 rounded-full opacity-60" style="background: currentColor;" />
     </div>
 
   </section>
 </template>
+
+<style scoped>
+[contenteditable]:empty::before {
+  content: attr(data-placeholder);
+  pointer-events: none;
+  display: block;
+}
+</style>

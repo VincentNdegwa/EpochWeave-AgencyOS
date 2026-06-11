@@ -4,6 +4,7 @@ import { Plus } from '@lucide/vue';
 import { ref } from 'vue';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import { Button } from '@/components/ui/button';
+import ConfirmationDialog from '@/components/ui/confirmation-dialog/ConfirmationDialog.vue';
 import { dashboard } from '@/routes';
 import type { Proposal } from '@/types/models/proposal';
 import DataTable from '@/pages/proposals/datatable/data-table.vue';
@@ -13,7 +14,30 @@ const props = defineProps<{
   proposals: Proposal[];
 }>();
 
-const columns = createColumns((proposal) => router.delete(ProposalController.destroy(proposal.id).url));
+const deleteDialog = ref({
+  open: false,
+  proposal: null as Proposal | null,
+});
+
+const handleDelete = (proposal: Proposal) => {
+  deleteDialog.value = {
+    open: true,
+    proposal,
+  };
+};
+
+const confirmDelete = () => {
+  if (deleteDialog.value.proposal) {
+    router.delete(ProposalController.destroy(deleteDialog.value.proposal.id).url);
+  }
+  deleteDialog.value.open = false;
+};
+
+const cancelDelete = () => {
+  deleteDialog.value.open = false;
+};
+
+const columns = createColumns(handleDelete);
 
 defineOptions({
   layout: {
@@ -47,4 +71,15 @@ defineOptions({
 
     <DataTable :columns="columns" :data="props.proposals" />
   </div>
+
+  <ConfirmationDialog
+    :open="deleteDialog.open"
+    title="Delete Proposal"
+    :description="`Are you sure you want to delete '${deleteDialog.proposal?.title}'? This action cannot be undone.`"
+    confirmText="Delete"
+    cancelText="Cancel"
+    variant="destructive"
+    @confirm="confirmDelete"
+    @cancel="cancelDelete"
+  />
 </template>

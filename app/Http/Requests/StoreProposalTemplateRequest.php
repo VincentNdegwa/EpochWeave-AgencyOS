@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BlockType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -23,23 +24,7 @@ class StoreProposalTemplateRequest extends FormRequest
             'content.*.type' => [
                 'required',
                 'string',
-                Rule::in([
-                    'cover',
-                    'rich_text',
-                    'image',
-                    'logo',
-                    'divider',
-                    'spacer',
-                    'pricing_table',
-                    'timeline',
-                    'team_member',
-                    'testimonial',
-                    'terms',
-                    'signature',
-                    'cta',
-                    'video_embed',
-                    'file_attachment',
-                ]),
+                Rule::in(BlockType::values()),
             ],
             'content.*.sort_order' => 'required|integer|min:0',
             'content.*.is_locked' => 'required|boolean',

@@ -1,8 +1,19 @@
 import type { BaseBlock } from '../proposal-builder';
 import type { Workspace } from './workspace';
 
-export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired';
 export type DepositType = 'percentage' | 'fixed';
+
+export interface ProposalStatusModel {
+  id: number;
+  workspace_id: number;
+  title: string;
+  color: string;
+  is_system: boolean;
+  automation_trigger: 'draft' | 'sent' | 'accepted' | 'declined' | 'expired' | null;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface Proposal extends Record<string, unknown> {
   id: number;
@@ -12,7 +23,7 @@ export interface Proposal extends Record<string, unknown> {
   template_id: number | null;
   title: string;
   proposal_number: string | null;
-  status: ProposalStatus;
+  proposal_status_id: number | null;
   valid_until: string | null;
   content: BaseBlock[];
   currency: string;
@@ -48,6 +59,7 @@ export interface Proposal extends Record<string, unknown> {
   workspace?: Workspace;
   template?: ProposalTemplate;
   items?: ProposalItem[];
+  proposalStatus?: ProposalStatusModel;
 }
 
 export interface Account {

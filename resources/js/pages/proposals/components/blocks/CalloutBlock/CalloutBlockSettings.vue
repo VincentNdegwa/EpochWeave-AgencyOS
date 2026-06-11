@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ColorPresets } from '@/components/ui/color-presets';
-import { SmileIcon, PaletteIcon, LayoutIcon } from '@lucide/vue';
+import { PaletteIcon, LayoutIcon } from '@lucide/vue';
 import type { CalloutBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
 
@@ -14,26 +14,22 @@ const { block, data, updateData } = useBlockSettings<CalloutBlockData>(props.blo
 
 // Preset callout styles
 const presets = [
-  { label: 'Info',    icon: 'ℹ️',  bg: '#EFF6FF', accent: '#3B82F6' },
-  { label: 'Success', icon: '✅',  bg: '#F0FDF4', accent: '#22C55E' },
-  { label: 'Warning', icon: '⚠️',  bg: '#FFFBEB', accent: '#F59E0B' },
-  { label: 'Quote',   icon: '💬',  bg: '#F8FAFC', accent: '#6366F1' },
-  { label: 'Tip',     icon: '💡',  bg: '#FEFCE8', accent: '#EAB308' },
-  { label: 'Custom',  icon: null,  bg: null,      accent: null       },
+  { label: 'Info',    bg: '#EFF6FF', accent: '#3B82F6' },
+  { label: 'Success', bg: '#F0FDF4', accent: '#22C55E' },
+  { label: 'Warning', bg: '#FFFBEB', accent: '#F59E0B' },
+  { label: 'Quote',   bg: '#F8FAFC', accent: '#6366F1' },
+  { label: 'Tip',     bg: '#FEFCE8', accent: '#EAB308' },
+  { label: 'Custom',  bg: null,      accent: null       },
 ] as const;
 
 const applyPreset = (preset: typeof presets[number]) => {
-  if (!preset.bg) return; // custom — let user configure manually
+  if (!preset.bg) return;
   updateData({
     background_color: preset.bg,
     accent_color:     preset.accent ?? '#6366f1',
-    icon:             preset.icon ?? null,
     border_left:      true,
   });
 };
-
-// Common emoji icons
-const quickIcons = ['ℹ️', '✅', '⚠️', '❌', '💡', '💬', '🔥', '⭐', '📌', '🎯', '🚀', '💎'];
 </script>
 
 <template>
@@ -60,56 +56,9 @@ const quickIcons = ['ℹ️', '✅', '⚠️', '❌', '💡', '💬', '🔥', '�
           :style="preset.bg ? { borderLeftColor: preset.accent ?? '', borderLeftWidth: '3px' } : {}"
           @click="applyPreset(preset)"
         >
-          <span class="text-base leading-none">{{ preset.icon ?? '✏️' }}</span>
+          <span class="text-base leading-none">📝</span>
           {{ preset.label }}
         </button>
-      </div>
-    </div>
-
-    <!-- ══════ SECTION 2 — ICON ══════ -->
-    <div class="py-3 border-b border-border">
-      <p class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase
-                tracking-wider text-muted-foreground">
-        <SmileIcon class="h-3 w-3" />
-        Icon
-      </p>
-
-      <!-- Quick emoji picker -->
-      <div class="mb-3 flex flex-wrap gap-1.5">
-        <button
-          v-for="emoji in quickIcons"
-          :key="emoji"
-          type="button"
-          class="flex h-7 w-7 items-center justify-center rounded-md border text-base
-                 transition hover:border-primary hover:bg-muted/50"
-          :class="data.icon === emoji
-            ? 'border-primary bg-primary/5'
-            : 'border-border bg-background'"
-          @click="updateData({ icon: data.icon === emoji ? null : emoji })"
-        >
-          {{ emoji }}
-        </button>
-        <!-- Clear -->
-        <button
-          v-if="data.icon"
-          type="button"
-          class="flex h-7 items-center rounded-md border border-border bg-background
-                 px-2 text-[11px] text-muted-foreground transition hover:border-destructive
-                 hover:text-destructive"
-          @click="updateData({ icon: null })"
-        >
-          Remove
-        </button>
-      </div>
-
-      <div class="grid gap-1.5">
-        <Label class="text-xs text-muted-foreground">Custom emoji or symbol</Label>
-        <Input
-          :model-value="data.icon ?? ''"
-          placeholder="Paste any emoji…"
-          class="h-8 text-sm"
-          @update:model-value="(v) => updateData({ icon: v ? String(v) : null })"
-        />
       </div>
     </div>
 

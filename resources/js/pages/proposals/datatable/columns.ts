@@ -14,7 +14,7 @@ import {
 import { useCurrency } from '@/composables/useCurrency';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import { edit as proposalEdit } from '@/routes/proposals';
-import type { Proposal } from '@/types/models/proposal';
+import type { Proposal, ProposalStatusModel } from '@/types/models/proposal';
 
 export function createColumns(onDelete: (proposal: Proposal) => void): ColumnDef<Proposal>[] {
   const { format: formatCurrency } = useCurrency();
@@ -47,28 +47,28 @@ export function createColumns(onDelete: (proposal: Proposal) => void): ColumnDef
       },
     },
     {
-      accessorKey: 'total_amount',
+      accessorKey: 'grand_total',
       header: 'Value',
       cell: ({ row }) => {
-        const amount = row.getValue('total_amount') as number;
+        const amount = row.getValue('grand_total') as number;
         const currency = row.original.currency;
         return h('span', {}, formatCurrency(amount, { currency }));
       },
     },
     {
-      accessorKey: 'status',
+      accessorKey: 'proposalStatus',
       header: 'Status',
       cell: ({ row }) => {
-        const status = row.getValue('status') as string;
-        const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
-          draft: { label: 'Draft', variant: 'secondary' },
-          sent: { label: 'Sent', variant: 'outline' },
-          accepted: { label: 'Accepted', variant: 'default' },
-          rejected: { label: 'Rejected', variant: 'destructive' },
-          expired: { label: 'Expired', variant: 'secondary' },
-        };
-        const map = statusMap[status] ?? { label: status, variant: 'secondary' };
-        return h(Badge, { variant: map.variant }, () => map.label);
+        const proposal = row.original;
+        const proposalStatus = proposal.proposal_status as ProposalStatusModel;
+        
+        if (!proposalStatus) {
+          return h(Badge, { variant: 'secondary' }, () => 'Unknown');
+        }
+        
+        return h(Badge, { 
+          style: { backgroundColor: proposalStatus.color, color: 'white' }
+        }, () => proposalStatus.title);
       },
     },
     {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BlockType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -26,6 +27,7 @@ class StoreProposalRequest extends FormRequest
             'account_id' => 'required|exists:accounts,id',
             'title' => 'required|string|max:255',
             'proposal_number' => 'nullable|string|max:255',
+            'proposal_status_id' => 'nullable|exists:proposal_statuses,id',
             'currency' => 'required|string|size:3',
             'valid_until' => 'nullable|date|after:now',
             'blocks' => 'required|array|min:1',
@@ -33,23 +35,7 @@ class StoreProposalRequest extends FormRequest
             'blocks.*.type' => [
                 'required',
                 'string',
-                Rule::in([
-                    'cover',
-                    'rich_text',
-                    'image',
-                    'logo',
-                    'divider',
-                    'spacer',
-                    'pricing_table',
-                    'timeline',
-                    'team_member',
-                    'testimonial',
-                    'terms',
-                    'signature',
-                    'cta',
-                    'video_embed',
-                    'file_attachment',
-                ]),
+                Rule::in(BlockType::values()),
             ],
             'blocks.*.sort_order' => 'required|integer|min:0',
             'blocks.*.is_locked' => 'required|boolean',

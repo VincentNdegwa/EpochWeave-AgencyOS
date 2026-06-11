@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Proposal;
 use App\Models\ProposalItem;
+use App\Models\ProposalStatus;
 use Exception;
 use Illuminate\Support\Collection;
 
@@ -13,13 +14,17 @@ class ProposalService
     public function createProposalWithItems(array $data, array $items = []): Proposal
     {
         try {
+            if (!isset($data['proposal_status_id'])) {
+                $data['proposal_status_id'] = $this->getDraftStatusId($data['workspace_id']);
+            }
+            
             $proposal = Proposal::create($data);
             
             if (!empty($items)) {
                 $this->createProposalItems($proposal, $items);
             }
             
-            return $proposal->fresh(['items.product']);
+            return $proposal->fresh(['items.product', 'proposalStatus']);
         } catch (Exception $e) {
             throw new Exception('Failed to create proposal with items: '.$e->getMessage());
         }
@@ -128,15 +133,27 @@ class ProposalService
     public function updateProposalTotals(Proposal $proposal, array $lineItems = null): Proposal
     {
         try {
-            // Use provided line items or get from proposal items
-            $items = $lineItems ?? $proposal->items->map(function ($item) {
-                return [
-                    'unit_price' => $item->unit_price,
-                    'quantity' => $item->quantity,
-                    'item_discount_type' => $item->discount_type,
-                    'item_discount_value' => $item->discount_value,
-                ];
-            })->toArray();
+            // Use provided line items or extract from content or get from proposal items
+            if ($lineItems) {
+                $items = $lineItems;
+            } else {
+                // Try to extract from pricing table blocks in content first
+                $contentItems = $this->extractLineItemsFromContent($proposal->content);
+                
+                if (!empty($contentItems)) {
+                    $items = $contentItems;
+                } else {
+                    // Fallback to proposal items
+                    $items = $proposal->items->map(function ($item) {
+                        return [
+                            'unit_price' => $item->unit_price,
+                            'quantity' => $item->quantity,
+                            'item_discount_type' => $item->discount_type,
+                            'item_discount_value' => $item->discount_value,
+                        ];
+                    })->toArray();
+                }
+            }
 
             $totals = $this->calculateTotalsFromLineItems($items);
             
@@ -151,6 +168,29 @@ class ProposalService
         } catch (Exception $e) {
             throw new Exception('Failed to update proposal totals: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Extract line items from pricing table blocks in proposal content
+     */
+    private function extractLineItemsFromContent(array $content): array
+    {
+        $lineItems = [];
+        
+        foreach ($content as $block) {
+            if ($block['type'] === 'pricing_table' && isset($block['data']['items'])) {
+                foreach ($block['data']['items'] as $item) {
+                    $lineItems[] = [
+                        'unit_price' => $item['unit_price'] ?? 0,
+                        'quantity' => $item['quantity'] ?? 1,
+                        'item_discount_type' => $item['item_discount_type'] ?? 'none',
+                        'item_discount_value' => $item['item_discount_value'] ?? 0,
+                    ];
+                }
+            }
+        }
+        
+        return $lineItems;
     }
 
     public function recalculateExistingProposal(int $proposalId): Proposal
@@ -173,6 +213,7 @@ class ProposalService
             'account', 
             'workspace', 
             'template', 
+            'proposalStatus',
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
             }
@@ -184,12 +225,23 @@ class ProposalService
         return Proposal::where('workspace_id', $workspaceId)
             ->with([
                 'account',
+                'proposalStatus',
                 'items.product' => function ($query) {
                     $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
                 }
             ])
             ->orderBy('created_at', 'desc')
             ->get();
+    }
+
+    private function getDraftStatusId(int $workspaceId): ?int
+    {
+        $draftStatus = ProposalStatus::where('workspace_id', $workspaceId)
+            ->where('is_system', true)
+            ->where('title', 'Draft')
+            ->first();
+        
+        return $draftStatus?->id;
     }
 
     public function getProposalsByAccount(int $accountId): Collection

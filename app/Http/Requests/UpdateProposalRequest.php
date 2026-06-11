@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BlockType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -26,30 +27,13 @@ class UpdateProposalRequest extends FormRequest
             'title' => 'sometimes|required|string|max:255',
             'currency' => 'sometimes|required|string|size:3',
             'valid_until' => 'nullable|date|after:now',
-            'status' => 'sometimes|required|string|in:draft,sent,viewed,accepted,declined,expired',
-            'total_amount' => 'sometimes|required|numeric|min:0',
+            'proposal_status_id' => 'sometimes|required|exists:proposal_statuses,id',
             'blocks' => 'sometimes|array',
             'blocks.*.id' => 'required|string',
             'blocks.*.type' => [
                 'required',
                 'string',
-                Rule::in([
-                    'cover',
-                    'rich_text',
-                    'image',
-                    'logo',
-                    'divider',
-                    'spacer',
-                    'pricing_table',
-                    'timeline',
-                    'team_member',
-                    'testimonial',
-                    'terms',
-                    'signature',
-                    'cta',
-                    'video_embed',
-                    'file_attachment',
-                ]),
+                Rule::in(BlockType::values()),
             ],
             'blocks.*.sort_order' => 'required|integer|min:0',
             'blocks.*.is_locked' => 'required|boolean',

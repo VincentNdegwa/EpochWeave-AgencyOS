@@ -18,7 +18,7 @@ class Proposal extends Model
         'template_id',
         'title',
         'proposal_number',
-        'status',
+        'proposal_status_id',
         'valid_until',
         'content',
         'currency',
@@ -64,6 +64,11 @@ class Proposal extends Model
         'last_viewed_at' => 'datetime',
         'decided_at' => 'datetime',
         'expired_at' => 'datetime',
+        'subtotal' => 'decimal:2',
+        'discount_total' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'grand_total' => 'decimal:2',
+        'deposit_amount' => 'decimal:2',
     ];
 
     public function workspace(): BelongsTo
@@ -74,6 +79,11 @@ class Proposal extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
+    }
+
+    public function proposalStatus(): BelongsTo
+    {
+        return $this->belongsTo(ProposalStatus::class);
     }
 
     public function createdBy(): BelongsTo

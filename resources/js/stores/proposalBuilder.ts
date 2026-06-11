@@ -27,6 +27,7 @@ const createDefaultProposal = (workspaceId = 0): Proposal => {
     title: 'Untitled proposal',
     proposal_number: null,
     status: 'draft',
+    proposal_status_id: null,
     valid_until: null,
     content: [],
     currency: 'USD',

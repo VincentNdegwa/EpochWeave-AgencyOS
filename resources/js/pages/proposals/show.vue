@@ -38,16 +38,17 @@ onMounted(() => {
   builderStore.hydrateProposal(props.proposal, { mode: 'proposal' });
 });
 
-const statusMeta: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' | 'destructive' }> = {
-  draft: { label: 'Draft', variant: 'secondary' },
-  sent: { label: 'Sent', variant: 'outline' },
-  viewed: { label: 'Viewed', variant: 'outline' },
-  accepted: { label: 'Accepted', variant: 'default' },
-  rejected: { label: 'Rejected', variant: 'destructive' },
-  expired: { label: 'Expired', variant: 'secondary' },
-};
-
-const statusDisplay = computed(() => statusMeta[props.proposal.status] ?? { label: props.proposal.status, variant: 'secondary' });
+const statusDisplay = computed(() => {
+  if (props.proposal.proposalStatus) {
+    return {
+      label: props.proposal.proposalStatus.title,
+      variant: props.proposal.proposalStatus.is_system ? 'default' : 'secondary',
+      color: props.proposal.proposalStatus.color
+    };
+  }
+  
+  return { label: 'Unknown', variant: 'secondary' };
+});
 
 const formattedValue = computed(() =>
   formatCurrency(props.proposal.grand_total ?? 0, {
@@ -150,7 +151,10 @@ function describeValidity(value?: string | null): string {
               {{ props.proposal.title }}
             </h1>
             <div class="flex flex-wrap items-center gap-2">
-              <Badge :variant="statusDisplay.variant">
+              <Badge 
+                :variant="statusDisplay.variant"
+                :style="statusDisplay.color ? { backgroundColor: statusDisplay.color, color: 'white' } : {}"
+              >
                 {{ statusDisplay.label }}
               </Badge>
               <Badge variant="outline" class="font-mono text-xs">

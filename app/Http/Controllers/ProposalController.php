@@ -58,7 +58,6 @@ class ProposalController extends Controller
                 'workspace_id' => $workspace->id,
                 'created_by' => $request->user()->id,
                 'proposal_number' => $proposalNumber,
-                'status' => 'draft',
                 'content' => $content,
                 'token' => Str::uuid(),
             ]);

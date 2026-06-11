@@ -29,7 +29,7 @@ const containerStyle = computed(() => ({
   backgroundColor: props.data.background_color ?? 'transparent',
   borderLeftColor: props.data.border_left ? (props.data.accent_color ?? '#6366f1') : 'transparent',
   borderLeftWidth: props.data.border_left ? '4px' : '0',
-  borderLeftStyle: 'solid',
+  borderLeftStyle: (props.data.border_left ? 'solid' : 'none') as 'solid' | 'none',
 }));
 
 const isEmpty = computed(() =>
@@ -49,15 +49,6 @@ const toolbarOptions = [
     :style="containerStyle"
   >
     <div class="flex gap-4">
-
-      <!-- Icon -->
-      <div
-        v-if="data.icon"
-        class="flex-shrink-0 text-2xl leading-none mt-0.5"
-        :title="data.icon"
-      >
-        {{ data.icon }}
-      </div>
 
       <!-- Content -->
       <div class="flex-1 min-w-0">
