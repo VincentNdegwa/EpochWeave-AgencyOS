@@ -60,6 +60,9 @@ const handleSave = async () => {
       throw new Error('Please select an account before saving.');
     }
 
+    // Get all line items from catalog
+    const allLineItems = builderStore.getAllLineItems();
+
     const payload = {
       title: proposal.value.title,
       currency: proposal.value.currency,
@@ -70,6 +73,7 @@ const handleSave = async () => {
       template_id: proposal.value.template_id,
       account_id: numericAccountId,
       blocks: proposal.value.content,
+      line_items: allLineItems, // Send all catalog items
     };
 
     await router.put(proposals.update(props.proposal.id).url, payload, {

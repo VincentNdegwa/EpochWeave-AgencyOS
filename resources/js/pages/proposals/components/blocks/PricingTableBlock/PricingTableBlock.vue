@@ -53,6 +53,9 @@ const openEditDialog = (item: PricingLineItem) => {
 };
 
 const handleSave = (item: PricingLineItem) => {
+  // Add/update item in the catalog
+  store.addLineItem(item);
+  
   const exists = props.data.items.some((i) => i.id === item.id);
   if (exists) {
     updateData({ items: props.data.items.map((i) => i.id === item.id ? item : i) });
@@ -69,12 +72,20 @@ const handleCancel = () => {
 };
 
 const removeItem = (id: string) => {
+  // Remove from catalog
+  store.removeLineItem(id);
+  // Remove from block
   updateData({ items: props.data.items.filter((i) => i.id !== id) });
 };
 
 const updateData = (changes: Partial<PricingTableBlockData>) => {
   store.updateBlockData(props.block.id, { ...props.data, ...changes });
 };
+
+// ── Get items from catalog ───────────────────────────────────────
+const catalogItems = computed(() => {
+  return store.getPricingTableItems(props.block.id);
+});
 
 // ── Computed totals ───────────────────────────────────────────
 const fmt = (amount: number) =>
@@ -85,7 +96,7 @@ const fmt = (amount: number) =>
   }).format(amount);
 
 const subtotal = computed(() =>
-  props.data.items
+  catalogItems.value
     .filter((i) => !i.is_optional)
     .reduce((s, i) => s + i.subtotal, 0),
 );
@@ -145,7 +156,7 @@ const gridCols = computed(() => {
       <!-- Rows -->
       <div class="divide-y divide-border">
         <div
-          v-for="item in data.items"
+          v-for="item in catalogItems"
           :key="item.id"
           class="group/row flex items-center gap-2 px-5 transition hover:bg-muted/20"
           :class="item.is_optional ? 'opacity-70' : ''"

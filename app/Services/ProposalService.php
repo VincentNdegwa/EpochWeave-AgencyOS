@@ -3,26 +3,79 @@
 namespace App\Services;
 
 use App\Models\Proposal;
+use App\Models\ProposalItem;
 use Exception;
 use Illuminate\Support\Collection;
 
 class ProposalService
 {
-    public function createProposal(array $data): Proposal
+    
+    public function createProposalWithItems(array $data, array $items = []): Proposal
     {
         try {
-            return Proposal::create($data);
+            $proposal = Proposal::create($data);
+            
+            if (!empty($items)) {
+                $this->createProposalItems($proposal, $items);
+            }
+            
+            return $proposal->fresh(['items.product']);
         } catch (Exception $e) {
-            throw new Exception('Failed to create proposal: '.$e->getMessage());
+            throw new Exception('Failed to create proposal with items: '.$e->getMessage());
         }
     }
 
-    public function updateProposal(Proposal $proposal, array $data): Proposal
+    public function createProposalItems(Proposal $proposal, array $items): void
+    {
+        try {
+            // Prepare items for bulk insert to avoid N+1 queries
+            $proposalItems = [];
+            foreach ($items as $index => $item) {
+                $proposalItems[] = [
+                    'proposal_id' => $proposal->id,
+                    'product_id' => $item['product_id'] ?? null,
+                    'item_name' => $item['description'] ?? '',
+                    'description' => $item['item_description'] ?? null,
+                    'unit_label' => $item['unit'] ?? 'Pcs',
+                    'billing_type' => $item['billing_type'] ?? 'one_time',
+                    'billing_frequency' => $item['billing_frequency'] ?? 'none',
+                    'quantity' => $item['quantity'] ?? 1,
+                    'unit_price' => $item['unit_price'] ?? 0,
+                    'subtotal' => $item['subtotal'] ?? 0,
+                    'discount_type' => $item['item_discount_type'] ?? 'none',
+                    'discount_value' => $item['item_discount_value'] ?? 0,
+                    'discount_amount' => 0, // Calculate if needed
+                    'total' => $item['subtotal'] ?? 0, // For now, same as subtotal
+                    'is_optional' => $item['is_optional'] ?? false,
+                    'is_selected' => true,
+                    'position' => $index, // Use array index as position
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            
+            // Bulk insert to avoid N+1 queries
+            if (!empty($proposalItems)) {
+                ProposalItem::insert($proposalItems);
+            }
+        } catch (Exception $e) {
+            throw new Exception('Failed to create proposal items: '.$e->getMessage());
+        }
+    }
+
+    public function updateProposal(Proposal $proposal, array $data, array $items = []): Proposal
     {
         try {
             $proposal->update($data);
 
-            return $proposal->fresh();
+            // Update line items if provided
+            if (!empty($items)) {
+                // Delete existing items and recreate them
+                $proposal->items()->delete();
+                $this->createProposalItems($proposal, $items);
+            }
+
+            return $proposal->fresh(['items.product']);
         } catch (Exception $e) {
             throw new Exception('Failed to update proposal: '.$e->getMessage());
         }
@@ -37,15 +90,104 @@ class ProposalService
         }
     }
 
+    public function calculateTotalsFromLineItems(array $lineItems): array
+    {
+        $subtotal = 0;
+        $discountTotal = 0;
+        $taxAmount = 0;
+
+        // Calculate subtotal from line items
+        foreach ($lineItems as $item) {
+            $itemSubtotal = ($item['unit_price'] ?? 0) * ($item['quantity'] ?? 1);
+            
+            // Apply item-level discount
+            $itemDiscountType = $item['item_discount_type'] ?? 'none';
+            $itemDiscountValue = $item['item_discount_value'] ?? 0;
+            
+            if ($itemDiscountType === 'percentage' && $itemDiscountValue > 0) {
+                $itemDiscountAmount = $itemSubtotal * ($itemDiscountValue / 100);
+            } elseif ($itemDiscountType === 'fixed' && $itemDiscountValue > 0) {
+                $itemDiscountAmount = $itemDiscountValue;
+            } else {
+                $itemDiscountAmount = 0;
+            }
+            
+            $subtotal += $itemSubtotal - $itemDiscountAmount;
+        }
+
+        $grandTotal = $subtotal - $discountTotal + $taxAmount;
+
+        return [
+            'subtotal' => $subtotal,
+            'discount_total' => $discountTotal,
+            'tax_amount' => $taxAmount,
+            'grand_total' => $grandTotal,
+        ];
+    }
+
+    public function updateProposalTotals(Proposal $proposal, array $lineItems = null): Proposal
+    {
+        try {
+            // Use provided line items or get from proposal items
+            $items = $lineItems ?? $proposal->items->map(function ($item) {
+                return [
+                    'unit_price' => $item->unit_price,
+                    'quantity' => $item->quantity,
+                    'item_discount_type' => $item->discount_type,
+                    'item_discount_value' => $item->discount_value,
+                ];
+            })->toArray();
+
+            $totals = $this->calculateTotalsFromLineItems($items);
+            
+            $proposal->update([
+                'subtotal' => $totals['subtotal'],
+                'discount_total' => $totals['discount_total'],
+                'tax_amount' => $totals['tax_amount'],
+                'grand_total' => $totals['grand_total'],
+            ]);
+
+            return $proposal->fresh();
+        } catch (Exception $e) {
+            throw new Exception('Failed to update proposal totals: '.$e->getMessage());
+        }
+    }
+
+    public function recalculateExistingProposal(int $proposalId): Proposal
+    {
+        try {
+            $proposal = $this->getProposalById($proposalId);
+            if (!$proposal) {
+                throw new Exception('Proposal not found');
+            }
+
+            return $this->updateProposalTotals($proposal);
+        } catch (Exception $e) {
+            throw new Exception('Failed to recalculate existing proposal: '.$e->getMessage());
+        }
+    }
+
     public function getProposalById(int $id): ?Proposal
     {
-        return Proposal::with(['account', 'workspace', 'template'])->find($id);
+        return Proposal::with([
+            'account', 
+            'workspace', 
+            'template', 
+            'items.product' => function ($query) {
+                $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
+            }
+        ])->find($id);
     }
 
     public function getProposalsByWorkspace(int $workspaceId): Collection
     {
         return Proposal::where('workspace_id', $workspaceId)
-            ->with('account')
+            ->with([
+                'account',
+                'items.product' => function ($query) {
+                    $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
+                }
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -53,6 +195,11 @@ class ProposalService
     public function getProposalsByAccount(int $accountId): Collection
     {
         return Proposal::where('account_id', $accountId)
+            ->with([
+                'items.product' => function ($query) {
+                    $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
+                }
+            ])
             ->orderBy('created_at', 'desc')
             ->get();
     }

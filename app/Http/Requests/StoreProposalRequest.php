@@ -70,6 +70,20 @@ class StoreProposalRequest extends FormRequest
             'blocks.*.meta.border_bottom' => 'required|boolean',
             'blocks.*.meta.is_hidden' => 'required|boolean',
             'blocks.*.meta.notes' => 'nullable|string',
+            'line_items' => 'nullable|array',
+            'line_items.*.id' => 'required|string',
+            'line_items.*.description' => 'required|string|max:255',
+            'line_items.*.item_description' => 'nullable|string',
+            'line_items.*.unit' => 'required|string|max:50',
+            'line_items.*.quantity' => 'required|numeric|min:0',
+            'line_items.*.unit_price' => 'required|numeric|min:0',
+            'line_items.*.subtotal' => 'required|numeric|min:0',
+            'line_items.*.billing_type' => 'required|in:one_time,recurring',
+            'line_items.*.billing_frequency' => 'required|in:none,monthly,quarterly,yearly',
+            'line_items.*.is_optional' => 'required|boolean',
+            'line_items.*.product_id' => 'nullable|integer|exists:products,id',
+            'line_items.*.item_discount_type' => 'nullable|in:none,percentage,fixed',
+            'line_items.*.item_discount_value' => 'nullable|numeric|min:0',
         ];
     }
 }

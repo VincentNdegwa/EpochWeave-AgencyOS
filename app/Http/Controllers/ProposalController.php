@@ -63,7 +63,14 @@ class ProposalController extends Controller
                 'token' => Str::uuid(),
             ]);
 
-            $proposal = $this->proposalService->createProposal($data);
+            // Extract line items from payload
+            $lineItems = $data['line_items'] ?? [];
+            unset($data['line_items']);
+
+            $proposal = $this->proposalService->createProposalWithItems($data, $lineItems);
+
+            // Calculate and update totals from line items
+            $this->proposalService->updateProposalTotals($proposal, $lineItems);
 
             $this->workspaceSettingService->incrementNumberingSequence($settings, $nextSequenceNumber);
 
@@ -118,7 +125,14 @@ class ProposalController extends Controller
                 $data['content'] = $content;
             }
 
-            $this->proposalService->updateProposal($proposal, $data);
+            // Extract line items from payload
+            $lineItems = $data['line_items'] ?? [];
+            unset($data['line_items']);
+
+            $this->proposalService->updateProposal($proposal, $data, $lineItems);
+
+            // Calculate and update totals from line items
+            $this->proposalService->updateProposalTotals($proposal, $lineItems);
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal updated successfully.']);
 
