@@ -3,19 +3,12 @@ import { computed } from 'vue';
 import { Label } from '@/components/ui/label';
 import { SeparatorHorizontalIcon, PaletteIcon } from '@lucide/vue';
 import type { DividerBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 import { ColorPresets } from '@/components/ui/color-presets';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<DividerBlockData | null>(() => (block.value?.data as DividerBlockData) ?? null);
-
-const updateData = (changes: Partial<DividerBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<DividerBlockData>(props.blockId);
 
 const styleOptions = [
   { value: 'solid',  label: 'Solid' },

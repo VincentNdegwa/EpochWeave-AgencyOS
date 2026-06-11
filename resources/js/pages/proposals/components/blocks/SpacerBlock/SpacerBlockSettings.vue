@@ -2,18 +2,11 @@
 import { computed } from 'vue';
 import { RulerIcon } from '@lucide/vue';
 import type { SpacerBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<SpacerBlockData | null>(() => (block.value?.data as SpacerBlockData) ?? null);
-
-const updateData = (changes: Partial<SpacerBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<SpacerBlockData>(props.blockId);
 
 const heightOptions = [8, 16, 24, 32, 48, 64] as const;
 </script>

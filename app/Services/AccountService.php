@@ -295,4 +295,14 @@ class AccountService
     {
         return Account::with('contacts')->find($id);
     }
+
+    public function bulkUpdateStatus(array $accountIds, AccountStatus $status): int
+    {
+        return Account::whereIn('id', $accountIds)->update(['status' => $status->value]);
+    }
+
+    public function bulkDelete(array $accountIds): int
+    {
+        return Account::whereIn('id', $accountIds)->delete();
+    }
 }

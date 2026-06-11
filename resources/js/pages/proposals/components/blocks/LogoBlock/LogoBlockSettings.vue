@@ -4,18 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BuildingIcon, LayoutIcon, RulerIcon } from '@lucide/vue';
 import type { LogoBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<LogoBlockData | null>(() => (block.value?.data as LogoBlockData) ?? null);
-
-const updateData = (changes: Partial<LogoBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<LogoBlockData>(props.blockId);
 
 const layoutOptions = [
   { value: 'workspace_only',    label: 'Workspace only' },

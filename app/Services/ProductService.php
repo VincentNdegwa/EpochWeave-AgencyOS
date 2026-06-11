@@ -80,4 +80,59 @@ class ProductService
     {
         return Product::with('unit')->find($id);
     }
+
+    public function bulkUpdateStatus(array $productIds, bool $isActive): int
+    {
+        return Product::whereIn('id', $productIds)->update(['is_active' => $isActive]);
+    }
+
+    public function bulkDelete(array $productIds): int
+    {
+        return Product::whereIn('id', $productIds)->delete();
+    }
+
+    public function getFilteredProducts(int $workspaceId, ?string $status = null, ?string $search = null): array
+    {
+        $query = Product::query()->where('workspace_id', $workspaceId);
+
+        if ($status && $status !== 'all') {
+            if ($status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        if ($search) {
+            $query->where('name', 'like', "%{$search}%");
+        }
+
+        $products = $query->with('unit')->get();
+
+        $stats = $this->getProductStats($workspaceId);
+
+        return [
+            'products' => $products,
+            'stats' => $stats,
+        ];
+    }
+
+    private function getProductStats(int $workspaceId): array
+    {
+        $total = Product::where('workspace_id', $workspaceId)->count();
+        $active = Product::where('workspace_id', $workspaceId)->where('is_active', true)->count();
+        $inactive = Product::where('workspace_id', $workspaceId)->where('is_active', false)->count();
+
+        return [
+            'total' => [
+                'value' => $total,
+            ],
+            'active' => [
+                'value' => $active,
+            ],
+            'inactive' => [
+                'value' => $inactive,
+            ],
+        ];
+    }
 }

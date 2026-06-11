@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Services\ProductService;
 use App\Services\ProductUnitService;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,12 +22,22 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $workspace = $request->attributes->get('current_workspace');
-        $products = $this->productService->getProductsByWorkspace($workspace->id);
         $units = $this->productUnitService->getProductUnitsByWorkspace($workspace->id);
 
+        $result = $this->productService->getFilteredProducts(
+            $workspace->id,
+            $request->query('status'),
+            $request->query('search')
+        );
+
         return Inertia::render('product/index', [
-            'products' => $products,
+            'products' => $result['products'],
             'units' => $units,
+            'stats' => $result['stats'],
+            'filters' => [
+                'status' => $request->query('status', 'all'),
+                'search' => $request->query('search'),
+            ],
         ]);
     }
 
@@ -97,6 +108,47 @@ class ProductController extends Controller
             return redirect()->route('products.index');
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return redirect()->back();
+        }
+    }
+
+    public function bulkUpdateStatus(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:products,id',
+            'is_active' => 'required|boolean',
+        ]);
+
+        try {
+            $updated = $this->productService->bulkUpdateStatus($request->input('ids'), $request->boolean('is_active'));
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => "Successfully updated {$updated} products."]);
+
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'Failed to update products.']);
+
+            return redirect()->back();
+        }
+    }
+
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:products,id',
+        ]);
+
+        try {
+            $deleted = $this->productService->bulkDelete($request->input('ids'));
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => "Successfully deleted {$deleted} products."]);
+
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'Failed to delete products.']);
 
             return redirect()->back();
         }

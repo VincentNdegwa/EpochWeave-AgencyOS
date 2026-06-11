@@ -4,18 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { VideoIcon, LinkIcon } from '@lucide/vue';
 import type { VideoEmbedBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<VideoEmbedBlockData | null>(() => (block.value?.data as VideoEmbedBlockData) ?? null);
-
-const updateData = (changes: Partial<VideoEmbedBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<VideoEmbedBlockData>(props.blockId);
 
 const platformOptions = [
   { value: 'youtube', label: 'YouTube' },

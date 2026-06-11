@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccountStatus;
 use App\Exceptions\AccountException;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use App\Services\AccountService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -101,6 +103,48 @@ class AccountController extends Controller
             return redirect()->route('accounts.index');
         } catch (AccountException $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return redirect()->back();
+        }
+    }
+
+    public function bulkUpdateStatus(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:accounts,id',
+            'status' => 'required|string|in:' . implode(',', array_column(AccountStatus::cases(), 'value')),
+        ]);
+
+        try {
+            $status = AccountStatus::from($request->input('status'));
+            $updated = $this->accountService->bulkUpdateStatus($request->input('ids'), $status);
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => "Successfully updated {$updated} accounts."]);
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'Failed to update accounts.']);
+
+            return redirect()->back();
+        }
+    }
+
+    public function bulkDelete(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:accounts,id',
+        ]);
+
+        try {
+            $deleted = $this->accountService->bulkDelete($request->input('ids'));
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => "Successfully deleted {$deleted} accounts."]);
+
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'Failed to delete accounts.']);
 
             return redirect()->back();
         }

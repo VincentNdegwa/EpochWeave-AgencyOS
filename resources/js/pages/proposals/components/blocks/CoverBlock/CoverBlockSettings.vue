@@ -8,30 +8,12 @@ import { ColorPresets } from '@/components/ui/color-presets';
 import { TextColorPicker } from '@/components/ui/text-color-picker';
 import { ImageIcon, LinkIcon, TypeIcon, ToggleLeftIcon } from '@lucide/vue';
 import type { CoverBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
 
-const store  = useProposalBuilderStore();
 const isUploading = ref(false);
-
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<CoverBlockData | null>(() => {
-  const blockData = block.value?.data;
-  if (!blockData) return null;
-  
-  // Handle reactive wrapper
-  if (blockData && '_custom' in blockData && (blockData as any)._custom?.value) {
-    return (blockData as any)._custom.value as CoverBlockData;
-  }
-  
-  return blockData as CoverBlockData;
-});
-
-const updateData = (changes: Partial<CoverBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<CoverBlockData>(props.blockId);
 
 const handleBackgroundFile = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];

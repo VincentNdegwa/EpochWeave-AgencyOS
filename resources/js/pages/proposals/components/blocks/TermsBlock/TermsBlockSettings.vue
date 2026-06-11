@@ -2,13 +2,11 @@
 import { computed } from 'vue';
 import { FileTextIcon } from '@lucide/vue';
 import type { TermsBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<TermsBlockData | null>(() => (block.value?.data as TermsBlockData) ?? null);
+const { block, data, updateData } = useBlockSettings<TermsBlockData>(props.blockId);
 </script>
 
 <template>

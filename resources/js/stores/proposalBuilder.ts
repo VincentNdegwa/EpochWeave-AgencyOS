@@ -78,8 +78,26 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     [...proposal.value.content].sort((a, b) => a.sort_order - b.sort_order)
   );
 
-  const selectedBlock = computed(() =>
-    proposal.value.content.find((b) => b.id === selectedBlockId.value) ?? null
+  // Helper function to find block recursively including nested blocks
+  function findBlockRecursive(blocks: BaseBlock[], blockId: string): BaseBlock | null {
+    for (const block of blocks) {
+      if (block.id === blockId) {
+        return block;
+      }
+      
+      // Check nested blocks in ColumnBlock
+      if (block.type === 'column' && 'children' in block.data && block.data.children) {
+        for (const column of block.data.children) {
+          const found = findBlockRecursive(column, blockId);
+          if (found) return found;
+        }
+      }
+    }
+    return null;
+  }
+
+  const selectedBlock = computed(() => 
+    findBlockRecursive(proposal.value.content, selectedBlockId.value ?? '')
   );
 
   watch(
@@ -123,8 +141,66 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     updateBlock(blockId, { data });
   }
 
+  // Helper function to update nested block data recursively
+  function updateNestedBlockData(blocks: BaseBlock[], blockId: string, data: any): boolean {
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      
+      if (block.id === blockId) {
+        blocks[i] = { ...block, data };
+        return true;
+      }
+      
+      // Check nested blocks in ColumnBlock
+      if (block.type === 'column' && 'children' in block.data && block.data.children) {
+        for (let j = 0; j < block.data.children.length; j++) {
+          const column = block.data.children[j];
+          if (updateNestedBlockData(column, blockId, data)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  function updateBlockDataRecursive(blockId: string, data: any) {
+    if (updateNestedBlockData(proposal.value.content, blockId, data)) {
+      isDirty.value = true;
+    }
+  }
+
   function updateBlockMeta(blockId: string, meta: any) {
     updateBlock(blockId, { meta });
+  }
+
+  // Helper function to update nested block metadata recursively
+  function updateNestedBlockMeta(blocks: BaseBlock[], blockId: string, meta: any): boolean {
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+      
+      if (block.id === blockId) {
+        blocks[i] = { ...block, meta };
+        return true;
+      }
+      
+      // Check nested blocks in ColumnBlock
+      if (block.type === 'column' && 'children' in block.data && block.data.children) {
+        for (let j = 0; j < block.data.children.length; j++) {
+          const column = block.data.children[j];
+          if (updateNestedBlockMeta(column, blockId, meta)) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  function updateBlockMetaRecursive(blockId: string, meta: any) {
+    if (updateNestedBlockMeta(proposal.value.content, blockId, meta)) {
+      isDirty.value = true;
+    }
   }
 
   function deleteBlock(blockId: string) {
@@ -256,7 +332,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     addBlock,
     updateBlock,
     updateBlockData,
+    updateBlockDataRecursive,
     updateBlockMeta,
+    updateBlockMetaRecursive,
     deleteBlock,
     reorderBlocks,
     duplicateBlock,

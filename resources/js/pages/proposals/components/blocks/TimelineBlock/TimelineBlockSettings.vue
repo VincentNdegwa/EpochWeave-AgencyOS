@@ -2,18 +2,11 @@
 import { computed } from 'vue';
 import { LayoutIcon } from '@lucide/vue';
 import type { TimelineBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<TimelineBlockData | null>(() => (block.value?.data as TimelineBlockData) ?? null);
-
-const updateData = (changes: Partial<TimelineBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<TimelineBlockData>(props.blockId);
 </script>
 
 <template>

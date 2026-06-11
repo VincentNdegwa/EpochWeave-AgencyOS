@@ -5,18 +5,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { PenLineIcon, ToggleLeftIcon } from '@lucide/vue';
 import type { SignatureBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<SignatureBlockData | null>(() => (block.value?.data as SignatureBlockData) ?? null);
-
-const updateData = (changes: Partial<SignatureBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<SignatureBlockData>(props.blockId);
 </script>
 
 <template>

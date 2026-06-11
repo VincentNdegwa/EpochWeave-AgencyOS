@@ -14,6 +14,8 @@ import {
   PenLine,
   MousePointerClick,
   Video,
+  MessageSquare,
+  Columns,
 } from '@lucide/vue';
 import type { BlockType } from '@/types/proposal-builder';
 import CoverBlock from '@/pages/proposals/components/blocks/CoverBlock/CoverBlock.vue';
@@ -44,6 +46,10 @@ import CtaBlock from '@/pages/proposals/components/blocks/CtaBlock/CtaBlock.vue'
 import CtaBlockSettings from '@/pages/proposals/components/blocks/CtaBlock/CtaBlockSettings.vue';
 import VideoEmbedBlock from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlock.vue';
 import VideoEmbedBlockSettings from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlockSettings.vue';
+import CalloutBlock from '@/pages/proposals/components/blocks/CalloutBlock/CalloutBlock.vue';
+import CalloutBlockSettings from '@/pages/proposals/components/blocks/CalloutBlock/CalloutBlockSettings.vue';
+import ColumnBlock from '@/pages/proposals/components/blocks/ColumnBlock/ColumnBlock.vue';
+import ColumnBlockSettings from '@/pages/proposals/components/blocks/ColumnBlock/ColumnBlockSettings.vue';
 
 export type BlockCategory = 'layout' | 'content';
 
@@ -188,6 +194,24 @@ export const blockRegistry: BlockRegistryEntry[] = [
     icon: Video,
     component: VideoEmbedBlock,
     settings: VideoEmbedBlockSettings,
+  },
+  {
+    type: 'callout',
+    label: 'Callout',
+    category: 'content',
+    description: 'Highlighted box with icon — info, tip, warning, quote.',
+    icon: MessageSquare,
+    component: CalloutBlock,
+    settings: CalloutBlockSettings,
+  },
+  {
+    type: 'column',
+    label: 'Columns',
+    category: 'layout',
+    description: 'Place blocks side by side in 2 or 3 columns.',
+    icon: Columns,
+    component: ColumnBlock,
+    settings: ColumnBlockSettings,
   },
 ];
 

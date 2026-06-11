@@ -1,17 +1,18 @@
-<script setup lang="ts" generic="TData, TValue">
-import { ChevronDown } from '@lucide/vue';
+<script setup lang="ts">
+import { Package, ChevronDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from '@lucide/vue';
 import {
     FlexRender,
     getCoreRowModel,
+    getFilteredRowModel,
     getPaginationRowModel,
     getSortedRowModel,
-    getFilteredRowModel,
     useVueTable,
 } from '@tanstack/vue-table';
-import type { ColumnDef } from '@tanstack/vue-table';
-import type { SortingState, ColumnFiltersState } from '@tanstack/vue-table';
-import { ref } from 'vue';
+import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from '@tanstack/vue-table';
+import type { Product } from '@/types/models/product';
+import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
+import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -30,13 +31,21 @@ import {
 import { valueUpdater } from '@/components/ui/table/utils';
 
 const props = defineProps<{
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
+    columns: ColumnDef<Product>[];
+    data: Product[];
+    searchValue?: string;
+    onSearchUpdate?: (value: string | number) => void;
 }>();
 
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
 const columnVisibility = ref<Record<string, boolean>>({});
+
+const rowSelection = ref<RowSelectionState>({});
+
+const selectedRows = computed(() => {
+    return table.getFilteredSelectedRowModel().rows.map(row => row.original);
+});
 
 const table = useVueTable({
     get data() {
@@ -54,6 +63,9 @@ const table = useVueTable({
         valueUpdater(updaterOrValue, columnFilters),
     onColumnVisibilityChange: (updaterOrValue) =>
         valueUpdater(updaterOrValue, columnVisibility),
+    onRowSelectionChange: (updaterOrValue) => {
+        rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue;
+    },
     state: {
         get sorting() {
             return sorting.value;
@@ -64,46 +76,53 @@ const table = useVueTable({
         get columnVisibility() {
             return columnVisibility.value;
         },
+        get rowSelection() {
+            return rowSelection.value;
+        },
     },
 });
 </script>
 
 <template>
     <div class="w-full">
-        <div class="flex items-center gap-2 py-4">
-            <Input
-                placeholder="Filter products..."
-                :model-value="
-                    (table.getColumn('name')?.getFilterValue() as string) ?? ''
-                "
-                class="max-w-sm"
-                @update:model-value="
-                    table.getColumn('name')?.setFilterValue($event)
-                "
-            />
-            <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                    <Button variant="outline" class="ml-auto">
-                        Columns
-                        <ChevronDown class="ml-2 h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuCheckboxItem
-                        v-for="column in table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())"
-                        :key="column.id"
-                        class="capitalize"
-                        :model-value="column.getIsVisible()"
-                        @update:model-value="
-                            (value) => column.toggleVisibility(!!value)
-                        "
-                    >
-                        {{ column.id }}
-                    </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+        <BulkActionsToolbar
+            :selected-rows="selectedRows"
+        />
+        <!-- Toolbar -->
+        <div class="flex flex-wrap items-center gap-2 py-3">
+            <div class="relative flex-1">
+                <Search class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                    v-if="onSearchUpdate"
+                    placeholder="Search products..."
+                    :model-value="searchValue"
+                    class="h-9 max-w-xs pl-9 text-sm"
+                    @update:model-value="onSearchUpdate"
+                />
+            </div>
+            <div class="flex items-center gap-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <Button variant="outline" size="sm" class="h-8 gap-1">
+                            <SlidersHorizontal class="h-3.5 w-3.5" />
+                            View
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuCheckboxItem
+                            v-for="column in table
+                                .getAllColumns()
+                                .filter((column) => column.getCanHide())"
+                            :key="column.id"
+                            class="capitalize"
+                            :model-value="column.getIsVisible()"
+                            @update:model-value="(value) => column.toggleVisibility(!!value)"
+                        >
+                            {{ column.id }}
+                        </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
         </div>
         <div class="rounded-md border">
             <Table>

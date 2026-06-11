@@ -113,6 +113,20 @@ export function createDefaultBlock(type: BlockType): BaseBlock {
             title: 'Attachments',
             files: [],
         },
+        callout: {
+            content: '<p>Add your callout content here.</p>',
+            icon: 'ℹ️',
+            background_color: '#EFF6FF',
+            accent_color: '#3B82F6',
+            border_left: true,
+        },
+        column: {
+            columns: 2,
+            gap: 'md',
+            vertical_align: 'start',
+            column_widths: null,
+            children: [[], []],
+        },
     };
 
     return {

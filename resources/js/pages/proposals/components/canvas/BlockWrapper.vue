@@ -25,11 +25,33 @@ const meta = computed<BlockMeta>(() => ({
 
 provide(blockMetaInjectionKey, meta);
 
-const handleSelect = () => {
+const handleSelect = (event: MouseEvent) => {
   if (props.isLocked) {
     return;
   }
-  store.selectBlock(props.block.id);
+  
+  // Only select if the click target is the wrapper itself or its direct children
+  // This prevents interfering with nested block clicks
+  const target = event.target as Element;
+  const wrapper = event.currentTarget as Element;
+  
+  // Check if the click is on the wrapper itself or a direct child
+  // If it's on a nested element inside the slot, don't handle it
+  if (target === wrapper || wrapper.contains(target) && !isNestedElement(target, wrapper)) {
+    store.selectBlock(props.block.id);
+  }
+};
+
+// Helper function to check if an element is nested (not a direct child of wrapper)
+const isNestedElement = (target: Element, wrapper: Element): boolean => {
+  let current = target.parentElement;
+  while (current && current !== wrapper) {
+    if (current.hasAttribute('data-nested-block')) {
+      return true;
+    }
+    current = current.parentElement;
+  }
+  return false;
 };
 </script>
 
@@ -39,7 +61,7 @@ const handleSelect = () => {
     :class="[
       isSelected && !props.isLocked ? 'ring-2 ring-primary ring-offset-2' : 'ring-1 ring-transparent',
     ]"
-    @click.stop="handleSelect"
+    @click="handleSelect"
   >
     <BlockToolbar v-if="!props.isLocked" :block="props.block" :is-selected="isSelected" />
     <BlockSurface :meta="meta" :is-locked="props.isLocked">

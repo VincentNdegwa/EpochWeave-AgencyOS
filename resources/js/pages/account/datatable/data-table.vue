@@ -1,4 +1,4 @@
-<script setup lang="ts" generic="TData, TValue">
+<script setup lang="ts">
 import { Building2, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from '@lucide/vue';
 import {
     FlexRender,
@@ -8,9 +8,11 @@ import {
     getSortedRowModel,
     useVueTable,
 } from '@tanstack/vue-table';
-import type { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/vue-table';
+import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from '@tanstack/vue-table';
+import type { Account } from '@/types/models/account';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
+import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -27,10 +29,11 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { valueUpdater } from '@/components/ui/table/utils';
+import { computed } from 'vue';
 
 const props = defineProps<{
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
+    columns: ColumnDef<Account>[];
+    data: Account[];
     searchValue?: string;
     dateFrom?: string;
     dateTo?: string;
@@ -42,6 +45,12 @@ const props = defineProps<{
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
 const columnVisibility = ref<Record<string, boolean>>({});
+
+const rowSelection = ref<RowSelectionState>({});
+
+const selectedRows = computed(() => {
+    return table.getFilteredSelectedRowModel().rows.map(row => row.original);
+});
 
 const table = useVueTable({
     get data() {
@@ -57,6 +66,7 @@ const table = useVueTable({
     onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
     onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
     onColumnVisibilityChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnVisibility),
+    onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
     state: {
         get sorting() {
             return sorting.value;
@@ -67,12 +77,18 @@ const table = useVueTable({
         get columnVisibility() {
             return columnVisibility.value;
         },
+        get rowSelection() {
+            return rowSelection.value;
+        },
     },
 });
 </script>
 
 <template>
     <div class="w-full">
+        <BulkActionsToolbar
+            :selected-rows="selectedRows"
+        />
         <!-- Toolbar -->
         <div class="flex flex-wrap items-center gap-2 py-3">
             <div class="relative flex-1">
@@ -211,3 +227,18 @@ const table = useVueTable({
         </div>
     </div>
 </template>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

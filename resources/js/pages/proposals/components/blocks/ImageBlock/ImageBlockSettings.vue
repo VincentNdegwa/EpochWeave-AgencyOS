@@ -22,24 +22,15 @@ import {
 } from '@lucide/vue';
 import { nanoid } from 'nanoid';
 import type { ImageBlockData, ImageItem } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
 
-const store = useProposalBuilderStore();
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<ImageBlockData | null>(
-  () => (block.value?.data as ImageBlockData) ?? null,
-);
+const { block, data, updateData } = useBlockSettings<ImageBlockData>(props.blockId);
 
 const expandedImageId = ref<string | null>(
   data.value?.images?.[0]?.id ?? null,
 );
-
-const updateData = (changes: Partial<ImageBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
 
 const updateImage = (id: string, changes: Partial<ImageItem>) => {
   if (!data.value) return;

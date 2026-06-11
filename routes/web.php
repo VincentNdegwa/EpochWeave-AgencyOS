@@ -27,6 +27,10 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::post('/workspaces/{workspace}/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
 
     Route::resource('accounts', AccountController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+    Route::post('/accounts/bulk-status', [AccountController::class, 'bulkUpdateStatus'])
+        ->name('accounts.bulk-status');
+    Route::post('/accounts/bulk', [AccountController::class, 'bulkDelete'])
+        ->name('accounts.bulk-delete');
     Route::post('/accounts/{account}/contacts', [AccountContactController::class, 'store'])
         ->name('accounts.contacts.store');
     Route::put('/accounts/{account}/contacts/{contact}', [AccountContactController::class, 'update'])
@@ -36,6 +40,10 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
 
     Route::resource('product-units', ProductUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::post('/products/bulk-status', [ProductController::class, 'bulkUpdateStatus'])
+        ->name('products.bulk-status');
+    Route::post('/products/bulk', [ProductController::class, 'bulkDelete'])
+        ->name('products.bulk-delete');
 
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('proposals', ProposalController::class);

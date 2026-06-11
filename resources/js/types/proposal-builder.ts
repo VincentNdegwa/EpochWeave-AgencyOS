@@ -13,7 +13,9 @@ export type BlockType =
   | 'signature'
   | 'cta'
   | 'video_embed'
-  | 'file_attachment';
+  | 'file_attachment'
+  | 'callout'
+  | 'column';
 
 
 export type PaddingSize = 'none' | 'sm' | 'md' | 'lg' | 'xl'
@@ -66,7 +68,9 @@ export type BlockData =
   | SignatureBlockData
   | CtaBlockData
   | VideoEmbedBlockData
-  | FileAttachmentBlockData;
+  | FileAttachmentBlockData
+  | CalloutBlockData
+  | ColumnBlockData;
 
 export interface CoverBlockData {
   heading: string;
@@ -254,4 +258,35 @@ export interface FileAttachment {
   url: string;
   size: number;
   type: string;
+}
+
+// ── CALLOUT BLOCK ────────────────────────────────────────────
+// A styled container: icon + rich text + background + accent border
+// Replaces the need for "tip box", "warning box", "quote block" etc.
+
+export interface CalloutBlockData {
+  content:          string           // HTML from Quill
+  icon:             string | null    // Emoji or null
+  background_color: string | null    // hex or null (transparent)
+  accent_color:     string           // used for left border — default '#6366f1'
+  border_left:      boolean          // show left accent bar — default true
+}
+
+// ── COLUMN BLOCK ─────────────────────────────────────────────
+// Layout container. Holds other blocks in a configurable grid.
+// This is the composability layer — no need for a Figma canvas.
+
+export interface ColumnBlockData {
+  columns:        1 | 2 | 3
+  gap:            'sm' | 'md' | 'lg'
+  vertical_align: 'start' | 'center' | 'end'
+  column_widths:  number[] | null
+  // null = equal widths
+  // [60, 40] = custom ratio for 2-col (must sum to 100)
+  // Only used when columns = 2
+  children:       BaseBlock[][]
+  // children[0] = blocks in column 1
+  // children[1] = blocks in column 2
+  // children[2] = blocks in column 3
+  // Array length always === columns
 }

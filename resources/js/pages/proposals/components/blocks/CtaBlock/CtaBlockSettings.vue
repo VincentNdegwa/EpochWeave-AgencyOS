@@ -4,18 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MousePointerClickIcon, AlignCenterIcon } from '@lucide/vue';
 import type { CtaBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<CtaBlockData | null>(() => (block.value?.data as CtaBlockData) ?? null);
-
-const updateData = (changes: Partial<CtaBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<CtaBlockData>(props.blockId);
 
 const alignOptions = [
   { value: 'left',   label: 'Left' },

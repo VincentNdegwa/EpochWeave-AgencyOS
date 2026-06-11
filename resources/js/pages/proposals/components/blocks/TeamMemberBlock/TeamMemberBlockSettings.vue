@@ -2,18 +2,11 @@
 import { computed } from 'vue';
 import { LayoutIcon } from '@lucide/vue';
 import type { TeamMemberBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<TeamMemberBlockData | null>(() => (block.value?.data as TeamMemberBlockData) ?? null);
-
-const updateData = (changes: Partial<TeamMemberBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<TeamMemberBlockData>(props.blockId);
 </script>
 
 <template>

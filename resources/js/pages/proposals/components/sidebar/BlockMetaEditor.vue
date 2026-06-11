@@ -22,7 +22,7 @@ const props = defineProps<{ blockId: string }>();
 
 const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
+const block = computed(() => store.selectedBlockId === props.blockId ? store.selectedBlock : null);
 const meta  = computed<BlockMeta>(() => block.value?.meta ?? {
   padding_top:      'md',
   padding_bottom:   'md',
@@ -35,7 +35,7 @@ const meta  = computed<BlockMeta>(() => block.value?.meta ?? {
 
 const updateMeta = (changes: Partial<BlockMeta>) => {
   if (!block.value) return;
-  store.updateBlockMeta(block.value.id, { ...meta.value, ...changes });
+  store.updateBlockMetaRecursive(block.value.id, { ...meta.value, ...changes });
 };
 
 // ── Padding options ───────────────────────────────────────────
@@ -57,7 +57,6 @@ const backgroundColorModel = computed({
   },
 });
 
-// ── Notes expanded state ──────────────────────────────────────
 const notesOpen = ref(!!(meta.value.notes?.length))
 </script>
 

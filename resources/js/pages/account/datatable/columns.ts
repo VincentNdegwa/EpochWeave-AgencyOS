@@ -4,6 +4,7 @@ import type { ColumnDef } from '@tanstack/vue-table';
 import { h } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,6 +23,21 @@ export function createColumns(
     onEdit?: (account: Account) => void,
 ): ColumnDef<Account>[] {
     return [
+        {
+            id: 'select',
+            header: ({ table }) => h(Checkbox, {
+                modelValue: table.getIsAllPageRowsSelected(),
+                'onUpdate:modelValue': (value: boolean | "indeterminate") => table.toggleAllPageRowsSelected(value as boolean),
+                'aria-label': 'Select all',
+            }),
+            cell: ({ row }) => h(Checkbox, {
+                modelValue: row.getIsSelected(),
+                'onUpdate:modelValue': (value: boolean | "indeterminate") => row.toggleSelected(value as boolean),
+                'aria-label': 'Select row',
+            }),
+            enableSorting: false,
+            enableHiding: false,
+        },
         {
             accessorKey: 'company_name',
             header: 'Company',

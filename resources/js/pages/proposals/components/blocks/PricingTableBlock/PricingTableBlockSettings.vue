@@ -6,18 +6,11 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { TableIcon, CoinsIcon, ToggleLeftIcon, TagIcon } from '@lucide/vue';
 import type { PricingTableBlockData, PricingDiscount } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useBlockSettings } from '@/composables/useBlockSettings';
 
 const props = defineProps<{ blockId: string }>();
-const store = useProposalBuilderStore();
 
-const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ?? null);
-const data  = computed<PricingTableBlockData | null>(() => (block.value?.data as PricingTableBlockData) ?? null);
-
-const updateData = (changes: Partial<PricingTableBlockData>) => {
-  if (!block.value || !data.value) return;
-  store.updateBlockData(block.value.id, { ...data.value, ...changes });
-};
+const { block, data, updateData } = useBlockSettings<PricingTableBlockData>(props.blockId);
 
 const updateDiscount = (changes: Partial<PricingDiscount>) => {
   if (!data.value) return;
