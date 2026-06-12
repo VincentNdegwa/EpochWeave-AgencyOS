@@ -86,7 +86,7 @@ class ProductTest extends TestCase
 
         $this->productService->deleteProduct($product);
 
-        $this->assertDatabaseMissing('products', ['id' => $product->id]);
+        $this->assertSoftDeleted('products', ['id' => $product->id]);
     }
 
     public function test_can_get_products_by_workspace(): void

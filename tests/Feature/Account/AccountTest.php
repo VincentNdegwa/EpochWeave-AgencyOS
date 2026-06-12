@@ -136,7 +136,7 @@ class AccountTest extends TestCase
             ->delete("/accounts/{$account->id}");
 
         $response->assertRedirect();
-        $this->assertDatabaseMissing('accounts', [
+        $this->assertSoftDeleted('accounts', [
             'id' => $account->id,
         ]);
     }

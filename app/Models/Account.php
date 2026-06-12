@@ -13,6 +13,16 @@ class Account extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function ($account) {
+            // Delete related portal invitations when account is deleted (including soft delete)
+            $account->portalInvitations()->delete();
+        });
+    }
+
     protected $fillable = [
         'workspace_id',
         'company_name',
@@ -35,5 +45,10 @@ class Account extends Model
     public function contacts(): HasMany
     {
         return $this->hasMany(AccountContact::class);
+    }
+
+    public function portalInvitations(): HasMany
+    {
+        return $this->hasMany(PortalInvitation::class);
     }
 }
