@@ -89,7 +89,9 @@ watch(
             <Form
                 v-bind="
                     (proposal
-                        ? ProposalController.update.form({ proposal: proposal.id })
+                        ? ProposalController.update.form({
+                              proposal: proposal.id,
+                          })
                         : ProposalController.store.form()) as any
                 "
                 v-slot="{ errors, processing }"
@@ -116,11 +118,15 @@ watch(
                                 required
                             >
                                 <SelectTrigger class="w-full">
-                                    <SelectValue placeholder="Select an account" />
+                                    <SelectValue
+                                        placeholder="Select an account"
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <!-- Account options would be populated here -->
-                                    <SelectItem value="1">Example Account</SelectItem>
+                                    <SelectItem value="1"
+                                        >Example Account</SelectItem
+                                    >
                                 </SelectContent>
                             </Select>
                             <InputError :message="errors.account_id" />
@@ -128,12 +134,11 @@ watch(
 
                         <div class="grid gap-2">
                             <Label for="currency">Currency</Label>
-                            <Select
-                                name="currency"
-                                v-model="form.currency"
-                            >
+                            <Select name="currency" v-model="form.currency">
                                 <SelectTrigger class="w-full">
-                                    <SelectValue placeholder="Select currency" />
+                                    <SelectValue
+                                        placeholder="Select currency"
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="USD">USD</SelectItem>

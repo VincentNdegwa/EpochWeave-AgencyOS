@@ -19,7 +19,6 @@ const props = withDefaults(
 const emit = defineEmits<{
     (e: 'update:modelValue', value: string | null): void;
 }>();
-
 </script>
 
 <template>
@@ -28,11 +27,16 @@ const emit = defineEmits<{
             v-if="!props.isLocked"
             :model-value="props.modelValue ?? ''"
             :placeholder="props.placeholder"
-            @update:model-value="(value: string | number) => emit('update:modelValue', String(value) || null)"
-            :class="cn(
-                '-mx-2 cursor-text text-lg font-semibold hover:bg-muted/50 border-none bg-transparent h-auto',
-                props.color ? { color: props.color } : undefined
-            )"
+            @update:model-value="
+                (value: string | number) =>
+                    emit('update:modelValue', String(value) || null)
+            "
+            :class="
+                cn(
+                    '-mx-2 h-auto cursor-text border-none bg-transparent text-lg font-semibold hover:bg-muted/50',
+                    props.color ? { color: props.color } : undefined,
+                )
+            "
             :style="props.color ? { color: props.color } : undefined"
         />
         <p

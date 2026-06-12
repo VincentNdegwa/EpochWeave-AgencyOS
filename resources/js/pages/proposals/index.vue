@@ -109,7 +109,8 @@ defineOptions({
             <div>
                 <h4 class="font-bold tracking-tight">Proposals</h4>
                 <p class="text-muted-foreground">
-                    Manage your proposals and track their status throughout the sales pipeline.
+                    Manage your proposals and track their status throughout the
+                    sales pipeline.
                 </p>
             </div>
             <div class="flex gap-2">
@@ -142,12 +143,17 @@ defineOptions({
             <button
                 v-for="tab in statusTabs"
                 :key="tab.value"
-                @click="updateFilters({ status: tab.value === 'all' ? undefined : tab.value, search: props.filters?.search })"
+                @click="
+                    updateFilters({
+                        status: tab.value === 'all' ? undefined : tab.value,
+                        search: props.filters?.search,
+                    })
+                "
                 :class="[
-                    'px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px',
+                    '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
                     props.filters?.status === tab.value
                         ? 'border-primary text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        : 'border-transparent text-muted-foreground hover:text-foreground',
                 ]"
             >
                 {{ tab.label }}
@@ -158,7 +164,13 @@ defineOptions({
             :columns="columns"
             :data="proposals"
             :search-value="props.filters?.search"
-            :on-search-update="(value: string | number) => updateFilters({ status: props.filters?.status, search: String(value) })"
+            :on-search-update="
+                (value: string | number) =>
+                    updateFilters({
+                        status: props.filters?.status,
+                        search: String(value),
+                    })
+            "
         />
 
         <ProposalFormDialog

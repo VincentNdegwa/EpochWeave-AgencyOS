@@ -18,7 +18,10 @@ defineProps<{
     stats: {
         total: { value: number; change?: { value: number; label: string } };
         lead: { value: number; change?: { value: number; label: string } };
-        opportunity: { value: number; change?: { value: number; label: string } };
+        opportunity: {
+            value: number;
+            change?: { value: number; label: string };
+        };
         client: { value: number; change?: { value: number; label: string } };
         archived: { value: number; change?: { value: number; label: string } };
     };
@@ -99,11 +102,31 @@ defineOptions({
 
         <!-- Overview Cards -->
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <StatsCard title="Total Accounts" :value="stats.total.value" :change="stats.total.change" />
-            <StatsCard title="Leads" :value="stats.lead.value" :change="stats.lead.change" />
-            <StatsCard title="Opportunities" :value="stats.opportunity.value" :change="stats.opportunity.change" />
-            <StatsCard title="Clients" :value="stats.client.value" :change="stats.client.change" />
-            <StatsCard title="Archived" :value="stats.archived.value" :change="stats.archived.change" />
+            <StatsCard
+                title="Total Accounts"
+                :value="stats.total.value"
+                :change="stats.total.change"
+            />
+            <StatsCard
+                title="Leads"
+                :value="stats.lead.value"
+                :change="stats.lead.change"
+            />
+            <StatsCard
+                title="Opportunities"
+                :value="stats.opportunity.value"
+                :change="stats.opportunity.change"
+            />
+            <StatsCard
+                title="Clients"
+                :value="stats.client.value"
+                :change="stats.client.change"
+            />
+            <StatsCard
+                title="Archived"
+                :value="stats.archived.value"
+                :change="stats.archived.change"
+            />
         </div>
 
         <!-- Status Tabs -->
@@ -111,12 +134,19 @@ defineOptions({
             <button
                 v-for="tab in statusTabs"
                 :key="tab.value"
-                @click="updateFilters({ status: tab.value === 'all' ? undefined : tab.value, search: filters.search, date_from: filters.date_from, date_to: filters.date_to })"
+                @click="
+                    updateFilters({
+                        status: tab.value === 'all' ? undefined : tab.value,
+                        search: filters.search,
+                        date_from: filters.date_from,
+                        date_to: filters.date_to,
+                    })
+                "
                 :class="[
-                    'px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px',
+                    '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
                     filters.status === tab.value
                         ? 'border-primary text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        : 'border-transparent text-muted-foreground hover:text-foreground',
                 ]"
             >
                 {{ tab.label }}
@@ -130,9 +160,42 @@ defineOptions({
             :search-value="filters.search"
             :date-from="filters.date_from"
             :date-to="filters.date_to"
-            :on-search-update="(value) => updateFilters({ status: filters.status === 'all' ? undefined : filters.status, search: value || undefined, date_from: filters.date_from, date_to: filters.date_to })"
-            :on-date-from-update="(value) => updateFilters({ status: filters.status === 'all' ? undefined : filters.status, search: filters.search, date_from: value || undefined, date_to: filters.date_to })"
-            :on-date-to-update="(value) => updateFilters({ status: filters.status === 'all' ? undefined : filters.status, search: filters.search, date_from: filters.date_from, date_to: value || undefined })"
+            :on-search-update="
+                (value) =>
+                    updateFilters({
+                        status:
+                            filters.status === 'all'
+                                ? undefined
+                                : filters.status,
+                        search: value || undefined,
+                        date_from: filters.date_from,
+                        date_to: filters.date_to,
+                    })
+            "
+            :on-date-from-update="
+                (value) =>
+                    updateFilters({
+                        status:
+                            filters.status === 'all'
+                                ? undefined
+                                : filters.status,
+                        search: filters.search,
+                        date_from: value || undefined,
+                        date_to: filters.date_to,
+                    })
+            "
+            :on-date-to-update="
+                (value) =>
+                    updateFilters({
+                        status:
+                            filters.status === 'all'
+                                ? undefined
+                                : filters.status,
+                        search: filters.search,
+                        date_from: filters.date_from,
+                        date_to: value || undefined,
+                    })
+            "
         />
 
         <AccountFormDialog

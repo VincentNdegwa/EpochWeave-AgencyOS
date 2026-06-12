@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { Building2, CalendarDays, ChevronDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from '@lucide/vue';
+import {
+    Building2,
+    CalendarDays,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Search,
+    SlidersHorizontal,
+} from '@lucide/vue';
 import {
     FlexRender,
     getCoreRowModel,
@@ -8,7 +16,12 @@ import {
     getSortedRowModel,
     useVueTable,
 } from '@tanstack/vue-table';
-import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from '@tanstack/vue-table';
+import type {
+    ColumnDef,
+    ColumnFiltersState,
+    RowSelectionState,
+    SortingState,
+} from '@tanstack/vue-table';
 import { ref } from 'vue';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -49,7 +62,7 @@ const columnVisibility = ref<Record<string, boolean>>({});
 const rowSelection = ref<RowSelectionState>({});
 
 const selectedRows = computed(() => {
-    return table.getFilteredSelectedRowModel().rows.map(row => row.original);
+    return table.getFilteredSelectedRowModel().rows.map((row) => row.original);
 });
 
 const table = useVueTable({
@@ -64,9 +77,12 @@ const table = useVueTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: (updaterOrValue) => valueUpdater(updaterOrValue, sorting),
-    onColumnFiltersChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnFilters),
-    onColumnVisibilityChange: (updaterOrValue) => valueUpdater(updaterOrValue, columnVisibility),
-    onRowSelectionChange: (updaterOrValue) => valueUpdater(updaterOrValue, rowSelection),
+    onColumnFiltersChange: (updaterOrValue) =>
+        valueUpdater(updaterOrValue, columnFilters),
+    onColumnVisibilityChange: (updaterOrValue) =>
+        valueUpdater(updaterOrValue, columnVisibility),
+    onRowSelectionChange: (updaterOrValue) =>
+        valueUpdater(updaterOrValue, rowSelection),
     state: {
         get sorting() {
             return sorting.value;
@@ -86,13 +102,13 @@ const table = useVueTable({
 
 <template>
     <div class="w-full">
-        <BulkActionsToolbar
-            :selected-rows="selectedRows"
-        />
+        <BulkActionsToolbar :selected-rows="selectedRows" />
         <!-- Toolbar -->
         <div class="flex flex-wrap items-center gap-2 py-3">
             <div class="relative flex-1">
-                <Search class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Search
+                    class="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                />
                 <Input
                     v-if="onSearchUpdate"
                     placeholder="Search accounts..."
@@ -104,7 +120,9 @@ const table = useVueTable({
 
             <div class="flex items-center gap-2">
                 <div v-if="onDateFromUpdate" class="relative flex items-center">
-                    <CalendarDays class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <CalendarDays
+                        class="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                    />
                     <Input
                         type="date"
                         :model-value="dateFrom"
@@ -112,9 +130,15 @@ const table = useVueTable({
                         @update:model-value="onDateFromUpdate(String($event))"
                     />
                 </div>
-                <span v-if="onDateFromUpdate && onDateToUpdate" class="text-xs text-muted-foreground">—</span>
+                <span
+                    v-if="onDateFromUpdate && onDateToUpdate"
+                    class="text-xs text-muted-foreground"
+                    >—</span
+                >
                 <div v-if="onDateToUpdate" class="relative flex items-center">
-                    <CalendarDays class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <CalendarDays
+                        class="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                    />
                     <Input
                         type="date"
                         :model-value="dateTo"
@@ -133,11 +157,15 @@ const table = useVueTable({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" class="w-40">
                         <DropdownMenuCheckboxItem
-                            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+                            v-for="column in table
+                                .getAllColumns()
+                                .filter((column) => column.getCanHide())"
                             :key="column.id"
                             class="capitalize"
                             :model-value="column.getIsVisible()"
-                            @update:model-value="(value) => column.toggleVisibility(!!value)"
+                            @update:model-value="
+                                (value) => column.toggleVisibility(!!value)
+                            "
                         >
                             {{ column.id.replace('_', ' ') }}
                         </DropdownMenuCheckboxItem>
@@ -158,7 +186,7 @@ const table = useVueTable({
                         <TableHead
                             v-for="header in headerGroup.headers"
                             :key="header.id"
-                            class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                            class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
                         >
                             <FlexRender
                                 v-if="!header.isPlaceholder"
@@ -173,23 +201,42 @@ const table = useVueTable({
                         <TableRow
                             v-for="row in table.getRowModel().rows"
                             :key="row.id"
-                            :data-state="row.getIsSelected() ? 'selected' : undefined"
+                            :data-state="
+                                row.getIsSelected() ? 'selected' : undefined
+                            "
                             class="transition-colors"
                         >
-                            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                            <TableCell
+                                v-for="cell in row.getVisibleCells()"
+                                :key="cell.id"
+                            >
+                                <FlexRender
+                                    :render="cell.column.columnDef.cell"
+                                    :props="cell.getContext()"
+                                />
                             </TableCell>
                         </TableRow>
                     </template>
                     <template v-else>
                         <TableRow>
-                            <TableCell :colspan="columns.length" class="h-40 text-center">
-                                <div class="flex flex-col items-center gap-2 text-muted-foreground">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                            <TableCell
+                                :colspan="columns.length"
+                                class="h-40 text-center"
+                            >
+                                <div
+                                    class="flex flex-col items-center gap-2 text-muted-foreground"
+                                >
+                                    <div
+                                        class="flex h-10 w-10 items-center justify-center rounded-full bg-muted"
+                                    >
                                         <Building2 class="h-5 w-5" />
                                     </div>
-                                    <p class="text-sm font-medium">No accounts found</p>
-                                    <p class="text-xs">Try adjusting your search or filters.</p>
+                                    <p class="text-sm font-medium">
+                                        No accounts found
+                                    </p>
+                                    <p class="text-xs">
+                                        Try adjusting your search or filters.
+                                    </p>
                                 </div>
                             </TableCell>
                         </TableRow>
@@ -202,7 +249,11 @@ const table = useVueTable({
         <div class="flex items-center justify-between py-3">
             <p class="text-xs text-muted-foreground">
                 {{ table.getFilteredRowModel().rows.length }}
-                {{ table.getFilteredRowModel().rows.length === 1 ? 'account' : 'accounts' }}
+                {{
+                    table.getFilteredRowModel().rows.length === 1
+                        ? 'account'
+                        : 'accounts'
+                }}
             </p>
             <div class="flex items-center gap-1">
                 <Button
@@ -227,18 +278,3 @@ const table = useVueTable({
         </div>
     </div>
 </template>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

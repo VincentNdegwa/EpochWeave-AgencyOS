@@ -38,7 +38,7 @@ const table = useVueTable({
                     <TableHead
                         v-for="header in headerGroup.headers"
                         :key="header.id"
-                        class="text-xs font-medium uppercase tracking-wider text-muted-foreground"
+                        class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
                     >
                         <FlexRender
                             v-if="!header.isPlaceholder"

@@ -8,7 +8,11 @@ import {
     getSortedRowModel,
     useVueTable,
 } from '@tanstack/vue-table';
-import type { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/vue-table';
+import type {
+    ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+} from '@tanstack/vue-table';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -75,7 +79,9 @@ const table = useVueTable({
         <!-- Toolbar -->
         <div class="flex flex-wrap items-center gap-2 py-3">
             <div class="relative flex-1">
-                <Search class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <Search
+                    class="absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground"
+                />
                 <Input
                     placeholder="Search statuses..."
                     :model-value="searchValue"
@@ -99,7 +105,9 @@ const table = useVueTable({
                             :key="column.id"
                             class="capitalize"
                             :model-value="column.getIsVisible()"
-                            @update:model-value="(value) => column.toggleVisibility(!!value)"
+                            @update:model-value="
+                                (value) => column.toggleVisibility(!!value)
+                            "
                         >
                             {{ column.id }}
                         </DropdownMenuCheckboxItem>

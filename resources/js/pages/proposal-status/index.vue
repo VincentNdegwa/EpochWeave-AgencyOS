@@ -87,7 +87,10 @@ defineOptions({
             :columns="columns"
             :data="proposal_statuses"
             :search-value="filters?.search"
-            :on-search-update="(value: string | number) => updateFilters({ search: String(value) })"
+            :on-search-update="
+                (value: string | number) =>
+                    updateFilters({ search: String(value) })
+            "
         />
 
         <ProposalStatusFormDialog

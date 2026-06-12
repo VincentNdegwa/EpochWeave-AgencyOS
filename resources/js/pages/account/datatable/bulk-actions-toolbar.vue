@@ -22,16 +22,18 @@ const selectionText = computed(() => {
 
 const handleBulkArchive = async () => {
     if (!hasSelection.value) {
-return;
-}
+        return;
+    }
 
     const confirmed = await confirm({
-        title: props.selectedRows.length === 1 
-            ? 'Archive Account' 
-            : `Archive ${props.selectedRows.length} Accounts`,
-        description: props.selectedRows.length === 1
-            ? 'Are you sure you want to archive this account? This can be undone later.'
-            : `Are you sure you want to archive ${props.selectedRows.length} accounts? This can be undone later.`,
+        title:
+            props.selectedRows.length === 1
+                ? 'Archive Account'
+                : `Archive ${props.selectedRows.length} Accounts`,
+        description:
+            props.selectedRows.length === 1
+                ? 'Are you sure you want to archive this account? This can be undone later.'
+                : `Are you sure you want to archive ${props.selectedRows.length} accounts? This can be undone later.`,
         confirmText: 'Archive',
         cancelText: 'Cancel',
         variant: 'default',
@@ -39,11 +41,11 @@ return;
 
     if (confirmed) {
         try {
-            const accountIds = props.selectedRows.map(account => account.id);
-            
+            const accountIds = props.selectedRows.map((account) => account.id);
+
             await router.post(accounts.bulkStatus().url, {
                 ids: accountIds,
-                status: 'archived'
+                status: 'archived',
             });
         } catch (error) {
             console.error('Error during bulk archive:', error);
@@ -53,16 +55,18 @@ return;
 
 const handleBulkDelete = async () => {
     if (!hasSelection.value) {
-return;
-}
+        return;
+    }
 
     const confirmed = await confirm({
-        title: props.selectedRows.length === 1 
-            ? 'Delete Account' 
-            : `Delete ${props.selectedRows.length} Accounts`,
-        description: props.selectedRows.length === 1
-            ? 'Are you sure you want to delete this account? This action cannot be undone.'
-            : `Are you sure you want to delete ${props.selectedRows.length} accounts? This action cannot be undone.`,
+        title:
+            props.selectedRows.length === 1
+                ? 'Delete Account'
+                : `Delete ${props.selectedRows.length} Accounts`,
+        description:
+            props.selectedRows.length === 1
+                ? 'Are you sure you want to delete this account? This action cannot be undone.'
+                : `Are you sure you want to delete ${props.selectedRows.length} accounts? This action cannot be undone.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         variant: 'destructive',
@@ -70,10 +74,10 @@ return;
 
     if (confirmed) {
         try {
-            const accountIds = props.selectedRows.map(account => account.id);
-            
+            const accountIds = props.selectedRows.map((account) => account.id);
+
             await router.post(accounts.bulkDelete().url, {
-                ids: accountIds
+                ids: accountIds,
             });
         } catch (error) {
             console.error('Error during bulk delete:', error);
@@ -83,11 +87,16 @@ return;
 </script>
 
 <template>
-    <div v-if="hasSelection" class="flex items-center justify-between p-3 bg-muted/50 border-b">
+    <div
+        v-if="hasSelection"
+        class="flex items-center justify-between border-b bg-muted/50 p-3"
+    >
         <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-muted-foreground">{{ selectionText }}</span>
+            <span class="text-sm font-medium text-muted-foreground">{{
+                selectionText
+            }}</span>
         </div>
-        
+
         <div class="flex items-center gap-2">
             <Button
                 variant="outline"
@@ -95,7 +104,7 @@ return;
                 @click="handleBulkArchive"
                 class="gap-1"
             >
-                <Archive class="w-4 h-4" />
+                <Archive class="h-4 w-4" />
                 Archive
             </Button>
             <Button
@@ -104,7 +113,7 @@ return;
                 @click="handleBulkDelete"
                 class="gap-1"
             >
-                <Trash2 class="w-4 h-4" />
+                <Trash2 class="h-4 w-4" />
                 Delete
             </Button>
         </div>

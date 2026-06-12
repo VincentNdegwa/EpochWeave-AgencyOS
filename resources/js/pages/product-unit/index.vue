@@ -74,7 +74,8 @@ defineOptions({
             <div>
                 <h4 class="font-bold tracking-tight">Product Units</h4>
                 <p class="text-muted-foreground">
-                    Manage measurement units for your products (e.g., hours, months, flat fee).
+                    Manage measurement units for your products (e.g., hours,
+                    months, flat fee).
                 </p>
             </div>
             <Button type="button" @click="handleCreate">
@@ -87,7 +88,10 @@ defineOptions({
             :columns="columns"
             :data="product_units"
             :search-value="filters?.search"
-            :on-search-update="(value: string | number) => updateFilters({ search: String(value) })"
+            :on-search-update="
+                (value: string | number) =>
+                    updateFilters({ search: String(value) })
+            "
         />
 
         <ProductUnitFormDialog

@@ -7,55 +7,66 @@ import ProposalMetaPanel from '@/pages/proposals/components/sidebar/ProposalMeta
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
 const props = withDefaults(
-  defineProps<{
-    mode: 'create' | 'edit';
-    builderMode: string;
-  }>(),
-  {
-    mode: 'create',
-    builderMode: 'proposal',
-  }
+    defineProps<{
+        mode: 'create' | 'edit';
+        builderMode: string;
+    }>(),
+    {
+        mode: 'create',
+        builderMode: 'proposal',
+    },
 );
 
 const store = useProposalBuilderStore();
 const { selectedBlockId, sidebarTab } = storeToRefs(store);
 
 const metaTabLabel = computed(() => {
-  return props.builderMode === 'template' ? 'Template' : 'Proposal';
+    return props.builderMode === 'template' ? 'Template' : 'Proposal';
 });
 
 watch(selectedBlockId, (newValue) => {
-  if (newValue) {
-    store.setSidebarTab('block');
-  }
+    if (newValue) {
+        store.setSidebarTab('block');
+    }
 });
 </script>
 
 <template>
-  <aside class="flex h-[calc(100vh-56px)] flex-col bg-background">
-    <div class="flex border-b border-border text-sm font-medium">
-      <button
-        class="flex-1 border-b-2 px-3 py-2 text-center capitalize"
-        :class="sidebarTab === 'block' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'"
-        type="button"
-        @click="store.setSidebarTab('block')"
-      >
-        Block
-      </button>
-      <button
-        class="flex-1 border-b-2 px-3 py-2 text-center capitalize"
-        :class="sidebarTab === 'proposal' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground'"
-        type="button"
-        @click="store.setSidebarTab('proposal')"
-      >
-        {{ metaTabLabel }}
-      </button>
-    </div>
+    <aside class="flex h-[calc(100vh-56px)] flex-col bg-background">
+        <div class="flex border-b border-border text-sm font-medium">
+            <button
+                class="flex-1 border-b-2 px-3 py-2 text-center capitalize"
+                :class="
+                    sidebarTab === 'block'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground'
+                "
+                type="button"
+                @click="store.setSidebarTab('block')"
+            >
+                Block
+            </button>
+            <button
+                class="flex-1 border-b-2 px-3 py-2 text-center capitalize"
+                :class="
+                    sidebarTab === 'proposal'
+                        ? 'border-primary text-primary'
+                        : 'border-transparent text-muted-foreground'
+                "
+                type="button"
+                @click="store.setSidebarTab('proposal')"
+            >
+                {{ metaTabLabel }}
+            </button>
+        </div>
 
-    <div class="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-      <BlockSettingsPanel v-if="sidebarTab === 'block'" class="h-full" />
-      <TemplateMetaPanel v-else-if="builderMode === 'template'" class="h-full" />
-      <ProposalMetaPanel v-else class="h-full" />
-    </div>
-  </aside>
+        <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
+            <BlockSettingsPanel v-if="sidebarTab === 'block'" class="h-full" />
+            <TemplateMetaPanel
+                v-else-if="builderMode === 'template'"
+                class="h-full"
+            />
+            <ProposalMetaPanel v-else class="h-full" />
+        </div>
+    </aside>
 </template>

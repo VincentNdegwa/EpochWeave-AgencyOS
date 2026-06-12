@@ -28,16 +28,20 @@ export function createColumns(
     return [
         {
             id: 'select',
-            header: ({ table }) => h(Checkbox, {
-                modelValue: table.getIsAllPageRowsSelected(),
-                'onUpdate:modelValue': (value: boolean | "indeterminate") => table.toggleAllPageRowsSelected(value as boolean),
-                'aria-label': 'Select all',
-            }),
-            cell: ({ row }) => h(Checkbox, {
-                modelValue: row.getIsSelected(),
-                'onUpdate:modelValue': (value: boolean | "indeterminate") => row.toggleSelected(value as boolean),
-                'aria-label': 'Select row',
-            }),
+            header: ({ table }) =>
+                h(Checkbox, {
+                    modelValue: table.getIsAllPageRowsSelected(),
+                    'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+                        table.toggleAllPageRowsSelected(value as boolean),
+                    'aria-label': 'Select all',
+                }),
+            cell: ({ row }) =>
+                h(Checkbox, {
+                    modelValue: row.getIsSelected(),
+                    'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+                        row.toggleSelected(value as boolean),
+                    'aria-label': 'Select row',
+                }),
             enableSorting: false,
             enableHiding: false,
         },
@@ -64,8 +68,8 @@ export function createColumns(
                 const sku = row.getValue('sku') as string | null;
 
                 if (!sku) {
-return h('span', { class: 'text-muted-foreground' }, '—');
-}
+                    return h('span', { class: 'text-muted-foreground' }, '—');
+                }
 
                 return h('span', { class: 'font-mono text-sm' }, sku);
             },
@@ -78,8 +82,8 @@ return h('span', { class: 'text-muted-foreground' }, '—');
                 const unit = product.unit;
 
                 if (!unit) {
-return h('span', { class: 'text-muted-foreground' }, '—');
-}
+                    return h('span', { class: 'text-muted-foreground' }, '—');
+                }
 
                 return h(
                     'span',

@@ -6,32 +6,35 @@ import { useProposalBuilderStore } from '@/stores/proposalBuilder';
  * Works for both top-level and nested blocks
  */
 export function useBlockSettings<T = any>(blockId: string) {
-  const store = useProposalBuilderStore();
+    const store = useProposalBuilderStore();
 
-  // Use selectedBlock if it matches the blockId, otherwise search recursively
-  const block = computed(() => {
-    // If the currently selected block matches our blockId, use it (works for nested blocks)
-    if (store.selectedBlock?.id === blockId) {
-      return store.selectedBlock;
-    }
-    
-    // Otherwise search recursively (fallback for edge cases)
-    return store.findBlockRecursive(blockId) ?? null;
-  });
+    // Use selectedBlock if it matches the blockId, otherwise search recursively
+    const block = computed(() => {
+        // If the currently selected block matches our blockId, use it (works for nested blocks)
+        if (store.selectedBlock?.id === blockId) {
+            return store.selectedBlock;
+        }
 
-  const data = computed<T | null>(() => (block.value?.data as T) ?? null);
+        // Otherwise search recursively (fallback for edge cases)
+        return store.findBlockRecursive(blockId) ?? null;
+    });
 
-  const updateData = (changes: Partial<T>) => {
-    if (!block.value || !data.value) {
-return;
-}
+    const data = computed<T | null>(() => (block.value?.data as T) ?? null);
 
-    store.updateBlockDataRecursive(block.value.id, { ...data.value, ...changes });
-  };
+    const updateData = (changes: Partial<T>) => {
+        if (!block.value || !data.value) {
+            return;
+        }
 
-  return {
-    block,
-    data,
-    updateData,
-  };
+        store.updateBlockDataRecursive(block.value.id, {
+            ...data.value,
+            ...changes,
+        });
+    };
+
+    return {
+        block,
+        data,
+        updateData,
+    };
 }

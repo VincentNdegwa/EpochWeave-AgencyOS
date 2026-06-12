@@ -20,52 +20,55 @@ templateSettings.value = { description: null, thumbnailUrl: null };
 const isSaving = ref(false);
 
 const handleSave = async () => {
-  if (isSaving.value) {
-return;
-}
-  
-  isSaving.value = true;
-  
-  try {
-    const templateData = {
-      name: proposal.value.title,
-      description: templateSettings.value.description,
-      thumbnail_url: templateSettings.value.thumbnailUrl,
-      content: proposal.value.content,
-    };
-    
-    await router.post(ProposalTemplateController.store().url, templateData as any);
-  } catch (error) {
-    console.error('Failed to save template:', error);
-  } finally {
-    isSaving.value = false;
-  }
+    if (isSaving.value) {
+        return;
+    }
+
+    isSaving.value = true;
+
+    try {
+        const templateData = {
+            name: proposal.value.title,
+            description: templateSettings.value.description,
+            thumbnail_url: templateSettings.value.thumbnailUrl,
+            content: proposal.value.content,
+        };
+
+        await router.post(
+            ProposalTemplateController.store().url,
+            templateData as any,
+        );
+    } catch (error) {
+        console.error('Failed to save template:', error);
+    } finally {
+        isSaving.value = false;
+    }
 };
 
 // Provide save functionality to child components
 defineExpose({
-  handleSave,
-  isSaving,
+    handleSave,
+    isSaving,
 });
 
 setLayoutProps({
-  title: 'create template',
-  description: 'Launch a new reusable proposal template.',
-  breadcrumbs: [
-    { title: 'dashboard', href: dashboard() },
-    { title: 'templates', href: proposalTemplates.index() },
-    { title: 'create' },
-  ],
+    title: 'create template',
+    description: 'Launch a new reusable proposal template.',
+    breadcrumbs: [
+        { title: 'dashboard', href: dashboard() },
+        { title: 'templates', href: proposalTemplates.index() },
+        { title: 'create' },
+    ],
 });
 </script>
 
 <template>
-  <Head title="Create Template" />
-  <div class="-mx-4 -mb-4 h-[calc(100vh-64px)]">
-    <ProposalBuilder 
-      mode="create" 
-      :on-save="handleSave"
-      :is-saving="isSaving"
-    />
-  </div>
+    <Head title="Create Template" />
+    <div class="-mx-4 -mb-4 h-[calc(100vh-64px)]">
+        <ProposalBuilder
+            mode="create"
+            :on-save="handleSave"
+            :is-saving="isSaving"
+        />
+    </div>
 </template>

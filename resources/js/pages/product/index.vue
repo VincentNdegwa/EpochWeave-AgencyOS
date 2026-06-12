@@ -112,7 +112,8 @@ defineOptions({
             <div>
                 <h4 class="font-bold tracking-tight">Products</h4>
                 <p class="text-muted-foreground">
-                    Manage your products and services with pricing and billing information.
+                    Manage your products and services with pricing and billing
+                    information.
                 </p>
             </div>
             <div class="flex gap-2">
@@ -142,21 +143,38 @@ defineOptions({
         </div>
 
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <StatsCard title="Total Products" :value="stats.total.value" :change="stats.total.change" />
-            <StatsCard title="Active" :value="stats.active.value" :change="stats.active.change" />
-            <StatsCard title="Inactive" :value="stats.inactive.value" :change="stats.inactive.change" />
+            <StatsCard
+                title="Total Products"
+                :value="stats.total.value"
+                :change="stats.total.change"
+            />
+            <StatsCard
+                title="Active"
+                :value="stats.active.value"
+                :change="stats.active.change"
+            />
+            <StatsCard
+                title="Inactive"
+                :value="stats.inactive.value"
+                :change="stats.inactive.change"
+            />
         </div>
 
         <div class="flex gap-2 border-b">
             <button
                 v-for="tab in statusTabs"
                 :key="tab.value"
-                @click="updateFilters({ status: tab.value === 'all' ? undefined : tab.value, search: filters.search })"
+                @click="
+                    updateFilters({
+                        status: tab.value === 'all' ? undefined : tab.value,
+                        search: filters.search,
+                    })
+                "
                 :class="[
-                    'px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px',
+                    '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
                     filters.status === tab.value
                         ? 'border-primary text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground'
+                        : 'border-transparent text-muted-foreground hover:text-foreground',
                 ]"
             >
                 {{ tab.label }}
@@ -167,7 +185,13 @@ defineOptions({
             :columns="columns"
             :data="products"
             :search-value="filters.search"
-            :on-search-update="(value: string | number) => updateFilters({ status: filters.status, search: String(value) })"
+            :on-search-update="
+                (value: string | number) =>
+                    updateFilters({
+                        status: filters.status,
+                        search: String(value),
+                    })
+            "
         />
 
         <ProductFormDialog

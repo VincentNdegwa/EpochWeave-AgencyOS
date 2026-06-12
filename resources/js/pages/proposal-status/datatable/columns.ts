@@ -35,9 +35,9 @@ export function createColumns(
                 return h('div', { class: 'flex items-center gap-2' }, [
                     h('div', {
                         class: 'w-4 h-4 rounded border',
-                        style: { backgroundColor: color }
+                        style: { backgroundColor: color },
                     }),
-                    h('span', { class: 'text-sm font-mono' }, color)
+                    h('span', { class: 'text-sm font-mono' }, color),
                 ]);
             },
         },

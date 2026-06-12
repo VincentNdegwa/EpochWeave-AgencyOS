@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { Form, Head, usePage } from '@inertiajs/vue3';
-import {
-    BuildingIcon,
-    PaletteIcon,
-    EyeIcon,
-} from '@lucide/vue';
+import { BuildingIcon, PaletteIcon, EyeIcon } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import WorkspaceGeneralSettingsController from '@/actions/App/Http/Controllers/WorkspaceSettings/GeneralController';
 import Heading from '@/components/Heading.vue';
@@ -142,12 +138,18 @@ const handleSuccess = async (): Promise<void> => {
                 <!-- Basic Information Section -->
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                        <div
+                            class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10"
+                        >
                             <BuildingIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <h3 class="text-sm font-semibold text-foreground">Basic information</h3>
-                            <p class="text-xs text-muted-foreground">Core details about your workspace</p>
+                            <h3 class="text-sm font-semibold text-foreground">
+                                Basic information
+                            </h3>
+                            <p class="text-xs text-muted-foreground">
+                                Core details about your workspace
+                            </p>
                         </div>
                     </div>
 
@@ -191,12 +193,19 @@ const handleSuccess = async (): Promise<void> => {
                 <!-- Branding Section -->
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                        <div
+                            class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10"
+                        >
                             <PaletteIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <h3 class="text-sm font-semibold text-foreground">Branding</h3>
-                            <p class="text-xs text-muted-foreground">Customize the visual appearance of your workspace</p>
+                            <h3 class="text-sm font-semibold text-foreground">
+                                Branding
+                            </h3>
+                            <p class="text-xs text-muted-foreground">
+                                Customize the visual appearance of your
+                                workspace
+                            </p>
                         </div>
                     </div>
 
@@ -204,7 +213,9 @@ const handleSuccess = async (): Promise<void> => {
                         <div class="grid gap-2">
                             <Label>Logo</Label>
                             <div class="flex items-center gap-4">
-                                <div class="h-12 w-12 overflow-hidden rounded-lg border bg-muted">
+                                <div
+                                    class="h-12 w-12 overflow-hidden rounded-lg border bg-muted"
+                                >
                                     <img
                                         v-if="logoUrl"
                                         :src="logoUrl"
@@ -218,12 +229,15 @@ const handleSuccess = async (): Promise<void> => {
                                         type="file"
                                         accept="image/*"
                                         :disabled="uploads.isUploading.value"
-                                        class="dark:bg-input/30 border-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 disabled:bg-input/50 dark:disabled:bg-input/80 h-8 rounded-lg border bg-transparent px-2.5 py-1 text-base transition-colors file:h-6 file:text-sm file:font-medium focus-visible:ring-3 aria-invalid:ring-3 md:text-sm w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                                        class="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
                                         @change="uploadLogo"
                                     />
                                     <InputError :message="errors.logo_url" />
                                     <p
-                                        v-if="(uploads.errors.value?.length || 0) > 0"
+                                        v-if="
+                                            (uploads.errors.value?.length ||
+                                                0) > 0
+                                        "
                                         class="text-sm text-destructive"
                                     >
                                         {{ uploads.errors.value?.[0] }}
@@ -252,16 +266,24 @@ const handleSuccess = async (): Promise<void> => {
                 <!-- Privacy Section -->
                 <div class="space-y-4">
                     <div class="flex items-center gap-3">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+                        <div
+                            class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10"
+                        >
                             <EyeIcon class="h-3.5 w-3.5 text-primary" />
                         </div>
                         <div>
-                            <h3 class="text-sm font-semibold text-foreground">Privacy</h3>
-                            <p class="text-xs text-muted-foreground">Control platform visibility and branding</p>
+                            <h3 class="text-sm font-semibold text-foreground">
+                                Privacy
+                            </h3>
+                            <p class="text-xs text-muted-foreground">
+                                Control platform visibility and branding
+                            </p>
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-between rounded-lg border p-4">
+                    <div
+                        class="flex items-center justify-between rounded-lg border p-4"
+                    >
                         <div class="space-y-0.5">
                             <Label for="white_label">White label</Label>
                             <p class="text-sm text-muted-foreground">
@@ -275,10 +297,7 @@ const handleSuccess = async (): Promise<void> => {
                                 name="white_label"
                                 :value="whiteLabel ? '1' : '0'"
                             />
-                            <Switch
-                                id="white_label"
-                                v-model="whiteLabel"
-                            />
+                            <Switch id="white_label" v-model="whiteLabel" />
                         </div>
                     </div>
                 </div>

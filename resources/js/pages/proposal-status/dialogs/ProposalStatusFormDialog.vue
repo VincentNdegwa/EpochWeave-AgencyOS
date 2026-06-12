@@ -73,11 +73,16 @@ watch(
             <Form
                 v-bind="
                     (status
-                        ? ProposalStatusController.update.form({ proposal_status: status.id })
+                        ? ProposalStatusController.update.form({
+                              proposal_status: status.id,
+                          })
                         : ProposalStatusController.store.form()) as any
                 "
                 :options="{ preserveScroll: true, preserveState: true }"
-                @success="emit('success'); emit('update:open', false)"
+                @success="
+                    emit('success');
+                    emit('update:open', false);
+                "
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-6 py-4">
@@ -107,7 +112,8 @@ watch(
                             />
                             <InputError :message="errors.color" />
                             <p class="text-xs text-muted-foreground">
-                                Choose a color to represent this status in your proposal workflow.
+                                Choose a color to represent this status in your
+                                proposal workflow.
                             </p>
                         </div>
                     </div>

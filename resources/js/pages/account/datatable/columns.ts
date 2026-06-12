@@ -25,16 +25,20 @@ export function createColumns(
     return [
         {
             id: 'select',
-            header: ({ table }) => h(Checkbox, {
-                modelValue: table.getIsAllPageRowsSelected(),
-                'onUpdate:modelValue': (value: boolean | "indeterminate") => table.toggleAllPageRowsSelected(value as boolean),
-                'aria-label': 'Select all',
-            }),
-            cell: ({ row }) => h(Checkbox, {
-                modelValue: row.getIsSelected(),
-                'onUpdate:modelValue': (value: boolean | "indeterminate") => row.toggleSelected(value as boolean),
-                'aria-label': 'Select row',
-            }),
+            header: ({ table }) =>
+                h(Checkbox, {
+                    modelValue: table.getIsAllPageRowsSelected(),
+                    'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+                        table.toggleAllPageRowsSelected(value as boolean),
+                    'aria-label': 'Select all',
+                }),
+            cell: ({ row }) =>
+                h(Checkbox, {
+                    modelValue: row.getIsSelected(),
+                    'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+                        row.toggleSelected(value as boolean),
+                    'aria-label': 'Select row',
+                }),
             enableSorting: false,
             enableHiding: false,
         },
@@ -61,8 +65,8 @@ export function createColumns(
                 const website = row.getValue('website') as string | null;
 
                 if (!website) {
-return h('span', { class: 'text-muted-foreground' }, '—');
-}
+                    return h('span', { class: 'text-muted-foreground' }, '—');
+                }
 
                 return h(
                     'a',

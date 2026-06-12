@@ -36,8 +36,14 @@ const isExternalUrl = (href: NavItem['href']): boolean => {
                         <component
                             :is="isExternalUrl(item.href) ? 'a' : Link"
                             :href="toUrl(item.href)"
-                            :target="isExternalUrl(item.href) ? '_blank' : undefined"
-                            :rel="isExternalUrl(item.href) ? 'noopener noreferrer' : undefined"
+                            :target="
+                                isExternalUrl(item.href) ? '_blank' : undefined
+                            "
+                            :rel="
+                                isExternalUrl(item.href)
+                                    ? 'noopener noreferrer'
+                                    : undefined
+                            "
                         >
                             <component :is="item.icon" />
                             <span>{{ item.title }}</span>

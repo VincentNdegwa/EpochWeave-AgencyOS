@@ -1,6 +1,9 @@
 import { computed } from 'vue';
 import type { Component } from 'vue';
-import { blockRegistry, getBlockDefinition } from '@/pages/proposals/components/blocks/registry';
+import {
+    blockRegistry,
+    getBlockDefinition,
+} from '@/pages/proposals/components/blocks/registry';
 import type { BaseBlock, BlockType } from '@/types/proposal-builder';
 
 export function useBlockRegistry() {
@@ -41,8 +44,8 @@ export function useBlockRegistry() {
     };
 
     const getBlocksByCategory = (category: string) => {
-        return computed(() => 
-            blockRegistry.filter(block => block.category === category)
+        return computed(() =>
+            blockRegistry.filter((block) => block.category === category),
         );
     };
 

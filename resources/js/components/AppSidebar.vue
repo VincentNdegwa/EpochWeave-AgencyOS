@@ -37,7 +37,8 @@ const mainNavItems: NavItem[] = [
         title: 'Catalog',
         href: products.index().url,
         icon: Box,
-    },{
+    },
+    {
         title: 'Proposal',
         href: proposals.index().url,
         icon: LayoutGrid,
@@ -46,7 +47,7 @@ const mainNavItems: NavItem[] = [
         title: 'Templates',
         href: proposalTemplates.index().url,
         icon: LayoutGrid,
-    }
+    },
 ];
 
 const footerNavItems: NavItem[] = [

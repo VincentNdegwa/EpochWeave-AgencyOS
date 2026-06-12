@@ -2,7 +2,10 @@
 import { Form } from '@inertiajs/vue3';
 import { Plus, X } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
-import { store as accountStore, update as accountUpdate } from '@/actions/App/Http/Controllers/AccountController';
+import {
+    store as accountStore,
+    update as accountUpdate,
+} from '@/actions/App/Http/Controllers/AccountController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -112,21 +115,34 @@ watch(
 
 <template>
     <Dialog :open="open" @update:open="emit('update:open', $event)">
-        <DialogContent class="sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-hidden">
+        <DialogContent
+            class="max-h-[90vh] overflow-hidden sm:max-w-xl md:max-w-2xl"
+        >
             <DialogHeader>
-                <DialogTitle>{{ isEditMode ? 'Edit Account' : 'New Account' }}</DialogTitle>
+                <DialogTitle>{{
+                    isEditMode ? 'Edit Account' : 'New Account'
+                }}</DialogTitle>
                 <DialogDescription>
-                    {{ isEditMode ? 'Update account information.' : 'Add a new client account to your workspace.' }}
+                    {{
+                        isEditMode
+                            ? 'Update account information.'
+                            : 'Add a new client account to your workspace.'
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
             <Form
-                v-bind="(formAction as any)"
+                v-bind="formAction as any"
                 :options="{ preserveScroll: true, preserveState: true }"
-                @success="emit('success'); emit('update:open', false)"
+                @success="
+                    emit('success');
+                    emit('update:open', false);
+                "
                 v-slot="{ errors, processing }"
             >
-                <div class="grid gap-6 py-4 overflow-y-auto max-h-[calc(90vh-180px)] pr-2">
+                <div
+                    class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2"
+                >
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="grid gap-2 sm:col-span-2">
                             <Label for="company_name" required>
@@ -211,7 +227,11 @@ watch(
                                         placeholder="John"
                                     />
                                     <InputError
-                                        :message="errors[`contacts.${index}.first_name`]"
+                                        :message="
+                                            errors[
+                                                `contacts.${index}.first_name`
+                                            ]
+                                        "
                                     />
                                 </div>
 
@@ -230,7 +250,11 @@ watch(
                                         placeholder="Doe"
                                     />
                                     <InputError
-                                        :message="errors[`contacts.${index}.last_name`]"
+                                        :message="
+                                            errors[
+                                                `contacts.${index}.last_name`
+                                            ]
+                                        "
                                     />
                                 </div>
 
@@ -250,7 +274,9 @@ watch(
                                         placeholder="john@example.com"
                                     />
                                     <InputError
-                                        :message="errors[`contacts.${index}.email`]"
+                                        :message="
+                                            errors[`contacts.${index}.email`]
+                                        "
                                     />
                                 </div>
 
@@ -265,7 +291,9 @@ watch(
                                         placeholder="+1 (555) 123-4567"
                                     />
                                     <InputError
-                                        :message="errors[`contacts.${index}.phone`]"
+                                        :message="
+                                            errors[`contacts.${index}.phone`]
+                                        "
                                     />
                                 </div>
 
@@ -280,7 +308,11 @@ watch(
                                         placeholder="CEO"
                                     />
                                     <InputError
-                                        :message="errors[`contacts.${index}.job_title`]"
+                                        :message="
+                                            errors[
+                                                `contacts.${index}.job_title`
+                                            ]
+                                        "
                                     />
                                 </div>
 
@@ -301,7 +333,9 @@ watch(
                                         <input
                                             type="hidden"
                                             :name="`contacts.${index}.is_primary`"
-                                            :value="contact.is_primary ? '1' : '0'"
+                                            :value="
+                                                contact.is_primary ? '1' : '0'
+                                            "
                                         />
                                     </div>
                                 </div>
@@ -323,7 +357,11 @@ watch(
                                         <input
                                             type="hidden"
                                             :name="`contacts.${index}.receives_billing`"
-                                            :value="contact.receives_billing ? '1' : '0'"
+                                            :value="
+                                                contact.receives_billing
+                                                    ? '1'
+                                                    : '0'
+                                            "
                                         />
                                     </div>
                                 </div>

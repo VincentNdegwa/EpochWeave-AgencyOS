@@ -22,16 +22,18 @@ const selectionText = computed(() => {
 
 const handleBulkDelete = async () => {
     if (!hasSelection.value) {
-return;
-}
+        return;
+    }
 
     const confirmed = await confirm({
-        title: props.selectedRows.length === 1 
-            ? 'Delete Proposal' 
-            : `Delete ${props.selectedRows.length} Proposals`,
-        description: props.selectedRows.length === 1
-            ? 'Are you sure you want to delete this proposal? This action cannot be undone.'
-            : `Are you sure you want to delete ${props.selectedRows.length} proposals? This action cannot be undone.`,
+        title:
+            props.selectedRows.length === 1
+                ? 'Delete Proposal'
+                : `Delete ${props.selectedRows.length} Proposals`,
+        description:
+            props.selectedRows.length === 1
+                ? 'Are you sure you want to delete this proposal? This action cannot be undone.'
+                : `Are you sure you want to delete ${props.selectedRows.length} proposals? This action cannot be undone.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         variant: 'destructive',
@@ -39,10 +41,12 @@ return;
 
     if (confirmed) {
         try {
-            const proposalIds = props.selectedRows.map(proposal => proposal.id);
-            
+            const proposalIds = props.selectedRows.map(
+                (proposal) => proposal.id,
+            );
+
             await router.post(proposals.bulkDelete().url, {
-                ids: proposalIds
+                ids: proposalIds,
             });
         } catch (error) {
             console.error('Error during bulk delete:', error);
@@ -52,11 +56,16 @@ return;
 </script>
 
 <template>
-    <div v-if="hasSelection" class="flex items-center justify-between p-3 bg-muted/50 border-b">
+    <div
+        v-if="hasSelection"
+        class="flex items-center justify-between border-b bg-muted/50 p-3"
+    >
         <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-muted-foreground">{{ selectionText }}</span>
+            <span class="text-sm font-medium text-muted-foreground">{{
+                selectionText
+            }}</span>
         </div>
-        
+
         <div class="flex items-center gap-2">
             <Button
                 variant="outline"
@@ -64,7 +73,7 @@ return;
                 @click="handleBulkDelete"
                 class="gap-1"
             >
-                <Trash2 class="w-4 h-4" />
+                <Trash2 class="h-4 w-4" />
                 Delete
             </Button>
         </div>

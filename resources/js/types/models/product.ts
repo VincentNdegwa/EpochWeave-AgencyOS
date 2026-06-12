@@ -1,5 +1,10 @@
 export type BillingType = 'one_time' | 'recurring';
-export type BillingFrequency = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type BillingFrequency =
+    | 'none'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'yearly';
 
 export interface BaseProductUnit {
     id: number;

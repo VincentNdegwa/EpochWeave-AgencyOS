@@ -10,8 +10,8 @@ import type { BaseBlock, BlockMeta } from '@/types/proposal-builder';
 import { defaultBlockMeta } from '@/types/proposal-builder';
 
 const props = defineProps<{
-  block: BaseBlock;
-  isLocked: boolean;
+    block: BaseBlock;
+    isLocked: boolean;
 }>();
 
 const store = useProposalBuilderStore();
@@ -19,57 +19,66 @@ const { selectedBlockId } = storeToRefs(store);
 const isSelected = computed(() => selectedBlockId.value === props.block.id);
 
 const meta = computed<BlockMeta>(() => ({
-  ...defaultBlockMeta,
-  ...props.block.meta,
+    ...defaultBlockMeta,
+    ...props.block.meta,
 }));
 
 provide(blockMetaInjectionKey, meta);
 
 const handleSelect = (event: MouseEvent) => {
-  if (props.isLocked) {
-    return;
-  }
-  
-  // Only select if the click target is the wrapper itself or its direct children
-  // This prevents interfering with nested block clicks
-  const target = event.target as Element;
-  const wrapper = event.currentTarget as Element;
-  
-  // Check if the click is on the wrapper itself or a direct child
-  // If it's on a nested element inside the slot, don't handle it
-  if (target === wrapper || wrapper.contains(target) && !isNestedElement(target, wrapper)) {
-    store.selectBlock(props.block.id);
-  }
+    if (props.isLocked) {
+        return;
+    }
+
+    // Only select if the click target is the wrapper itself or its direct children
+    // This prevents interfering with nested block clicks
+    const target = event.target as Element;
+    const wrapper = event.currentTarget as Element;
+
+    // Check if the click is on the wrapper itself or a direct child
+    // If it's on a nested element inside the slot, don't handle it
+    if (
+        target === wrapper ||
+        (wrapper.contains(target) && !isNestedElement(target, wrapper))
+    ) {
+        store.selectBlock(props.block.id);
+    }
 };
 
 // Helper function to check if an element is nested (not a direct child of wrapper)
 const isNestedElement = (target: Element, wrapper: Element): boolean => {
-  let current = target.parentElement;
+    let current = target.parentElement;
 
-  while (current && current !== wrapper) {
-    if (current.hasAttribute('data-nested-block')) {
-      return true;
+    while (current && current !== wrapper) {
+        if (current.hasAttribute('data-nested-block')) {
+            return true;
+        }
+
+        current = current.parentElement;
     }
 
-    current = current.parentElement;
-  }
-
-  return false;
+    return false;
 };
 </script>
 
 <template>
-  <div
-    class="relative"
-    :class="[
-      isSelected && !props.isLocked ? 'ring-2 ring-primary ring-offset-2' : 'ring-1 ring-transparent',
-    ]"
-    @click="handleSelect"
-  >
-    <BlockToolbar v-if="!props.isLocked" :block="props.block" :is-selected="isSelected" />
-    <BlockSurface :meta="meta" :is-locked="props.isLocked">
-      <slot />
-    </BlockSurface>
-    <BlockLockedOverlay v-if="props.block.is_locked && props.isLocked" />
-  </div>
+    <div
+        class="relative"
+        :class="[
+            isSelected && !props.isLocked
+                ? 'ring-2 ring-primary ring-offset-2'
+                : 'ring-1 ring-transparent',
+        ]"
+        @click="handleSelect"
+    >
+        <BlockToolbar
+            v-if="!props.isLocked"
+            :block="props.block"
+            :is-selected="isSelected"
+        />
+        <BlockSurface :meta="meta" :is-locked="props.isLocked">
+            <slot />
+        </BlockSurface>
+        <BlockLockedOverlay v-if="props.block.is_locked && props.isLocked" />
+    </div>
 </template>

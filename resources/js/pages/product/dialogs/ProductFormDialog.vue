@@ -72,7 +72,9 @@ watch(
                 billing_type: newProduct.billing_type,
                 billing_frequency:
                     newProduct.billing_frequency ||
-                    (newProduct.billing_type === 'recurring' ? 'monthly' : 'none'),
+                    (newProduct.billing_type === 'recurring'
+                        ? 'monthly'
+                        : 'none'),
                 is_active: newProduct.is_active,
             };
         } else {
@@ -141,7 +143,9 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <div class="flex items-center justify-between gap-3">
+                            <div
+                                class="flex items-center justify-between gap-3"
+                            >
                                 <Label for="unit_id" required>Unit</Label>
                                 <Button
                                     v-if="!units.length"
@@ -175,7 +179,9 @@ watch(
                                         :key="unit.id"
                                         :value="unit.id.toString()"
                                     >
-                                        {{ unit.name }} ({{ unit.abbreviation }})
+                                        {{ unit.name }} ({{
+                                            unit.abbreviation
+                                        }})
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -293,7 +299,9 @@ watch(
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <InputError :message="errors.billing_frequency" />
+                                <InputError
+                                    :message="errors.billing_frequency"
+                                />
                                 <p class="text-xs text-muted-foreground">
                                     Recurring items must specify how often they
                                     renew.
@@ -301,8 +309,11 @@ watch(
                             </template>
 
                             <template v-else>
-                                <div class="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">
-                                    Billing frequency set to <strong>None</strong>
+                                <div
+                                    class="rounded-md border border-dashed border-border px-3 py-2 text-xs text-muted-foreground"
+                                >
+                                    Billing frequency set to
+                                    <strong>None</strong>
                                     for one-time charges.
                                 </div>
                             </template>
@@ -316,7 +327,8 @@ watch(
                                     Active
                                 </Label>
                                 <div class="text-xs text-muted-foreground">
-                                    Disable to hide this product from new proposals.
+                                    Disable to hide this product from new
+                                    proposals.
                                 </div>
                             </div>
                             <input
@@ -324,10 +336,7 @@ watch(
                                 name="is_active"
                                 :value="form.is_active ? '1' : '0'"
                             />
-                            <Switch
-                                id="is_active"
-                                v-model="form.is_active"
-                            />
+                            <Switch id="is_active" v-model="form.is_active" />
                         </div>
                     </div>
                 </div>
@@ -340,7 +349,10 @@ watch(
                     >
                         Cancel
                     </Button>
-                    <Button type="submit" :disabled="processing || !units.length">
+                    <Button
+                        type="submit"
+                        :disabled="processing || !units.length"
+                    >
                         {{ product ? 'Update' : 'Create' }} Product
                     </Button>
                 </DialogFooter>

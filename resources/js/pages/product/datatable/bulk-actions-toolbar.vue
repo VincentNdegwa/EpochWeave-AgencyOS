@@ -22,16 +22,18 @@ const selectionText = computed(() => {
 
 const handleBulkDeactivate = async () => {
     if (!hasSelection.value) {
-return;
-}
+        return;
+    }
 
     const confirmed = await confirm({
-        title: props.selectedRows.length === 1 
-            ? 'Deactivate Product' 
-            : `Deactivate ${props.selectedRows.length} Products`,
-        description: props.selectedRows.length === 1
-            ? 'Are you sure you want to deactivate this product? This can be undone later.'
-            : `Are you sure you want to deactivate ${props.selectedRows.length} products? This can be undone later.`,
+        title:
+            props.selectedRows.length === 1
+                ? 'Deactivate Product'
+                : `Deactivate ${props.selectedRows.length} Products`,
+        description:
+            props.selectedRows.length === 1
+                ? 'Are you sure you want to deactivate this product? This can be undone later.'
+                : `Are you sure you want to deactivate ${props.selectedRows.length} products? This can be undone later.`,
         confirmText: 'Deactivate',
         cancelText: 'Cancel',
         variant: 'default',
@@ -39,11 +41,11 @@ return;
 
     if (confirmed) {
         try {
-            const productIds = props.selectedRows.map(product => product.id);
-            
+            const productIds = props.selectedRows.map((product) => product.id);
+
             await router.post(products.bulkStatus().url, {
                 ids: productIds,
-                is_active: false
+                is_active: false,
             });
         } catch (error) {
             console.error('Error during bulk deactivate:', error);
@@ -53,16 +55,18 @@ return;
 
 const handleBulkActivate = async () => {
     if (!hasSelection.value) {
-return;
-}
+        return;
+    }
 
     const confirmed = await confirm({
-        title: props.selectedRows.length === 1 
-            ? 'Activate Product' 
-            : `Activate ${props.selectedRows.length} Products`,
-        description: props.selectedRows.length === 1
-            ? 'Are you sure you want to activate this product?'
-            : `Are you sure you want to activate ${props.selectedRows.length} products?`,
+        title:
+            props.selectedRows.length === 1
+                ? 'Activate Product'
+                : `Activate ${props.selectedRows.length} Products`,
+        description:
+            props.selectedRows.length === 1
+                ? 'Are you sure you want to activate this product?'
+                : `Are you sure you want to activate ${props.selectedRows.length} products?`,
         confirmText: 'Activate',
         cancelText: 'Cancel',
         variant: 'default',
@@ -70,11 +74,11 @@ return;
 
     if (confirmed) {
         try {
-            const productIds = props.selectedRows.map(product => product.id);
-            
+            const productIds = props.selectedRows.map((product) => product.id);
+
             await router.post(products.bulkStatus().url, {
                 ids: productIds,
-                is_active: true
+                is_active: true,
             });
         } catch (error) {
             console.error('Error during bulk activate:', error);
@@ -84,16 +88,18 @@ return;
 
 const handleBulkDelete = async () => {
     if (!hasSelection.value) {
-return;
-}
+        return;
+    }
 
     const confirmed = await confirm({
-        title: props.selectedRows.length === 1 
-            ? 'Delete Product' 
-            : `Delete ${props.selectedRows.length} Products`,
-        description: props.selectedRows.length === 1
-            ? 'Are you sure you want to delete this product? This action cannot be undone.'
-            : `Are you sure you want to delete ${props.selectedRows.length} products? This action cannot be undone.`,
+        title:
+            props.selectedRows.length === 1
+                ? 'Delete Product'
+                : `Delete ${props.selectedRows.length} Products`,
+        description:
+            props.selectedRows.length === 1
+                ? 'Are you sure you want to delete this product? This action cannot be undone.'
+                : `Are you sure you want to delete ${props.selectedRows.length} products? This action cannot be undone.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         variant: 'destructive',
@@ -101,10 +107,10 @@ return;
 
     if (confirmed) {
         try {
-            const productIds = props.selectedRows.map(product => product.id);
-            
+            const productIds = props.selectedRows.map((product) => product.id);
+
             await router.post(products.bulkDelete().url, {
-                ids: productIds
+                ids: productIds,
             });
         } catch (error) {
             console.error('Error during bulk delete:', error);
@@ -114,11 +120,16 @@ return;
 </script>
 
 <template>
-    <div v-if="hasSelection" class="flex items-center justify-between p-3 bg-muted/50 border-b">
+    <div
+        v-if="hasSelection"
+        class="flex items-center justify-between border-b bg-muted/50 p-3"
+    >
         <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-muted-foreground">{{ selectionText }}</span>
+            <span class="text-sm font-medium text-muted-foreground">{{
+                selectionText
+            }}</span>
         </div>
-        
+
         <div class="flex items-center gap-2">
             <Button
                 variant="outline"
@@ -126,7 +137,7 @@ return;
                 @click="handleBulkActivate"
                 class="gap-1"
             >
-                <Power class="w-4 h-4" />
+                <Power class="h-4 w-4" />
                 Activate
             </Button>
             <Button
@@ -135,7 +146,7 @@ return;
                 @click="handleBulkDeactivate"
                 class="gap-1"
             >
-                <Power class="w-4 h-4" />
+                <Power class="h-4 w-4" />
                 Deactivate
             </Button>
             <Button
@@ -144,7 +155,7 @@ return;
                 @click="handleBulkDelete"
                 class="gap-1"
             >
-                <Trash2 class="w-4 h-4" />
+                <Trash2 class="h-4 w-4" />
                 Delete
             </Button>
         </div>
