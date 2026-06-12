@@ -6,7 +6,9 @@ use App\Http\Requests\StoreProposalRequest;
 use App\Http\Requests\UpdateProposalRequest;
 use App\Models\Proposal;
 use App\Models\WorkspaceSetting;
+use App\Services\MovementRulesService;
 use App\Services\ProposalService;
+use App\Services\UserPreferenceService;
 use App\Services\WorkspaceSettingService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -18,19 +20,43 @@ class ProposalController extends Controller
 {
     public function __construct(
         private ProposalService $proposalService,
-        private WorkspaceSettingService $workspaceSettingService
+        private UserPreferenceService $userPreferenceService,
+        private WorkspaceSettingService $workspaceSettingService,
+        private MovementRulesService $movementRulesService
     ) {}
 
     public function index(Request $request)
     {
         $workspace = $request->attributes->get('current_workspace');
-        $proposals = $this->proposalService->getProposalsByWorkspace($workspace->id);
+        $user = $request->user();
+        
+        $result = $this->proposalService->getFilteredProposals(
+            $workspace->id,
+            $request->query('status'),
+            $request->query('search')
+        );
+
+        $proposalStatuses = \App\Models\ProposalStatus::where('workspace_id', $workspace->id)
+            ->orderBy('position')
+            ->get();
+
+        $displayMode = $this->userPreferenceService->getDisplayMode($workspace->id, $user->id);
+
+        $movementRules = $this->movementRulesService->getMovementRules($proposalStatuses->toArray());
 
         return Inertia::render('proposals/index', [
-            'proposals' => $proposals,
+            'proposals' => $result['proposals'],
+            'proposal_statuses' => $proposalStatuses,
+            'display_mode' => $displayMode,
+            'movement_rules' => $movementRules,
+            'filters' => [
+                'status' => $request->query('status', 'all'),
+                'search' => $request->query('search'),
+            ],
         ]);
     }
 
+    
     public function create(Request $request)
     {
 

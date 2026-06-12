@@ -11,7 +11,9 @@ use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ProposalStatusController;
 use App\Http\Controllers\ProposalTemplateController;
 use App\Http\Controllers\UploadController;
+use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\ProposalKanbanController;
 use App\Http\Controllers\WorkspaceSettings\GeneralController as WorkspaceGeneralSettingsController;
 use App\Http\Controllers\WorkspaceSettings\ProposalController as WorkspaceProposalSettingsController;
 use Illuminate\Support\Facades\Route;
@@ -49,6 +51,9 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
 
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('proposals', ProposalController::class);
+    Route::patch('/proposals/{proposal}/move', [ProposalKanbanController::class, 'move'])->name('proposal.move');
+    Route::post('/user-preferences/display-mode', [UserPreferenceController::class, 'updateDisplayMode'])
+        ->name('user-preferences.display-mode.update');
     Route::resource('proposal-templates', ProposalTemplateController::class);
     Route::post('proposal-templates/{template}/duplicate', [ProposalTemplateController::class, 'duplicate'])->name('proposal-templates.duplicate');
     Route::post('proposal-templates/{template}/set-default', [ProposalTemplateController::class, 'setDefault'])->name('proposal-templates.set-default');

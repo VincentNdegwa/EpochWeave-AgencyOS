@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { Plus, Tag } from '@lucide/vue';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,9 +16,13 @@ import ProposalStatusFormDialog from '../proposal-status/dialogs/ProposalStatusF
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
 import ProposalFormDialog from './dialogs/ProposalFormDialog.vue';
+import KanbanView from './KanbanView.vue';
 
-const props = defineProps<{
+const { proposals, proposal_statuses, display_mode, movement_rules, filters } = defineProps<{
     proposals: Proposal[];
+    proposal_statuses: any[];
+    display_mode: string;
+    movement_rules: Record<string, number[]>;
     filters?: {
         status?: string;
         search?: string;
@@ -40,13 +44,13 @@ const columns = createColumns(
     },
 );
 
-const statusTabs = [
+const statusTabs = computed(() => [
     { value: 'all', label: 'All' },
-    { value: 'draft', label: 'Draft' },
-    { value: 'sent', label: 'Sent' },
-    { value: 'accepted', label: 'Accepted' },
-    { value: 'rejected', label: 'Rejected' },
-];
+    ...proposal_statuses.map((status: any) => ({
+        value: String(status.id),
+        label: status.title
+    }))
+]);
 
 const handleCreate = () => {
     editingProposal.value = null;
@@ -73,6 +77,19 @@ const handleStatusSuccess = () => {
     editingStatus.value = null;
     router.reload({
         only: ['proposal_statuses'],
+    });
+};
+
+const handleDisplayModeChange = (mode: string) => {
+    router.post('/user-preferences/display-mode', {
+        display_mode: mode,
+    }, {
+        preserveState: true,
+        onSuccess: () => {
+            router.reload({
+                only: ['display_mode'],
+            });
+        },
     });
 };
 
@@ -139,38 +156,66 @@ defineOptions({
             </div>
         </div>
 
-        <div class="flex gap-2 border-b">
-            <button
-                v-for="tab in statusTabs"
-                :key="tab.value"
-                @click="
-                    updateFilters({
-                        status: tab.value === 'all' ? undefined : tab.value,
-                        search: props.filters?.search,
-                    })
-                "
-                :class="[
-                    '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
-                    props.filters?.status === tab.value
-                        ? 'border-primary text-foreground'
-                        : 'border-transparent text-muted-foreground hover:text-foreground',
-                ]"
-            >
-                {{ tab.label }}
-            </button>
+        <div class="flex items-center justify-between">
+            <div class="flex gap-2 border-b" v-if="display_mode === 'list'">
+                <button
+                    v-for="tab in statusTabs"
+                    :key="tab.value"
+                    @click="
+                        updateFilters({
+                            status: tab.value === 'all' ? undefined : tab.value,
+                            search: filters?.search,
+                        })
+                    "
+                    :class="[
+                        '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
+                        filters?.status === tab.value
+                            ? 'border-primary text-foreground'
+                            : 'border-transparent text-muted-foreground hover:text-foreground',
+                    ]"
+                >
+                    {{ tab.label }}
+                </button>
+            </div>
+            <div class="flex rounded-lg border bg-background p-1 ml-auto">
+                <Button
+                    :variant="display_mode === 'list' ? 'default' : 'ghost'"
+                    size="sm"
+                    @click="handleDisplayModeChange('list')"
+                    class="h-7 px-2"
+                >
+                    List
+                </Button>
+                <Button
+                    :variant="display_mode === 'kanban' ? 'default' : 'ghost'"
+                    size="sm"
+                    @click="handleDisplayModeChange('kanban')"
+                    class="h-7 px-2"
+                >
+                    Kanban
+                </Button>
+            </div>
         </div>
 
         <DataTable
+            v-if="display_mode === 'list'"
             :columns="columns"
             :data="proposals"
-            :search-value="props.filters?.search"
+            :search-value="filters?.search"
             :on-search-update="
                 (value: string | number) =>
                     updateFilters({
-                        status: props.filters?.status,
+                        status: filters?.status,
                         search: String(value),
                     })
             "
+        />
+
+        <KanbanView
+            v-else
+            :proposals="proposals"
+            :proposal_statuses="proposal_statuses"
+            :movement_rules="movement_rules"
         />
 
         <ProposalFormDialog
