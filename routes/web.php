@@ -51,7 +51,7 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
 
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('proposals', ProposalController::class);
-    Route::patch('/proposals/{proposal}/move', [ProposalKanbanController::class, 'move'])->name('proposal.move');
+    Route::patch('/proposals/{proposal}/move', [ProposalController::class, 'move'])->name('proposal.move');
     Route::post('/user-preferences/display-mode', [UserPreferenceController::class, 'updateDisplayMode'])
         ->name('user-preferences.display-mode.update');
     Route::resource('proposal-templates', ProposalTemplateController::class);

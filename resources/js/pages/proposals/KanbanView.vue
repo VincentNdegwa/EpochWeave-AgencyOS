@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
 import { Calendar, Building, User, AlertCircle } from '@lucide/vue';
 import type { Proposal } from '@/types/models/proposal';
-import proposals from '@/routes/proposals';
 
-// ── Types ─────────────────────────────────────────────────────
 interface ProposalStatus {
     id: number;
     title: string;
@@ -22,79 +19,8 @@ interface Props {
 
 const { proposals: allProposals, proposal_statuses, movement_rules } = defineProps<Props>();
 
-// ── Status configuration ────────────────────────────────────────
-type StatusKey = string;
+const LOCKED_STATUSES = ['accepted', 'declined', 'expired'];
 
-const LOCKED_STATUSES: StatusKey[] = ['accepted', 'declined', 'expired'];
-
-type ColStyle = {
-    topBar: string;
-    countBg: string;
-    countText: string;
-    dropActive: string;
-    dot: string;
-    badge: string;
-    badgeText: string;
-};
-
-const COLUMN_STYLES: Record<string, ColStyle> = {
-    draft: {
-        topBar: 'bg-slate-400',
-        countBg: 'bg-slate-100',
-        countText: 'text-slate-600',
-        dropActive: 'ring-2 ring-slate-400 bg-slate-50',
-        dot: 'bg-slate-400',
-        badge: 'bg-slate-100',
-        badgeText: 'text-slate-600',
-    },
-    sent: {
-        topBar: 'bg-blue-500',
-        countBg: 'bg-blue-50',
-        countText: 'text-blue-600',
-        dropActive: 'ring-2 ring-blue-400 bg-blue-50/60',
-        dot: 'bg-blue-500',
-        badge: 'bg-blue-50',
-        badgeText: 'text-blue-600',
-    },
-    accepted: {
-        topBar: 'bg-emerald-500',
-        countBg: 'bg-emerald-50',
-        countText: 'text-emerald-700',
-        dropActive: 'ring-2 ring-emerald-400 bg-emerald-50/60',
-        dot: 'bg-emerald-500',
-        badge: 'bg-emerald-50',
-        badgeText: 'text-emerald-700',
-    },
-    declined: {
-        topBar: 'bg-rose-500',
-        countBg: 'bg-rose-50',
-        countText: 'text-rose-600',
-        dropActive: 'ring-2 ring-rose-400 bg-rose-50/60',
-        dot: 'bg-rose-500',
-        badge: 'bg-rose-50',
-        badgeText: 'text-rose-600',
-    },
-    expired: {
-        topBar: 'bg-gray-500',
-        countBg: 'bg-gray-50',
-        countText: 'text-gray-600',
-        dropActive: 'ring-2 ring-gray-400 bg-gray-50/60',
-        dot: 'bg-gray-500',
-        badge: 'bg-gray-50',
-        badgeText: 'text-gray-600',
-    },
-    pending_review: {
-        topBar: 'bg-amber-500',
-        countBg: 'bg-amber-50',
-        countText: 'text-amber-600',
-        dropActive: 'ring-2 ring-amber-400 bg-amber-50/60',
-        dot: 'bg-amber-500',
-        badge: 'bg-amber-50',
-        badgeText: 'text-amber-600',
-    },
-};
-
-// ── Drag state ────────────────────────────────────────────────
 const dragging = ref<{
     id: number;
     trigger: string | null;
@@ -102,6 +28,8 @@ const dragging = ref<{
 } | null>(null);
 const dragOverStatus = ref<string | null>(null);
 const hoveredProposalId = ref<number | null>(null);
+const isDragging = ref(false);
+const dragStartTime = ref<number>(0);
 
 const canDrop = (toStatusId: number): boolean => {
     if (!dragging.value) return false;
@@ -123,6 +51,8 @@ const isTerminal = (trigger: string | null): boolean => {
 
 function onDragStart(e: DragEvent, proposal: Proposal, status: ProposalStatus) {
     hoveredProposalId.value = null;
+    isDragging.value = true;
+    dragStartTime.value = Date.now();
     dragging.value = {
         id: proposal.id,
         trigger: status.automation_trigger,
@@ -138,6 +68,28 @@ function onDragStart(e: DragEvent, proposal: Proposal, status: ProposalStatus) {
 function onDragEnd() {
     dragging.value = null;
     dragOverStatus.value = null;
+    isDragging.value = false;
+}
+
+const mouseDownTime = ref<number>(0);
+const mouseDownTarget = ref<number | null>(null);
+
+function onProposalMouseDown(proposal: Proposal) {
+    mouseDownTime.value = Date.now();
+    mouseDownTarget.value = proposal.id;
+}
+
+function onProposalMouseUp(proposal: Proposal) {
+    const timeSinceMouseDown = Date.now() - mouseDownTime.value;
+    if (
+        mouseDownTarget.value === proposal.id &&
+        !isDragging.value &&
+        timeSinceMouseDown < 200 &&
+        timeSinceMouseDown > 50
+    ) {
+        router.visit(`/proposals/${proposal.id}`);
+    }
+    mouseDownTarget.value = null;
 }
 
 function onDragOver(e: DragEvent, status: ProposalStatus) {
@@ -181,16 +133,13 @@ async function onDrop(e: DragEvent, targetStatus: ProposalStatus) {
     );
 }
 
-// ── Computed helpers ──────────────────────────────────────────
 const columns = computed(() =>
     proposal_statuses.map((status) => {
         const trigger = status.automation_trigger;
-        const style = COLUMN_STYLES[trigger || ''] || COLUMN_STYLES.draft;
         return {
             status,
             proposals: allProposals.filter((p) => p.proposal_status_id === status.id),
-            locked: LOCKED_STATUSES.includes(trigger),
-            style,
+            locked: trigger ? LOCKED_STATUSES.includes(trigger) : false,
         };
     }),
 );
@@ -198,9 +147,6 @@ const columns = computed(() =>
 const getStatusFromId = (id: number): ProposalStatus | undefined => 
     proposal_statuses.find(s => s.id === id);
 
-const isDraggingCard = (id: number) => dragging.value?.id === id;
-
-// ── Formatting ────────────────────────────────────────────────
 const fmt = (n: number, currency = 'USD') =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n);
 
@@ -231,7 +177,7 @@ const fmtDate = (s: string) =>
                 class="flex w-[240px] shrink-0 flex-col rounded-xl border bg-muted/30 transition-all duration-150"
                 :class="[
                     dragOverStatus === col.status.automation_trigger && canDrop(col.status.id)
-                        ? col.style.dropActive
+                        ? 'ring-2 ring-border bg-muted/30'
                         : '',
                     dragging &&
                     !canDrop(col.status.id) &&
@@ -247,7 +193,7 @@ const fmtDate = (s: string) =>
                     <div class="flex flex-1 items-center gap-2 overflow-hidden">
                         <span
                             class="h-2.5 w-2.5 shrink-0 rounded-full"
-                            :class="col.style.dot"
+                            :style="{ backgroundColor: col.status.color }"
                         />
                         <span
                             class="truncate text-sm font-semibold text-foreground"
@@ -263,11 +209,7 @@ const fmtDate = (s: string) =>
 
                         <template v-if="!dragging">
                             <span
-                                class="rounded-full px-1.5 py-0.5 text-xs font-semibold tabular-nums"
-                                :class="[
-                                    col.style.countBg,
-                                    col.style.countText,
-                                ]"
+                                class="rounded-full bg-muted/50 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-foreground"
                             >
                                 {{ col.proposals.length }}
                             </span>
@@ -298,7 +240,7 @@ const fmtDate = (s: string) =>
 
                 <div
                     class="mx-3 mb-2 h-0.5 rounded-full"
-                    :class="col.style.topBar"
+                    :style="{ backgroundColor: col.status.color }"
                 />
 
                 <div
@@ -322,8 +264,8 @@ const fmtDate = (s: string) =>
                         class="group relative rounded-lg border bg-background p-3 shadow-sm transition-all duration-100 select-none"
                         :class="[
                             col.locked
-                                ? 'cursor-default'
-                                : 'cursor-grab hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing',
+                                ? 'cursor-pointer hover:bg-muted/50'
+                                : 'cursor-grab hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing hover:bg-muted/30',
                             dragging?.id === proposal.id
                                 ? 'scale-95 opacity-40'
                                 : '',
@@ -333,6 +275,8 @@ const fmtDate = (s: string) =>
                         @mouseleave="hoveredProposalId = null"
                         @dragstart="onDragStart($event, proposal, col.status)"
                         @dragend="onDragEnd"
+                        @mousedown="onProposalMouseDown(proposal)"
+                        @mouseup="onProposalMouseUp(proposal)"
                     >
                         <div
                             class="mb-1.5 flex items-start justify-between gap-1"
@@ -368,7 +312,7 @@ const fmtDate = (s: string) =>
                             >
                                 {{
                                     fmt(
-                                        proposal.grand_total || proposal.total_value,
+                                        Number(proposal.grand_total || proposal.total_value || 0),
                                         proposal.currency ?? 'USD',
                                     )
                                 }}
@@ -407,15 +351,11 @@ const fmtDate = (s: string) =>
                                     <span
                                         v-for="targetId in validTargets(col.status.automation_trigger)"
                                         :key="targetId"
-                                        class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] leading-none font-semibold"
-                                        :class="[
-                                            COLUMN_STYLES[getStatusFromId(targetId)?.automation_trigger || '']?.badge || COLUMN_STYLES.draft.badge,
-                                            COLUMN_STYLES[getStatusFromId(targetId)?.automation_trigger || '']?.badgeText || COLUMN_STYLES.draft.badgeText,
-                                        ]"
+                                        class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] leading-none font-semibold bg-muted/50 text-muted-foreground"
                                     >
                                         <span
                                             class="h-1.5 w-1.5 rounded-full"
-                                            :class="COLUMN_STYLES[getStatusFromId(targetId)?.automation_trigger || '']?.dot || COLUMN_STYLES.draft.dot"
+                                            :style="{ backgroundColor: getStatusFromId(targetId)?.color || '#6b7280' }"
                                         />
                                         {{ getStatusFromId(targetId)?.title }}
                                     </span>

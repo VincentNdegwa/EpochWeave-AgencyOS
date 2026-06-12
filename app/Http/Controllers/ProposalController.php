@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateProposalRequest;
 use App\Models\Proposal;
 use App\Models\WorkspaceSetting;
 use App\Services\MovementRulesService;
+use App\Services\MoveService;
 use App\Services\ProposalService;
 use App\Services\UserPreferenceService;
 use App\Services\WorkspaceSettingService;
@@ -22,7 +23,8 @@ class ProposalController extends Controller
         private ProposalService $proposalService,
         private UserPreferenceService $userPreferenceService,
         private WorkspaceSettingService $workspaceSettingService,
-        private MovementRulesService $movementRulesService
+        private MovementRulesService $movementRulesService,
+        private MoveService $moveService
     ) {}
 
     public function index(Request $request)
@@ -220,5 +222,27 @@ class ProposalController extends Controller
         unset($data['blocks']);
 
         return $blocks;
+    }
+
+    public function move(Request $request, Proposal $proposal)
+    {
+        try {
+            $request->validate([
+                'target_status_id' => 'required|exists:proposal_statuses,id'
+            ]);
+
+            $result = $this->moveService->moveProposal($proposal, $request->target_status_id);
+
+            if (!$result['success']) {
+                Inertia::flash('toast', ['type' => 'error', 'message' => $result['error']]);
+                return redirect()->back();
+            }
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal moved successfully.']);
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+            return redirect()->back();
+        }
     }
 }

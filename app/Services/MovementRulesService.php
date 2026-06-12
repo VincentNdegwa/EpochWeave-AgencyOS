@@ -35,7 +35,7 @@ class MovementRulesService
         }
     }
 
-    public function canMove(string $currentTrigger, string $targetTrigger): array
+    public function canMove(string $currentTrigger, string $targetTrigger, array $proposalStatuses): array
     {
         if ($targetTrigger === 'expired') {
             return [
@@ -48,6 +48,28 @@ class MovementRulesService
             return [
                 'allowed' => false,
                 'error' => 'This proposal has already been accepted and locked. You must explicitly void the active contract or invoice to reset this pipeline position.'
+            ];
+        }
+        
+        // Get valid targets for the current trigger
+        $validTargets = $this->getValidTargets($currentTrigger, $proposalStatuses);
+        
+        // Find the target status ID for the target trigger
+        $targetStatus = collect($proposalStatuses)
+            ->firstWhere('automation_trigger', $targetTrigger);
+        
+        if (!$targetStatus) {
+            return [
+                'allowed' => false,
+                'error' => 'Invalid target status.'
+            ];
+        }
+        
+        // Check if the target status is in the valid targets
+        if (!in_array($targetStatus['id'], $validTargets)) {
+            return [
+                'allowed' => false,
+                'error' => 'Cannot move from ' . ucfirst($currentTrigger) . ' to ' . ucfirst($targetTrigger) . '.'
             ];
         }
 

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Plus, Tag } from '@lucide/vue';
+import { Plus, Tag, List, GitBranch } from '@lucide/vue';
 import { ref, computed } from 'vue';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import { Button } from '@/components/ui/button';
+import {
+    ButtonGroup,
+} from '@/components/ui/button-group';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -177,14 +180,14 @@ defineOptions({
                     {{ tab.label }}
                 </button>
             </div>
-            <div class="flex rounded-lg border bg-background p-1 ml-auto">
+            <ButtonGroup class="ml-auto">
                 <Button
                     :variant="display_mode === 'list' ? 'default' : 'ghost'"
                     size="sm"
                     @click="handleDisplayModeChange('list')"
                     class="h-7 px-2"
                 >
-                    List
+                    <List class="h-3.5 w-3.5" />
                 </Button>
                 <Button
                     :variant="display_mode === 'kanban' ? 'default' : 'ghost'"
@@ -192,9 +195,9 @@ defineOptions({
                     @click="handleDisplayModeChange('kanban')"
                     class="h-7 px-2"
                 >
-                    Kanban
+                    <GitBranch class="h-3.5 w-3.5" />
                 </Button>
-            </div>
+            </ButtonGroup>
         </div>
 
         <DataTable
