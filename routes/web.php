@@ -20,6 +20,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
 
+// Public proposal routes
+Route::get('/proposals/{token}/public', [ProposalController::class, 'publicShow'])->name('proposals.public.show');
+
 Route::get('/portal/setup/{token}', [PortalSetupController::class, 'show'])->name('portal.setup');
 Route::post('/portal/setup/{token}', [PortalSetupController::class, 'complete'])->name('portal.setup.complete');
 
@@ -52,8 +55,9 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('proposals', ProposalController::class);
     Route::patch('/proposals/{proposal}/move', [ProposalController::class, 'move'])->name('proposal.move');
-    Route::post('/user-preferences/display-mode', [UserPreferenceController::class, 'updateDisplayMode'])
-        ->name('user-preferences.display-mode.update');
+    Route::post('/proposals/{proposal}/send', [ProposalController::class, 'send'])->name('proposals.send');
+
+
     Route::resource('proposal-templates', ProposalTemplateController::class);
     Route::post('proposal-templates/{template}/duplicate', [ProposalTemplateController::class, 'duplicate'])->name('proposal-templates.duplicate');
     Route::post('proposal-templates/{template}/set-default', [ProposalTemplateController::class, 'setDefault'])->name('proposal-templates.set-default');
@@ -81,6 +85,9 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('workspace-settings.proposals');
     Route::patch('workspace/settings/proposals', [WorkspaceProposalSettingsController::class, 'update'])
         ->name('workspace-settings.proposals.update');
+
+    Route::post('/user-preferences/display-mode', [UserPreferenceController::class, 'updateDisplayMode'])
+        ->name('user-preferences.display-mode.update');
 });
 
 require __DIR__.'/settings.php';

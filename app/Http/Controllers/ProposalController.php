@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\SendProposal;
 use App\Http\Requests\StoreProposalRequest;
 use App\Http\Requests\UpdateProposalRequest;
 use App\Models\Proposal;
@@ -24,7 +25,8 @@ class ProposalController extends Controller
         private UserPreferenceService $userPreferenceService,
         private WorkspaceSettingService $workspaceSettingService,
         private MovementRulesService $movementRulesService,
-        private MoveService $moveService
+        private MoveService $moveService,
+        private SendProposal $sendProposal
     ) {}
 
     public function index(Request $request)
@@ -222,6 +224,36 @@ class ProposalController extends Controller
         unset($data['blocks']);
 
         return $blocks;
+    }
+
+    public function publicShow(string $token)
+    {
+        $proposal = Proposal::where('token', $token)
+            ->with(['account','items' ,'accountContact', 'user', 'proposalStatus', 'workspace'])
+            ->firstOrFail();
+
+        $proposal->update([
+            'view_count' => $proposal->view_count + 1,
+            'last_viewed_at' => now(),
+        ]);
+
+        return Inertia::render('public/proposal/show', [
+            'proposal' => $proposal,
+            'workspace' => $proposal->workspace,
+        ]);
+    }
+
+    public function send(Proposal $proposal)
+    {
+        try {
+            $this->sendProposal->send($proposal);
+            
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal sent successfully!']);
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+            return redirect()->back();
+        }
     }
 
     public function move(Request $request, Proposal $proposal)
