@@ -6,7 +6,7 @@ import {
     CheckCircle2,
     Clock4,
     Eye,
-    Layers,
+    Pencil,
     Send,
 } from '@lucide/vue';
 import { computed, onMounted } from 'vue';
@@ -37,19 +37,6 @@ onMounted(() => {
     builderStore.hydrateProposal(props.proposal, { mode: 'proposal' });
 });
 
-const statusDisplay = computed(() => {
-    if (props.proposal.proposalStatus) {
-        return {
-            label: props.proposal.proposalStatus.title,
-            variant: props.proposal.proposalStatus.is_system
-                ? 'default'
-                : 'secondary',
-            color: props.proposal.proposalStatus.color,
-        };
-    }
-
-    return { label: 'Unknown', variant: 'secondary' };
-});
 
 const formattedValue = computed(() =>
     formatCurrency(props.proposal.grand_total ?? 0, {
@@ -182,16 +169,11 @@ function describeValidity(value?: string | null): string {
         </div>
 
         <aside
-            class="w-full border-t border-border bg-background/95 p-6 shadow-2xl backdrop-blur lg:w-96 lg:border-t-0 lg:border-l"
+            class="w-full border-t border-border bg-background/95 p-6 shadow-2xl backdrop-blur lg:w-96 lg:border-t-0 lg:border-l custom-scrollbar overflow-y-auto"
         >
             <div class="space-y-8">
                 <section class="space-y-3">
                     <div class="flex flex-col gap-2">
-                        <p
-                            class="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
-                        >
-                            Proposal
-                        </p>
                         <h1
                             class="text-2xl leading-snug font-semibold text-foreground"
                         >
@@ -199,18 +181,18 @@ function describeValidity(value?: string | null): string {
                         </h1>
                         <div class="flex flex-wrap items-center gap-2">
                             <Badge
-                                :variant="statusDisplay.variant"
+                                v-if="props.proposal.proposal_status"
                                 :style="
-                                    statusDisplay.color
+                                    props.proposal.proposal_status.color
                                         ? {
                                               backgroundColor:
-                                                  statusDisplay.color,
+                                                  props.proposal.proposal_status.color,
                                               color: 'white',
                                           }
                                         : {}
                                 "
                             >
-                                {{ statusDisplay.label }}
+                                {{ props.proposal.proposal_status.title }}
                             </Badge>
                             <Badge variant="outline" class="font-mono text-xs">
                                 #{{ proposalNumber }}
@@ -228,8 +210,8 @@ function describeValidity(value?: string | null): string {
                             class="w-full"
                         >
                             <Button class="w-full gap-2">
-                                <Layers class="h-4 w-4" />
-                                Edit in builder
+                                <Pencil class="h-4 w-4" />
+                                Edit
                             </Button>
                         </Link>
                     </div>
@@ -295,6 +277,44 @@ function describeValidity(value?: string | null): string {
                         <template v-else>
                             {{ accountName }}
                         </template>
+                    </div>
+                    
+                    <div v-if="props.proposal.account_contact" class="flex items-start gap-2 text-sm">
+                        <div class="h-4 w-4 text-muted-foreground mt-0.5">👤</div>
+                        <div>
+                            <p class="font-medium">
+                                {{ `${props.proposal.account_contact.first_name} ${props.proposal.account_contact.last_name}` }}
+                            </p>
+                            <p class="text-muted-foreground text-xs">
+                                {{ props.proposal.account_contact.email }}
+                            </p>
+                            <p v-if="props.proposal.account_contact.job_title" class="text-muted-foreground text-xs">
+                                {{ props.proposal.account_contact.job_title }}
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="space-y-3">
+                    <p
+                        class="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Team
+                    </p>
+                    <Separator />
+                    <div v-if="props.proposal.user" class="flex items-start gap-2 text-sm">
+                        <div class="h-4 w-4 text-muted-foreground mt-0.5">👨‍💼</div>
+                        <div>
+                            <p class="font-medium">
+                                {{ props.proposal.user.name }}
+                            </p>
+                            <p class="text-muted-foreground text-xs">
+                                {{ props.proposal.user.email }}
+                            </p>
+                            <p class="text-muted-foreground text-xs">
+                                Assigned to proposal
+                            </p>
+                        </div>
                     </div>
                 </section>
 

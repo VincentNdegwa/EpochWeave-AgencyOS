@@ -28,6 +28,8 @@ class UpdateProposalRequest extends FormRequest
             'currency' => 'sometimes|required|string|size:3',
             'valid_until' => 'nullable|date|after:now',
             'proposal_status_id' => 'sometimes|required|exists:proposal_statuses,id',
+            'account_contact_id' => 'sometimes|nullable|exists:account_contacts,id',
+            'user_id' => 'sometimes|nullable|exists:users,id',
             'blocks' => 'sometimes|array',
             'blocks.*.id' => 'required|string',
             'blocks.*.type' => [

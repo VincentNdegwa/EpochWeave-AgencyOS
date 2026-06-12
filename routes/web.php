@@ -64,6 +64,8 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         Route::get('templates', [BuilderDataController::class, 'templates'])->name('templates');
         Route::get('templates/{template}', [BuilderDataController::class, 'template'])->name('templates.show');
         Route::get('accounts', [BuilderDataController::class, 'accounts'])->name('accounts');
+        Route::get('users', [BuilderDataController::class, 'users'])->name('users');
+        Route::get('account-contacts', [BuilderDataController::class, 'accountContacts'])->name('account-contacts');
     });
 
     Route::post('uploads', [UploadController::class, 'store'])->name('uploads.store');

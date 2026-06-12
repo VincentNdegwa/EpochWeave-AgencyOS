@@ -24,7 +24,7 @@ class ProposalService
                 $this->createProposalItems($proposal, $items);
             }
             
-            return $proposal->fresh(['items.product', 'proposalStatus']);
+            return $proposal->fresh(['items.product', 'proposalStatus', 'accountContact', 'user']);
         } catch (Exception $e) {
             throw new Exception('Failed to create proposal with items: '.$e->getMessage());
         }
@@ -211,6 +211,8 @@ class ProposalService
     {
         return Proposal::with([
             'account', 
+            'accountContact',
+            'user',
             'workspace', 
             'template', 
             'proposalStatus',
@@ -248,6 +250,8 @@ class ProposalService
 
         $proposals = $query->with([
             'account',
+            'accountContact',
+            'user',
             'proposalStatus',
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
@@ -258,33 +262,6 @@ class ProposalService
 
         return [
             'proposals' => $proposals,
-        ];
-    }
-
-    private function getProposalStats(int $workspaceId): array
-    {
-        $total = Proposal::where('workspace_id', $workspaceId)->count();
-        
-        $draftStatus = ProposalStatus::where('workspace_id', $workspaceId)
-            ->where('title', 'Draft')
-            ->first();
-        $draftCount = $draftStatus ? Proposal::where('workspace_id', $workspaceId)->where('proposal_status_id', $draftStatus->id)->count() : 0;
-        
-        $sentStatus = ProposalStatus::where('workspace_id', $workspaceId)
-            ->where('title', 'Sent')
-            ->first();
-        $sentCount = $sentStatus ? Proposal::where('workspace_id', $workspaceId)->where('proposal_status_id', $sentStatus->id)->count() : 0;
-        
-        $acceptedStatus = ProposalStatus::where('workspace_id', $workspaceId)
-            ->where('title', 'Accepted')
-            ->first();
-        $acceptedCount = $acceptedStatus ? Proposal::where('workspace_id', $workspaceId)->where('proposal_status_id', $acceptedStatus->id)->count() : 0;
-
-        return [
-            'total' => ['value' => $total],
-            'draft' => ['value' => $draftCount],
-            'sent' => ['value' => $sentCount],
-            'accepted' => ['value' => $acceptedCount],
         ];
     }
 

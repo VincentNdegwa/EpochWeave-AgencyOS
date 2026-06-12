@@ -42,6 +42,8 @@ const handleSave = async () => {
             deposit_value: proposal.value.deposit_value,
             template_id: proposal.value.template_id,
             account_id: numericAccountId,
+            account_contact_id: proposal.value.account_contact_id,
+            user_id: proposal.value.user_id,
             blocks: proposal.value.content,
             line_items: allLineItems, // Send all catalog items
         };

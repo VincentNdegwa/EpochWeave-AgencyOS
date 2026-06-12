@@ -32,7 +32,7 @@ watch(selectedBlockId, (newValue) => {
 </script>
 
 <template>
-    <aside class="flex h-[calc(100vh-56px)] flex-col bg-background">
+    <aside class="flex flex-col bg-background h-full">
         <div class="flex border-b border-border text-sm font-medium">
             <button
                 class="flex-1 border-b-2 px-3 py-2 text-center capitalize"
@@ -60,7 +60,7 @@ watch(selectedBlockId, (newValue) => {
             </button>
         </div>
 
-        <div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
+        <div class="custom-scrollbar overflow-y-auto min-h-0 flex-1 h-[calc(100vh-100px)]">
             <BlockSettingsPanel v-if="sidebarTab === 'block'" class="h-full" />
             <TemplateMetaPanel
                 v-else-if="builderMode === 'template'"

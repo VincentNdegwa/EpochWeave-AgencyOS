@@ -14,7 +14,9 @@ class Proposal extends Model
     protected $fillable = [
         'workspace_id',
         'account_id',
+        'account_contact_id',
         'created_by',
+        'user_id',
         'template_id',
         'title',
         'proposal_number',
@@ -83,6 +85,11 @@ class Proposal extends Model
         return $this->belongsTo(Account::class);
     }
 
+    public function accountContact(): BelongsTo
+    {
+        return $this->belongsTo(AccountContact::class);
+    }
+
     public function proposalStatus(): BelongsTo
     {
         return $this->belongsTo(ProposalStatus::class);
@@ -91,6 +98,11 @@ class Proposal extends Model
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function template(): BelongsTo

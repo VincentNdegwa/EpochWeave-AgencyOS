@@ -25,7 +25,9 @@ export interface Proposal extends Record<string, unknown> {
     id: number;
     workspace_id: number;
     account_id: number | null;
+    account_contact_id: number | null;
     created_by: number | null;
+    user_id: number | null;
     template_id: number | null;
     title: string;
     proposal_number: string | null;
@@ -62,10 +64,12 @@ export interface Proposal extends Record<string, unknown> {
     created_at: string;
     updated_at: string;
     account?: Account;
+    account_contact?: AccountContact;
+    user?: User;
     workspace?: Workspace;
     template?: ProposalTemplate;
     items?: ProposalItem[];
-    proposalStatus?: ProposalStatusModel;
+    proposal_status?: ProposalStatusModel;
 }
 
 export interface Account {
@@ -74,6 +78,27 @@ export interface Account {
     status: string;
     website: string | null;
     lifetime_value: number;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface AccountContact {
+    id: number;
+    account_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string | null;
+    job_title: string | null;
+    is_primary: boolean;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface User {
+    id: number;
+    name: string;
+    email: string;
     created_at: string;
     updated_at: string;
 }
@@ -126,7 +151,9 @@ export interface UpdateProposal {
     title?: string;
     currency?: string;
     valid_until?: string | null;
-    status?: ProposalStatus;
+    proposal_status_id?: number | null;
+    account_contact_id?: number | null;
+    user_id?: number | null;
     content?: BaseBlock[];
     subtotal?: number;
     discount_total?: number;

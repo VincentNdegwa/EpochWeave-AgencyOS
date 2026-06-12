@@ -37,9 +37,6 @@ const previewButtonText = computed(() =>
 const previewButtonIcon = computed(() => (props.isPreview ? Edit : Eye));
 
 const isTemplateMode = computed(() => props.builderMode === 'template');
-const saveButtonText = computed(() =>
-    props.mode === 'create' ? 'Create' : 'Save',
-);
 
 const handleSave = async () => {
     if (props.onSave) {
@@ -116,7 +113,7 @@ watch(
                     v-else
                     class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
                 ></div>
-                {{ isSaving ? 'Saving...' : saveButtonText }}
+                {{ isSaving ? 'Saving...' : 'Save' }}
             </Button>
 
             <!-- Proposal mode: Show Create or Send button -->

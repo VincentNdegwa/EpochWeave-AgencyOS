@@ -9,7 +9,8 @@ import {
     FileIcon,
 } from '@lucide/vue';
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import type { Ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,14 +30,42 @@ import type { Proposal } from '@/types/models/proposal';
 const builderStore = useProposalBuilderStore();
 const { proposal } = storeToRefs(builderStore) as { proposal: Ref<Proposal> };
 const builderDataStore = useBuilderDataStore();
-const { templates, accounts } = storeToRefs(builderDataStore);
+const { templates, accounts, users, accountContacts } = storeToRefs(builderDataStore);
 
 const isApplyingTemplate = ref(false);
 const selectedTemplateId = ref<string | null>(null);
 
-const { fetchTemplates, fetchAccounts } = builderDataStore;
+const { fetchTemplates, fetchAccounts, fetchUsers, fetchAccountContacts } = builderDataStore;
 fetchTemplates();
 fetchAccounts();
+fetchUsers();
+
+const currentUser = computed(() => {
+    const page = usePage();
+    return page.props.auth?.user;
+});
+
+watch(() => proposal.value.account_id, (newAccountId) => {
+    if (newAccountId) {
+        fetchAccountContacts();
+    } else {
+        accountContacts.value = [];
+        proposal.value.account_contact_id = null;
+    }
+}, { immediate: true });
+
+watch(() => accountContacts.value, (contacts) => {
+    if (contacts.length > 0 && !proposal.value.account_contact_id) {
+        const primaryContact = contacts.find(contact => contact.is_primary);
+        if (primaryContact) {
+            proposal.value.account_contact_id = primaryContact.id;
+        }
+    }
+});
+
+if (currentUser.value && !proposal.value.user_id) {
+    proposal.value.user_id = currentUser.value.id;
+}
 
 const proposalTitleModel = computed({
     get: () => proposal.value.title,
@@ -54,6 +83,23 @@ const selectedAccountModel = computed({
         proposal.value.account_id ? proposal.value.account_id.toString() : null,
     set: (value: string | null) => {
         proposal.value.account_id = value ? Number(value) : null;
+        proposal.value.account_contact_id = null;
+    },
+});
+
+const selectedContactModel = computed({
+    get: () =>
+        proposal.value.account_contact_id ? proposal.value.account_contact_id.toString() : null,
+    set: (value: string | null) => {
+        proposal.value.account_contact_id = value ? Number(value) : null;
+    },
+});
+
+const selectedUserModel = computed({
+    get: () =>
+        proposal.value.user_id ? proposal.value.user_id.toString() : null,
+    set: (value: string | null) => {
+        proposal.value.user_id = value ? Number(value) : null;
     },
 });
 
@@ -200,7 +246,7 @@ const applyTemplate = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-0 text-sm">
+    <div class="flex flex-col gap-0 text-sm h-full">
         <div class="border-b border-border px-4 py-3">
             <p
                 class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
@@ -256,6 +302,46 @@ const applyTemplate = async () => {
                             :value="account.id.toString()"
                         >
                             {{ account.company_name ?? account.name }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div class="mb-3">
+                <Label class="mb-1.5 block text-xs text-muted-foreground"
+                    >Contact person</Label
+                >
+                <Select v-model="selectedContactModel" :disabled="!selectedAccountModel">
+                    <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Choose contact..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="contact in accountContacts"
+                            :key="contact.id"
+                            :value="contact.id.toString()"
+                        >
+                            {{ `${contact.first_name} ${contact.last_name}` }} - {{ contact.email }}
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div class="mb-3">
+                <Label class="mb-1.5 block text-xs text-muted-foreground"
+                    >Assigned to</Label
+                >
+                <Select v-model="selectedUserModel">
+                    <SelectTrigger class="w-full">
+                        <SelectValue placeholder="Choose team member..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem
+                            v-for="user in users"
+                            :key="user.id"
+                            :value="user.id.toString()"
+                        >
+                            {{ user.name }}
                         </SelectItem>
                     </SelectContent>
                 </Select>
