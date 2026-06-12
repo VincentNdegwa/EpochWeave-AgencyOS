@@ -1,16 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Input } from '@/components/ui/input';
+import { PaletteIcon, LayoutIcon } from '@lucide/vue';
+import { ColorPresets } from '@/components/ui/color-presets';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { ColorPresets } from '@/components/ui/color-presets';
-import { PaletteIcon, LayoutIcon } from '@lucide/vue';
-import type { CalloutBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { CalloutBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<CalloutBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<CalloutBlockData>(props.blockId);
 
 // Preset callout styles
 const presets = [
@@ -23,7 +21,10 @@ const presets = [
 ] as const;
 
 const applyPreset = (preset: typeof presets[number]) => {
-  if (!preset.bg) return;
+  if (!preset.bg) {
+return;
+}
+
   updateData({
     background_color: preset.bg,
     accent_color:     preset.accent ?? '#6366f1',

@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { RulerIcon } from '@lucide/vue';
-import type { SpacerBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { SpacerBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<SpacerBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<SpacerBlockData>(props.blockId);
 
 const heightOptions = [8, 16, 24, 32, 48, 64] as const;
 </script>

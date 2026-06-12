@@ -1,27 +1,10 @@
 <script setup lang="ts">
 import { Form, Head, usePage } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
-import { QuillEditor } from '@vueup/vue-quill';
-import '@vueup/vue-quill/dist/vue-quill.snow.css';
-import WorkspaceProposalSettingsController from '@/actions/App/Http/Controllers/WorkspaceSettings/ProposalController';
-import Heading from '@/components/Heading.vue';
-import InputError from '@/components/InputError.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { dashboard } from '@/routes';
-import { index } from '@/routes/workspace-settings';
-import type { ProposalSettings } from '@/types';
 import {
-    FileTextIcon,
     HashIcon,
     UserIcon,
     ClockIcon,
     BanknoteIcon,
-    ArchiveIcon,
     ScrollTextIcon,
     EyeIcon,
     SparklesIcon,
@@ -30,6 +13,17 @@ import {
     XIcon,
     PlusIcon,
 } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
+import WorkspaceProposalSettingsController from '@/actions/App/Http/Controllers/WorkspaceSettings/ProposalController';
+import Heading from '@/components/Heading.vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { dashboard } from '@/routes';
+import { index } from '@/routes/workspace-settings';
+import type { ProposalSettings } from '@/types';
 
 defineOptions({
     layout: {
@@ -87,6 +81,7 @@ const computedFormatString = computed(() => formatTokens.value.join(''));
 
 const numberPreview = computed(() => {
     const padded = String(localNextSeq.value).padStart(localPadding.value, '0');
+
     return computedFormatString.value
         .replace('{PREFIX}',     localPrefix.value || 'PREFIX')
         .replace(/{DELIMITER}/g, localDelimiter.value || '-')
@@ -138,21 +133,40 @@ function getTokenDef(token: string) {
 }
 
 function getTokenPreview(token: string): string {
-    if (token === '{PREFIX}')    return localPrefix.value || 'PREFIX';
-    if (token === '{DELIMITER}') return localDelimiter.value || '—';
-    if (token === '{YEAR}')      return new Date().getFullYear().toString();
-    if (token === '{SEQUENCE}')  return String(localNextSeq.value).padStart(localPadding.value, '0');
+    if (token === '{PREFIX}')    {
+return localPrefix.value || 'PREFIX';
+}
+
+    if (token === '{DELIMITER}') {
+return localDelimiter.value || '—';
+}
+
+    if (token === '{YEAR}')      {
+return new Date().getFullYear().toString();
+}
+
+    if (token === '{SEQUENCE}')  {
+return String(localNextSeq.value).padStart(localPadding.value, '0');
+}
+
     return token;
 }
 
 function isTokenDisabled(token: string): boolean {
     const def = getTokenDef(token);
-    if (!def?.unique) return false;
+
+    if (!def?.unique) {
+return false;
+}
+
     return formatTokens.value.includes(token);
 }
 
 function addToken(token: string) {
-    if (isTokenDisabled(token)) return;
+    if (isTokenDisabled(token)) {
+return;
+}
+
     formatTokens.value = [...formatTokens.value, token];
 }
 
@@ -163,7 +177,11 @@ function removeToken(index: number) {
 function moveToken(index: number, direction: -1 | 1) {
     const arr = [...formatTokens.value];
     const newIndex = index + direction;
-    if (newIndex < 0 || newIndex >= arr.length) return;
+
+    if (newIndex < 0 || newIndex >= arr.length) {
+return;
+}
+
     [arr[index], arr[newIndex]] = [arr[newIndex], arr[index]];
     formatTokens.value = arr;
 }

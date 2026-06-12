@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Head, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { storeToRefs } from 'pinia';
 import { router } from '@inertiajs/vue3';
-import { dashboard } from '@/routes';
-import proposalTemplates from '@/routes/proposal-templates';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 import ProposalTemplateController from '@/actions/App/Http/Controllers/ProposalTemplateController';
 import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
+import { dashboard } from '@/routes';
+import proposalTemplates from '@/routes/proposal-templates';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
 const workspaceId = usePage().props.workspace?.id ?? 0;
@@ -20,7 +20,9 @@ templateSettings.value = { description: null, thumbnailUrl: null };
 const isSaving = ref(false);
 
 const handleSave = async () => {
-  if (isSaving.value) return;
+  if (isSaving.value) {
+return;
+}
   
   isSaving.value = true;
   

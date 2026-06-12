@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { PlusIcon } from '@lucide/vue';
-import { nanoid } from 'nanoid';
-import type { BaseBlock, ColumnBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
-import { useBlockRegistry } from '@/composables/useBlockRegistry';
+import { computed } from 'vue';
 import { createDefaultBlock } from '@/composables/blockFactory';
+import { useBlockRegistry } from '@/composables/useBlockRegistry';
 import BlockWrapper from '@/pages/proposals/components/canvas/BlockWrapper.vue';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, ColumnBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: ColumnBlockData;
@@ -35,8 +34,14 @@ const gridClass = computed(() => {
   const gapMap = { sm: 'gap-3', md: 'gap-6', lg: 'gap-10' };
   const gap    = gapMap[props.data.gap ?? 'md'];
 
-  if (props.data.columns === 1) return `grid grid-cols-1 ${gap}`;
-  if (props.data.columns === 2) return `grid grid-cols-2 ${gap}`;
+  if (props.data.columns === 1) {
+return `grid grid-cols-1 ${gap}`;
+}
+
+  if (props.data.columns === 2) {
+return `grid grid-cols-2 ${gap}`;
+}
+
   return `grid grid-cols-3 ${gap}`;
 });
 
@@ -73,8 +78,12 @@ const resolveComponent = (block: BaseBlock) => registry.resolveComponent(block);
 
 // ── Column width styles (for custom ratios) ───────────────────
 const colWidthStyle = (colIndex: number) => {
-  if (!props.data.column_widths || props.data.columns !== 2) return {};
+  if (!props.data.column_widths || props.data.columns !== 2) {
+return {};
+}
+
   const widths = props.data.column_widths;
+
   return { flex: `0 0 ${widths[colIndex] ?? 50}%`, maxWidth: `${widths[colIndex] ?? 50}%` };
 };
 

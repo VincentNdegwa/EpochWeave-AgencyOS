@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { VideoIcon, LinkIcon } from '@lucide/vue';
-import type { BaseBlock, VideoEmbedBlockData } from '@/types/proposal-builder';
+import { computed } from 'vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, VideoEmbedBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: VideoEmbedBlockData;
@@ -18,16 +18,25 @@ const updateData = (changes: Partial<VideoEmbedBlockData>) => {
 
 const embedUrl = computed(() => {
   const url = props.data.url;
-  if (!url) return null;
+
+  if (!url) {
+return null;
+}
 
   if (props.data.platform === 'youtube') {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
-    if (match) return `https://www.youtube.com/embed/${match[1]}`;
+
+    if (match) {
+return `https://www.youtube.com/embed/${match[1]}`;
+}
   }
 
   if (props.data.platform === 'vimeo') {
     const match = url.match(/vimeo\.com\/(\d+)/);
-    if (match) return `https://player.vimeo.com/video/${match[1]}`;
+
+    if (match) {
+return `https://player.vimeo.com/video/${match[1]}`;
+}
   }
 
   return url; // custom / direct

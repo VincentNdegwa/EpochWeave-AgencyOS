@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { PenLineIcon, CheckCircleIcon } from '@lucide/vue';
+import { ref, computed } from 'vue';
 import type { BaseBlock, SignatureBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
-const props = defineProps<{
+defineProps<{
   data: SignatureBlockData;
   block: BaseBlock;
   isLocked: boolean;
@@ -20,11 +19,6 @@ const emit = defineEmits<{
   sign: [payload: { name: string; date: string; dataUrl: string }];
 }>();
 
-const store = useProposalBuilderStore();
-
-const updateData = (changes: Partial<SignatureBlockData>) => {
-  store.updateBlockData(props.block.id, { ...props.data, ...changes });
-};
 
 // ── Signature pad (canvas) ────────────────────────────────────
 const canvasRef    = ref<HTMLCanvasElement | null>(null);
@@ -34,21 +28,35 @@ const typedName    = ref('');
 const typedDate    = ref(new Date().toISOString().split('T')[0]);
 
 const startDraw = (e: MouseEvent | TouchEvent) => {
-  if (!canvasRef.value) return;
+  if (!canvasRef.value) {
+return;
+}
+
   isDrawing.value = true;
   const ctx = canvasRef.value.getContext('2d');
-  if (!ctx) return;
+
+  if (!ctx) {
+return;
+}
+
   const pos = getPos(e, canvasRef.value);
   ctx.beginPath();
   ctx.moveTo(pos.x, pos.y);
 };
 
 const draw = (e: MouseEvent | TouchEvent) => {
-  if (!isDrawing.value || !canvasRef.value) return;
+  if (!isDrawing.value || !canvasRef.value) {
+return;
+}
+
   e.preventDefault();
   hasStrokes.value = true;
   const ctx = canvasRef.value.getContext('2d');
-  if (!ctx) return;
+
+  if (!ctx) {
+return;
+}
+
   const pos = getPos(e, canvasRef.value);
   ctx.lineTo(pos.x, pos.y);
   ctx.strokeStyle = '#111827';
@@ -58,25 +66,39 @@ const draw = (e: MouseEvent | TouchEvent) => {
   ctx.stroke();
 };
 
-const endDraw = () => { isDrawing.value = false; };
+const endDraw = () => {
+ isDrawing.value = false; 
+};
 
 const clearCanvas = () => {
-  if (!canvasRef.value) return;
+  if (!canvasRef.value) {
+return;
+}
+
   const ctx = canvasRef.value.getContext('2d');
-  if (ctx) ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height);
+
+  if (ctx) {
+ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height);
+}
+
   hasStrokes.value = false;
 };
 
 const getPos = (e: MouseEvent | TouchEvent, canvas: HTMLCanvasElement) => {
   const rect = canvas.getBoundingClientRect();
+
   if ('touches' in e) {
     return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
   }
+
   return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 };
 
 const submitSignature = () => {
-  if (!canvasRef.value || !typedName.value.trim()) return;
+  if (!canvasRef.value || !typedName.value.trim()) {
+return;
+}
+
   const dataUrl = canvasRef.value.toDataURL('image/png');
   emit('sign', { name: typedName.value, date: typedDate.value, dataUrl });
 };

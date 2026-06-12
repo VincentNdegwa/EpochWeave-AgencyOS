@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { PenLineIcon, ToggleLeftIcon } from '@lucide/vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { PenLineIcon, ToggleLeftIcon } from '@lucide/vue';
-import type { SignatureBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { SignatureBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<SignatureBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<SignatureBlockData>(props.blockId);
 </script>
 
 <template>

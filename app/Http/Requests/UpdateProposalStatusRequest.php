@@ -16,7 +16,6 @@ class UpdateProposalStatusRequest extends FormRequest
         return [
             'title' => 'sometimes|required|string|max:255',
             'color' => 'sometimes|required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'position' => 'sometimes|required|integer|min:0',
         ];
     }
 }

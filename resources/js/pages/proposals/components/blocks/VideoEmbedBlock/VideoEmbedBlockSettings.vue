@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { VideoIcon, LinkIcon } from '@lucide/vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { VideoIcon, LinkIcon } from '@lucide/vue';
-import type { VideoEmbedBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { VideoEmbedBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<VideoEmbedBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<VideoEmbedBlockData>(props.blockId);
 
 const platformOptions = [
   { value: 'youtube', label: 'YouTube' },

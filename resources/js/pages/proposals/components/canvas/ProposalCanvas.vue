@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { computed } from 'vue';
 import { getBlockDefinition } from '@/pages/proposals/components/blocks/registry';
+import BlockAddButton from '@/pages/proposals/components/canvas/BlockAddButton.vue';
 import BlockWrapper from '@/pages/proposals/components/canvas/BlockWrapper.vue';
 import CanvasEmpty from '@/pages/proposals/components/canvas/CanvasEmpty.vue';
-import BlockAddButton from '@/pages/proposals/components/canvas/BlockAddButton.vue';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
 const emit = defineEmits<{
   (e: 'add-block', afterBlockId: string | null, blockType: string): void;
@@ -24,6 +24,7 @@ const handleAddClick = (afterBlockId: string | null, blockType: string) => {
   if (props.isLocked) {
     return;
   }
+
   emit('add-block', afterBlockId, blockType);
 };
 </script>

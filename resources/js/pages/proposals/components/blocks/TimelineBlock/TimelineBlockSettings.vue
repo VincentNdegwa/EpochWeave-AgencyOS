@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { LayoutIcon } from '@lucide/vue';
-import type { TimelineBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { TimelineBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<TimelineBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<TimelineBlockData>(props.blockId);
 </script>
 
 <template>

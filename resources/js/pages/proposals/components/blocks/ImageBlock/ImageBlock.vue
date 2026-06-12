@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { ImageIcon, PlusIcon, XIcon, UploadIcon } from '@lucide/vue';
 import { nanoid } from 'nanoid';
-import type { BaseBlock, ImageBlockData, ImageItem } from '@/types/proposal-builder';
+import { ref, computed } from 'vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, ImageBlockData, ImageItem } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: ImageBlockData;
@@ -43,14 +43,20 @@ const removeImage = (id: string) => {
 // ── File upload per image slot ────────────────────────────────
 const handleFileUpload = (id: string, event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) return;
+
+  if (!file) {
+return;
+}
+
   uploadingId.value = id;
   const reader = new FileReader();
   reader.onload = () => {
     updateImage(id, { url: typeof reader.result === 'string' ? reader.result : '' });
     uploadingId.value = null;
   };
-  reader.onerror = () => { uploadingId.value = null; };
+  reader.onerror = () => {
+ uploadingId.value = null; 
+};
   reader.readAsDataURL(file);
 };
 
@@ -60,43 +66,64 @@ const handleDragOver = (id: string, e: DragEvent) => {
   dragOverId.value = id;
 };
 
-const handleDragLeave = () => { dragOverId.value = null; };
+const handleDragLeave = () => {
+ dragOverId.value = null; 
+};
 
 const handleDrop = (id: string, e: DragEvent) => {
   e.preventDefault();
   dragOverId.value = null;
   const file = e.dataTransfer?.files?.[0];
-  if (!file || !file.type.startsWith('image/')) return;
+
+  if (!file || !file.type.startsWith('image/')) {
+return;
+}
+
   uploadingId.value = id;
   const reader = new FileReader();
   reader.onload = () => {
     updateImage(id, { url: typeof reader.result === 'string' ? reader.result : '' });
     uploadingId.value = null;
   };
-  reader.onerror = () => { uploadingId.value = null; };
+  reader.onerror = () => {
+ uploadingId.value = null; 
+};
   reader.readAsDataURL(file);
 };
 
 // ── Computed styles ───────────────────────────────────────────
 const gridClass = computed(() => {
-  if (props.data.columns === 1) return '';
-  if (props.data.columns === 2) return 'grid grid-cols-2 gap-4';
+  if (props.data.columns === 1) {
+return '';
+}
+
+  if (props.data.columns === 2) {
+return 'grid grid-cols-2 gap-4';
+}
+
   return 'grid grid-cols-3 gap-4';
 });
 
 const wrapperClass = computed(() => {
-  if (props.data.columns > 1) return '';
+  if (props.data.columns > 1) {
+return '';
+}
+
   const align: Record<string, string> = {
     left:   'mr-auto',
     center: 'mx-auto',
     right:  'ml-auto',
     full:   'w-full',
   };
+
   return align[props.data.alignment] ?? 'mx-auto';
 });
 
 const wrapperStyle = computed(() => {
-  if (props.data.columns > 1 || props.data.alignment === 'full') return {};
+  if (props.data.columns > 1 || props.data.alignment === 'full') {
+return {};
+}
+
   return { width: `${props.data.width_percent ?? 100}%` };
 });
 
@@ -107,6 +134,7 @@ const aspectClass = computed(() => {
     video:    'aspect-video',
     portrait: 'aspect-[3/4]',
   };
+
   return map[props.data.aspect_ratio ?? 'auto'] ?? '';
 });
 

@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { Form, Head, usePage } from '@inertiajs/vue3';
+import {
+    BuildingIcon,
+    PaletteIcon,
+    EyeIcon,
+} from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import WorkspaceGeneralSettingsController from '@/actions/App/Http/Controllers/WorkspaceSettings/GeneralController';
 import Heading from '@/components/Heading.vue';
@@ -14,14 +19,6 @@ import { useTemporaryUploads } from '@/composables/useTemporaryUploads';
 import { dashboard } from '@/routes';
 import { index } from '@/routes/workspace-settings';
 import type { Workspace } from '@/types/models/workspace';
-import {
-    BuildingIcon,
-    FileTextIcon,
-    DollarSignIcon,
-    ImageIcon,
-    PaletteIcon,
-    EyeIcon,
-} from '@lucide/vue';
 
 defineOptions({
     layout: {

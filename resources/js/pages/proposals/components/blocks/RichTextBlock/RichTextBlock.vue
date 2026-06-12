@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue';
 import { QuillEditor } from '@vueup/vue-quill';
+import { computed, watch, ref } from 'vue';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
-import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
-import type { BaseBlock, RichTextBlockData } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useBlockMeta } from '@/pages/proposals/components/blocks/shared/blockMetaContext';
+import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, RichTextBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: RichTextBlockData;

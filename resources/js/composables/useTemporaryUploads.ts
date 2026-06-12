@@ -66,6 +66,7 @@ export const useTemporaryUploads = (): UseTemporaryUploadsReturn => {
 
             if (!response.ok) {
                 errors.value.push('Upload failed');
+
                 return {};
             }
 
@@ -84,6 +85,7 @@ export const useTemporaryUploads = (): UseTemporaryUploadsReturn => {
             return json;
         } catch {
             errors.value.push('Upload failed');
+
             return {};
         } finally {
             isUploading.value = false;
@@ -96,6 +98,7 @@ export const useTemporaryUploads = (): UseTemporaryUploadsReturn => {
         if (!item || item.committed) {
             pending.value = { ...pending.value };
             delete pending.value[key];
+
             return;
         }
 

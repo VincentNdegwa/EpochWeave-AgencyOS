@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue';
 import { store as accountStore, update as accountUpdate } from '@/actions/App/Http/Controllers/AccountController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -13,7 +14,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Account } from '@/types/models/account';
@@ -70,6 +70,7 @@ const formAction = computed(() => {
     if (isEditMode.value && props.account) {
         return accountUpdate.form({ account: props.account.id });
     }
+
     return accountStore.form();
 });
 
@@ -77,6 +78,7 @@ const resetPrimaryFields = () => {
     if (props.account) {
         companyName.value = props.account.company_name ?? '';
         website.value = props.account.website ?? '';
+
         return;
     }
 

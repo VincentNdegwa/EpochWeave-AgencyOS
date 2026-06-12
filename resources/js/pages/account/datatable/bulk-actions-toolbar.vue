@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { router } from '@inertiajs/vue3';
 import { Archive, Trash2 } from '@lucide/vue';
 import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
-import type { Account } from '@/types/models/account';
 import { confirm } from '@/composables/useConfirmation';
-import { router } from '@inertiajs/vue3';
 import accounts from '@/routes/accounts';
+import type { Account } from '@/types/models/account';
 
 interface Props {
     selectedRows: Account[];
@@ -16,11 +16,14 @@ const props = defineProps<Props>();
 const hasSelection = computed(() => props.selectedRows.length > 0);
 const selectionText = computed(() => {
     const count = props.selectedRows.length;
+
     return count === 1 ? '1 item selected' : `${count} items selected`;
 });
 
 const handleBulkArchive = async () => {
-    if (!hasSelection.value) return;
+    if (!hasSelection.value) {
+return;
+}
 
     const confirmed = await confirm({
         title: props.selectedRows.length === 1 
@@ -49,7 +52,9 @@ const handleBulkArchive = async () => {
 };
 
 const handleBulkDelete = async () => {
-    if (!hasSelection.value) return;
+    if (!hasSelection.value) {
+return;
+}
 
     const confirmed = await confirm({
         title: props.selectedRows.length === 1 

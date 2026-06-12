@@ -17,10 +17,10 @@ import {
 import { dashboard } from '@/routes';
 import accounts from '@/routes/accounts';
 import products from '@/routes/products';
+import proposalTemplates from '@/routes/proposal-templates';
+import proposals from '@/routes/proposals';
 import { index as workspaceSettings } from '@/routes/workspace-settings';
 import type { NavItem } from '@/types';
-import proposals from '@/routes/proposals';
-import proposalTemplates from '@/routes/proposal-templates';
 
 const mainNavItems: NavItem[] = [
     {

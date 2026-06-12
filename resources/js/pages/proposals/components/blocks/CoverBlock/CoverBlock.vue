@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { BaseBlock, CoverBlockData } from '@/types/proposal-builder';
 import { useWorkspaceStore } from '@/stores/workspace';
+import type { BaseBlock, CoverBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: CoverBlockData;
@@ -28,6 +28,7 @@ const containerStyle = computed(() => {
       color: props.data.text_color,
     } as Record<string, string>;
   }
+
   return {
     backgroundColor: props.data.background_value,
     color: props.data.text_color,

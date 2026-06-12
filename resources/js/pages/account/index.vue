@@ -9,9 +9,9 @@ import { useCurrency } from '@/composables/useCurrency';
 import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import type { Account } from '@/types/models/account';
-import AccountFormDialog from './dialogs/AccountFormDialog.vue';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
+import AccountFormDialog from './dialogs/AccountFormDialog.vue';
 
 defineProps<{
     accounts: Account[];

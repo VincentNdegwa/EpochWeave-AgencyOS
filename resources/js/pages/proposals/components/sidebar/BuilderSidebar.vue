@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
 import { storeToRefs } from 'pinia';
+import { watch, computed } from 'vue';
+import TemplateMetaPanel from '@/pages/proposal-templates/components/TemplateMetaPanel.vue';
 import BlockSettingsPanel from '@/pages/proposals/components/sidebar/BlockSettingsPanel.vue';
 import ProposalMetaPanel from '@/pages/proposals/components/sidebar/ProposalMetaPanel.vue';
-import TemplateMetaPanel from '@/pages/proposal-templates/components/TemplateMetaPanel.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
 const props = withDefaults(

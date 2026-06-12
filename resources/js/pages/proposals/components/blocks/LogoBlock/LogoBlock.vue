@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { BuildingIcon } from '@lucide/vue';
+import { computed } from 'vue';
 import type { BaseBlock, LogoBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{

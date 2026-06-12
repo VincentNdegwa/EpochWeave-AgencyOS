@@ -22,7 +22,10 @@ export function useBlockSettings<T = any>(blockId: string) {
   const data = computed<T | null>(() => (block.value?.data as T) ?? null);
 
   const updateData = (changes: Partial<T>) => {
-    if (!block.value || !data.value) return;
+    if (!block.value || !data.value) {
+return;
+}
+
     store.updateBlockDataRecursive(block.value.id, { ...data.value, ...changes });
   };
 

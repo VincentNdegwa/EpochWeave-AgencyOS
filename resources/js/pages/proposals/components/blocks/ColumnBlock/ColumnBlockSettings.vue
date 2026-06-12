@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Label } from '@/components/ui/label';
 import { LayoutIcon, AlignCenterVerticalIcon } from '@lucide/vue';
-import type { ColumnBlockData } from '@/types/proposal-builder';
+import { computed } from 'vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { ColumnBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 const store = useProposalBuilderStore();
@@ -12,13 +11,19 @@ const block = computed(() => store.blocks.find((b) => b.id === props.blockId) ??
 const data  = computed<ColumnBlockData | null>(() => (block.value?.data as ColumnBlockData) ?? null);
 
 const updateData = (changes: Partial<ColumnBlockData>) => {
-  if (!block.value || !data.value) return;
+  if (!block.value || !data.value) {
+return;
+}
+
   store.updateBlockData(block.value.id, { ...data.value, ...changes });
 };
 
 // When changing column count, resize children array
 const setColumns = (count: 1 | 2 | 3) => {
-  if (!data.value) return;
+  if (!data.value) {
+return;
+}
+
   const current = data.value.children;
   let children: any[][]
 

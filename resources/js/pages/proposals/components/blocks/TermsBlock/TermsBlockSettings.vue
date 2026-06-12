@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { FileTextIcon } from '@lucide/vue';
-import type { TermsBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { TermsBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<TermsBlockData>(props.blockId);
+const { data } = useBlockSettings<TermsBlockData>(props.blockId);
 </script>
 
 <template>

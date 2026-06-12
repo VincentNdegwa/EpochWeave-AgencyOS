@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed, provide } from 'vue';
 import { storeToRefs } from 'pinia';
-import type { BaseBlock, BlockMeta } from '@/types/proposal-builder';
-import { defaultBlockMeta } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
-import BlockToolbar from '@/pages/proposals/components/canvas/BlockToolbar.vue';
+import { computed, provide } from 'vue';
+import { blockMetaInjectionKey } from '@/pages/proposals/components/blocks/shared/blockMetaContext';
 import BlockLockedOverlay from '@/pages/proposals/components/canvas/BlockLockedOverlay.vue';
 import BlockSurface from '@/pages/proposals/components/canvas/BlockSurface.vue';
-import { blockMetaInjectionKey } from '@/pages/proposals/components/blocks/shared/blockMetaContext';
+import BlockToolbar from '@/pages/proposals/components/canvas/BlockToolbar.vue';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, BlockMeta } from '@/types/proposal-builder';
+import { defaultBlockMeta } from '@/types/proposal-builder';
 
 const props = defineProps<{
   block: BaseBlock;
@@ -45,12 +45,15 @@ const handleSelect = (event: MouseEvent) => {
 // Helper function to check if an element is nested (not a direct child of wrapper)
 const isNestedElement = (target: Element, wrapper: Element): boolean => {
   let current = target.parentElement;
+
   while (current && current !== wrapper) {
     if (current.hasAttribute('data-nested-block')) {
       return true;
     }
+
     current = current.parentElement;
   }
+
   return false;
 };
 </script>

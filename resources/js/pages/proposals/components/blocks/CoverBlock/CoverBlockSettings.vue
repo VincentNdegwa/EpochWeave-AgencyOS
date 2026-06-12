@@ -1,30 +1,36 @@
 <script setup lang="ts">
+import { ImageIcon, LinkIcon, TypeIcon, ToggleLeftIcon } from '@lucide/vue';
 import { computed, ref } from 'vue';
+import { ColorPresets } from '@/components/ui/color-presets';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ColorPresets } from '@/components/ui/color-presets';
 import { TextColorPicker } from '@/components/ui/text-color-picker';
-import { ImageIcon, LinkIcon, TypeIcon, ToggleLeftIcon } from '@lucide/vue';
-import type { CoverBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { CoverBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
 const isUploading = ref(false);
-const { block, data, updateData } = useBlockSettings<CoverBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<CoverBlockData>(props.blockId);
 
 const handleBackgroundFile = (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) return;
+
+  if (!file) {
+return;
+}
+
   isUploading.value = true;
   const reader = new FileReader();
   reader.onload  = () => {
     updateData({ background_value: typeof reader.result === 'string' ? reader.result : '' });
     isUploading.value = false;
   };
-  reader.onerror = () => { isUploading.value = false; };
+  reader.onerror = () => {
+ isUploading.value = false; 
+};
   reader.readAsDataURL(file);
 };
 

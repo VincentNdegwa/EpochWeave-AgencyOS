@@ -1,19 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { TableIcon, CoinsIcon, ToggleLeftIcon, TagIcon } from '@lucide/vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { TableIcon, CoinsIcon, ToggleLeftIcon, TagIcon } from '@lucide/vue';
-import type { PricingTableBlockData, PricingDiscount } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { PricingTableBlockData, PricingDiscount } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<PricingTableBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<PricingTableBlockData>(props.blockId);
 
 const updateDiscount = (changes: Partial<PricingDiscount>) => {
-  if (!data.value) return;
+  if (!data.value) {
+return;
+}
+
   const current = data.value.discount ?? { type: 'percentage', value: 0, label: 'Discount', amount: 0 };
   updateData({ discount: { ...current, ...changes } });
 };

@@ -9,10 +9,9 @@ import {
     useVueTable,
 } from '@tanstack/vue-table';
 import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from '@tanstack/vue-table';
-import type { Account } from '@/types/models/account';
 import { ref } from 'vue';
+import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
-import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -29,7 +28,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { valueUpdater } from '@/components/ui/table/utils';
-import { computed } from 'vue';
+import type { Account } from '@/types/models/account';
+import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 
 const props = defineProps<{
     columns: ColumnDef<Account>[];

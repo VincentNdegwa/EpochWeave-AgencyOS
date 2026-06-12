@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue';
-import { storeToRefs } from 'pinia';
 import { usePage } from '@inertiajs/vue3';
 import { watchDebounced } from '@vueuse/core';
+import { storeToRefs } from 'pinia';
+import { computed, onBeforeUnmount, ref } from 'vue';
+import BuilderTopbar from '@/pages/proposals/components/builder/BuilderTopbar.vue';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import BuilderSidebar from '@/pages/proposals/components/sidebar/BuilderSidebar.vue';
-import BuilderTopbar from '@/pages/proposals/components/builder/BuilderTopbar.vue';
-import type { BlockType } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
+import type { BlockType } from '@/types/proposal-builder';
 
 const props = withDefaults(
   defineProps<{
@@ -23,7 +23,7 @@ const props = withDefaults(
 );
 
 const builderStore = useProposalBuilderStore();
-const { proposal, isDirty, isSaving, builderMode } = storeToRefs(builderStore);
+const { proposal, isDirty, builderMode } = storeToRefs(builderStore);
 const workspaceStore = useWorkspaceStore();
 
 const workspace = usePage().props.workspace;

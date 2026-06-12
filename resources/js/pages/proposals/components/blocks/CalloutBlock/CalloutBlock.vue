@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
 import { QuillEditor } from '@vueup/vue-quill';
+import { ref, watch, computed } from 'vue';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
-import type { BaseBlock, CalloutBlockData } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, CalloutBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: CalloutBlockData;
@@ -21,7 +21,9 @@ const updateData = (changes: Partial<CalloutBlockData>) => {
 };
 
 watch(() => props.data.content, (incoming) => {
-  if (editorContent.value !== incoming) editorContent.value = incoming;
+  if (editorContent.value !== incoming) {
+editorContent.value = incoming;
+}
 });
 
 // ── Computed styles from data ─────────────────────────────────

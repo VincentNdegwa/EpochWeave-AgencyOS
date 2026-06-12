@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Head, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { ref } from 'vue';
-import { storeToRefs } from 'pinia';
 import { router } from '@inertiajs/vue3';
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
+import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
 import { dashboard } from '@/routes';
 import proposals from '@/routes/proposals';
-import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
 const workspaceId = usePage().props.workspace?.id ?? 0;
@@ -17,7 +17,9 @@ const { proposal } = storeToRefs(builderStore);
 const isSaving = ref(false);
 
 const handleSave = async () => {
-  if (isSaving.value) return;
+  if (isSaving.value) {
+return;
+}
   
   isSaving.value = true;
   

@@ -1,4 +1,3 @@
-import type { Component } from 'vue';
 import {
   LayoutPanelTop,
   AlignLeft,
@@ -17,39 +16,40 @@ import {
   MessageSquare,
   Columns,
 } from '@lucide/vue';
-import type { BlockType } from '@/types/proposal-builder';
-import CoverBlock from '@/pages/proposals/components/blocks/CoverBlock/CoverBlock.vue';
-import CoverBlockSettings from '@/pages/proposals/components/blocks/CoverBlock/CoverBlockSettings.vue';
-import RichTextBlock from '@/pages/proposals/components/blocks/RichTextBlock/RichTextBlock.vue';
-import RichTextBlockSettings from '@/pages/proposals/components/blocks/RichTextBlock/RichTextBlockSettings.vue';
-import ImageBlock from '@/pages/proposals/components/blocks/ImageBlock/ImageBlock.vue';
-import ImageBlockSettings from '@/pages/proposals/components/blocks/ImageBlock/ImageBlockSettings.vue';
-import LogoBlock from '@/pages/proposals/components/blocks/LogoBlock/LogoBlock.vue';
-import LogoBlockSettings from '@/pages/proposals/components/blocks/LogoBlock/LogoBlockSettings.vue';
-import DividerBlock from '@/pages/proposals/components/blocks/DividerBlock/DividerBlock.vue';
-import DividerBlockSettings from '@/pages/proposals/components/blocks/DividerBlock/DividerBlockSettings.vue';
-import SpacerBlock from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlock.vue';
-import SpacerBlockSettings from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlockSettings.vue';
-import PricingTableBlock from '@/pages/proposals/components/blocks/PricingTableBlock/PricingTableBlock.vue';
-import PricingTableBlockSettings from '@/pages/proposals/components/blocks/PricingTableBlock/PricingTableBlockSettings.vue';
-import TimelineBlock from '@/pages/proposals/components/blocks/TimelineBlock/TimelineBlock.vue';
-import TimelineBlockSettings from '@/pages/proposals/components/blocks/TimelineBlock/TimelineBlockSettings.vue';
-import TeamMemberBlock from '@/pages/proposals/components/blocks/TeamMemberBlock/TeamMemberBlock.vue';
-import TeamMemberBlockSettings from '@/pages/proposals/components/blocks/TeamMemberBlock/TeamMemberBlockSettings.vue';
-import TestimonialBlock from '@/pages/proposals/components/blocks/TestimonialBlock/TestimonialBlock.vue';
-import TestimonialBlockSettings from '@/pages/proposals/components/blocks/TestimonialBlock/TestimonialBlockSettings.vue';
-import TermsBlock from '@/pages/proposals/components/blocks/TermsBlock/TermsBlock.vue';
-import TermsBlockSettings from '@/pages/proposals/components/blocks/TermsBlock/TermsBlockSettings.vue';
-import SignatureBlock from '@/pages/proposals/components/blocks/SignatureBlock/SignatureBlock.vue';
-import SignatureBlockSettings from '@/pages/proposals/components/blocks/SignatureBlock/SignatureBlockSettings.vue';
-import CtaBlock from '@/pages/proposals/components/blocks/CtaBlock/CtaBlock.vue';
-import CtaBlockSettings from '@/pages/proposals/components/blocks/CtaBlock/CtaBlockSettings.vue';
-import VideoEmbedBlock from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlock.vue';
-import VideoEmbedBlockSettings from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlockSettings.vue';
+import type { Component } from 'vue';
 import CalloutBlock from '@/pages/proposals/components/blocks/CalloutBlock/CalloutBlock.vue';
 import CalloutBlockSettings from '@/pages/proposals/components/blocks/CalloutBlock/CalloutBlockSettings.vue';
 import ColumnBlock from '@/pages/proposals/components/blocks/ColumnBlock/ColumnBlock.vue';
 import ColumnBlockSettings from '@/pages/proposals/components/blocks/ColumnBlock/ColumnBlockSettings.vue';
+import CoverBlock from '@/pages/proposals/components/blocks/CoverBlock/CoverBlock.vue';
+import CoverBlockSettings from '@/pages/proposals/components/blocks/CoverBlock/CoverBlockSettings.vue';
+import CtaBlock from '@/pages/proposals/components/blocks/CtaBlock/CtaBlock.vue';
+import CtaBlockSettings from '@/pages/proposals/components/blocks/CtaBlock/CtaBlockSettings.vue';
+import DividerBlock from '@/pages/proposals/components/blocks/DividerBlock/DividerBlock.vue';
+import DividerBlockSettings from '@/pages/proposals/components/blocks/DividerBlock/DividerBlockSettings.vue';
+import ImageBlock from '@/pages/proposals/components/blocks/ImageBlock/ImageBlock.vue';
+import ImageBlockSettings from '@/pages/proposals/components/blocks/ImageBlock/ImageBlockSettings.vue';
+import LogoBlock from '@/pages/proposals/components/blocks/LogoBlock/LogoBlock.vue';
+import LogoBlockSettings from '@/pages/proposals/components/blocks/LogoBlock/LogoBlockSettings.vue';
+import PricingTableBlock from '@/pages/proposals/components/blocks/PricingTableBlock/PricingTableBlock.vue';
+import PricingTableBlockSettings from '@/pages/proposals/components/blocks/PricingTableBlock/PricingTableBlockSettings.vue';
+import RichTextBlock from '@/pages/proposals/components/blocks/RichTextBlock/RichTextBlock.vue';
+import RichTextBlockSettings from '@/pages/proposals/components/blocks/RichTextBlock/RichTextBlockSettings.vue';
+import SignatureBlock from '@/pages/proposals/components/blocks/SignatureBlock/SignatureBlock.vue';
+import SignatureBlockSettings from '@/pages/proposals/components/blocks/SignatureBlock/SignatureBlockSettings.vue';
+import SpacerBlock from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlock.vue';
+import SpacerBlockSettings from '@/pages/proposals/components/blocks/SpacerBlock/SpacerBlockSettings.vue';
+import TeamMemberBlock from '@/pages/proposals/components/blocks/TeamMemberBlock/TeamMemberBlock.vue';
+import TeamMemberBlockSettings from '@/pages/proposals/components/blocks/TeamMemberBlock/TeamMemberBlockSettings.vue';
+import TermsBlock from '@/pages/proposals/components/blocks/TermsBlock/TermsBlock.vue';
+import TermsBlockSettings from '@/pages/proposals/components/blocks/TermsBlock/TermsBlockSettings.vue';
+import TestimonialBlock from '@/pages/proposals/components/blocks/TestimonialBlock/TestimonialBlock.vue';
+import TestimonialBlockSettings from '@/pages/proposals/components/blocks/TestimonialBlock/TestimonialBlockSettings.vue';
+import TimelineBlock from '@/pages/proposals/components/blocks/TimelineBlock/TimelineBlock.vue';
+import TimelineBlockSettings from '@/pages/proposals/components/blocks/TimelineBlock/TimelineBlockSettings.vue';
+import VideoEmbedBlock from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlock.vue';
+import VideoEmbedBlockSettings from '@/pages/proposals/components/blocks/VideoEmbedBlock/VideoEmbedBlockSettings.vue';
+import type { BlockType } from '@/types/proposal-builder';
 
 export type BlockCategory = 'layout' | 'content';
 

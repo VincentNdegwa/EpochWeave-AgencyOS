@@ -1,14 +1,4 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
 import {
   ImageIcon,
   LayoutGridIcon,
@@ -21,19 +11,32 @@ import {
   LinkIcon,
 } from '@lucide/vue';
 import { nanoid } from 'nanoid';
-import type { ImageBlockData, ImageItem } from '@/types/proposal-builder';
+import { ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { ImageBlockData, ImageItem } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<ImageBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<ImageBlockData>(props.blockId);
 
 const expandedImageId = ref<string | null>(
   data.value?.images?.[0]?.id ?? null,
 );
 
 const updateImage = (id: string, changes: Partial<ImageItem>) => {
-  if (!data.value) return;
+  if (!data.value) {
+return;
+}
+
   updateData({
     images: data.value.images.map((img) =>
       img.id === id ? { ...img, ...changes } : img,
@@ -42,7 +45,10 @@ const updateImage = (id: string, changes: Partial<ImageItem>) => {
 };
 
 const addImage = () => {
-  if (!data.value) return;
+  if (!data.value) {
+return;
+}
+
   const newImg: ImageItem = {
     id: nanoid(8),
     url: '',
@@ -55,8 +61,12 @@ const addImage = () => {
 };
 
 const removeImage = (id: string) => {
-  if (!data.value) return;
+  if (!data.value) {
+return;
+}
+
   updateData({ images: data.value.images.filter((img) => img.id !== id) });
+
   if (expandedImageId.value === id) {
     expandedImageId.value = data.value.images[0]?.id ?? null;
   }
@@ -66,14 +76,20 @@ const removeImage = (id: string) => {
 const uploadingId = ref<string | null>(null);
 const handleFileUpload = (id: string, event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) return;
+
+  if (!file) {
+return;
+}
+
   uploadingId.value = id;
   const reader = new FileReader();
   reader.onload = () => {
     updateImage(id, { url: typeof reader.result === 'string' ? reader.result : '' });
     uploadingId.value = null;
   };
-  reader.onerror = () => { uploadingId.value = null; };
+  reader.onerror = () => {
+ uploadingId.value = null; 
+};
   reader.readAsDataURL(file);
 };
 

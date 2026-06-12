@@ -1,5 +1,14 @@
 <script setup lang="ts">
+import {
+  PackageIcon,
+  TypeIcon,
+  CoinsIcon,
+  TagIcon,
+  ToggleLeftIcon,
+} from '@lucide/vue';
+import type { AcceptableValue } from 'reka-ui';
 import { reactive, computed, watch } from 'vue';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -9,9 +18,6 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -19,16 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  PackageIcon,
-  TypeIcon,
-  CoinsIcon,
-  TagIcon,
-  ToggleLeftIcon,
-} from '@lucide/vue';
-import type { PricingLineItem } from '@/types/proposal-builder';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import { useBillingFrequencies } from '@/composables/useEnums';
-import type { AcceptableValue } from 'reka-ui';
+import type { PricingLineItem } from '@/types/proposal-builder';
 
 // ── Props / emits ─────────────────────────────────────────────
 const props = defineProps<{
@@ -94,10 +94,13 @@ const handleProductSelect = (rawValue: AcceptableValue) => {
 
   if (value === 'custom') {
     form.product_id = null;
+
     return;
   }
+
   const productId = Number(value);
   const product   = props.products.find((p) => p.id === productId);
+
   if (product) {
     form.product_id   = productId;
     form.description  = product.name;
@@ -123,25 +126,37 @@ watch(
 const lineSubtotal = computed(() => form.quantity * form.unit_price);
 
 const discountAmount = computed(() => {
-  if (form.item_discount_type === 'none') return 0;
-  if (form.item_discount_type === 'percentage')
-    return Math.round(lineSubtotal.value * form.item_discount_value / 100);
+  if (form.item_discount_type === 'none') {
+return 0;
+}
+
+  if (form.item_discount_type === 'percentage') {
+return Math.round(lineSubtotal.value * form.item_discount_value / 100);
+}
+
   return form.item_discount_value;
 });
 
 const afterDiscount = computed(() => lineSubtotal.value - discountAmount.value);
 
 const taxAmount = computed(() => {
-  if (form.item_tax_type === 'none') return 0;
-  if (form.item_tax_type === 'percentage')
-    return Math.round(afterDiscount.value * form.item_tax_value / 100);
+  if (form.item_tax_type === 'none') {
+return 0;
+}
+
+  if (form.item_tax_type === 'percentage') {
+return Math.round(afterDiscount.value * form.item_tax_value / 100);
+}
+
   return form.item_tax_value;
 });
 
 const lineTotal = computed(() => afterDiscount.value + taxAmount.value);
 
 // Keep subtotal in sync so the table display is accurate
-watch(lineTotal, (v) => { form.subtotal = v; });
+watch(lineTotal, (v) => {
+ form.subtotal = v; 
+});
 
 // ── Currency formatter ────────────────────────────────────────
 const fmt = (amount: number) =>
@@ -156,7 +171,6 @@ const handleSave = () => {
   emit('save', { ...form });
 };
 
-const isNew = computed(() => !props.products.some((p) => p.id === form.product_id) && !form.description);
 </script>
 
 <template>

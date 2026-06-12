@@ -1,20 +1,19 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   FileTextIcon,
   ImageIcon,
   LinkIcon,
   UploadIcon,
 } from '@lucide/vue';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useTemporaryUploads } from '@/composables/useTemporaryUploads';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
 const builderStore = useProposalBuilderStore();
 const { proposal, templateSettings } = storeToRefs(builderStore);
@@ -49,11 +48,14 @@ const handleFileUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   
-  if (!file) return;
+  if (!file) {
+return;
+}
   
   try {
     uploadError.value = null;
     const result = await upload({ thumbnail: file });
+
     if (result?.thumbnail) {
       thumbnailUrl.value = result.thumbnail;
     }
@@ -73,6 +75,7 @@ const clearThumbnail = () => {
 const isValidUrl = (url: string) => {
   try {
     new URL(url);
+
     return true;
   } catch {
     return false;
@@ -83,6 +86,7 @@ const urlError = computed<string | null>(() => {
   if (thumbnailTab.value === 'url' && thumbnailUrl.value && !isValidUrl(thumbnailUrl.value)) {
     return 'Please enter a valid URL';
   }
+
   return null;
 });
 </script>

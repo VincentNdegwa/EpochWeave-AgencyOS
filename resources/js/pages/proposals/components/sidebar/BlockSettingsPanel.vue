@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { computed } from 'vue';
 import { getBlockDefinition } from '@/pages/proposals/components/blocks/registry';
 import BlockMetaEditor from '@/pages/proposals/components/sidebar/BlockMetaEditor.vue';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 
 const store = useProposalBuilderStore();
 const { selectedBlock } = storeToRefs(store);
@@ -12,6 +12,7 @@ const settingsComponent = computed(() => {
   if (!selectedBlock.value) {
     return null;
   }
+
   return getBlockDefinition(selectedBlock.value.type)?.settings ?? null;
 });
 

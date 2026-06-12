@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import {
   RulerIcon,
   PaletteIcon,
@@ -14,9 +6,17 @@ import {
   StickyNoteIcon,
   SeparatorHorizontalIcon,
 } from '@lucide/vue';
-import type { BaseBlock, BlockMeta, PaddingSize } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { computed, ref } from 'vue';
 import { ColorPresets } from '@/components/ui/color-presets';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BlockMeta, PaddingSize } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
@@ -34,7 +34,10 @@ const meta  = computed<BlockMeta>(() => block.value?.meta ?? {
 });
 
 const updateMeta = (changes: Partial<BlockMeta>) => {
-  if (!block.value) return;
+  if (!block.value) {
+return;
+}
+
   store.updateBlockMetaRecursive(block.value.id, { ...meta.value, ...changes });
 };
 

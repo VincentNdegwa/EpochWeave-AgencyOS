@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, router, setLayoutProps } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
 import { storeToRefs } from 'pinia';
+import { computed, ref, watch } from 'vue';
 import ProposalBuilder from '@/pages/proposals/components/builder/ProposalBuilder.vue';
 import { dashboard } from '@/routes';
 import proposals from '@/routes/proposals';
@@ -13,7 +13,7 @@ const props = defineProps<{
 }>();
 
 const builderStore = useProposalBuilderStore();
-const { proposal } = storeToRefs(builderStore);
+const { proposal: storeProposal } = storeToRefs(builderStore);
 
 watch(
   () => props.proposal,
@@ -28,7 +28,7 @@ const isSaving = ref(false);
 const breadcrumbs = computed(() => [
   { title: 'dashboard', href: dashboard() },
   { title: 'proposals', href: '/proposals' },
-  { title: proposal.value.title },
+  { title: storeProposal.value.title },
 ]);
 
 const applyLayout = () => {
@@ -42,7 +42,7 @@ const applyLayout = () => {
 applyLayout();
 
 watch(
-  () => proposal.value.title,
+  () => storeProposal.value.title,
   () => applyLayout(),
 );
 
@@ -54,7 +54,7 @@ const handleSave = async () => {
   isSaving.value = true;
 
   try {
-    const numericAccountId = proposal.value.account_id ?? null;
+    const numericAccountId = storeProposal.value.account_id ?? null;
 
     if (!numericAccountId || Number.isNaN(numericAccountId)) {
       throw new Error('Please select an account before saving.');
@@ -64,15 +64,15 @@ const handleSave = async () => {
     const allLineItems = builderStore.getAllLineItems();
 
     const payload = {
-      title: proposal.value.title,
-      currency: proposal.value.currency,
-      valid_until: proposal.value.valid_until,
-      requires_deposit: proposal.value.requires_deposit,
-      deposit_type: proposal.value.deposit_type,
-      deposit_value: proposal.value.deposit_value,
-      template_id: proposal.value.template_id,
+      title: storeProposal.value.title,
+      currency: storeProposal.value.currency,
+      valid_until: storeProposal.value.valid_until,
+      requires_deposit: storeProposal.value.requires_deposit,
+      deposit_type: storeProposal.value.deposit_type,
+      deposit_value: storeProposal.value.deposit_value,
+      template_id: storeProposal.value.template_id,
       account_id: numericAccountId,
-      blocks: proposal.value.content,
+      blocks: storeProposal.value.content,
       line_items: allLineItems, // Send all catalog items
     };
 

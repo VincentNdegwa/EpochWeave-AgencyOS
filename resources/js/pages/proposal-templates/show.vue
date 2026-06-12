@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, setLayoutProps, usePage } from '@inertiajs/vue3';
+import { Edit } from '@lucide/vue';
 import { onMounted } from 'vue';
+import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import { dashboard } from '@/routes';
 import proposalTemplates from '@/routes/proposal-templates';
-import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
-import { Button } from '@/components/ui/button';
-import { Edit } from '@lucide/vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { Proposal, ProposalTemplate } from '@/types/models/proposal';

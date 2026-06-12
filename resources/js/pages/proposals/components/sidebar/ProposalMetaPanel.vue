@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import type { Ref } from 'vue';
-import { storeToRefs } from 'pinia';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   FileTextIcon,
   CoinsIcon,
@@ -16,8 +8,16 @@ import {
   AlertCircleIcon,
   FileIcon,
 } from '@lucide/vue';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { storeToRefs } from 'pinia';
+import { computed, ref } from 'vue';
+import type { Ref } from 'vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useBuilderDataStore } from '@/stores/builderData';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import type { Proposal } from '@/types/models/proposal';
 
 const builderStore = useProposalBuilderStore();
@@ -75,6 +75,7 @@ const daysUntil = computed(() => {
   if (!proposal.value.valid_until) {
     return null;
   }
+
   return Math.ceil((new Date(proposal.value.valid_until).getTime() - Date.now()) / 86_400_000);
 });
 
@@ -82,15 +83,19 @@ const validityHint = computed(() => {
   if (!proposal.value.valid_until) {
     return null;
   }
+
   if (isExpired.value) {
     return 'This proposal has expired';
   }
+
   if (daysUntil.value === 0) {
     return 'Expires today';
   }
+
   if (daysUntil.value === 1) {
     return 'Expires tomorrow';
   }
+
   return daysUntil.value !== null ? `Expires in ${daysUntil.value} days` : null;
 });
 
@@ -123,10 +128,12 @@ const depositValueModel = computed({
 
 const toggleDepositRequirement = (value: boolean) => {
   proposal.value.requires_deposit = value;
+
   if (value && !proposal.value.deposit_type) {
     proposal.value.deposit_type = 'percentage';
     proposal.value.deposit_value = proposal.value.deposit_value ?? 0;
   }
+
   if (!value) {
     proposal.value.deposit_type = null;
     proposal.value.deposit_value = null;
@@ -135,17 +142,22 @@ const toggleDepositRequirement = (value: boolean) => {
 
 const setDepositType = (type: 'percentage' | 'fixed') => {
   proposal.value.deposit_type = type;
+
   if (proposal.value.deposit_value == null) {
     proposal.value.deposit_value = 0;
   }
 };
 
 const applyTemplate = async () => {
-  if (!selectedTemplateId.value || isApplyingTemplate.value) return;
+  if (!selectedTemplateId.value || isApplyingTemplate.value) {
+return;
+}
 
   isApplyingTemplate.value = true;
+
   try {
     const templateId = parseInt(selectedTemplateId.value, 10);
+
     if (Number.isNaN(templateId)) {
       throw new Error('Invalid template ID');
     }

@@ -8,8 +8,8 @@ import {
     getSortedRowModel,
     useVueTable,
 } from '@tanstack/vue-table';
-import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from '@tanstack/vue-table';
-import { ref, computed } from 'vue';
+import type { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/vue-table';
+import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -27,12 +27,11 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { valueUpdater } from '@/components/ui/table/utils';
-import type { Proposal } from '@/types/models/proposal';
-import BulkActionsToolbar from './bulk-actions-toolbar.vue';
+import type { ProposalStatusModel } from '@/types/models/proposal';
 
 const props = defineProps<{
-    columns: ColumnDef<Proposal>[];
-    data: Proposal[];
+    columns: ColumnDef<ProposalStatusModel>[];
+    data: ProposalStatusModel[];
     searchValue?: string;
     onSearchUpdate?: (value: string | number) => void;
 }>();
@@ -40,12 +39,6 @@ const props = defineProps<{
 const sorting = ref<SortingState>([]);
 const columnFilters = ref<ColumnFiltersState>([]);
 const columnVisibility = ref<Record<string, boolean>>({});
-
-const rowSelection = ref<RowSelectionState>({});
-
-const selectedRows = computed(() => {
-    return table.getFilteredSelectedRowModel().rows.map(row => row.original);
-});
 
 const table = useVueTable({
     get data() {
@@ -63,9 +56,6 @@ const table = useVueTable({
         valueUpdater(updaterOrValue, columnFilters),
     onColumnVisibilityChange: (updaterOrValue) =>
         valueUpdater(updaterOrValue, columnVisibility),
-    onRowSelectionChange: (updaterOrValue) => {
-        rowSelection.value = typeof updaterOrValue === 'function' ? updaterOrValue(rowSelection.value) : updaterOrValue;
-    },
     state: {
         get sorting() {
             return sorting.value;
@@ -76,28 +66,21 @@ const table = useVueTable({
         get columnVisibility() {
             return columnVisibility.value;
         },
-        get rowSelection() {
-            return rowSelection.value;
-        },
     },
 });
 </script>
 
 <template>
     <div class="w-full">
-        <BulkActionsToolbar
-            :selected-rows="selectedRows"
-        />
         <!-- Toolbar -->
         <div class="flex flex-wrap items-center gap-2 py-3">
             <div class="relative flex-1">
                 <Search class="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                    v-if="onSearchUpdate"
-                    placeholder="Search proposals..."
+                    placeholder="Search statuses..."
                     :model-value="searchValue"
                     class="h-9 max-w-xs pl-9 text-sm"
-                    @update:model-value="onSearchUpdate"
+                    @update:model-value="onSearchUpdate || (() => {})"
                 />
             </div>
             <div class="flex items-center gap-2">
@@ -148,9 +131,6 @@ const table = useVueTable({
                         <TableRow
                             v-for="row in table.getRowModel().rows"
                             :key="row.id"
-                            :data-state="
-                                row.getIsSelected() ? 'selected' : undefined
-                            "
                         >
                             <TableCell
                                 v-for="cell in row.getVisibleCells()"

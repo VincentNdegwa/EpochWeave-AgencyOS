@@ -16,7 +16,6 @@ class StoreProposalStatusRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
-            'position' => 'required|integer|min:0',
         ];
     }
 }

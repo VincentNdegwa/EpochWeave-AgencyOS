@@ -1,9 +1,9 @@
+import { nanoid } from 'nanoid';
 import { defineStore } from 'pinia';
 import { computed, nextTick, ref, watch } from 'vue';
-import { nanoid } from 'nanoid';
-import type { BaseBlock, BlockType, PricingLineItem, PricingTableBlockData } from '@/types/proposal-builder';
-import type { Proposal, ProposalItem } from '@/types/models/proposal';
 import { createDefaultBlock } from '@/composables/blockFactory';
+import type { Proposal, ProposalItem } from '@/types/models/proposal';
+import type { BaseBlock, BlockType, PricingLineItem, PricingTableBlockData } from '@/types/proposal-builder';
 
 type BuilderMode = 'proposal' | 'template';
 type SidebarTab = 'block' | 'proposal';
@@ -78,15 +78,21 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   // Helper function to find block recursively including nested blocks
   function findBlockRecursive(blocks: BaseBlock[], blockId: string): BaseBlock | null {
     for (const block of blocks) {
-      if (block.id === blockId) return block;
+      if (block.id === blockId) {
+return block;
+}
       
       if (block.type === 'column' && 'children' in block.data && block.data.children) {
         for (const column of block.data.children) {
           const found = findBlockRecursive(column, blockId);
-          if (found) return found;
+
+          if (found) {
+return found;
+}
         }
       }
     }
+
     return null;
   }
 
@@ -97,7 +103,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   // Watchers
   watch(proposal, () => {
-    if (!hydrating.value) isDirty.value = true;
+    if (!hydrating.value) {
+isDirty.value = true;
+}
   }, { deep: true });
 
   function loadBlocks(newBlocks: BaseBlock[]) {
@@ -120,6 +128,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   function updateBlock(blockId: string, updates: Partial<BaseBlock>) {
     const index = proposal.value.content.findIndex((b) => b.id === blockId);
+
     if (index !== -1) {
       proposal.value.content[index] = { ...proposal.value.content[index], ...updates };
       isDirty.value = true;
@@ -133,17 +142,22 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   function updateNestedBlockData(blocks: BaseBlock[], blockId: string, data: BaseBlock['data']): boolean {
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
+
       if (block.id === blockId) {
         blocks[i] = { ...block, data };
+
         return true;
       }
       
       if (block.type === 'column' && 'children' in block.data && block.data.children) {
         for (const column of block.data.children) {
-          if (updateNestedBlockData(column, blockId, data)) return true;
+          if (updateNestedBlockData(column, blockId, data)) {
+return true;
+}
         }
       }
     }
+
     return false;
   }
 
@@ -160,17 +174,22 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   function updateNestedBlockMeta(blocks: BaseBlock[], blockId: string, meta: BaseBlock['meta']): boolean {
     for (let i = 0; i < blocks.length; i++) {
       const block = blocks[i];
+
       if (block.id === blockId) {
         blocks[i] = { ...block, meta };
+
         return true;
       }
       
       if (block.type === 'column' && 'children' in block.data && block.data.children) {
         for (const column of block.data.children) {
-          if (updateNestedBlockMeta(column, blockId, meta)) return true;
+          if (updateNestedBlockMeta(column, blockId, meta)) {
+return true;
+}
         }
       }
     }
+
     return false;
   }
 
@@ -192,6 +211,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
     for (const [index, blockId] of blockIds.entries()) {
       const block = blockMap.get(blockId);
+
       if (block) {
         reorderedBlocks.push({ ...block, sort_order: index });
       }
@@ -203,6 +223,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   function duplicateBlock(blockId: string) {
     const block = proposal.value.content.find((b) => b.id === blockId);
+
     if (block) {
       const newBlock = {
         ...JSON.parse(JSON.stringify(block)),
@@ -272,9 +293,11 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     if (options?.mode) {
       builderMode.value = options.mode;
     }
+
     if (options?.template) {
       templateSettings.value = { ...options.template };
     }
+
     nextTick(() => {
       hydrating.value = false;
       markAsClean();
@@ -298,11 +321,13 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   function moveBlock(blockId: string, direction: 'up' | 'down') {
     const currentIndex = proposal.value.content.findIndex((block) => block.id === blockId);
+
     if (currentIndex === -1) {
       return;
     }
 
     const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
     if (nextIndex < 0 || nextIndex >= proposal.value.content.length) {
       return;
     }
@@ -321,16 +346,19 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
   
   function addLineItem(item: PricingLineItem): void {
     const existingIndex = lineItemsCatalog.value.findIndex(i => i.id === item.id);
+
     if (existingIndex >= 0) {
       lineItemsCatalog.value[existingIndex] = item;
     } else {
       lineItemsCatalog.value.push(item);
     }
+
     isDirty.value = true;
   }
 
   function updateLineItem(itemId: string, updates: Partial<PricingLineItem>): void {
     const index = lineItemsCatalog.value.findIndex(item => item.id === itemId);
+
     if (index >= 0) {
       lineItemsCatalog.value[index] = { ...lineItemsCatalog.value[index], ...updates };
       isDirty.value = true;
@@ -339,6 +367,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   function removeLineItem(itemId: string): void {
     const index = lineItemsCatalog.value.findIndex(item => item.id === itemId);
+
     if (index >= 0) {
       lineItemsCatalog.value.splice(index, 1);
       isDirty.value = true;
@@ -377,6 +406,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     }
     
     extractFromBlocks(proposal.value.content);
+
     return itemIds;
   }
 
@@ -413,15 +443,24 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
           
           const updatedItems = pricingItems.map((blockItem) => {
             const matchingCatalogItem = catalogMap.get(blockItem.description);
-            if (matchingCatalogItem) return { ...blockItem, id: matchingCatalogItem.id };
+
+            if (matchingCatalogItem) {
+return { ...blockItem, id: matchingCatalogItem.id };
+}
             
             const existingMatch = catalogItems.find(catalogItem => catalogItem.id === blockItem.id);
-            if (existingMatch) return { ...blockItem, id: existingMatch.id };
+
+            if (existingMatch) {
+return { ...blockItem, id: existingMatch.id };
+}
             
             const availableCatalogItem = catalogItems.find(catalogItem => 
               !pricingItems.some(pItem => pItem.id === catalogItem.id)
             );
-            if (availableCatalogItem) return { ...blockItem, id: availableCatalogItem.id };
+
+            if (availableCatalogItem) {
+return { ...blockItem, id: availableCatalogItem.id };
+}
             
             return blockItem;
           });
@@ -454,12 +493,14 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
 
   function getPricingTableItems(blockId: string): PricingLineItem[] {
     const block = findBlockRecursive(proposal.value.content, blockId);
+
     if (!block || block.type !== 'pricing_table' || !('items' in block.data)) {
       return [];
     }
     
     const blockData = block.data as PricingTableBlockData;
     const itemIds = blockData.items.map((item) => item.id);
+
     return lineItemsCatalog.value.filter(item => itemIds.includes(item.id));
   }
 

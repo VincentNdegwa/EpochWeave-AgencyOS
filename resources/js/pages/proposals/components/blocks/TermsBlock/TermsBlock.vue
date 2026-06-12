@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
 import { QuillEditor } from '@vueup/vue-quill';
+import { ref, watch } from 'vue';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
-import type { BaseBlock, TermsBlockData } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, TermsBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: TermsBlockData;
@@ -21,7 +21,9 @@ const updateData = (changes: Partial<TermsBlockData>) => {
 };
 
 watch(() => props.data.content, (incoming) => {
-  if (editorContent.value !== incoming) editorContent.value = incoming;
+  if (editorContent.value !== incoming) {
+editorContent.value = incoming;
+}
 });
 
 const toolbarOptions = [

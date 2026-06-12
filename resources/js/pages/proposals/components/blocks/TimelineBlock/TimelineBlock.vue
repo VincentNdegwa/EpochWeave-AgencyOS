@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { PlusIcon, Trash2Icon, XIcon } from '@lucide/vue';
 import { nanoid } from 'nanoid';
-import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
 import BlockEmptyPlaceholder from '@/pages/proposals/components/blocks/shared/BlockEmptyPlaceholder.vue';
-import type { BaseBlock, TimelineBlockData, TimelineMilestone } from '@/types/proposal-builder';
+import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, TimelineBlockData, TimelineMilestone } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: TimelineBlockData;
@@ -48,13 +47,21 @@ const removeMilestone = (id: string) => {
 
 const addDeliverable = (milestoneId: string) => {
   const m = props.data.milestones.find((m) => m.id === milestoneId);
-  if (!m) return;
+
+  if (!m) {
+return;
+}
+
   updateMilestone(milestoneId, { deliverables: [...m.deliverables, ''] });
 };
 
 const updateDeliverable = (milestoneId: string, index: number, value: string) => {
   const m = props.data.milestones.find((m) => m.id === milestoneId);
-  if (!m) return;
+
+  if (!m) {
+return;
+}
+
   const deliverables = [...m.deliverables];
   deliverables[index] = value;
   updateMilestone(milestoneId, { deliverables });
@@ -62,7 +69,11 @@ const updateDeliverable = (milestoneId: string, index: number, value: string) =>
 
 const removeDeliverable = (milestoneId: string, index: number) => {
   const m = props.data.milestones.find((m) => m.id === milestoneId);
-  if (!m) return;
+
+  if (!m) {
+return;
+}
+
   updateMilestone(milestoneId, { deliverables: m.deliverables.filter((_, i) => i !== index) });
 };
 </script>
@@ -93,7 +104,7 @@ const removeDeliverable = (milestoneId: string, index: number) => {
 
       <div class="space-y-6">
         <div
-          v-for="(milestone, index) in data.milestones"
+          v-for="milestone in data.milestones"
           :key="milestone.id"
           class="group/milestone relative pl-12"
         >

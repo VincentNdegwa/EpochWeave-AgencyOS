@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import { TypeIcon, PaletteIcon, ToggleLeftIcon } from '@lucide/vue';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { TextColorPicker } from '@/components/ui/text-color-picker';
-import { TypeIcon, PaletteIcon, ToggleLeftIcon } from '@lucide/vue';
-import type { RichTextBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { RichTextBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<RichTextBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<RichTextBlockData>(props.blockId);
 </script>
 
 <template>

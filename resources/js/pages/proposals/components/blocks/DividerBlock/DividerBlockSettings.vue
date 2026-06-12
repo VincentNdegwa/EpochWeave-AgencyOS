@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Label } from '@/components/ui/label';
 import { SeparatorHorizontalIcon, PaletteIcon } from '@lucide/vue';
-import type { DividerBlockData } from '@/types/proposal-builder';
-import { useBlockSettings } from '@/composables/useBlockSettings';
 import { ColorPresets } from '@/components/ui/color-presets';
+import { Label } from '@/components/ui/label';
+import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { DividerBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<DividerBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<DividerBlockData>(props.blockId);
 
 const styleOptions = [
   { value: 'solid',  label: 'Solid' },

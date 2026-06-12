@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Package, ChevronDown, ChevronLeft, ChevronRight, Search, SlidersHorizontal } from '@lucide/vue';
+import { Search, SlidersHorizontal } from '@lucide/vue';
 import {
     FlexRender,
     getCoreRowModel,
@@ -9,10 +9,8 @@ import {
     useVueTable,
 } from '@tanstack/vue-table';
 import type { ColumnDef, ColumnFiltersState, RowSelectionState, SortingState } from '@tanstack/vue-table';
-import type { Product } from '@/types/models/product';
 import { ref, computed } from 'vue';
 import { Button } from '@/components/ui/button';
-import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -29,6 +27,8 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { valueUpdater } from '@/components/ui/table/utils';
+import type { Product } from '@/types/models/product';
+import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 
 const props = defineProps<{
     columns: ColumnDef<Product>[];

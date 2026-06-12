@@ -1,10 +1,9 @@
 <script setup lang="ts">
+import { Eye, Edit, MoreVertical, Save } from '@lucide/vue';
 import { computed, onMounted, ref, watch } from 'vue';
-import { ArrowLeft, Eye, Edit, Send, MoreVertical, Save } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import BuilderSaveStatus from '@/pages/proposals/components/builder/BuilderSaveStatus.vue';
 import BuilderActionMenu from '@/pages/proposals/components/builder/BuilderActionMenu.vue';
+import BuilderSaveStatus from '@/pages/proposals/components/builder/BuilderSaveStatus.vue';
 
 defineEmits<{
   (e: 'toggle-preview'): void;
@@ -48,6 +47,7 @@ const handleInput = () => {
   if (!editableRef.value) {
     return;
   }
+
   const nextValue = editableRef.value.textContent?.trim();
   title.value = nextValue && nextValue.length > 0 ? nextValue : 'Untitled proposal';
 };

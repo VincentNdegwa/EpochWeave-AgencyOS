@@ -2,47 +2,47 @@
 import { Head, router } from '@inertiajs/vue3';
 import { Plus } from '@lucide/vue';
 import { ref } from 'vue';
-import ProductUnitController from '@/actions/App/Http/Controllers/ProductUnitController';
+import ProposalStatusController from '@/actions/App/Http/Controllers/ProposalStatusController';
 import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
-import type { ProductUnit } from '@/types/models/product';
+import type { ProposalStatusModel } from '@/types/models/proposal';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
-import ProductUnitFormDialog from './dialogs/ProductUnitFormDialog.vue';
+import ProposalStatusFormDialog from './dialogs/ProposalStatusFormDialog.vue';
 
 defineProps<{
-    product_units: ProductUnit[];
+    proposal_statuses: ProposalStatusModel[];
     filters: {
         search?: string;
     };
 }>();
 
 const dialogOpen = ref(false);
-const editingUnit = ref<ProductUnit | null>(null);
+const editingStatus = ref<ProposalStatusModel | null>(null);
 
 const columns = createColumns(
-    (unit) => {
-        editingUnit.value = unit;
+    (status) => {
+        editingStatus.value = status;
         dialogOpen.value = true;
     },
-    (unit) => {
-        router.delete(ProductUnitController.destroy(unit.id).url);
+    (status) => {
+        router.delete(ProposalStatusController.destroy(status.id).url);
     },
 );
 
 const handleCreate = () => {
-    editingUnit.value = null;
+    editingStatus.value = null;
     dialogOpen.value = true;
 };
 
 const handleSuccess = () => {
     dialogOpen.value = false;
-    editingUnit.value = null;
+    editingStatus.value = null;
     router.reload();
 };
 
 function updateFilters(newFilters: Record<string, string | undefined>) {
-    router.get(ProductUnitController.index().url, newFilters, {
+    router.get(ProposalStatusController.index().url, newFilters, {
         preserveState: true,
         replace: true,
     });
@@ -50,15 +50,15 @@ function updateFilters(newFilters: Record<string, string | undefined>) {
 
 defineOptions({
     layout: {
-        title: 'Product Units',
-        description: 'Manage product measurement units',
+        title: 'Proposal Statuses',
+        description: 'Manage proposal status labels and colors',
         breadcrumbs: [
             {
                 title: 'Dashboard',
                 href: dashboard(),
             },
             {
-                title: 'Product Units',
+                title: 'Proposal Statuses',
             },
         ],
     },
@@ -66,33 +66,33 @@ defineOptions({
 </script>
 
 <template>
-    <Head title="Product Units" />
+    <Head title="Proposal Statuses" />
 
     <div class="space-y-3">
         <!-- Header -->
         <div class="flex items-center justify-between">
             <div>
-                <h4 class="font-bold tracking-tight">Product Units</h4>
+                <h4 class="font-bold tracking-tight">Proposal Statuses</h4>
                 <p class="text-muted-foreground">
-                    Manage measurement units for your products (e.g., hours, months, flat fee).
+                    Manage status labels and colors for your proposals workflow.
                 </p>
             </div>
             <Button type="button" @click="handleCreate">
                 <Plus class="mr-2 h-4 w-4" />
-                New Unit
+                New Status
             </Button>
         </div>
 
         <DataTable
             :columns="columns"
-            :data="product_units"
+            :data="proposal_statuses"
             :search-value="filters?.search"
             :on-search-update="(value: string | number) => updateFilters({ search: String(value) })"
         />
 
-        <ProductUnitFormDialog
+        <ProposalStatusFormDialog
             v-model:open="dialogOpen"
-            :unit="editingUnit"
+            :status="editingStatus"
             @success="handleSuccess"
         />
     </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { BaseBlock, CtaBlockData } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, CtaBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: CtaBlockData;

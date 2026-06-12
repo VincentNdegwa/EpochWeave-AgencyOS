@@ -1,27 +1,26 @@
 <script setup lang="ts">
 import { Head, Link, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { computed, onMounted } from 'vue';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { dashboard } from '@/routes';
-import { edit as proposalEdit } from '@/routes/proposals';
-import { show as accountShow } from '@/routes/accounts';
-import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
-import { useWorkspaceStore } from '@/stores/workspace';
-import { useCurrency } from '@/composables/useCurrency';
-import type { Proposal } from '@/types/models/proposal';
 import {
   Building2,
   CalendarDays,
   CheckCircle2,
   Clock4,
-  DollarSign,
   Eye,
   Layers,
   Send,
 } from '@lucide/vue';
+import { computed, onMounted } from 'vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { useCurrency } from '@/composables/useCurrency';
+import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
+import { dashboard } from '@/routes';
+import { show as accountShow } from '@/routes/accounts';
+import { edit as proposalEdit } from '@/routes/proposals';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import { useWorkspaceStore } from '@/stores/workspace';
+import type { Proposal } from '@/types/models/proposal';
 
 const props = defineProps<{
   proposal: Proposal;
@@ -104,6 +103,7 @@ function formatDate(value?: string | null): string {
   if (!value) {
     return '—';
   }
+
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value));
 }
 
@@ -111,6 +111,7 @@ function formatDateTime(value?: string | null): string {
   if (!value) {
     return '—';
   }
+
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
 
@@ -118,18 +119,22 @@ function describeValidity(value?: string | null): string {
   if (!value) {
     return 'No expiry date';
   }
+
   const target = new Date(value).getTime();
   const diffDays = Math.ceil((target - Date.now()) / 86_400_000);
 
   if (diffDays < 0) {
     return 'Expired';
   }
+
   if (diffDays === 0) {
     return 'Expires today';
   }
+
   if (diffDays === 1) {
     return 'Expires tomorrow';
   }
+
   return `Expires in ${diffDays} days`;
 }
 </script>

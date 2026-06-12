@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { BuildingIcon, LayoutIcon, RulerIcon } from '@lucide/vue';
-import type { LogoBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { LogoBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<LogoBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<LogoBlockData>(props.blockId);
 
 const layoutOptions = [
   { value: 'workspace_only',    label: 'Workspace only' },

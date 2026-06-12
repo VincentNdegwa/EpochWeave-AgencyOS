@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { BaseBlock, SpacerBlockData } from '@/types/proposal-builder';
 
-const props = defineProps<{
+defineProps<{
   data: SpacerBlockData;
   block: BaseBlock;
   isLocked: boolean;

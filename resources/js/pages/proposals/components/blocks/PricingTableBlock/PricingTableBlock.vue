@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
 import { PlusIcon, Trash2Icon, GripVerticalIcon, PencilIcon, PackageIcon } from '@lucide/vue';
 import { nanoid } from 'nanoid';
-import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
+import { computed, onMounted, ref } from 'vue';
 import { Button } from '@/components/ui/button';
-import PricingLineItemDialog from './PricingLineItemDialog.vue';
-import type { BaseBlock, PricingTableBlockData, PricingLineItem } from '@/types/proposal-builder';
-import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
 import { useBuilderDataStore } from '@/stores/builderData';
+import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, PricingTableBlockData, PricingLineItem } from '@/types/proposal-builder';
+import PricingLineItemDialog from './PricingLineItemDialog.vue';
 
 const props = defineProps<{
   data: PricingTableBlockData;
@@ -57,11 +57,13 @@ const handleSave = (item: PricingLineItem) => {
   store.addLineItem(item);
   
   const exists = props.data.items.some((i) => i.id === item.id);
+
   if (exists) {
     updateData({ items: props.data.items.map((i) => i.id === item.id ? item : i) });
   } else {
     updateData({ items: [...props.data.items, item] });
   }
+
   dialogOpen.value  = false;
   editingItem.value = null;
 };
@@ -102,7 +104,10 @@ const subtotal = computed(() =>
 );
 
 const discountAmount = computed(() => {
-  if (!props.data.discount) return 0;
+  if (!props.data.discount) {
+return 0;
+}
+
   return props.data.discount.type === 'percentage'
     ? Math.round(subtotal.value * props.data.discount.value / 100)
     : props.data.discount.amount;
@@ -117,10 +122,14 @@ const taxAmount  = computed(() =>
 const grandTotal = computed(() => taxBase.value + taxAmount.value);
 
 const gridCols = computed(() => {
-  if (props.data.show_quantity_column && props.data.show_unit_column)
-    return 'grid-cols-[1fr_56px_56px_100px]';
-  if (props.data.show_quantity_column || props.data.show_unit_column)
-    return 'grid-cols-[1fr_56px_100px]';
+  if (props.data.show_quantity_column && props.data.show_unit_column) {
+return 'grid-cols-[1fr_56px_56px_100px]';
+}
+
+  if (props.data.show_quantity_column || props.data.show_unit_column) {
+return 'grid-cols-[1fr_56px_100px]';
+}
+
   return 'grid-cols-[1fr_100px]';
 });
 </script>

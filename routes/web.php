@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProductUnitController;
 use App\Http\Controllers\ProposalController;
+use App\Http\Controllers\ProposalStatusController;
 use App\Http\Controllers\ProposalTemplateController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\WorkspaceController;
@@ -40,6 +41,7 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
 
     Route::resource('product-units', ProductUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::resource('proposal-status', ProposalStatusController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('/products/bulk-status', [ProductController::class, 'bulkUpdateStatus'])
         ->name('products.bulk-status');
     Route::post('/products/bulk', [ProductController::class, 'bulkDelete'])

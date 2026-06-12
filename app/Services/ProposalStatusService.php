@@ -16,6 +16,11 @@ class ProposalStatusService
     public function createStatus(Workspace $workspace, array $data): ProposalStatus
     {
         try {
+            if (!isset($data['position'])) {
+                $maxPosition = $workspace->proposalStatuses()->max('position') ?? 0;
+                $data['position'] = $maxPosition + 1;
+            }
+            
             return $workspace->proposalStatuses()->create($data);
         } catch (Exception $e) {
             throw new Exception('Failed to create proposal status: ' . $e->getMessage());
@@ -61,6 +66,11 @@ class ProposalStatusService
         return $workspace->proposalStatuses()
             ->where('automation_trigger', $trigger)
             ->first();
+    }
+
+    public function getStatusById(int $id): ?ProposalStatus
+    {
+        return ProposalStatus::find($id);
     }
 
     public function initializeDefaultStatuses(Workspace $workspace): void

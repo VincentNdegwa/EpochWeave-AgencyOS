@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { LayoutIcon } from '@lucide/vue';
-import type { TestimonialBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { TestimonialBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<TestimonialBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<TestimonialBlockData>(props.blockId);
 </script>
 
 <template>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { PlusIcon, Trash2Icon, UserIcon, Link } from '@lucide/vue';
 import { nanoid } from 'nanoid';
-import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
 import BlockEmptyPlaceholder from '@/pages/proposals/components/blocks/shared/BlockEmptyPlaceholder.vue';
-import type { BaseBlock, TeamMemberBlockData, TeamMember } from '@/types/proposal-builder';
+import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock, TeamMemberBlockData, TeamMember } from '@/types/proposal-builder';
 
 const props = defineProps<{
   data: TeamMemberBlockData;
@@ -39,7 +39,11 @@ const removeMember = (id: string) => {
 
 const handleAvatarUpload = (id: string, event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file) return;
+
+  if (!file) {
+return;
+}
+
   const reader = new FileReader();
   reader.onload = () => updateMember(id, { avatar_url: typeof reader.result === 'string' ? reader.result : null });
   reader.readAsDataURL(file);

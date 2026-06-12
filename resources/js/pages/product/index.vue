@@ -4,13 +4,13 @@ import { Plus, Package } from '@lucide/vue';
 import { ref } from 'vue';
 import ProductController from '@/actions/App/Http/Controllers/ProductController';
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { StatsCard } from '@/components/ui/stats-card';
 import { dashboard } from '@/routes';
 import { index as productUnitIndex } from '@/routes/product-units';
 import type { Product, ProductUnit } from '@/types/models/product';

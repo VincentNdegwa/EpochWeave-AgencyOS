@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { LayoutIcon } from '@lucide/vue';
-import type { TeamMemberBlockData } from '@/types/proposal-builder';
 import { useBlockSettings } from '@/composables/useBlockSettings';
+import type { TeamMemberBlockData } from '@/types/proposal-builder';
 
 const props = defineProps<{ blockId: string }>();
 
-const { block, data, updateData } = useBlockSettings<TeamMemberBlockData>(props.blockId);
+const { data, updateData } = useBlockSettings<TeamMemberBlockData>(props.blockId);
 </script>
 
 <template>

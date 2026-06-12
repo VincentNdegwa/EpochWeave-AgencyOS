@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { GripVertical, ArrowUp, ArrowDown, Copy, EyeOff, Trash2 } from '@lucide/vue';
 import { Button } from '@/components/ui/button';
-import type { BaseBlock } from '@/types/proposal-builder';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
+import type { BaseBlock } from '@/types/proposal-builder';
 
 const props = defineProps<{
   block: BaseBlock;
