@@ -7,6 +7,7 @@ use App\Models\ProposalItem;
 use App\Models\ProposalStatus;
 use Exception;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class ProposalService
 {
@@ -22,6 +23,7 @@ class ProposalService
             
             if (!empty($items)) {
                 $this->createProposalItems($proposal, $items);
+                $this->updateProposalTotals($proposal);
             }
             
             return $proposal->fresh(['items.product', 'proposalStatus', 'accountContact', 'user']);
@@ -33,33 +35,36 @@ class ProposalService
     public function createProposalItems(Proposal $proposal, array $items): void
     {
         try {
-            // Prepare items for bulk insert to avoid N+1 queries
             $proposalItems = [];
             foreach ($items as $index => $item) {
+                $financials = $this->computeItemFinancials($item);
+
                 $proposalItems[] = [
                     'proposal_id' => $proposal->id,
                     'product_id' => $item['product_id'] ?? null,
-                    'item_name' => $item['description'] ?? '',
-                    'description' => $item['item_description'] ?? null,
+                    'item_name' => $item['description'] ?? $item['item_name'] ?? '',
+                    'description' => $item['item_description'] ?? $item['description'] ?? null,
                     'unit_label' => $item['unit'] ?? 'Pcs',
                     'billing_type' => $item['billing_type'] ?? 'one_time',
                     'billing_frequency' => $item['billing_frequency'] ?? 'none',
-                    'quantity' => $item['quantity'] ?? 1,
-                    'unit_price' => $item['unit_price'] ?? 0,
-                    'subtotal' => $item['subtotal'] ?? 0,
-                    'discount_type' => $item['item_discount_type'] ?? 'none',
-                    'discount_value' => $item['item_discount_value'] ?? 0,
-                    'discount_amount' => 0, // Calculate if needed
-                    'total' => $item['subtotal'] ?? 0, // For now, same as subtotal
+                    'quantity' => $financials['quantity'],
+                    'unit_price' => $financials['unit_price'],
+                    'subtotal' => $financials['subtotal'],
+                    'discount_type' => $financials['discount_type'],
+                    'discount_value' => $financials['discount_value'],
+                    'discount_amount' => $financials['discount_amount'],
+                    'tax_type' => $financials['tax_type'],
+                    'tax_value' => $financials['tax_value'],
+                    'total_tax_amount' => $financials['tax_amount'],
+                    'total' => $financials['total'],
                     'is_optional' => $item['is_optional'] ?? false,
-                    'is_selected' => true,
-                    'position' => $index, // Use array index as position
+                    'is_selected' => $item['is_selected'] ?? true,
+                    'position' => $item['position'] ?? $index,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }
             
-            // Bulk insert to avoid N+1 queries
             if (!empty($proposalItems)) {
                 ProposalItem::insert($proposalItems);
             }
@@ -73,11 +78,10 @@ class ProposalService
         try {
             $proposal->update($data);
 
-            // Update line items if provided
             if (!empty($items)) {
-                // Delete existing items and recreate them
                 $proposal->items()->delete();
                 $this->createProposalItems($proposal, $items);
+                $this->updateProposalTotals($proposal);
             }
 
             return $proposal->fresh(['items.product']);
@@ -95,73 +99,21 @@ class ProposalService
         }
     }
 
-    public function calculateTotalsFromLineItems(array $lineItems): array
-    {
-        $subtotal = 0;
-        $discountTotal = 0;
-        $taxAmount = 0;
-
-        // Calculate subtotal from line items
-        foreach ($lineItems as $item) {
-            $itemSubtotal = ($item['unit_price'] ?? 0) * ($item['quantity'] ?? 1);
-            
-            // Apply item-level discount
-            $itemDiscountType = $item['item_discount_type'] ?? 'none';
-            $itemDiscountValue = $item['item_discount_value'] ?? 0;
-            
-            if ($itemDiscountType === 'percentage' && $itemDiscountValue > 0) {
-                $itemDiscountAmount = $itemSubtotal * ($itemDiscountValue / 100);
-            } elseif ($itemDiscountType === 'fixed' && $itemDiscountValue > 0) {
-                $itemDiscountAmount = $itemDiscountValue;
-            } else {
-                $itemDiscountAmount = 0;
-            }
-            
-            $subtotal += $itemSubtotal - $itemDiscountAmount;
-        }
-
-        $grandTotal = $subtotal - $discountTotal + $taxAmount;
-
-        return [
-            'subtotal' => $subtotal,
-            'discount_total' => $discountTotal,
-            'tax_amount' => $taxAmount,
-            'grand_total' => $grandTotal,
-        ];
-    }
-
-    public function updateProposalTotals(Proposal $proposal, array $lineItems = null): Proposal
+    public function updateProposalTotals(Proposal $proposal): Proposal
     {
         try {
-            // Use provided line items or extract from content or get from proposal items
-            if ($lineItems) {
-                $items = $lineItems;
-            } else {
-                // Try to extract from pricing table blocks in content first
-                $contentItems = $this->extractLineItemsFromContent($proposal->content);
-                
-                if (!empty($contentItems)) {
-                    $items = $contentItems;
-                } else {
-                    // Fallback to proposal items
-                    $items = $proposal->items->map(function ($item) {
-                        return [
-                            'unit_price' => $item->unit_price,
-                            'quantity' => $item->quantity,
-                            'item_discount_type' => $item->discount_type,
-                            'item_discount_value' => $item->discount_value,
-                        ];
-                    })->toArray();
-                }
-            }
-
-            $totals = $this->calculateTotalsFromLineItems($items);
+            $items = $proposal->items;
             
+            $subtotal = $items->sum('subtotal');
+            $discountTotal = $items->sum('discount_amount');
+            $taxAmount = $items->sum('total_tax_amount');
+            $grandTotal = $items->sum('total');
+
             $proposal->update([
-                'subtotal' => $totals['subtotal'],
-                'discount_total' => $totals['discount_total'],
-                'tax_amount' => $totals['tax_amount'],
-                'grand_total' => $totals['grand_total'],
+                'subtotal' => $subtotal,
+                'discount_total' => $discountTotal,
+                'total_tax_amount' => $taxAmount,
+                'grand_total' => $grandTotal,
             ]);
 
             return $proposal->fresh();
@@ -170,27 +122,49 @@ class ProposalService
         }
     }
 
-    /**
-     * Extract line items from pricing table blocks in proposal content
-     */
-    private function extractLineItemsFromContent(array $content): array
+    private function computeItemFinancials(array $item): array
     {
-        $lineItems = [];
-        
-        foreach ($content as $block) {
-            if ($block['type'] === 'pricing_table' && isset($block['data']['items'])) {
-                foreach ($block['data']['items'] as $item) {
-                    $lineItems[] = [
-                        'unit_price' => $item['unit_price'] ?? 0,
-                        'quantity' => $item['quantity'] ?? 1,
-                        'item_discount_type' => $item['item_discount_type'] ?? 'none',
-                        'item_discount_value' => $item['item_discount_value'] ?? 0,
-                    ];
-                }
-            }
+        $unitPrice = isset($item['unit_price']) ? (float) $item['unit_price'] : 0.0;
+        $quantity = isset($item['quantity']) ? (float) $item['quantity'] : 1.0;
+
+        $itemSubtotal = $unitPrice * $quantity;
+
+        $discountType = $item['discount_type'] ?? 'none';
+        $discountValue = isset($item['discount_value']) ? (float) $item['discount_value'] : 0.0;
+
+        if ($discountType === 'percentage' && $discountValue > 0) {
+            $discountAmount = $itemSubtotal * ($discountValue / 100);
+        } elseif ($discountType === 'fixed' && $discountValue > 0) {
+            $discountAmount = $discountValue;
+        } else {
+            $discountAmount = 0.0;
         }
-        
-        return $lineItems;
+
+        $subtotalAfterDiscount = $itemSubtotal - $discountAmount;
+
+        $taxType = $item['tax_type'] ?? 'none';
+        $taxValue = isset($item['tax_value']) ? (float) $item['tax_value'] : 0.0;
+
+        if ($taxType === 'percentage' && $taxValue > 0) {
+            $taxAmount = $subtotalAfterDiscount * ($taxValue / 100);
+        } elseif ($taxType === 'fixed' && $taxValue > 0) {
+            $taxAmount = $taxValue;
+        } else {
+            $taxAmount = 0.0;
+        }
+
+        return [
+            'unit_price' => $unitPrice,
+            'quantity' => $quantity,
+            'subtotal' => $itemSubtotal,
+            'discount_type' => $discountType,
+            'discount_value' => $discountValue,
+            'discount_amount' => $discountAmount,
+            'tax_type' => $taxType,
+            'tax_value' => $taxValue,
+            'tax_amount' => $taxAmount,
+            'total' => $subtotalAfterDiscount + $taxAmount,
+        ];
     }
 
     public function recalculateExistingProposal(int $proposalId): Proposal

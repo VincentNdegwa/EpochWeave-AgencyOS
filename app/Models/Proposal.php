@@ -26,8 +26,7 @@ class Proposal extends Model
         'currency',
         'subtotal',
         'discount_total',
-        'tax_rate',
-        'tax_amount',
+        'total_tax_amount',
         'grand_total',
         'requires_deposit',
         'deposit_type',
@@ -57,7 +56,6 @@ class Proposal extends Model
     protected $casts = [
         'content' => 'array',
         'valid_until' => 'date',
-        'tax_rate' => 'decimal:2',
         'deposit_value' => 'decimal:2',
         'quantity' => 'decimal:2',
         'requires_deposit' => 'boolean',
@@ -72,7 +70,7 @@ class Proposal extends Model
         'expired_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'discount_total' => 'decimal:2',
-        'tax_amount' => 'decimal:2',
+        'total_tax_amount' => 'decimal:2',
         'grand_total' => 'decimal:2',
         'deposit_amount' => 'decimal:2',
     ];

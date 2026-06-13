@@ -17,6 +17,7 @@ use App\Http\Controllers\ProposalKanbanController;
 use App\Http\Controllers\WorkspaceSettings\GeneralController as WorkspaceGeneralSettingsController;
 use App\Http\Controllers\WorkspaceSettings\NotificationController;
 use App\Http\Controllers\WorkspaceSettings\ProposalController as WorkspaceProposalSettingsController;
+use App\Http\Controllers\WorkspaceSettings\AutomationController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -94,6 +95,10 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('workspace-settings.notifications');
     Route::patch('workspace/settings/notifications', [NotificationController::class, 'update'])
         ->name('workspace-settings.notifications.update');
+    Route::get('workspace/settings/automation', [AutomationController::class, 'edit'])
+        ->name('workspace-settings.automation');
+    Route::patch('workspace/settings/automation', [AutomationController::class, 'update'])
+        ->name('workspace-settings.automation.update');
 
     Route::post('/user-preferences/display-mode', [UserPreferenceController::class, 'updateDisplayMode'])
         ->name('user-preferences.display-mode.update');

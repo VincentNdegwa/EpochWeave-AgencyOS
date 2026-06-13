@@ -123,9 +123,6 @@ class ProposalController extends Controller
 
             $proposal = $this->proposalService->createProposalWithItems($data, $lineItems);
 
-            // Calculate and update totals from line items
-            $this->proposalService->updateProposalTotals($proposal, $lineItems);
-
             $this->workspaceSettingService->incrementNumberingSequence($settings, $nextSequenceNumber);
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal created successfully.']);
@@ -184,9 +181,6 @@ class ProposalController extends Controller
             unset($data['line_items']);
 
             $this->proposalService->updateProposal($proposal, $data, $lineItems);
-
-            // Calculate and update totals from line items
-            $this->proposalService->updateProposalTotals($proposal, $lineItems);
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal updated successfully.']);
 

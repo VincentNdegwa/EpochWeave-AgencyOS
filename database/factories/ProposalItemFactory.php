@@ -17,6 +17,7 @@ class ProposalItemFactory extends Factory
     public function definition(): array
     {
         $billingType = fake()->randomElement(['one_time', 'recurring']);
+        $taxType = fake()->randomElement(['percentage', 'fixed']);
 
         return [
             'proposal_id' => Proposal::factory(),
@@ -38,6 +39,10 @@ class ProposalItemFactory extends Factory
             'is_optional' => fake()->boolean(20),
             'is_selected' => true,
             'position' => 0,
+            'tax_type' => $taxType,
+            'tax_value' => $taxType === 'percentage' 
+                ? fake()->randomFloat(2, 5, 25) 
+                : fake()->randomFloat(2, 10, 500),
         ];
     }
 }

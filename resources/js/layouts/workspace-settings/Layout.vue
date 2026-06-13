@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Bell, FileText, Settings } from '@lucide/vue';
+import { Bell, FileText, Settings, Sparkles } from '@lucide/vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -24,6 +24,11 @@ const sidebarNavItems: NavItem[] = [
         title: 'Notifications',
         href: '/workspace/settings/notifications',
         icon: Bell,
+    },
+    {
+        title: 'Automation',
+        href: '/workspace/settings/automation',
+        icon: Sparkles,
     },
 ];
 

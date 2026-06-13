@@ -41,8 +41,6 @@ const createDefaultProposal = (workspaceId = 0): Proposal => {
         currency: 'USD',
         subtotal: 0,
         discount_total: 0,
-        tax_rate: 0,
-        tax_amount: 0,
         grand_total: 0,
         requires_deposit: false,
         deposit_type: null,
@@ -63,6 +61,8 @@ const createDefaultProposal = (workspaceId = 0): Proposal => {
         last_viewed_at: null,
         view_count: 0,
         decided_at: null,
+        accepted_at: null,
+        signed_at: null,
         expired_at: null,
         decline_reason: null,
         created_at: timestamp,
@@ -86,10 +86,8 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     });
     const lineItemsCatalog = ref<PricingLineItem[]>([]);
     
-    // Portal mode state
     const portalMode = ref(false);
 
-    // Helper function to find block recursively including nested blocks
     function findBlockRecursive(
         blocks: BaseBlock[],
         blockId: string,
@@ -329,21 +327,21 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
             const catalogItems = payload.items.map((item: ProposalItem) => ({
                 id: item.id.toString(),
                 description: item.item_name || '',
-                item_description: item.description || null,
                 unit: item.unit_label || 'Pcs',
-                quantity: parseFloat(item.quantity) || 1,
-                unit_price: parseFloat(item.unit_price) || 0,
-                subtotal: parseFloat(item.subtotal) || 0,
+                quantity: item.quantity || 1,
+                unit_price: item.unit_price || 0,
+                subtotal: item.subtotal || 0,
                 billing_type: item.billing_type || 'one_time',
                 billing_frequency: item.billing_frequency || 'none',
                 is_optional: Boolean(item.is_optional),
                 product_id: item.product_id || null,
-                item_discount_type:
+                discount_type:
                     (item.discount_type as 'percentage' | 'fixed' | 'none') ||
                     'none',
-                item_discount_value: parseFloat(item.discount_value) || 0,
-                item_tax_type: 'none' as const, // Backend doesn't seem to have item tax
-                item_tax_value: 0,
+                discount_value: item.discount_value || 0,
+                tax_type: (item.tax_type as 'percentage' | 'fixed' | 'none') || 'none',
+                tax_value: item.tax_value || 0,
+                total_tax_amount: item.total_tax_amount || 0,
             }));
             setLineItemsCatalog(catalogItems);
 
@@ -504,7 +502,6 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
                         block.data.items = catalogItems.map((item) => ({
                             id: item.id,
                             description: item.description,
-                            item_description: item.item_description,
                             unit: item.unit,
                             quantity: item.quantity,
                             unit_price: item.unit_price,
@@ -513,10 +510,11 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
                             billing_frequency: item.billing_frequency,
                             is_optional: item.is_optional,
                             product_id: item.product_id,
-                            item_discount_type: item.item_discount_type,
-                            item_discount_value: item.item_discount_value,
-                            item_tax_type: item.item_tax_type,
-                            item_tax_value: item.item_tax_value,
+                            discount_type: item.discount_type,
+                            discount_value: item.discount_value,
+                            tax_type: item.tax_type,
+                            tax_value: item.tax_value,
+                            total_tax_amount: item.total_tax_amount,
                         }));
                         continue;
                     }

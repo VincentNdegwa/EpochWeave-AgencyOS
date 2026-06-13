@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="Tests\Feature\Proposal\ProposalTotalsTest" file="/var/www/html/tests/Feature/Proposal/ProposalTotalsTest.php" tests="2" assertions="9" errors="0" failures="2" skipped="0" time="22.581321">
+    <testcase name="test_create_route_computes_and_persists_totals" file="/var/www/html/tests/Feature/Proposal/ProposalTotalsTest.php" line="35" class="Tests\Feature\Proposal\ProposalTotalsTest" classname="Tests.Feature.Proposal.ProposalTotalsTest" assertions="5" time="22.029492">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\Proposal\ProposalTotalsTest::test_create_route_computes_and_persists_totals
+Failed asserting that 0.0 matches expected 11.0.
+
+/var/www/html/tests/Feature/Proposal/ProposalTotalsTest.php:128</failure>
+    </testcase>
+    <testcase name="test_update_route_recalculates_totals_and_updates_items" file="/var/www/html/tests/Feature/Proposal/ProposalTotalsTest.php" line="139" class="Tests\Feature\Proposal\ProposalTotalsTest" classname="Tests.Feature.Proposal.ProposalTotalsTest" assertions="4" time="0.551828">
+      <failure type="PHPUnit\Framework\ExpectationFailedException">Tests\Feature\Proposal\ProposalTotalsTest::test_update_route_recalculates_totals_and_updates_items
+Failed asserting that 0.0 matches expected 40.0.
+
+/var/www/html/tests/Feature/Proposal/ProposalTotalsTest.php:221</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

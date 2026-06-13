@@ -18,7 +18,6 @@ class ProfessionalFreelanceTemplateSeeder extends Seeder
             return;
         }
 
-        // Delete existing professional template
         ProposalTemplate::where('workspace_id', $workspace->id)
             ->where('name', 'Professional Freelance Services')
             ->delete();

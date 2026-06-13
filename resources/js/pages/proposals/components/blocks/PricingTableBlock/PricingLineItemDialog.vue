@@ -55,19 +55,19 @@ const emit = defineEmits<{
 // We work on a local copy so cancel truly discards changes
 const form = reactive<
     PricingLineItem & {
-        item_description: string | null;
-        item_discount_type: 'none' | 'percentage' | 'fixed';
-        item_discount_value: number;
-        item_tax_type: 'none' | 'percentage' | 'fixed';
-        item_tax_value: number;
+        description: string | null;
+        discount_type: 'none' | 'percentage' | 'fixed';
+        discount_value: number;
+        tax_type: 'none' | 'percentage' | 'fixed';
+        tax_value: number;
     }
 >({
     ...props.item,
-    item_description: (props.item as any).item_description ?? null,
-    item_discount_type: (props.item as any).item_discount_type ?? 'none',
-    item_discount_value: (props.item as any).item_discount_value ?? 0,
-    item_tax_type: (props.item as any).item_tax_type ?? 'none',
-    item_tax_value: (props.item as any).item_tax_value ?? 0,
+    description: (props.item as any).description ?? null,
+    discount_type: (props.item as any).discount_type ?? 'none',
+    discount_value: (props.item as any).discount_value ?? 0,
+    tax_type: (props.item as any).tax_type ?? 'none',
+    tax_value: (props.item as any).tax_value ?? 0,
     billing_frequency: props.item.billing_frequency ?? 'none',
 });
 
@@ -77,11 +77,11 @@ watch(
     (newItem) => {
         Object.assign(form, {
             ...newItem,
-            item_description: (newItem as any).item_description ?? null,
-            item_discount_type: (newItem as any).item_discount_type ?? 'none',
-            item_discount_value: (newItem as any).item_discount_value ?? 0,
-            item_tax_type: (newItem as any).item_tax_type ?? 'none',
-            item_tax_value: (newItem as any).item_tax_value ?? 0,
+            description: (newItem as any).description ?? null,
+            discount_type: (newItem as any).discount_type ?? 'none',
+            discount_value: (newItem as any).discount_value ?? 0,
+            tax_type: (newItem as any).tax_type ?? 'none',
+            tax_value: (newItem as any).tax_value ?? 0,
             billing_frequency: newItem.billing_frequency ?? 'none',
         });
     },
@@ -133,31 +133,31 @@ watch(
 const lineSubtotal = computed(() => form.quantity * form.unit_price);
 
 const discountAmount = computed(() => {
-    if (form.item_discount_type === 'none') {
+    if (form.discount_type === 'none') {
         return 0;
     }
 
-    if (form.item_discount_type === 'percentage') {
+    if (form.discount_type === 'percentage') {
         return Math.round(
-            (lineSubtotal.value * form.item_discount_value) / 100,
+            (lineSubtotal.value * form.discount_value) / 100,
         );
     }
 
-    return form.item_discount_value;
+    return form.discount_value;
 });
 
 const afterDiscount = computed(() => lineSubtotal.value - discountAmount.value);
 
 const taxAmount = computed(() => {
-    if (form.item_tax_type === 'none') {
+    if (form.tax_type === 'none') {
         return 0;
     }
 
-    if (form.item_tax_type === 'percentage') {
-        return Math.round((afterDiscount.value * form.item_tax_value) / 100);
+    if (form.tax_type === 'percentage') {
+        return Math.round((afterDiscount.value * form.tax_value) / 100);
     }
 
-    return form.item_tax_value;
+    return form.tax_value;
 });
 
 const lineTotal = computed(() => afterDiscount.value + taxAmount.value);
@@ -275,17 +275,7 @@ const handleSave = () => {
                         </div>
                     </div>
 
-                    <div class="grid gap-2 sm:col-span-2">
-                        <Label for="item_description">Description</Label>
-                        <Textarea
-                            id="item_description"
-                            :model-value="form.item_description ?? ''"
-                            placeholder="Brief description shown below the name on the proposal…"
-                            rows="2"
-                            @update:model-value="(v) => (form.item_description = v ? String(v) : null)"
-                        />
-                    </div>
-
+                    
                     <div class="grid gap-2">
                         <Label>Billing type</Label>
                         <div class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
@@ -339,27 +329,27 @@ const handleSave = () => {
                                 :key="opt.value"
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.item_discount_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
-                                @click="form.item_discount_type = opt.value as typeof form.item_discount_type"
+                                :class="form.discount_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                @click="form.discount_type = opt.value as typeof form.discount_type"
                             >
                                 {{ opt.label }}
                             </button>
                         </div>
                         <div
-                            v-if="form.item_discount_type !== 'none'"
+                            v-if="form.discount_type !== 'none'"
                             class="flex items-center gap-3"
                         >
                             <div class="relative flex-1">
                                 <Input
-                                    v-model.number="form.item_discount_value"
+                                    v-model.number="form.discount_value"
                                     type="number"
                                     min="0"
-                                    :max="form.item_discount_type === 'percentage' ? 100 : undefined"
+                                    :max="form.discount_type === 'percentage' ? 100 : undefined"
                                     class="pr-10"
                                     placeholder="0"
                                 />
                                 <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                                    {{ form.item_discount_type === 'percentage' ? '%' : currency }}
+                                    {{ form.discount_type === 'percentage' ? '%' : currency }}
                                 </span>
                             </div>
                             <div class="text-right">
@@ -383,26 +373,26 @@ const handleSave = () => {
                                 :key="opt.value"
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.item_tax_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
-                                @click="form.item_tax_type = opt.value as typeof form.item_tax_type"
+                                :class="form.tax_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                @click="form.tax_type = opt.value as typeof form.tax_type"
                             >
                                 {{ opt.label }}
                             </button>
                         </div>
                         <div
-                            v-if="form.item_tax_type !== 'none'"
+                            v-if="form.tax_type !== 'none'"
                             class="flex items-center gap-3"
                         >
                             <div class="relative flex-1">
                                 <Input
-                                    v-model.number="form.item_tax_value"
+                                    v-model.number="form.tax_value"
                                     type="number"
                                     min="0"
                                     class="pr-10"
                                     placeholder="0"
                                 />
                                 <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                                    {{ form.item_tax_type === 'percentage' ? '%' : currency }}
+                                    {{ form.tax_type === 'percentage' ? '%' : currency }}
                                 </span>
                             </div>
                             <div class="text-right">
@@ -433,14 +423,14 @@ const handleSave = () => {
                                     <span>{{ fmt(lineSubtotal) }}</span>
                                 </div>
                                 <div
-                                    v-if="form.item_discount_type !== 'none'"
+                                    v-if="form.discount_type !== 'none'"
                                     class="flex justify-between px-4 py-2.5 text-muted-foreground"
                                 >
                                     <span>Discount</span>
                                     <span class="text-red-500 dark:text-red-400">−{{ fmt(discountAmount) }}</span>
                                 </div>
                                 <div
-                                    v-if="form.item_tax_type !== 'none'"
+                                    v-if="form.tax_type !== 'none'"
                                     class="flex justify-between px-4 py-2.5 text-muted-foreground"
                                 >
                                     <span>Tax</span>

@@ -43,7 +43,6 @@ const openAddDialog = () => {
     editingItem.value = {
         id: nanoid(8),
         description: '',
-        item_description: null,
         unit: builderDataStore.units[0]?.abbreviation ?? 'hr',
         quantity: 1,
         unit_price: 0,
@@ -52,10 +51,10 @@ const openAddDialog = () => {
         billing_type: 'one_time',
         billing_frequency: 'none',
         product_id: null,
-        item_discount_type: 'none',
-        item_discount_value: 0,
-        item_tax_type: 'none',
-        item_tax_value: 0,
+        discount_type: 'none',
+        discount_value: 0,
+        tax_type: 'none',
+        tax_value: 0,
     };
     dialogOpen.value = true;
 };
@@ -129,11 +128,31 @@ const discountAmount = computed(() => {
 });
 
 const taxBase = computed(() => subtotal.value - discountAmount.value);
-const taxAmount = computed(() =>
-    props.data.show_tax_row
-        ? Math.round((taxBase.value * props.data.tax_rate) / 100)
-        : 0,
-);
+const taxAmount = computed(() => {
+    if (!props.data.show_tax_row) {
+        return 0;
+    }
+
+    return catalogItems.value
+        .filter((i) => !i.is_optional)
+        .reduce((totalTax, item) => {
+            if (item.tax_type === 'none') {
+                return totalTax;
+            }
+
+            const itemSubtotal = item.subtotal;
+            const itemDiscount = item.discount_type === 'percentage'
+                ? Math.round((itemSubtotal * item.discount_value) / 100)
+                : item.discount_value;
+            const afterDiscount = itemSubtotal - itemDiscount;
+
+            const itemTax = item.tax_type === 'percentage'
+                ? Math.round((afterDiscount * item.tax_value) / 100)
+                : item.tax_value;
+
+            return totalTax + itemTax;
+        }, 0);
+});
 const grandTotal = computed(() => taxBase.value + taxAmount.value);
 
 const gridCols = computed(() => {
@@ -204,17 +223,11 @@ const gridCols = computed(() => {
                             </p>
                             <div
                                 v-if="
-                                    item.item_description ||
                                     item.is_optional ||
                                     item.billing_type === 'recurring'
                                 "
                                 class="mt-0.5 flex flex-wrap items-center gap-1.5"
                             >
-                                <span
-                                    v-if="item.item_description"
-                                    class="truncate text-xs text-muted-foreground"
-                                    >{{ item.item_description }}</span
-                                >
                                 <span
                                     v-if="item.is_optional"
                                     class="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground"

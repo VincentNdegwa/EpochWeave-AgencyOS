@@ -37,8 +37,6 @@ export interface Proposal extends Record<string, unknown> {
     currency: string;
     subtotal: number;
     discount_total: number;
-    tax_rate: number | string;
-    tax_amount: number;
     grand_total: number;
     requires_deposit: boolean;
     deposit_type: DepositType | null;
@@ -124,6 +122,9 @@ export interface ProposalItem {
     is_optional: boolean;
     is_selected: boolean;
     position: number;
+    tax_type: 'percentage' | 'fixed' | null;
+    tax_value: number | null;
+    total_tax_amount: number | null;
     created_at: string;
     updated_at: string;
 }
@@ -159,8 +160,6 @@ export interface UpdateProposal {
     content?: BaseBlock[];
     subtotal?: number;
     discount_total?: number;
-    tax_rate?: number | string;
-    tax_amount?: number;
     grand_total?: number;
     requires_deposit?: boolean;
     deposit_type?: DepositType | null;

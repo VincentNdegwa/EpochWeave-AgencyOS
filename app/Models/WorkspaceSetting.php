@@ -12,6 +12,7 @@ class WorkspaceSetting extends Model
 
     public const SUBMODULE_PROPOSALS = 'proposals';
     public const SUBMODULE_NOTIFICATIONS = 'notifications';
+    public const SUBMODULE_AUTOMATION = 'automation';
 
     protected $fillable = [
         'workspace_id',

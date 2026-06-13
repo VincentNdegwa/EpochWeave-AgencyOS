@@ -34,3 +34,19 @@ export interface NotificationSettings {
     created_at: string;
     updated_at: string;
 }
+
+export interface AutomationSettings {
+    id: number;
+    workspace_id: number;
+    submodule: string;
+    settings: {
+        automation: {
+            proposals: {
+                auto_generate_invoice: boolean;
+                auto_create_project: boolean;
+            };
+        };
+    };
+    created_at: string;
+    updated_at: string;
+}

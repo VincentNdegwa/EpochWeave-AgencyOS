@@ -70,8 +70,10 @@ class StoreProposalRequest extends FormRequest
             'line_items.*.billing_frequency' => 'required|in:none,monthly,quarterly,yearly',
             'line_items.*.is_optional' => 'required|boolean',
             'line_items.*.product_id' => 'nullable|integer|exists:products,id',
-            'line_items.*.item_discount_type' => 'nullable|in:none,percentage,fixed',
-            'line_items.*.item_discount_value' => 'nullable|numeric|min:0',
+            'line_items.*.discount_type' => 'nullable|in:none,percentage,fixed',
+            'line_items.*.discount_value' => 'nullable|numeric|min:0',
+            'line_items.*.tax_type' => 'nullable|in:none,percentage,fixed',
+            'line_items.*.tax_value' => 'nullable|numeric|min:0',
         ];
     }
 }

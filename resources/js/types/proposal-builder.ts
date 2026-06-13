@@ -145,7 +145,6 @@ export interface PricingTableBlockData {
 export interface PricingLineItem {
     id: string;
     description: string; // the name shown on the table row
-    item_description: string | null; // sub-description shown below the name
     unit: string;
     quantity: number;
     unit_price: number;
@@ -157,11 +156,11 @@ export interface PricingLineItem {
 
     is_optional: boolean;
 
-    item_discount_type: 'none' | 'percentage' | 'fixed';
-    item_discount_value: number; // e.g. 10 for 10% or fixed amount
+    discount_type: 'none' | 'percentage' | 'fixed';
+    discount_value: number; // e.g. 10 for 10% or fixed amount
 
-    item_tax_type: 'none' | 'percentage' | 'fixed';
-    item_tax_value: number;
+    tax_type: 'none' | 'percentage' | 'fixed';
+    tax_value: number;
 }
 
 export interface PricingDiscount {
