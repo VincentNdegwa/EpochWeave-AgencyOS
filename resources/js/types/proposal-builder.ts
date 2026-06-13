@@ -148,7 +148,7 @@ export interface PricingLineItem {
     unit: string;
     quantity: number;
     unit_price: number;
-    subtotal: number; // computed: (qty × price - discount + tax)
+    subtotal: number; // computed: (qty × price)
 
     billing_type: 'one_time' | 'recurring';
     billing_frequency: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
@@ -158,9 +158,12 @@ export interface PricingLineItem {
 
     discount_type: 'none' | 'percentage' | 'fixed';
     discount_value: number; // e.g. 10 for 10% or fixed amount
+    discount_amount?: number; // absolute amount deducted
 
     tax_type: 'none' | 'percentage' | 'fixed';
     tax_value: number;
+    total_tax_amount?: number; // absolute amount added for tax
+    total?: number; // subtotal - discount + tax
 }
 
 export interface PricingDiscount {

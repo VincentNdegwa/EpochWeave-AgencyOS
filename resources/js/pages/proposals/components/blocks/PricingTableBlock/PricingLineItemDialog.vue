@@ -69,6 +69,9 @@ const form = reactive<
     tax_type: (props.item as any).tax_type ?? 'none',
     tax_value: (props.item as any).tax_value ?? 0,
     billing_frequency: props.item.billing_frequency ?? 'none',
+    discount_amount: (props.item as any).discount_amount ?? 0,
+    total_tax_amount: (props.item as any).total_tax_amount ?? 0,
+    total: (props.item as any).total ?? props.item.subtotal ?? 0,
 });
 
 // Sync form when dialog opens with a new item
@@ -83,6 +86,9 @@ watch(
             tax_type: (newItem as any).tax_type ?? 'none',
             tax_value: (newItem as any).tax_value ?? 0,
             billing_frequency: newItem.billing_frequency ?? 'none',
+            discount_amount: (newItem as any).discount_amount ?? 0,
+            total_tax_amount: (newItem as any).total_tax_amount ?? 0,
+            total: (newItem as any).total ?? newItem.subtotal ?? 0,
         });
     },
     { immediate: true },
@@ -162,10 +168,16 @@ const taxAmount = computed(() => {
 
 const lineTotal = computed(() => afterDiscount.value + taxAmount.value);
 
-// Keep subtotal in sync so the table display is accurate
-watch(lineTotal, (v) => {
-    form.subtotal = v;
-});
+watch(
+    [lineSubtotal, discountAmount, taxAmount, lineTotal],
+    ([base, discount, tax, total]) => {
+        form.subtotal = base;
+        form.discount_amount = discount;
+        form.total_tax_amount = tax;
+        form.total = total;
+    },
+    { immediate: true },
+);
 
 // ── Currency formatter ────────────────────────────────────────
 const fmt = (amount: number) =>

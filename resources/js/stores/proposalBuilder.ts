@@ -70,6 +70,16 @@ const createDefaultProposal = (workspaceId = 0): Proposal => {
     };
 };
 
+const toNumber = (value: unknown, fallback = 0): number => {
+    if (value === null || value === undefined) {
+        return fallback;
+    }
+
+    const parsed = typeof value === 'string' ? Number.parseFloat(value) : Number(value);
+
+    return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
     // State
     const isDirty = ref(false);
@@ -328,9 +338,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
                 id: item.id.toString(),
                 description: item.item_name || '',
                 unit: item.unit_label || 'Pcs',
-                quantity: item.quantity || 1,
-                unit_price: item.unit_price || 0,
-                subtotal: item.subtotal || 0,
+                quantity: toNumber(item.quantity, 1),
+                unit_price: toNumber(item.unit_price, 0),
+                subtotal: toNumber(item.subtotal, 0),
                 billing_type: item.billing_type || 'one_time',
                 billing_frequency: item.billing_frequency || 'none',
                 is_optional: Boolean(item.is_optional),
@@ -338,10 +348,12 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
                 discount_type:
                     (item.discount_type as 'percentage' | 'fixed' | 'none') ||
                     'none',
-                discount_value: item.discount_value || 0,
+                discount_value: toNumber(item.discount_value, 0),
+                discount_amount: toNumber(item.discount_amount, 0),
                 tax_type: (item.tax_type as 'percentage' | 'fixed' | 'none') || 'none',
-                tax_value: item.tax_value || 0,
-                total_tax_amount: item.total_tax_amount || 0,
+                tax_value: toNumber(item.tax_value, 0),
+                total_tax_amount: toNumber(item.total_tax_amount, 0),
+                total: toNumber(item.total, 0),
             }));
             setLineItemsCatalog(catalogItems);
 

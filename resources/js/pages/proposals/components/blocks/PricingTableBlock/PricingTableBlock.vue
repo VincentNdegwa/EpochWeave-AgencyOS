@@ -111,13 +111,82 @@ const fmt = (amount: number) =>
         minimumFractionDigits: 0,
     }).format(amount);
 
+const ensureNumber = (value: number | string | undefined | null, fallback = 0): number => {
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : fallback;
+    }
+
+    if (typeof value === 'string') {
+        const parsed = Number.parseFloat(value);
+
+        return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    return fallback;
+};
+
+const nonOptionalItems = computed(() => catalogItems.value.filter((i) => !i.is_optional));
+
+const resolveDiscountAmount = (item: PricingLineItem): number => {
+    if (item.discount_amount !== undefined) {
+        return ensureNumber(item.discount_amount);
+    }
+
+    const base = ensureNumber(item.subtotal);
+    const discountValue = ensureNumber(item.discount_value);
+
+    if (item.discount_type === 'percentage' && discountValue > 0) {
+        return Math.round((base * discountValue) / 100);
+    }
+
+    if (item.discount_type === 'fixed' && discountValue > 0) {
+        return discountValue;
+    }
+
+    return 0;
+};
+
+const resolveTaxAmount = (item: PricingLineItem): number => {
+    if (item.total_tax_amount !== undefined) {
+        return ensureNumber(item.total_tax_amount);
+    }
+
+    const discount = resolveDiscountAmount(item);
+    const base = ensureNumber(item.subtotal) - discount;
+    const taxValue = ensureNumber(item.tax_value);
+
+    if (item.tax_type === 'percentage' && taxValue > 0) {
+        return Math.round((base * taxValue) / 100);
+    }
+
+    if (item.tax_type === 'fixed' && taxValue > 0) {
+        return taxValue;
+    }
+
+    return 0;
+};
+
+const resolveLineTotal = (item: PricingLineItem): number => {
+    if (item.total !== undefined) {
+        const total = ensureNumber(item.total);
+
+        if (total > 0) {
+            return total;
+        }
+    }
+
+    const base = ensureNumber(item.subtotal);
+    const discount = resolveDiscountAmount(item);
+    const tax = resolveTaxAmount(item);
+
+    return base - discount + tax;
+};
+
 const subtotal = computed(() =>
-    catalogItems.value
-        .filter((i) => !i.is_optional)
-        .reduce((s, i) => s + i.subtotal, 0),
+    nonOptionalItems.value.reduce((sum, item) => sum + ensureNumber(item.subtotal), 0),
 );
 
-const discountAmount = computed(() => {
+const tableDiscountAmount = computed(() => {
     if (!props.data.discount) {
         return 0;
     }
@@ -127,33 +196,19 @@ const discountAmount = computed(() => {
         : props.data.discount.amount;
 });
 
-const taxBase = computed(() => subtotal.value - discountAmount.value);
-const taxAmount = computed(() => {
-    if (!props.data.show_tax_row) {
-        return 0;
-    }
+const lineDiscountTotal = computed(() =>
+    nonOptionalItems.value.reduce((sum, item) => sum + resolveDiscountAmount(item), 0),
+);
 
-    return catalogItems.value
-        .filter((i) => !i.is_optional)
-        .reduce((totalTax, item) => {
-            if (item.tax_type === 'none') {
-                return totalTax;
-            }
+const lineTaxTotal = computed(() =>
+    nonOptionalItems.value.reduce((sum, item) => sum + resolveTaxAmount(item), 0),
+);
 
-            const itemSubtotal = item.subtotal;
-            const itemDiscount = item.discount_type === 'percentage'
-                ? Math.round((itemSubtotal * item.discount_value) / 100)
-                : item.discount_value;
-            const afterDiscount = itemSubtotal - itemDiscount;
+const baseGrandTotal = computed(() =>
+    nonOptionalItems.value.reduce((sum, item) => sum + resolveLineTotal(item), 0),
+);
 
-            const itemTax = item.tax_type === 'percentage'
-                ? Math.round((afterDiscount * item.tax_value) / 100)
-                : item.tax_value;
-
-            return totalTax + itemTax;
-        }, 0);
-});
-const grandTotal = computed(() => taxBase.value + taxAmount.value);
+const grandTotal = computed(() => Math.max(baseGrandTotal.value - tableDiscountAmount.value, 0));
 
 const gridCols = computed(() => {
     if (props.data.show_quantity_column && props.data.show_unit_column) {
@@ -240,6 +295,23 @@ const gridCols = computed(() => {
                                     {{ item.billing_frequency }}</span
                                 >
                             </div>
+                            <div
+                                v-if="resolveDiscountAmount(item) > 0 || resolveTaxAmount(item) > 0"
+                                class="mt-1 flex flex-wrap gap-1.5 text-[11px]"
+                            >
+                                <span
+                                    v-if="resolveDiscountAmount(item) > 0"
+                                    class="rounded-full bg-rose-50 px-1.5 py-0.5 font-medium text-rose-500 dark:bg-rose-500/10 dark:text-rose-300"
+                                >
+                                    Discount −{{ fmt(resolveDiscountAmount(item)) }}
+                                </span>
+                                <span
+                                    v-if="resolveTaxAmount(item) > 0"
+                                    class="rounded-full bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300"
+                                >
+                                    Tax +{{ fmt(resolveTaxAmount(item)) }}
+                                </span>
+                            </div>
                         </div>
 
                         <span
@@ -258,8 +330,8 @@ const gridCols = computed(() => {
                             {{
                                 fmt(
                                     data.show_subtotal_per_line
-                                        ? item.subtotal
-                                        : item.unit_price,
+                                        ? resolveLineTotal(item)
+                                        : ensureNumber(item.unit_price),
                                 )
                             }}
                         </span>
@@ -330,20 +402,29 @@ const gridCols = computed(() => {
                     <span>Subtotal</span><span>{{ fmt(subtotal) }}</span>
                 </div>
                 <div
-                    v-if="data.discount && discountAmount"
+                    v-if="lineDiscountTotal > 0"
+                    class="flex justify-between text-muted-foreground"
+                >
+                    <span>Discount</span>
+                    <span class="text-red-500 dark:text-red-400"
+                        >−{{ fmt(lineDiscountTotal) }}</span
+                    >
+                </div>
+                <div
+                    v-if="data.discount && tableDiscountAmount"
                     class="flex justify-between text-muted-foreground"
                 >
                     <span>{{ data.discount.label || 'Discount' }}</span>
                     <span class="text-red-500 dark:text-red-400"
-                        >−{{ fmt(discountAmount) }}</span
+                        >−{{ fmt(tableDiscountAmount) }}</span
                     >
                 </div>
                 <div
-                    v-if="data.show_tax_row"
+                    v-if="data.show_tax_row && lineTaxTotal > 0"
                     class="flex justify-between text-muted-foreground"
                 >
-                    <span>{{ data.tax_label }} ({{ data.tax_rate }}%)</span>
-                    <span>{{ fmt(taxAmount) }}</span>
+                    <span>{{ data.tax_label || 'Taxes' }}</span>
+                    <span>{{ fmt(lineTaxTotal) }}</span>
                 </div>
                 <div
                     v-if="data.show_total_row"

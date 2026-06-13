@@ -83,7 +83,6 @@ class ProposalController extends Controller
             $workspace = $request->attributes->get('current_workspace');
             $data = $request->validated();
             
-            // Apply template content if selected
             $content = [];
             if (!empty($data['template_id'])) {
                 $template = $this->proposalTemplateService->getTemplateById($data['template_id']);
@@ -104,7 +103,6 @@ class ProposalController extends Controller
             $proposalNumber = $this->generateProposalNumber($numberingSettings);
             unset($data['proposal_number']);
 
-            // Set currency from workspace if not provided
             if (empty($data['currency'])) {
                 $data['currency'] = $workspace->currency ?? 'USD';
             }
@@ -117,7 +115,6 @@ class ProposalController extends Controller
                 'token' => Str::uuid(),
             ]);
 
-            // Extract line items from payload
             $lineItems = $data['line_items'] ?? [];
             unset($data['line_items']);
 
@@ -176,7 +173,6 @@ class ProposalController extends Controller
                 $data['content'] = $content;
             }
 
-            // Extract line items from payload
             $lineItems = $data['line_items'] ?? [];
             unset($data['line_items']);
 

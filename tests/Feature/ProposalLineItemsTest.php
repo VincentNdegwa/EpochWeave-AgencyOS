@@ -36,8 +36,7 @@ class ProposalLineItemsTest extends TestCase
             ->withSession(['current_workspace_id' => $this->workspace->id]);
     }
 
-    /** @test */
-    public function it_can_create_proposal_with_line_items()
+    public function test_it_can_create_proposal_with_line_items(): void
     {
         $proposalData = [
             'title' => 'Test Proposal with Items',
@@ -134,8 +133,7 @@ class ProposalLineItemsTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_can_update_proposal_with_line_items()
+    public function test_it_can_update_proposal_with_line_items(): void
     {
         // Create initial proposal
         $proposal = Proposal::factory()->create([
@@ -186,13 +184,15 @@ class ProposalLineItemsTest extends TestCase
                     'unit' => 'Hour',
                     'quantity' => 5,
                     'unit_price' => 200,
-                    'subtotal' => 1000,
+                    'subtotal' => 900,
                     'billing_type' => 'one_time',
                     'billing_frequency' => 'none',
                     'is_optional' => false,
                     'product_id' => null,
-                    'item_discount_type' => 'percentage',
-                    'item_discount_value' => 10,
+                    'discount_type' => 'percentage',
+                    'discount_value' => 10,
+                    'tax_type' => 'none',
+                    'tax_value' => 0,
                 ],
             ],
         ];
@@ -226,10 +226,13 @@ class ProposalLineItemsTest extends TestCase
 
         $proposal->refresh();
         $this->assertCount(1, $proposal->items);
+        $this->assertEquals(1000, (int) $proposal->subtotal);
+        $this->assertEquals(100, (int) $proposal->discount_total);
+        $this->assertEquals(0.0, (float) $proposal->total_tax_amount);
+        $this->assertEquals(900, (int) $proposal->grand_total);
     }
 
-    /** @test */
-    public function it_can_load_proposal_with_items_and_avoid_n_plus_one()
+    public function test_it_can_load_proposal_with_items_and_avoid_n_plus_one(): void
     {
         // Create proposal with multiple items
         $proposal = Proposal::factory()->create([
@@ -260,8 +263,7 @@ class ProposalLineItemsTest extends TestCase
         $this->assertEquals(5, $response->viewData('proposal')->items->count());
     }
 
-    /** @test */
-    public function it_can_create_proposal_without_line_items()
+    public function test_it_can_create_proposal_without_line_items(): void
     {
         $proposalData = [
             'title' => 'Simple Proposal',
@@ -302,8 +304,7 @@ class ProposalLineItemsTest extends TestCase
         $this->assertCount(0, $proposal->items);
     }
 
-    /** @test */
-    public function it_validates_line_items_data()
+    public function test_it_validates_line_items_data(): void
     {
         $invalidData = [
             'title' => 'Test Proposal',
@@ -355,8 +356,7 @@ class ProposalLineItemsTest extends TestCase
         ]);
     }
 
-    /** @test */
-    public function it_handles_empty_line_items_array()
+    public function test_it_handles_empty_line_items_array(): void
     {
         $proposalData = [
             'title' => 'Proposal with Empty Items',
@@ -395,8 +395,7 @@ class ProposalLineItemsTest extends TestCase
         $this->assertCount(0, $proposal->items);
     }
 
-    /** @test */
-    public function it_can_get_proposals_by_workspace_with_items()
+    public function test_it_can_get_proposals_by_workspace_with_items(): void
     {
         // Create multiple proposals with items
         $proposals = Proposal::factory()->count(3)->create([
@@ -427,8 +426,7 @@ class ProposalLineItemsTest extends TestCase
         }
     }
 
-    /** @test */
-    public function it_can_get_proposals_by_account_with_items()
+    public function test_it_can_get_proposals_by_account_with_items(): void
     {
         // Create proposals with items
         $proposals = Proposal::factory()->count(2)->create([
@@ -459,8 +457,7 @@ class ProposalLineItemsTest extends TestCase
         }
     }
 
-    /** @test */
-    public function it_handles_product_relationships_in_items()
+    public function test_it_handles_product_relationships_in_items(): void
     {
         // Create a product
         $product = Product::factory()->create([

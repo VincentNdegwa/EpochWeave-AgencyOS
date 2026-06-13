@@ -77,12 +77,9 @@ class ProposalService
     {
         try {
             $proposal->update($data);
-
-            if (!empty($items)) {
                 $proposal->items()->delete();
                 $this->createProposalItems($proposal, $items);
                 $this->updateProposalTotals($proposal);
-            }
 
             return $proposal->fresh(['items.product']);
         } catch (Exception $e) {
@@ -102,12 +99,24 @@ class ProposalService
     public function updateProposalTotals(Proposal $proposal): Proposal
     {
         try {
-            $items = $proposal->items;
+            $items = $proposal->items()->get();
+            $proposal->setRelation('items', $items);
+
+            \Log::info("Proposal Items", [
+                'data' => $items
+            ]);
             
             $subtotal = $items->sum('subtotal');
             $discountTotal = $items->sum('discount_amount');
             $taxAmount = $items->sum('total_tax_amount');
             $grandTotal = $items->sum('total');
+
+            \Log::info("Proposal data", [
+                'subtotal' => $subtotal,
+                'discount_total' => $discountTotal,
+                'total_tax_amount' => $taxAmount,
+                'grand_total' => $grandTotal,
+            ]);
 
             $proposal->update([
                 'subtotal' => $subtotal,
