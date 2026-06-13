@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue';
 import { usePage } from '@inertiajs/vue3';
 import { BellIcon, BellOffIcon } from '@lucide/vue';
 import { ref } from 'vue';
@@ -29,6 +30,17 @@ const getNotificationData = (notification: Notification) => {
     }
 
     return notification.data;
+};
+
+const getColorClass = (color: string) => {
+    const colorMap: Record<string, string> = {
+        'blue-500': 'text-blue-500',
+        'amber-500': 'text-amber-500',
+        'green-500': 'text-green-500',
+        'red-500': 'text-red-500',
+    };
+
+    return colorMap[color] || 'text-gray-500';
 };
 </script>
 
@@ -65,32 +77,32 @@ const getNotificationData = (notification: Notification) => {
                                 v-for="notification in notifications"
                                 v-else
                                 :key="notification.id"
-                                class="flex flex-col items-start gap-1 p-4"
+                                class="flex flex-col items-start gap-2 p-4"
                             >
                                 <div
-                                    class="flex w-full items-center justify-between"
+                                    class="flex w-full items-start gap-3"
                                 >
-                                    <span class="text-sm font-medium">
-                                        {{
-                                            getNotificationData(notification)
-                                                .title || 'Notification'
-                                        }}
-                                    </span>
-                                    <span class="text-xs text-muted-foreground">
-                                        {{
-                                            new Date(
-                                                notification.created_at,
-                                            ).toLocaleDateString()
-                                        }}
-                                    </span>
+                                    <Icon 
+                                        :icon="getNotificationData(notification).icon || 'mdi:bell'"
+                                        :class="getColorClass(getNotificationData(notification).color || 'gray-500')"
+                                        class="h-5 w-5 mt-0.5 flex-shrink-0"
+                                    />
+                                    <div class="flex-1 min-w-0">
+                                        <div
+                                            class="flex w-full items-center justify-between"
+                                        >
+                                            <span class="text-sm font-medium truncate">
+                                                {{ getNotificationData(notification).title }}
+                                            </span>
+                                            <span class="text-xs text-muted-foreground ml-2 flex-shrink-0">
+                                                {{ new Date(notification.created_at).toLocaleDateString() }}
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-muted-foreground mt-1">
+                                            {{ getNotificationData(notification).message }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <p class="text-sm text-muted-foreground">
-                                    {{
-                                        getNotificationData(notification)
-                                            .message ||
-                                        getNotificationData(notification)
-                                    }}
-                                </p>
                             </CommandItem>
                         </ScrollArea>
                     </CommandGroup>

@@ -49,6 +49,7 @@ class Proposal extends Model
         'view_count',
         'decided_at',
         'accepted_at',
+        'signed_at',
         'expired_at',
         'decline_reason',
     ];
@@ -67,6 +68,7 @@ class Proposal extends Model
         'last_viewed_at' => 'datetime',
         'decided_at' => 'datetime',
         'accepted_at' => 'datetime',
+        'signed_at' => 'datetime',
         'expired_at' => 'datetime',
         'subtotal' => 'decimal:2',
         'discount_total' => 'decimal:2',

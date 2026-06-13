@@ -30,6 +30,16 @@ class WorkspaceSettingService
         }
     }
 
+    public function updateSettings(int $workspaceId, string $submodule, array $settings): WorkspaceSetting
+    {
+        $setting = $this->getOrCreate($workspaceId, $submodule);
+        
+        $setting->settings = $settings;
+        $setting->save();
+
+        return $setting->refresh();
+    }
+
     public function incrementNumberingSequence(WorkspaceSetting $setting, int $currentSequence, string $path = 'numbering.next_sequence_number'): WorkspaceSetting
     {
         $settings = $setting->settings ?? [];

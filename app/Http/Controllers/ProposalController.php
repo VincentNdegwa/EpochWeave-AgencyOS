@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\AcceptProposal;
+use App\Actions\RejectProposal;
 use App\Actions\SendProposal;
+use App\Actions\TrackProposalView;
+use App\Http\Requests\AcceptProposalRequest;
+use App\Http\Requests\RejectProposalRequest;
 use App\Http\Requests\StoreProposalRequest;
 use App\Http\Requests\UpdateProposalRequest;
 use App\Models\Proposal;
@@ -10,6 +15,7 @@ use App\Models\WorkspaceSetting;
 use App\Services\MovementRulesService;
 use App\Services\MoveService;
 use App\Services\ProposalService;
+use App\Services\ProposalTemplateService;
 use App\Services\UserPreferenceService;
 use App\Services\WorkspaceSettingService;
 use Exception;
@@ -26,7 +32,11 @@ class ProposalController extends Controller
         private WorkspaceSettingService $workspaceSettingService,
         private MovementRulesService $movementRulesService,
         private MoveService $moveService,
-        private SendProposal $sendProposal
+        private SendProposal $sendProposal,
+        private AcceptProposal $acceptProposal,
+        private RejectProposal $rejectProposal,
+        private TrackProposalView $trackProposalView,
+        private ProposalTemplateService $proposalTemplateService
     ) {}
 
     public function index(Request $request)
@@ -72,7 +82,17 @@ class ProposalController extends Controller
         try {
             $workspace = $request->attributes->get('current_workspace');
             $data = $request->validated();
-            $content = $this->pullBlocksFromPayload($data) ?? [];
+            
+            // Apply template content if selected
+            $content = [];
+            if (!empty($data['template_id'])) {
+                $template = $this->proposalTemplateService->getTemplateById($data['template_id']);
+                if ($template && $template->content) {
+                    $content = $template->content;
+                }
+            } else {
+                $content = $this->pullBlocksFromPayload($data) ?? [];
+            }
 
             $settings = $this->workspaceSettingService->getOrCreate(
                 $workspace->id,
@@ -83,6 +103,11 @@ class ProposalController extends Controller
             $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
             $proposalNumber = $this->generateProposalNumber($numberingSettings);
             unset($data['proposal_number']);
+
+            // Set currency from workspace if not provided
+            if (empty($data['currency'])) {
+                $data['currency'] = $workspace->currency ?? 'USD';
+            }
 
             $data = array_merge($data, [
                 'workspace_id' => $workspace->id,
@@ -105,7 +130,7 @@ class ProposalController extends Controller
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal created successfully.']);
 
-            return redirect()->route('proposals.show', $proposal->id);
+            return redirect()->route('proposals.edit', $proposal->id);
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
 
@@ -237,6 +262,12 @@ class ProposalController extends Controller
             'last_viewed_at' => now(),
         ]);
 
+        $viewer = $proposal->accountContact;
+
+        if (!auth()->check()) {
+            $this->trackProposalView->execute($proposal, $viewer);
+        }
+
         return Inertia::render('public/proposal/show', [
             'proposal' => $proposal,
             'workspace' => $proposal->workspace,
@@ -271,6 +302,32 @@ class ProposalController extends Controller
             }
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal moved successfully.']);
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+            return redirect()->back();
+        }
+    }
+
+    public function accept(AcceptProposalRequest $request, Proposal $proposal)
+    {
+        try {
+            $this->acceptProposal->accept($proposal, $request->validated());
+            
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal accepted successfully!']);
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+            return redirect()->back();
+        }
+    }
+
+    public function decline(RejectProposalRequest $request, Proposal $proposal)
+    {
+        try {
+            $this->rejectProposal->reject($proposal, $request->validated()['reason'] ?? null);
+            
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal declined successfully.']);
             return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { usePage } from '@inertiajs/vue3';
+import { useBuilderDataStore } from '@/stores/builderData';
+import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 import type { Proposal } from '@/types/models/proposal';
 
 interface Props {
@@ -38,13 +42,31 @@ const emit = defineEmits<{
     success: [];
 }>();
 
+const page = usePage();
+const workspace = computed(() => page.props.workspace as any);
+const builderDataStore = useBuilderDataStore();
+const { accounts, templates, accountContacts } = storeToRefs(builderDataStore);
+
 const form = ref({
     title: props.proposal?.title || '',
     description: props.proposal?.description || '',
     account_id: props.proposal?.account_id || '',
-    grand_total: props.proposal?.grand_total || '',
-    currency: props.proposal?.currency || 'USD',
+    account_contact_id: props.proposal?.account_contact_id || '',
+    template_id: props.proposal?.template_id || '',
 });
+
+// Fetch data when dialog opens
+onMounted(() => {
+    builderDataStore.fetchAccounts();
+    builderDataStore.fetchTemplates();
+});
+
+// Fetch contacts when account changes
+watch(() => form.value.account_id, (newAccountId) => {
+    if (newAccountId) {
+        builderDataStore.fetchAccountContacts();
+    }
+}, { immediate: true });
 
 watch(
     () => props.proposal,
@@ -54,16 +76,16 @@ watch(
                 title: newProposal.title,
                 description: newProposal.description || '',
                 account_id: newProposal.account_id?.toString() || '',
-                grand_total: newProposal.grand_total?.toString() || '',
-                currency: newProposal.currency || 'USD',
+                account_contact_id: newProposal.account_contact_id?.toString() || '',
+                template_id: newProposal.template_id?.toString() || '',
             };
         } else {
             form.value = {
                 title: '',
                 description: '',
                 account_id: '',
-                grand_total: '',
-                currency: 'USD',
+                account_contact_id: '',
+                template_id: '',
             };
         }
     },
@@ -123,30 +145,64 @@ watch(
                                     />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <!-- Account options would be populated here -->
-                                    <SelectItem value="1"
-                                        >Example Account</SelectItem
+                                    <SelectItem 
+                                        v-for="account in accounts" 
+                                        :key="account.id" 
+                                        :value="account.id.toString()"
                                     >
+                                        {{ account.company_name || account.name }}
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                             <InputError :message="errors.account_id" />
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="currency">Currency</Label>
-                            <Select name="currency" v-model="form.currency">
+                            <Label for="account_contact_id">Contact</Label>
+                            <Select
+                                name="account_contact_id"
+                                v-model="form.account_contact_id"
+                            >
                                 <SelectTrigger class="w-full">
                                     <SelectValue
-                                        placeholder="Select currency"
+                                        placeholder="Select a contact"
                                     />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="USD">USD</SelectItem>
-                                    <SelectItem value="EUR">EUR</SelectItem>
-                                    <SelectItem value="GBP">GBP</SelectItem>
+                                    <SelectItem 
+                                        v-for="contact in accountContacts" 
+                                        :key="contact.id" 
+                                        :value="contact.id.toString()"
+                                    >
+                                        {{ contact.first_name }} {{ contact.last_name }}
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
-                            <InputError :message="errors.currency" />
+                            <InputError :message="errors.account_contact_id" />
+                        </div>
+
+                        <div class="grid gap-2 sm:col-span-2">
+                            <Label for="template_id">Template</Label>
+                            <Select
+                                name="template_id"
+                                v-model="form.template_id"
+                            >
+                                <SelectTrigger class="w-full">
+                                    <SelectValue
+                                        placeholder="Select a template (optional)"
+                                    />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem 
+                                        v-for="template in templates" 
+                                        :key="template.id" 
+                                        :value="template.id.toString()"
+                                    >
+                                        {{ template.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.template_id" />
                         </div>
 
                         <div class="grid gap-2 sm:col-span-2">
@@ -159,28 +215,6 @@ watch(
                                 rows="4"
                             />
                             <InputError :message="errors.description" />
-                        </div>
-
-                        <div class="grid gap-2">
-                            <Label for="grand_total">Total Amount</Label>
-                            <div class="relative">
-                                <div
-                                    class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground"
-                                >
-                                    {{ form.currency }}
-                                </div>
-                                <Input
-                                    id="grand_total"
-                                    name="grand_total"
-                                    type="number"
-                                    v-model="form.grand_total"
-                                    placeholder="5000"
-                                    min="0"
-                                    step="0.01"
-                                    class="pl-12"
-                                />
-                            </div>
-                            <InputError :message="errors.grand_total" />
                         </div>
                     </div>
                 </div>

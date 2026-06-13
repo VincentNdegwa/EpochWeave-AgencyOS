@@ -59,6 +59,8 @@ export interface Proposal extends Record<string, unknown> {
     last_viewed_at: string | null;
     view_count: number;
     decided_at: string | null;
+    accepted_at: string | null;
+    signed_at: string | null;
     expired_at: string | null;
     decline_reason: string | null;
     created_at: string;

@@ -183,503 +183,283 @@ const handleSave = () => {
 
 <template>
     <Dialog :open="open" @update:open="(v) => !v && emit('cancel')">
-        <DialogContent class="max-w-lg gap-0 overflow-hidden p-0">
-            <!-- Header -->
-            <DialogHeader class="border-b border-border px-6 py-4">
+        <DialogContent class="sm:max-w-xl md:max-w-2xl">
+            <DialogHeader>
                 <DialogTitle class="text-base font-semibold text-foreground">
                     {{ item.description ? 'Edit line item' : 'Add line item' }}
                 </DialogTitle>
             </DialogHeader>
 
-            <!-- Body -->
-            <div class="flex max-h-[70vh] flex-col gap-0 overflow-y-auto">
-                <!-- ══════ SECTION 1 — PRODUCT ══════ -->
-                <div class="border-b border-border px-6 py-4">
-                    <p
-                        class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                    >
-                        <PackageIcon class="h-3 w-3" />
-                        Product
-                    </p>
-
-                    <div class="grid gap-3">
-                        <!-- Catalog picker -->
-                        <div class="grid gap-1.5">
-                            <Label class="text-xs text-muted-foreground"
-                                >From catalog
-                                <span class="opacity-50"
-                                    >(optional)</span
-                                ></Label
-                            >
-                            <Select
-                                :model-value="
-                                    form.product_id
-                                        ? String(form.product_id)
-                                        : 'custom'
-                                "
-                                @update:model-value="handleProductSelect"
-                            >
-                                <SelectTrigger class="h-9">
-                                    <SelectValue
-                                        placeholder="Select from catalog or add custom…"
-                                    />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="custom">
-                                        <span class="text-muted-foreground"
-                                            >Custom item (no catalog link)</span
-                                        >
-                                    </SelectItem>
-                                    <div
-                                        v-if="products.length"
-                                        class="my-1 border-t border-border"
-                                    />
-                                    <SelectItem
-                                        v-for="product in products"
-                                        :key="product.id"
-                                        :value="String(product.id)"
-                                    >
-                                        {{ product.name }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <p class="text-[11px] text-muted-foreground">
-                                Selecting a product pre-fills the fields below.
-                                You can still edit them freely.
-                            </p>
-                        </div>
+            <div class="grid gap-6 py-4">
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div class="grid gap-2 sm:col-span-2">
+                        <Label for="description" required>Name</Label>
+                        <Input
+                            id="description"
+                            v-model="form.description"
+                            placeholder="e.g. Website Design, Logo Package…"
+                            required
+                        />
                     </div>
-                </div>
 
-                <!-- ══════ SECTION 2 — DESCRIPTION ══════ -->
-                <div class="border-b border-border px-6 py-4">
-                    <p
-                        class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                    >
-                        <TypeIcon class="h-3 w-3" />
-                        Item details
-                    </p>
-
-                    <div class="grid gap-3">
-                        <!-- Name -->
-                        <div class="grid gap-1.5">
-                            <Label class="text-xs text-muted-foreground"
-                                >Name
-                                <span class="text-destructive">*</span></Label
-                            >
-                            <Input
-                                v-model="form.description"
-                                placeholder="e.g. Website Design, Logo Package…"
-                                class="h-9"
-                            />
-                        </div>
-
-                        <!-- Description -->
-                        <div class="grid gap-1.5">
-                            <Label class="text-xs text-muted-foreground">
-                                Description
-                                <span class="opacity-50">(optional)</span>
-                            </Label>
-                            <Textarea
-                                :model-value="form.item_description ?? ''"
-                                placeholder="Brief description shown below the name on the proposal…"
-                                rows="2"
-                                class="resize-none text-sm"
-                                @update:model-value="
-                                    (v) =>
-                                        (form.item_description = v
-                                            ? String(v)
-                                            : null)
-                                "
-                            />
-                        </div>
-
-                        <!-- Billing type -->
-                        <div class="grid gap-3">
-                            <div class="grid gap-1.5">
-                                <Label class="text-xs text-muted-foreground"
-                                    >Billing type</Label
+                    <div class="grid gap-2">
+                        <Label for="product">From catalog</Label>
+                        <Select
+                            :model-value="form.product_id ? String(form.product_id) : 'custom'"
+                            @update:model-value="handleProductSelect"
+                        >
+                            <SelectTrigger class="w-full">
+                                <SelectValue placeholder="Select from catalog or add custom…" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="custom">
+                                    Custom item (no catalog link)
+                                </SelectItem>
+                                <div v-if="products.length" class="my-1 border-t border-border" />
+                                <SelectItem
+                                    v-for="product in products"
+                                    :key="product.id"
+                                    :value="String(product.id)"
                                 >
-                                <div
-                                    class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
-                                >
-                                    <button
-                                        type="button"
-                                        class="rounded py-1.5 text-xs font-medium transition"
-                                        :class="
-                                            form.billing_type === 'one_time'
-                                                ? 'bg-background text-foreground shadow-sm'
-                                                : 'text-muted-foreground hover:text-foreground'
-                                        "
-                                        @click="form.billing_type = 'one_time'"
-                                    >
-                                        One-time
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="rounded py-1.5 text-xs font-medium transition"
-                                        :class="
-                                            form.billing_type === 'recurring'
-                                                ? 'bg-background text-foreground shadow-sm'
-                                                : 'text-muted-foreground hover:text-foreground'
-                                        "
-                                        @click="form.billing_type = 'recurring'"
-                                    >
-                                        Recurring
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="grid gap-1.5">
-                                <Label class="text-xs text-muted-foreground"
-                                    >Billing frequency</Label
-                                >
-                                <Select
-                                    v-model="form.billing_frequency"
-                                    :disabled="form.billing_type === 'one_time'"
-                                >
-                                    <SelectTrigger class="h-9">
-                                        <SelectValue
-                                            placeholder="Select frequency"
-                                        />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem
-                                            v-for="option in billingFrequencyOptions"
-                                            :key="option.value"
-                                            :value="option.value"
-                                            :disabled="
-                                                option.value !== 'none' &&
-                                                form.billing_type === 'one_time'
-                                            "
-                                        >
-                                            {{ option.label }}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <p class="text-[11px] text-muted-foreground">
-                                    Recurring items require a frequency.
-                                    One-time items are always billed once.
-                                </p>
-                            </div>
-                        </div>
+                                    {{ product.name }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
-                </div>
 
-                <!-- ══════ SECTION 3 — PRICING ══════ -->
-                <div class="border-b border-border px-6 py-4">
-                    <p
-                        class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                    >
-                        <CoinsIcon class="h-3 w-3" />
-                        Pricing
-                    </p>
+                    <div class="grid gap-2">
+                        <Label for="unit">Unit</Label>
+                        <Select v-model="form.unit">
+                            <SelectTrigger class="w-full">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem
+                                    v-for="unit in units"
+                                    :key="unit.id"
+                                    :value="unit.abbreviation"
+                                >
+                                    {{ unit.abbreviation }}
+                                    <span v-if="unit.name" class="ml-1 text-muted-foreground">
+                                        · {{ unit.name }}
+                                    </span>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                    <div class="grid grid-cols-3 gap-3">
-                        <!-- Unit -->
-                        <div class="grid gap-1.5">
-                            <Label class="text-xs text-muted-foreground"
-                                >Unit</Label
-                            >
-                            <Select v-model="form.unit">
-                                <SelectTrigger class="h-9">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem
-                                        v-for="unit in units"
-                                        :key="unit.id"
-                                        :value="unit.abbreviation"
-                                    >
-                                        {{ unit.abbreviation }}
-                                        <span
-                                            v-if="unit.name"
-                                            class="ml-1 text-muted-foreground"
-                                            >· {{ unit.name }}</span
-                                        >
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
+                    <div class="grid gap-2">
+                        <Label for="quantity">Quantity</Label>
+                        <Input
+                            id="quantity"
+                            v-model.number="form.quantity"
+                            type="number"
+                            min="0"
+                            step="0.5"
+                        />
+                    </div>
 
-                        <!-- Quantity -->
-                        <div class="grid gap-1.5">
-                            <Label class="text-xs text-muted-foreground"
-                                >Quantity</Label
-                            >
+                    <div class="grid gap-2">
+                        <Label for="unit_price">Unit price</Label>
+                        <div class="relative">
+                            <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">
+                                {{ currency }}
+                            </div>
                             <Input
-                                v-model.number="form.quantity"
+                                id="unit_price"
+                                v-model.number="form.unit_price"
                                 type="number"
                                 min="0"
-                                step="0.5"
-                                class="h-9"
+                                class="pl-12"
                             />
                         </div>
+                    </div>
 
-                        <!-- Unit price -->
-                        <div class="grid gap-1.5">
-                            <Label class="text-xs text-muted-foreground"
-                                >Unit price</Label
+                    <div class="grid gap-2 sm:col-span-2">
+                        <Label for="item_description">Description</Label>
+                        <Textarea
+                            id="item_description"
+                            :model-value="form.item_description ?? ''"
+                            placeholder="Brief description shown below the name on the proposal…"
+                            rows="2"
+                            @update:model-value="(v) => (form.item_description = v ? String(v) : null)"
+                        />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label>Billing type</Label>
+                        <div class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                            <button
+                                type="button"
+                                class="rounded py-1.5 text-xs font-medium transition"
+                                :class="form.billing_type === 'one_time' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                @click="form.billing_type = 'one_time'"
                             >
-                            <div class="relative">
-                                <span
-                                    class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-xs font-medium text-muted-foreground"
+                                One-time
+                            </button>
+                            <button
+                                type="button"
+                                class="rounded py-1.5 text-xs font-medium transition"
+                                :class="form.billing_type === 'recurring' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                @click="form.billing_type = 'recurring'"
+                            >
+                                Recurring
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label>Billing frequency</Label>
+                        <Select v-model="form.billing_frequency" :disabled="form.billing_type === 'one_time'">
+                            <SelectTrigger class="w-full">
+                                <SelectValue placeholder="Select frequency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem
+                                    v-for="option in billingFrequencyOptions"
+                                    :key="option.value"
+                                    :value="option.value"
+                                    :disabled="option.value !== 'none' && form.billing_type === 'one_time'"
                                 >
-                                    {{ currency }}
-                                </span>
+                                    {{ option.label }}
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label>Item discount</Label>
+                        <div class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                            <button
+                                v-for="opt in [
+                                    { value: 'none', label: 'None' },
+                                    { value: 'percentage', label: 'Percent %' },
+                                    { value: 'fixed', label: `Fixed ${currency}` },
+                                ]"
+                                :key="opt.value"
+                                type="button"
+                                class="rounded py-1.5 text-xs font-medium transition"
+                                :class="form.item_discount_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                @click="form.item_discount_type = opt.value as typeof form.item_discount_type"
+                            >
+                                {{ opt.label }}
+                            </button>
+                        </div>
+                        <div
+                            v-if="form.item_discount_type !== 'none'"
+                            class="flex items-center gap-3"
+                        >
+                            <div class="relative flex-1">
                                 <Input
-                                    v-model.number="form.unit_price"
+                                    v-model.number="form.item_discount_value"
                                     type="number"
                                     min="0"
-                                    class="h-9 pl-11"
+                                    :max="form.item_discount_type === 'percentage' ? 100 : undefined"
+                                    class="pr-10"
+                                    placeholder="0"
                                 />
+                                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
+                                    {{ form.item_discount_type === 'percentage' ? '%' : currency }}
+                                </span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Line subtotal pill -->
-                    <div
-                        class="mt-3 flex items-center justify-between rounded-md bg-muted/50 px-3 py-2"
-                    >
-                        <span class="text-xs text-muted-foreground">
-                            {{ form.quantity }} × {{ fmt(form.unit_price) }}
-                        </span>
-                        <span class="text-sm font-semibold text-foreground">{{
-                            fmt(lineSubtotal)
-                        }}</span>
-                    </div>
-                </div>
-
-                <!-- ══════ SECTION 4 — DISCOUNT ══════ -->
-                <div class="border-b border-border px-6 py-4">
-                    <p
-                        class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                    >
-                        <TagIcon class="h-3 w-3" />
-                        Item discount
-                        <span class="ml-1 font-normal normal-case opacity-60"
-                            >(optional)</span
-                        >
-                    </p>
-
-                    <!-- Type selector -->
-                    <div
-                        class="mb-3 grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
-                    >
-                        <button
-                            v-for="opt in [
-                                { value: 'none', label: 'None' },
-                                { value: 'percentage', label: 'Percent %' },
-                                { value: 'fixed', label: `Fixed ${currency}` },
-                            ]"
-                            :key="opt.value"
-                            type="button"
-                            class="rounded py-1.5 text-xs font-medium transition"
-                            :class="
-                                form.item_discount_type === opt.value
-                                    ? 'bg-background text-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground'
-                            "
-                            @click="
-                                form.item_discount_type =
-                                    opt.value as typeof form.item_discount_type
-                            "
-                        >
-                            {{ opt.label }}
-                        </button>
-                    </div>
-
-                    <!-- Value input -->
-                    <div
-                        v-if="form.item_discount_type !== 'none'"
-                        class="flex items-center gap-3"
-                    >
-                        <div class="relative flex-1">
-                            <Input
-                                v-model.number="form.item_discount_value"
-                                type="number"
-                                min="0"
-                                :max="
-                                    form.item_discount_type === 'percentage'
-                                        ? 100
-                                        : undefined
-                                "
-                                class="h-9 pr-10"
-                                placeholder="0"
-                            />
-                            <span
-                                class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground"
-                            >
-                                {{
-                                    form.item_discount_type === 'percentage'
-                                        ? '%'
-                                        : currency
-                                }}
-                            </span>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[11px] text-muted-foreground">
-                                Discount
-                            </p>
-                            <p
-                                class="text-sm font-semibold text-red-500 dark:text-red-400"
-                            >
-                                −{{ fmt(discountAmount) }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ══════ SECTION 5 — TAX ══════ -->
-                <div class="border-b border-border px-6 py-4">
-                    <p
-                        class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                    >
-                        Item tax
-                        <span class="ml-1 font-normal normal-case opacity-60"
-                            >(optional)</span
-                        >
-                    </p>
-
-                    <div
-                        class="mb-3 grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
-                    >
-                        <button
-                            v-for="opt in [
-                                { value: 'none', label: 'None' },
-                                { value: 'percentage', label: 'Percent %' },
-                                { value: 'fixed', label: `Fixed ${currency}` },
-                            ]"
-                            :key="opt.value"
-                            type="button"
-                            class="rounded py-1.5 text-xs font-medium transition"
-                            :class="
-                                form.item_tax_type === opt.value
-                                    ? 'bg-background text-foreground shadow-sm'
-                                    : 'text-muted-foreground hover:text-foreground'
-                            "
-                            @click="
-                                form.item_tax_type =
-                                    opt.value as typeof form.item_tax_type
-                            "
-                        >
-                            {{ opt.label }}
-                        </button>
-                    </div>
-
-                    <div
-                        v-if="form.item_tax_type !== 'none'"
-                        class="flex items-center gap-3"
-                    >
-                        <div class="relative flex-1">
-                            <Input
-                                v-model.number="form.item_tax_value"
-                                type="number"
-                                min="0"
-                                class="h-9 pr-10"
-                                placeholder="0"
-                            />
-                            <span
-                                class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground"
-                            >
-                                {{
-                                    form.item_tax_type === 'percentage'
-                                        ? '%'
-                                        : currency
-                                }}
-                            </span>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[11px] text-muted-foreground">Tax</p>
-                            <p class="text-sm font-semibold text-foreground">
-                                +{{ fmt(taxAmount) }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ══════ SECTION 6 — FLAGS ══════ -->
-                <div class="border-b border-border px-6 py-4">
-                    <p
-                        class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                    >
-                        <ToggleLeftIcon class="h-3 w-3" />
-                        Options
-                    </p>
-
-                    <div
-                        class="space-y-0 divide-y divide-border overflow-hidden rounded-lg border border-border"
-                    >
-                        <label
-                            class="flex cursor-pointer items-center justify-between px-3 py-2.5 transition-colors hover:bg-muted/50"
-                        >
-                            <div>
-                                <p class="text-xs font-medium text-foreground">
-                                    Optional item
-                                </p>
-                                <p class="text-[11px] text-muted-foreground">
-                                    Client can choose to include or exclude this
+                            <div class="text-right">
+                                <p class="text-[11px] text-muted-foreground">Discount</p>
+                                <p class="text-sm font-semibold text-red-500 dark:text-red-400">
+                                    −{{ fmt(discountAmount) }}
                                 </p>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label>Item tax</Label>
+                        <div class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                            <button
+                                v-for="opt in [
+                                    { value: 'none', label: 'None' },
+                                    { value: 'percentage', label: 'Percent %' },
+                                    { value: 'fixed', label: `Fixed ${currency}` },
+                                ]"
+                                :key="opt.value"
+                                type="button"
+                                class="rounded py-1.5 text-xs font-medium transition"
+                                :class="form.item_tax_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                @click="form.item_tax_type = opt.value as typeof form.item_tax_type"
+                            >
+                                {{ opt.label }}
+                            </button>
+                        </div>
+                        <div
+                            v-if="form.item_tax_type !== 'none'"
+                            class="flex items-center gap-3"
+                        >
+                            <div class="relative flex-1">
+                                <Input
+                                    v-model.number="form.item_tax_value"
+                                    type="number"
+                                    min="0"
+                                    class="pr-10"
+                                    placeholder="0"
+                                />
+                                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
+                                    {{ form.item_tax_type === 'percentage' ? '%' : currency }}
+                                </span>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[11px] text-muted-foreground">Tax</p>
+                                <p class="text-sm font-semibold text-foreground">
+                                    +{{ fmt(taxAmount) }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-2 sm:col-span-2">
+                        <div class="flex items-center gap-2">
                             <Switch v-model:checked="form.is_optional" />
-                        </label>
+                            <Label for="is_optional">Optional item</Label>
+                        </div>
+                        <p class="text-xs text-muted-foreground">
+                            Client can choose to include or exclude this item
+                        </p>
                     </div>
-                </div>
 
-                <!-- ══════ SECTION 7 — TOTALS SUMMARY ══════ -->
-                <div class="px-6 py-4">
-                    <p
-                        class="mb-3 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
-                    >
-                        Line summary
-                    </p>
-                    <div
-                        class="overflow-hidden rounded-lg border border-border"
-                    >
-                        <div class="divide-y divide-border text-sm">
-                            <div
-                                class="flex justify-between px-4 py-2.5 text-muted-foreground"
-                            >
-                                <span>Subtotal</span>
-                                <span>{{ fmt(lineSubtotal) }}</span>
-                            </div>
-                            <div
-                                v-if="form.item_discount_type !== 'none'"
-                                class="flex justify-between px-4 py-2.5 text-muted-foreground"
-                            >
-                                <span>Discount</span>
-                                <span class="text-red-500 dark:text-red-400"
-                                    >−{{ fmt(discountAmount) }}</span
+                    <div class="grid gap-2 sm:col-span-2">
+                        <Label>Line summary</Label>
+                        <div class="overflow-hidden rounded-lg border border-border">
+                            <div class="divide-y divide-border text-sm">
+                                <div class="flex justify-between px-4 py-2.5 text-muted-foreground">
+                                    <span>Subtotal</span>
+                                    <span>{{ fmt(lineSubtotal) }}</span>
+                                </div>
+                                <div
+                                    v-if="form.item_discount_type !== 'none'"
+                                    class="flex justify-between px-4 py-2.5 text-muted-foreground"
                                 >
-                            </div>
-                            <div
-                                v-if="form.item_tax_type !== 'none'"
-                                class="flex justify-between px-4 py-2.5 text-muted-foreground"
-                            >
-                                <span>Tax</span>
-                                <span>+{{ fmt(taxAmount) }}</span>
-                            </div>
-                            <div
-                                class="flex justify-between bg-muted/30 px-4 py-3 font-semibold text-foreground"
-                            >
-                                <span>Line total</span>
-                                <span>{{ fmt(lineTotal) }}</span>
+                                    <span>Discount</span>
+                                    <span class="text-red-500 dark:text-red-400">−{{ fmt(discountAmount) }}</span>
+                                </div>
+                                <div
+                                    v-if="form.item_tax_type !== 'none'"
+                                    class="flex justify-between px-4 py-2.5 text-muted-foreground"
+                                >
+                                    <span>Tax</span>
+                                    <span>+{{ fmt(taxAmount) }}</span>
+                                </div>
+                                <div class="flex justify-between bg-muted/30 px-4 py-3 font-semibold text-foreground">
+                                    <span>Line total</span>
+                                    <span>{{ fmt(lineTotal) }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Footer -->
-            <DialogFooter class="border-t border-border px-6 py-4">
-                <Button variant="outline" @click="emit('cancel')"
-                    >Cancel</Button
-                >
-                <Button
-                    :disabled="!form.description.trim()"
-                    @click="handleSave"
-                >
-                    {{ item.description ? 'Save changes' : 'Add item' }}
+            <DialogFooter>
+                <Button variant="outline" @click="emit('cancel')">Cancel</Button>
+                <Button :disabled="!form.description.trim()" @click="handleSave">
+                    {{ item.description ? 'Update' : 'Add' }} line item
                 </Button>
             </DialogFooter>
         </DialogContent>

@@ -85,6 +85,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
         thumbnailUrl: null,
     });
     const lineItemsCatalog = ref<PricingLineItem[]>([]);
+    
+    // Portal mode state
+    const portalMode = ref(false);
 
     // Helper function to find block recursively including nested blocks
     function findBlockRecursive(
@@ -610,6 +613,11 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
         );
     }
 
+    // Portal mode methods
+    function setPortalMode(enabled: boolean) {
+        portalMode.value = enabled;
+    }
+
     return {
         proposal,
         blocks,
@@ -622,6 +630,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
         templateSettings,
         orderedBlocks,
         selectedBlock,
+        // Portal mode
+        portalMode,
+        setPortalMode,
         loadBlocks,
         addBlock,
         updateBlock,

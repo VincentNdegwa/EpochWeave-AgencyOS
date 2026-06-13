@@ -48,6 +48,7 @@ class ProposalFactory extends Factory
             'view_count' => 0,
             'decided_at' => null,
             'accepted_at' => null,
+            'signed_at' => null,
             'expired_at' => null,
         ];
     }
