@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AccountStatus;
 use App\Models\AccountContact;
+use App\Models\Project;
 use App\Models\ProposalTemplate;
 use App\Models\User;
 use App\Services\AccountService;
@@ -47,7 +48,7 @@ class BuilderDataController extends Controller
     public function template(Request $request, ProposalTemplate $template): JsonResponse
     {
         $workspace = $request->attributes->get('current_workspace');
-        
+
         // Ensure the template belongs to the current workspace
         if ($template->workspace_id !== $workspace->id) {
             return response()->json(['error' => 'Template not found'], 404);
@@ -68,13 +69,13 @@ class BuilderDataController extends Controller
     public function users(Request $request): JsonResponse
     {
         $workspace = $request->attributes->get('current_workspace');
-        
+
         $users = User::whereHas('rolesTeams', function ($query) use ($workspace) {
             $query->where('workspace_id', $workspace->id);
         })
-        ->select(['id', 'name', 'email'])
-        ->orderBy('name')
-        ->get();
+            ->select(['id', 'name', 'email'])
+            ->orderBy('name')
+            ->get();
 
         return response()->json($users);
     }
@@ -82,15 +83,34 @@ class BuilderDataController extends Controller
     public function accountContacts(Request $request): JsonResponse
     {
         $workspace = $request->attributes->get('current_workspace');
-        
-        $contacts = AccountContact::whereHas('account', function ($query) use ($workspace) {
+
+        $query = AccountContact::whereHas('account', function ($query) use ($workspace) {
             $query->where('workspace_id', $workspace->id);
         })
-        ->with(['account:id,company_name'])
-        ->select(['id', 'account_id', 'first_name', 'last_name', 'email', 'phone', 'job_title', 'is_primary'])
-        ->orderBy('first_name')
-        ->get();
+            ->with(['account:id,company_name'])
+            ->select(['id', 'account_id', 'first_name', 'last_name', 'email', 'phone', 'job_title', 'is_primary']);
+
+        if ($request->has('account_id')) {
+            $query->where('account_id', $request->input('account_id'));
+        }
+
+        $contacts = $query->orderBy('first_name')->get();
 
         return response()->json($contacts);
+    }
+
+    public function projects(Request $request): JsonResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        $query = Project::where('workspace_id', $workspace->id)
+            ->select(['id', 'account_id', 'name', 'status', 'currency'])
+            ->orderBy('name');
+
+        if ($request->has('account_id')) {
+            $query->where('account_id', $request->query('account_id'));
+        }
+
+        return response()->json($query->get());
     }
 }

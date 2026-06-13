@@ -18,6 +18,17 @@ return [
                 'next_sequence_number' => 1,
             ],
         ],
+        'invoices' => [
+            'payment_due_days' => 14,
+            'default_terms' => null,
+            'numbering' => [
+                'format' => '{PREFIX}{DELIMITER}{SEQUENCE}',
+                'prefix' => 'INV',
+                'delimiter' => '-',
+                'sequence_padding' => 4,
+                'next_sequence_number' => 1,
+            ],
+        ],
         'notifications' => [
             'proposals' => [
                 'notify_on_view' => true,

@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Box, Building, LayoutGrid, Settings } from '@lucide/vue';
+import { 
+    LayoutDashboard, 
+    Building2, 
+    Package, 
+    FileText, 
+    LayoutTemplate, 
+    ReceiptText, 
+    FolderKanban,
+    CheckSquare,
+    Settings2 
+} from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
@@ -13,40 +23,69 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarRail,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import accounts from '@/routes/accounts';
 import products from '@/routes/products';
+import invoices from '@/routes/invoices';
 import proposalTemplates from '@/routes/proposal-templates';
 import proposals from '@/routes/proposals';
 import { index as workspaceSettings } from '@/routes/workspace-settings';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+const overviewNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: LayoutDashboard,
     },
+];
+
+const crmNavItems: NavItem[] = [
     {
         title: 'Accounts',
         href: accounts.index().url,
-        icon: Building,
+        icon: Building2,
     },
     {
         title: 'Catalog',
         href: products.index().url,
-        icon: Box,
+        icon: Package,
     },
+];
+
+const salesNavItems: NavItem[] = [
     {
         title: 'Proposal',
         href: proposals.index().url,
-        icon: LayoutGrid,
+        icon: FileText,
     },
     {
         title: 'Templates',
         href: proposalTemplates.index().url,
-        icon: LayoutGrid,
+        icon: LayoutTemplate,
+    },
+];
+
+const projectNavItems: NavItem[] = [
+    {
+        title: 'Projects',
+        href: '#',
+        icon: FolderKanban,
+    },
+    {
+        title: 'Tasks',
+        href: '#',
+        icon: CheckSquare,
+    },
+];
+
+const financeNavItems: NavItem[] = [
+    {
+        title: 'Invoices',
+        href: invoices.index().url,
+        icon: ReceiptText,
     },
 ];
 
@@ -54,14 +93,14 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Business settings',
         href: workspaceSettings(),
-        icon: Settings,
+        icon: Settings2,
     },
 ];
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset">
-        <SidebarHeader>
+    <Sidebar collapsible="icon" variant="inset" class="epochweave-sidebar border-r-0">
+        <SidebarHeader class="p-0 ps-2">
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
@@ -71,16 +110,27 @@ const footerNavItems: NavItem[] = [
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
+
+            <div class="mx-3 border-b border-border/60" />
         </SidebarHeader>
 
-        <SidebarContent>
-            <NavMain :items="mainNavItems" />
+        <SidebarContent class="py-3">
+            <NavMain :items="overviewNavItems" group-label="Overview" />
+            <NavMain :items="crmNavItems" group-label="CRM & Inventory" />
+            <NavMain :items="salesNavItems" group-label="Sales Pipeline" />
+            <NavMain :items="projectNavItems" group-label="Project Delivery" />
+            <NavMain :items="financeNavItems" group-label="Finance" />
         </SidebarContent>
 
-        <SidebarFooter>
-            <NavFooter :items="footerNavItems" />
-            <NavUser />
+        <SidebarFooter class="p-0">
+            <div class="mx-3 border-t border-border/60 mb-2" />
+            <NavFooter :items="footerNavItems" class="px-2 pb-1" />
+            <div class="px-2 pb-3">
+                <NavUser />
+            </div>
         </SidebarFooter>
+
+        <SidebarRail />
     </Sidebar>
     <slot />
 </template>

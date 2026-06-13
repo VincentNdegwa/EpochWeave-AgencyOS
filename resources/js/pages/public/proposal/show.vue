@@ -128,10 +128,8 @@ function describeValidity(value?: string | null): string {
 </script>
 
 <template>
-    <div class="flex h-[calc(100vh-64px)] flex-col">
-        <div class="flex-1 overflow-hidden">
+    <div>
             <ProposalCanvas :is-locked="true" :builder-mode="'proposal'" />
-        </div>
         
         <!-- Floating Action Buttons -->
         <div v-if="showActionButtons" class="fixed bottom-6 right-6 flex flex-col gap-2">

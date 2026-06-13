@@ -8,14 +8,15 @@ const appName = computed(() => page.props.name as string);
 </script>
 
 <template>
-    <div
-        class="flex aspect-square size-8 items-center justify-center rounded-md"
-    >
+    <div class="flex aspect-square size-8 items-center justify-center rounded-md">
         <AppLogoIcon class="size-8 fill-current text-white dark:text-black" />
     </div>
-    <div class="ml-1 grid flex-1 text-left text-sm">
-        <span class="mb-0.5 truncate leading-tight font-semibold">
-            {{ appName }}
+    <div class="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
+        <span class="text-md font-bold tracking-tight text-foreground">
+            EpochWeave
+        </span>
+        <span class="text-[10px] font-medium text-muted-foreground tracking-wide uppercase">
+            Agency OS
         </span>
     </div>
 </template>

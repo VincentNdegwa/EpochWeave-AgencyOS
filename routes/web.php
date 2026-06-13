@@ -3,21 +3,22 @@
 use App\Http\Controllers\AccountContactController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BuilderDataController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PortalSetupController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProductUnitController;
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ProposalStatusController;
 use App\Http\Controllers\ProposalTemplateController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\WorkspaceController;
-use App\Http\Controllers\ProposalKanbanController;
+use App\Http\Controllers\WorkspaceSettings\AutomationController;
 use App\Http\Controllers\WorkspaceSettings\GeneralController as WorkspaceGeneralSettingsController;
+use App\Http\Controllers\WorkspaceSettings\InvoiceController as WorkspaceInvoiceSettingsController;
 use App\Http\Controllers\WorkspaceSettings\NotificationController;
 use App\Http\Controllers\WorkspaceSettings\ProposalController as WorkspaceProposalSettingsController;
-use App\Http\Controllers\WorkspaceSettings\AutomationController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'Welcome')->name('home');
@@ -26,6 +27,9 @@ Route::inertia('/', 'Welcome')->name('home');
 Route::get('/proposals/{token}/public', [ProposalController::class, 'publicShow'])->name('proposals.public.show');
 Route::post('/proposals/{proposal}/accept', [ProposalController::class, 'accept'])->name('proposals.accept');
 Route::post('/proposals/{proposal}/decline', [ProposalController::class, 'decline'])->name('proposals.decline');
+
+// Public invoice routes
+Route::get('/invoices/{token}/public', [InvoiceController::class, 'publicShow'])->name('invoices.public.show');
 
 Route::get('/portal/setup/{token}', [PortalSetupController::class, 'show'])->name('portal.setup');
 Route::post('/portal/setup/{token}', [PortalSetupController::class, 'complete'])->name('portal.setup.complete');
@@ -57,12 +61,15 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('products.bulk-delete');
 
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
-    
-    
+
+    Route::resource('invoices', InvoiceController::class);
+    Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');
+    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.status.update');
+    Route::post('/invoices/bulk', [InvoiceController::class, 'bulkDelete'])->name('invoices.bulk-delete');
+
     Route::resource('proposals', ProposalController::class);
     Route::patch('/proposals/{proposal}/move', [ProposalController::class, 'move'])->name('proposal.move');
     Route::post('/proposals/{proposal}/send', [ProposalController::class, 'send'])->name('proposals.send');
-
 
     Route::resource('proposal-templates', ProposalTemplateController::class);
     Route::post('proposal-templates/{template}/duplicate', [ProposalTemplateController::class, 'duplicate'])->name('proposal-templates.duplicate');
@@ -76,6 +83,7 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         Route::get('accounts', [BuilderDataController::class, 'accounts'])->name('accounts');
         Route::get('users', [BuilderDataController::class, 'users'])->name('users');
         Route::get('account-contacts', [BuilderDataController::class, 'accountContacts'])->name('account-contacts');
+        Route::get('projects', [BuilderDataController::class, 'projects'])->name('projects');
     });
 
     Route::post('uploads', [UploadController::class, 'store'])->name('uploads.store');
@@ -91,6 +99,10 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('workspace-settings.proposals');
     Route::patch('workspace/settings/proposals', [WorkspaceProposalSettingsController::class, 'update'])
         ->name('workspace-settings.proposals.update');
+    Route::get('workspace/settings/invoices', [WorkspaceInvoiceSettingsController::class, 'edit'])
+        ->name('workspace-settings.invoices');
+    Route::patch('workspace/settings/invoices', [WorkspaceInvoiceSettingsController::class, 'update'])
+        ->name('workspace-settings.invoices.update');
     Route::get('workspace/settings/notifications', [NotificationController::class, 'edit'])
         ->name('workspace-settings.notifications');
     Route::patch('workspace/settings/notifications', [NotificationController::class, 'update'])

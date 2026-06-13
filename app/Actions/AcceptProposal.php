@@ -2,11 +2,13 @@
 
 namespace App\Actions;
 
+use App\Jobs\CreateInvoiceFromProposal;
+use App\Jobs\ProvisionProjectFromProposal;
 use App\Models\Proposal;
 use App\Models\ProposalStatus;
+use App\Models\WorkspaceSetting;
 use App\Notifications\ProposalSigned;
 use App\Services\WorkspaceSettingService;
-use App\Models\WorkspaceSetting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -32,15 +34,38 @@ class AcceptProposal
                 'decided_at' => now(),
                 'signer_name' => $data['name'] ?? null,
                 'signed_at' => now(),
-                'signature_data' => $data['signature'] ? ['data' => $data['signature']] : null,
+                'signature_data' => ($data['signature'] ?? null) ? ['data' => $data['signature']] : null,
                 'signed_ip' => request()->ip(),
                 'signed_user_agent' => request()->userAgent(),
             ]);
 
             $this->sendSignedNotification($proposal, $data);
+            $this->dispatchAutomationJobs($proposal);
 
             return $proposal->fresh();
         });
+    }
+
+    private function dispatchAutomationJobs(Proposal $proposal): void
+    {
+        try {
+            $workspace = $proposal->workspace;
+
+            $shouldCreateInvoice = data_get($workspace->settings, 'automation.proposals.auto_generate_invoice', true);
+            if ($shouldCreateInvoice) {
+                CreateInvoiceFromProposal::dispatch($proposal);
+            }
+
+            $shouldCreateProject = data_get($workspace->settings, 'automation.proposals.auto_create_project', true);
+            if ($shouldCreateProject) {
+                ProvisionProjectFromProposal::dispatch($proposal);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to dispatch proposal automation jobs', [
+                'proposal_id' => $proposal->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     private function sendSignedNotification(Proposal $proposal, array $data): void
@@ -55,11 +80,14 @@ class AcceptProposal
             $proposalNotifications = $notificationSettings['proposals'] ?? [];
 
             if ($proposalNotifications['signed'] ?? false) {
-                $signer = new class {
+                $signer = new class
+                {
                     public $id = null;
+
                     public $first_name;
-                    
-                    public function __construct() {
+
+                    public function __construct()
+                    {
                         $this->first_name = 'Client';
                     }
                 };

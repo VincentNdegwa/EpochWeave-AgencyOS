@@ -29,6 +29,7 @@ export interface Enums {
     accountStatuses: Record<string, EnumOption>;
     billingTypes: Record<string, EnumOption>;
     billingFrequencies: Record<string, EnumOption>;
+    invoiceStatuses: Record<string, EnumOption & { hexColor: string }>;
 }
 
 export function useEnums() {
@@ -39,6 +40,7 @@ export function useEnums() {
         accountStatuses: enums?.accountStatuses || {},
         billingTypes: enums?.billingTypes || {},
         billingFrequencies: enums?.billingFrequencies || {},
+        invoiceStatuses: enums?.invoiceStatuses || {},
     };
 }
 
@@ -72,5 +74,24 @@ export function useBillingTypes() {
             billingTypes[value]?.variant || 'default',
         getColor: (value: string): string => billingTypes[value]?.color || '',
         values: Object.values(billingTypes),
+    };
+}
+
+export function useInvoiceStatuses() {
+    const { invoiceStatuses } = useEnums();
+
+    return {
+        all: invoiceStatuses,
+        getByValue: (value: string): (EnumOption & { hexColor: string }) | undefined =>
+            invoiceStatuses[value],
+        getLabel: (value: string): string =>
+            invoiceStatuses[value]?.label || value,
+        getVariant: (value: string): BadgeVariants['variant'] =>
+            invoiceStatuses[value]?.variant || 'default',
+        getColor: (value: string): string =>
+            invoiceStatuses[value]?.color || '',
+        getHexColor: (value: string): string =>
+            invoiceStatuses[value]?.hexColor || '#6b7280',
+        values: Object.values(invoiceStatuses),
     };
 }

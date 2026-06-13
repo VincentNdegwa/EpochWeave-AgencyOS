@@ -31,7 +31,7 @@ const handleAddClick = (afterBlockId: string | null, blockType: string) => {
 
 <template>
     <div
-        class="custom-scrollbar flex h-full flex-col overflow-y-auto bg-muted p-6"
+        class="custom-scrollbar flex h-full flex-col overflow-y-auto"
     >
         <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-0">
             <div class="rounded-sm border border-border p-6 shadow-sm">

@@ -8,6 +8,11 @@ export interface Workspace {
     domain: string | null;
     logo_url: string | null;
     primary_color: string | null;
+    address?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    tax_number?: string | null;
+    payment_instructions?: string | null;
     created_at: string;
     updated_at: string;
 }

@@ -11,7 +11,11 @@ class WorkspaceSetting extends Model
     use HasFactory;
 
     public const SUBMODULE_PROPOSALS = 'proposals';
+
+    public const SUBMODULE_INVOICES = 'invoices';
+
     public const SUBMODULE_NOTIFICATIONS = 'notifications';
+
     public const SUBMODULE_AUTOMATION = 'automation';
 
     protected $fillable = [

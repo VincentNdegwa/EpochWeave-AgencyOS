@@ -68,6 +68,7 @@ class Proposal extends Model
         'accepted_at' => 'datetime',
         'signed_at' => 'datetime',
         'expired_at' => 'datetime',
+        'signature_data' => 'array',
         'subtotal' => 'decimal:2',
         'discount_total' => 'decimal:2',
         'total_tax_amount' => 'decimal:2',
@@ -108,6 +109,11 @@ class Proposal extends Model
     public function template(): BelongsTo
     {
         return $this->belongsTo(ProposalTemplate::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
     }
 
     public function items(): HasMany

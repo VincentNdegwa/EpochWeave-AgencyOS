@@ -16,6 +16,7 @@ export const useBuilderDataStore = defineStore('builderData', () => {
     const accounts = ref<any[]>([]);
     const users = ref<any[]>([]);
     const accountContacts = ref<any[]>([]);
+    const projects = ref<any[]>([]);
 
     const productsLoaded = ref(false);
     const unitsLoaded = ref(false);
@@ -23,6 +24,7 @@ export const useBuilderDataStore = defineStore('builderData', () => {
     const accountsLoaded = ref(false);
     const usersLoaded = ref(false);
     const accountContactsLoaded = ref(false);
+    const projectsLoaded = ref(false);
 
     const fetchProducts = async () => {
         if (productsLoaded.value) {
@@ -84,16 +86,33 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         return users.value;
     };
 
-    const fetchAccountContacts = async () => {
-        if (accountContactsLoaded.value) {
+    const fetchAccountContacts = async (filters?: { account_id?: string }) => {
+        if (accountContactsLoaded.value && !filters?.account_id) {
             return accountContacts.value;
         }
 
-        const response = await fetch(accountContactsRoute.get().url);
+        const params = new URLSearchParams();
+        if (filters?.account_id) params.append('account_id', filters.account_id);
+        const url =
+            accountContactsRoute.get().url +
+            (params.toString() ? '?' + params.toString() : '');
+        const response = await fetch(url);
         accountContacts.value = await response.json();
         accountContactsLoaded.value = true;
 
         return accountContacts.value;
+    };
+
+    const fetchProjects = async (filters?: { account_id?: string }) => {
+        const params = new URLSearchParams();
+        if (filters?.account_id) params.append('account_id', filters.account_id);
+
+        const url = `/builder-data/projects${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await fetch(url);
+        projects.value = await response.json();
+        projectsLoaded.value = true;
+
+        return projects.value;
     };
 
     const fetchTemplate = async (templateId: number) => {
@@ -113,12 +132,14 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         accounts.value = [];
         users.value = [];
         accountContacts.value = [];
+        projects.value = [];
         productsLoaded.value = false;
         unitsLoaded.value = false;
         templatesLoaded.value = false;
         accountsLoaded.value = false;
         usersLoaded.value = false;
         accountContactsLoaded.value = false;
+        projectsLoaded.value = false;
     };
 
     return {
@@ -128,18 +149,21 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         accounts,
         users,
         accountContacts,
+        projects,
         productsLoaded,
         unitsLoaded,
         templatesLoaded,
         accountsLoaded,
         usersLoaded,
         accountContactsLoaded,
+        projectsLoaded,
         fetchProducts,
         fetchUnits,
         fetchTemplates,
         fetchAccounts,
         fetchUsers,
         fetchAccountContacts,
+        fetchProjects,
         fetchTemplate,
         reset,
     };
