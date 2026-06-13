@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Calendar, Building, AlertCircle } from '@lucide/vue';
 import { useInvoiceStatuses } from '@/composables/useEnums';
+import InvoiceActions from './components/InvoiceActions.vue';
 import type { Invoice } from '@/types/models/invoice';
 
 interface StatusColumn {
@@ -270,6 +271,11 @@ const fmtDate = (s: string) =>
                             <span class="font-mono text-xs text-muted-foreground">
                                 #{{ invoice.invoice_number || `INV-${invoice.id}` }}
                             </span>
+                            <InvoiceActions
+                                :invoice="invoice"
+                                variant="dropdown"
+                                size="icon"
+                            />
                         </div>
 
                         <p class="mb-2 line-clamp-2 text-sm leading-snug font-medium text-foreground">

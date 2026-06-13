@@ -14,9 +14,7 @@ use Inertia\Response;
 
 class ProposalController extends Controller
 {
-    public function __construct(private WorkspaceSettingService $workspaceSettingService)
-    {
-    }
+    public function __construct(private WorkspaceSettingService $workspaceSettingService) {}
 
     public function edit(Request $request): Response
     {
@@ -48,7 +46,6 @@ class ProposalController extends Controller
         }
 
         $validated = $request->validated();
-        $settings = $this->workspaceSettingService->getOrCreate($workspace->id, WorkspaceSetting::SUBMODULE_PROPOSALS);
 
         $updatedSettings = [
             'default_validity_days' => (int) $validated['default_validity_days'],
@@ -67,8 +64,11 @@ class ProposalController extends Controller
             ],
         ];
 
-        $settings->settings = $updatedSettings;
-        $settings->save();
+        $this->workspaceSettingService->updateSettings(
+            $workspace->id,
+            WorkspaceSetting::SUBMODULE_PROPOSALS,
+            $updatedSettings,
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Proposal settings updated.')]);
 

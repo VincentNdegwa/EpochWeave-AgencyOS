@@ -25,11 +25,7 @@ const { invoices, display_mode, filters } = defineProps<{
 
 const invoiceStatuses = useInvoiceStatuses();
 
-const columns = createColumns(
-    (invoice) => {
-        router.delete(InvoiceController.destroy(invoice.id).url);
-    },
-);
+const columns = createColumns();
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },

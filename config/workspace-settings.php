@@ -38,5 +38,11 @@ return [
                 'expiry_reminder_days_before' => 3,
             ],
         ],
+        'automation' => [
+            'proposals' => [
+                'auto_generate_invoice' => true,
+                'auto_create_project' => true,
+            ],
+        ],
     ],
 ];

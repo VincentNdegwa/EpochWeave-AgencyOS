@@ -49,15 +49,18 @@ class AcceptProposal
     private function dispatchAutomationJobs(Proposal $proposal): void
     {
         try {
-            $workspace = $proposal->workspace;
+            $settings = $this->workspaceSettingService->getOrCreate(
+                $proposal->workspace_id,
+                WorkspaceSetting::SUBMODULE_AUTOMATION,
+            );
 
-            $shouldCreateInvoice = data_get($workspace->settings, 'automation.proposals.auto_generate_invoice', true);
-            if ($shouldCreateInvoice) {
+            $automationSettings = $settings->settings['proposals'] ?? [];
+
+            if ($automationSettings['auto_generate_invoice'] ?? true) {
                 CreateInvoiceFromProposal::dispatch($proposal);
             }
 
-            $shouldCreateProject = data_get($workspace->settings, 'automation.proposals.auto_create_project', true);
-            if ($shouldCreateProject) {
+            if ($automationSettings['auto_create_project'] ?? true) {
                 ProvisionProjectFromProposal::dispatch($proposal);
             }
         } catch (\Exception $e) {

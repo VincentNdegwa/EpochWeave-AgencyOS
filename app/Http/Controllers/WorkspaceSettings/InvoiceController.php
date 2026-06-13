@@ -46,7 +46,6 @@ class InvoiceController extends Controller
         }
 
         $validated = $request->validated();
-        $settings = $this->workspaceSettingService->getOrCreate($workspace->id, WorkspaceSetting::SUBMODULE_INVOICES);
 
         $updatedSettings = [
             'payment_due_days' => (int) $validated['payment_due_days'],
@@ -60,8 +59,11 @@ class InvoiceController extends Controller
             ],
         ];
 
-        $settings->settings = $updatedSettings;
-        $settings->save();
+        $this->workspaceSettingService->updateSettings(
+            $workspace->id,
+            WorkspaceSetting::SUBMODULE_INVOICES,
+            $updatedSettings,
+        );
 
         Inertia::flash('toast', ['type' => 'success', 'message' => __('Invoice settings updated.')]);
 

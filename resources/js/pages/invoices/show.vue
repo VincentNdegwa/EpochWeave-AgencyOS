@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps } from '@inertiajs/vue3';
 import {
-    Send, Pencil, Trash2, PrinterIcon, DownloadIcon,
-    CopyIcon, CheckCircle2Icon, ClockIcon, CalendarIcon,
+    Send, CheckCircle2Icon, ClockIcon, CalendarIcon,
     BuildingIcon, UserIcon, FileTextIcon, FolderOpenIcon,
-    MoreHorizontalIcon, ExternalLinkIcon, HashIcon,
+    ExternalLinkIcon, HashIcon,
 } from '@lucide/vue';
 import { computed, ref, watchEffect } from 'vue';
 
@@ -13,16 +12,13 @@ import { Badge }         from '@/components/ui/badge';
 import { Button }        from '@/components/ui/button';
 import { Separator }     from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-    DropdownMenu, DropdownMenuContent,
-    DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useCurrency }       from '@/composables/useCurrency';
 import { useDateFormat }     from '@/composables/useDateFormat';
 import { useInvoiceStatuses } from '@/composables/useEnums';
 import { dashboard }         from '@/routes';
 import type { Invoice }      from '@/types/models/invoice';
-import InvoiceDocument from "./components/InvoiceDocument.vue"
+import InvoiceDocument from './components/InvoiceDocument.vue';
+import InvoiceActions from './components/InvoiceActions.vue';
 const props = defineProps<{ invoice: Invoice }>();
 
 const { format: fmt }  = useCurrency();
@@ -71,22 +67,6 @@ const timelineEntries = computed(() =>
     ].filter(e => Boolean(e.date)),
 );
 
-const sendInvoice = () => router.post(`/invoices/${props.invoice.id}/send`);
-
-const deleteInvoice = async () => {
-    const { confirm } = await import('@/composables/useConfirmation');
-    if (await confirm({
-        title:       'Delete invoice',
-        description: 'This action cannot be undone.',
-        confirmText: 'Delete',
-        variant:     'destructive',
-    })) {
-        router.delete(InvoiceController.destroy(props.invoice.id).url);
-    }
-};
-
-const printInvoice = () => window.print();
-
 function initials(name: string) {
     return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 }
@@ -122,47 +102,11 @@ function initials(name: string) {
                     </h1>
                 </div>
 
-                <div class="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                        v-if="invoice.status === 'draft'"
-                        size="sm"
-                        class="gap-1.5 h-8 text-xs"
-                        @click="sendInvoice"
-                    >
-                        <Send class="h-3.5 w-3.5" />
-                        Send invoice
-                    </Button>
-
-                    <Link :href="InvoiceController.edit(invoice.id).url">
-                        <Button variant="outline" size="sm" class="gap-1.5 h-8 text-xs">
-                            <Pencil class="h-3.5 w-3.5" />
-                            Edit
-                        </Button>
-                    </Link>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger as-child>
-                            <Button variant="outline" size="icon" class="h-8 w-8">
-                                <MoreHorizontalIcon class="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" class="w-44">
-                            <DropdownMenuItem class="gap-2 text-xs" @click="printInvoice">
-                                <PrinterIcon class="h-3.5 w-3.5" />
-                                Print / Save PDF
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                            v-if="status.label == 'Draft'"
-                                class="gap-2 text-xs text-destructive focus:text-destructive"
-                                @click="deleteInvoice"
-                            >
-                                <Trash2 class="h-3.5 w-3.5" />
-                                Delete invoice
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                <InvoiceActions
+                    :invoice="invoice"
+                    variant="split"
+                    size="sm"
+                />
             </div>
         </div>
 
