@@ -157,45 +157,8 @@ defineOptions({
         <DataTable
             :columns="columns"
             :data="accounts"
-            :search-value="filters.search"
-            :date-from="filters.date_from"
-            :date-to="filters.date_to"
-            :on-search-update="
-                (value) =>
-                    updateFilters({
-                        status:
-                            filters.status === 'all'
-                                ? undefined
-                                : filters.status,
-                        search: value || undefined,
-                        date_from: filters.date_from,
-                        date_to: filters.date_to,
-                    })
-            "
-            :on-date-from-update="
-                (value) =>
-                    updateFilters({
-                        status:
-                            filters.status === 'all'
-                                ? undefined
-                                : filters.status,
-                        search: filters.search,
-                        date_from: value || undefined,
-                        date_to: filters.date_to,
-                    })
-            "
-            :on-date-to-update="
-                (value) =>
-                    updateFilters({
-                        status:
-                            filters.status === 'all'
-                                ? undefined
-                                : filters.status,
-                        search: filters.search,
-                        date_from: filters.date_from,
-                        date_to: value || undefined,
-                    })
-            "
+            :filters="filters"
+            :on-filter="updateFilters"
         />
 
         <AccountFormDialog

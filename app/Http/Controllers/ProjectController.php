@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ProjectStatus;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
@@ -24,6 +25,7 @@ class ProjectController extends Controller
 
         return Inertia::render('projects/index', [
             'projects' => $projects,
+            'project_statuses' => ProjectStatus::cases(),
             'filters' => $filters,
         ]);
     }
@@ -31,7 +33,10 @@ class ProjectController extends Controller
     public function store(StoreProjectRequest $request): RedirectResponse
     {
         $workspace = $request->attributes->get('current_workspace');
-        $data = array_merge($request->validated(), ['workspace_id' => $workspace->id]);
+        $data = array_merge($request->validated(), [
+            'workspace_id' => $workspace->id,
+            'currency' => $workspace->currency ?? 'USD',
+        ]);
 
         try {
             $project = $this->projectService->createProject($data);
@@ -56,7 +61,6 @@ class ProjectController extends Controller
         $project->load([
             'account',
             'members.user:id,name,email',
-            'taskStatuses' => fn ($query) => $query->orderBy('position'),
         ]);
 
         return Inertia::render('projects/show', [
@@ -73,7 +77,10 @@ class ProjectController extends Controller
         }
 
         try {
-            $this->projectService->updateProject($project, $request->validated());
+            $data = array_merge($request->validated(), [
+                'currency' => $workspace->currency ?? 'USD',
+            ]);
+            $this->projectService->updateProject($project, $data);
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Project updated successfully.']);
 
             return redirect()->route('projects.show', $project);

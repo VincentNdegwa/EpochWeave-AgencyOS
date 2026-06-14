@@ -30,6 +30,8 @@ export interface Enums {
     billingTypes: Record<string, EnumOption>;
     billingFrequencies: Record<string, EnumOption>;
     invoiceStatuses: Record<string, EnumOption & { hexColor: string }>;
+    projectStatuses: Record<string, EnumOption & { hexColor: string }>;
+    taskPriorities: Record<string, EnumOption & { hexColor: string }>;
 }
 
 export function useEnums() {
@@ -41,6 +43,8 @@ export function useEnums() {
         billingTypes: enums?.billingTypes || {},
         billingFrequencies: enums?.billingFrequencies || {},
         invoiceStatuses: enums?.invoiceStatuses || {},
+        projectStatuses: enums?.projectStatuses || {},
+        taskPriorities: enums?.taskPriorities || {},
     };
 }
 
@@ -93,5 +97,43 @@ export function useInvoiceStatuses() {
         getHexColor: (value: string): string =>
             invoiceStatuses[value]?.hexColor || '#6b7280',
         values: Object.values(invoiceStatuses),
+    };
+}
+
+export function useProjectStatuses() {
+    const { projectStatuses } = useEnums();
+
+    return {
+        all: projectStatuses,
+        getByValue: (value: string): (EnumOption & { hexColor: string }) | undefined =>
+            projectStatuses[value],
+        getLabel: (value: string): string =>
+            projectStatuses[value]?.label || value,
+        getVariant: (value: string): BadgeVariants['variant'] =>
+            projectStatuses[value]?.variant || 'default',
+        getColor: (value: string): string =>
+            projectStatuses[value]?.color || '',
+        getHexColor: (value: string): string =>
+            projectStatuses[value]?.hexColor || '#6b7280',
+        values: Object.values(projectStatuses),
+    };
+}
+
+export function useTaskPriorities() {
+    const { taskPriorities } = useEnums();
+
+    return {
+        all: taskPriorities,
+        getByValue: (value: string): (EnumOption & { hexColor: string }) | undefined =>
+            taskPriorities[value],
+        getLabel: (value: string): string =>
+            taskPriorities[value]?.label || value,
+        getVariant: (value: string): BadgeVariants['variant'] =>
+            taskPriorities[value]?.variant || 'default',
+        getColor: (value: string): string =>
+            taskPriorities[value]?.color || '',
+        getHexColor: (value: string): string =>
+            taskPriorities[value]?.hexColor || '#6b7280',
+        values: Object.values(taskPriorities),
     };
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TaskPriority;
 use Illuminate\Validation\Rule;
 
 class StoreTaskRequest extends FormRequest
@@ -19,7 +20,7 @@ class StoreTaskRequest extends FormRequest
             'title' => ['required', 'string', 'max:500'],
             'description' => ['nullable', 'string'],
             'assignee_id' => ['nullable', 'exists:users,id'],
-            'priority' => ['nullable', Rule::in(['low', 'medium', 'high'])],
+            'priority' => ['nullable', Rule::in(array_map(fn (TaskPriority $p) => $p->value, TaskPriority::cases()))],
             'position' => ['nullable', 'integer', 'min:0'],
             'start_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:start_date'],

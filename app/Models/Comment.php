@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Comment extends Model
 {
@@ -13,8 +14,8 @@ class Comment extends Model
 
     protected $fillable = [
         'workspace_id',
-        'project_id',
-        'task_id',
+        'commentable_type',
+        'commentable_id',
         'user_id',
         'body',
         'is_internal',
@@ -31,14 +32,9 @@ class Comment extends Model
         return $this->belongsTo(Workspace::class);
     }
 
-    public function project(): BelongsTo
+    public function commentable(): MorphTo
     {
-        return $this->belongsTo(Project::class);
-    }
-
-    public function task(): BelongsTo
-    {
-        return $this->belongsTo(Task::class);
+        return $this->morphTo();
     }
 
     public function user(): BelongsTo

@@ -80,9 +80,9 @@ class Task extends Model
         return $this->belongsToMany(Tag::class, 'task_tags');
     }
 
-    public function comments(): HasMany
+    public function comments(): MorphMany
     {
-        return $this->hasMany(Comment::class);
+        return $this->morphMany(Comment::class, 'commentable');
     }
 
     public function attachments(): MorphMany

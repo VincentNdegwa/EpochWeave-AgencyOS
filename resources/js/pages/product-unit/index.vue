@@ -87,11 +87,8 @@ defineOptions({
         <DataTable
             :columns="columns"
             :data="product_units"
-            :search-value="filters?.search"
-            :on-search-update="
-                (value: string | number) =>
-                    updateFilters({ search: String(value) })
-            "
+            :filters="filters"
+            :on-filter="updateFilters"
         />
 
         <ProductUnitFormDialog

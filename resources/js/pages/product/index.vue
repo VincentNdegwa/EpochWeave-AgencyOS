@@ -184,14 +184,8 @@ defineOptions({
         <DataTable
             :columns="columns"
             :data="products"
-            :search-value="filters.search"
-            :on-search-update="
-                (value: string | number) =>
-                    updateFilters({
-                        status: filters.status,
-                        search: String(value),
-                    })
-            "
+            :filters="filters"
+            :on-filter="updateFilters"
         />
 
         <ProductFormDialog

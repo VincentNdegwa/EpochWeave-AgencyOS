@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, setLayoutProps } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, watchEffect } from 'vue';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -192,8 +192,8 @@ const goBack = () => {
     router.visit(InvoiceController.show(props.invoice.id).url);
 };
 
-defineOptions({
-    layout: {
+watchEffect(() => {
+    setLayoutProps({
         title: 'Edit Invoice',
         description: `Editing invoice #${props.invoice.invoice_number || props.invoice.id}`,
         breadcrumbs: [
@@ -201,8 +201,9 @@ defineOptions({
             { title: 'Invoices', href: InvoiceController.index() },
             { title: `#${props.invoice.invoice_number || props.invoice.id}` },
         ],
-    },
+    });
 });
+
 </script>
 
 <template>

@@ -15,6 +15,8 @@ import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
+import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
+import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import {
     Sidebar,
     SidebarContent,
@@ -71,12 +73,12 @@ const salesNavItems: NavItem[] = [
 const projectNavItems: NavItem[] = [
     {
         title: 'Projects',
-        href: '#',
+        href: ProjectController.index().url,
         icon: FolderKanban,
     },
     {
         title: 'Tasks',
-        href: '#',
+        href: TaskController.index().url,
         icon: CheckSquare,
     },
 ];

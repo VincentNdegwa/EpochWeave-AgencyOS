@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('task_statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
 
             $table->string('name', 100);
             $table->string('color', 7)->default('#6366f1');
@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->timestampTz('created_at')->useCurrent();
 
-            $table->index(['project_id', 'position'], 'idx_task_statuses_project');
+            $table->index(['workspace_id', 'position'], 'idx_task_statuses_workspace');
         });
     }
 

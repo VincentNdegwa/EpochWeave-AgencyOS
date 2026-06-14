@@ -14,7 +14,7 @@ class TaskStatus extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'project_id',
+        'workspace_id',
         'name',
         'color',
         'position',
@@ -28,9 +28,9 @@ class TaskStatus extends Model
         'is_closed' => 'boolean',
     ];
 
-    public function project(): BelongsTo
+    public function workspace(): BelongsTo
     {
-        return $this->belongsTo(Project::class);
+        return $this->belongsTo(Workspace::class);
     }
 
     public function tasks(): HasMany

@@ -34,4 +34,9 @@ class Workspace extends LaratrustTeam
     {
         return $this->hasMany(ProposalStatus::class);
     }
+
+    public function taskStatuses(): HasMany
+    {
+        return $this->hasMany(TaskStatus::class);
+    }
 }

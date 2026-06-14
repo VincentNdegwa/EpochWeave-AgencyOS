@@ -6,6 +6,8 @@ use App\Enums\AccountStatus;
 use App\Enums\BillingFrequency;
 use App\Enums\BillingType;
 use App\Enums\InvoiceStatus;
+use App\Enums\ProjectStatus;
+use App\Enums\TaskPriority;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -54,6 +56,8 @@ class HandleInertiaRequests extends Middleware
                 'billingTypes' => collect(BillingType::cases())->keyBy(fn (BillingType $type) => $type->value),
                 'billingFrequencies' => collect(BillingFrequency::cases())->keyBy(fn (BillingFrequency $frequency) => $frequency->value),
                 'invoiceStatuses' => collect(InvoiceStatus::cases())->keyBy(fn (InvoiceStatus $status) => $status->value),
+                'projectStatuses' => collect(ProjectStatus::cases())->keyBy(fn (ProjectStatus $status) => $status->value),
+                'taskPriorities' => collect(TaskPriority::cases())->keyBy(fn (TaskPriority $priority) => $priority->value),
             ],
         ];
     }

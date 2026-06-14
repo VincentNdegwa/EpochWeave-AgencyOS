@@ -86,11 +86,8 @@ defineOptions({
         <DataTable
             :columns="columns"
             :data="proposal_statuses"
-            :search-value="filters?.search"
-            :on-search-update="
-                (value: string | number) =>
-                    updateFilters({ search: String(value) })
-            "
+            :filters="filters"
+            :on-filter="updateFilters"
         />
 
         <ProposalStatusFormDialog

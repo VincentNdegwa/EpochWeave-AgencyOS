@@ -114,10 +114,13 @@ class TaskService
 
     private function getStatusForProject(Project $project, int $statusId): TaskStatus
     {
-        $status = $project->taskStatuses()->whereKey($statusId)->first();
+        $status = TaskStatus::query()
+            ->where('workspace_id', $project->workspace_id)
+            ->whereKey($statusId)
+            ->first();
 
         if (! $status) {
-            throw new Exception('Invalid task status selected for this project.');
+            throw new Exception('Invalid task status selected for this workspace.');
         }
 
         return $status;

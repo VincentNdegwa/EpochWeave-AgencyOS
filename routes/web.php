@@ -11,6 +11,8 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ProposalStatusController;
 use App\Http\Controllers\ProposalTemplateController;
+use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskStatusController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\WorkspaceController;
@@ -55,12 +57,15 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('product-units', ProductUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('proposal-status', ProposalStatusController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('task-status', TaskStatusController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('/products/bulk-status', [ProductController::class, 'bulkUpdateStatus'])
         ->name('products.bulk-status');
     Route::post('/products/bulk', [ProductController::class, 'bulkDelete'])
         ->name('products.bulk-delete');
 
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::resource('tasks', TaskController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.status.update');
 
     Route::resource('invoices', InvoiceController::class);
     Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TaskPriority;
 use Illuminate\Validation\Rule;
 
 class UpdateTaskRequest extends FormRequest
@@ -19,7 +20,7 @@ class UpdateTaskRequest extends FormRequest
             'title' => ['sometimes', 'required', 'string', 'max:500'],
             'description' => ['sometimes', 'nullable', 'string'],
             'assignee_id' => ['sometimes', 'nullable', 'exists:users,id'],
-            'priority' => ['sometimes', Rule::in(['low', 'medium', 'high'])],
+            'priority' => ['sometimes', Rule::in(array_map(fn (TaskPriority $p) => $p->value, TaskPriority::cases()))],
             'position' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'start_date' => ['sometimes', 'nullable', 'date'],
             'due_date' => ['sometimes', 'nullable', 'date', 'after_or_equal:start_date'],

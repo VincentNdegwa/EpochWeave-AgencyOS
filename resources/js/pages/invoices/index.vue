@@ -138,14 +138,8 @@ defineOptions({
             v-if="display_mode === 'list'"
             :columns="columns"
             :data="invoices"
-            :search-value="filters?.search"
-            :on-search-update="
-                (value: string | number) =>
-                    updateFilters({
-                        status: filters?.status,
-                        search: String(value),
-                    })
-            "
+            :filters="filters"
+            :on-filter="updateFilters"
         />
 
         <KanbanView
