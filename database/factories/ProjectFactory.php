@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Account;
 use App\Models\Project;
+use App\Models\ProjectStatus;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +23,7 @@ class ProjectFactory extends Factory
             'name' => fake()->sentence(3),
             'description' => fake()->optional()->paragraph(),
             'color' => fake()->hexColor(),
-            'status' => fake()->randomElement(['active', 'on_hold', 'completed', 'archived']),
+            'project_status_id' => ProjectStatus::factory(),
             'hourly_rate' => fake()->numberBetween(2_500, 20_000),
             'currency' => 'KES',
             'start_date' => fake()->dateTimeBetween('-1 month', 'now'),
@@ -42,9 +43,15 @@ class ProjectFactory extends Factory
                 if ($project->account) {
                     $project->account->workspace_id = $project->workspace_id;
                 }
+                if ($project->status) {
+                    $project->status->workspace_id = $project->workspace_id;
+                }
             })
             ->afterCreating(function (Project $project): void {
                 $project->account()->update(['workspace_id' => $project->workspace_id]);
+                if ($project->status) {
+                    $project->status->update(['workspace_id' => $project->workspace_id]);
+                }
             });
     }
 }

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { Bell, FileText, Settings, Sparkles } from '@lucide/vue';
+import { Bell, FileText, Receipt, Settings, Sparkles } from '@lucide/vue';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { toUrl } from '@/lib/utils';
-import { general, proposals } from '@/routes/workspace-settings';
+import { general, proposals, invoices } from '@/routes/workspace-settings';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
@@ -19,6 +19,11 @@ const sidebarNavItems: NavItem[] = [
         title: 'Proposals',
         href: proposals(),
         icon: FileText,
+    },
+    {
+        title: 'Invoices',
+        href: invoices(),
+        icon: Receipt,
     },
     {
         title: 'Notifications',

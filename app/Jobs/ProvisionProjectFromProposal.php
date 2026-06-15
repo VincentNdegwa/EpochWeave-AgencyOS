@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Project;
+use App\Models\ProjectStatus;
 use App\Models\Proposal;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,12 +32,17 @@ class ProvisionProjectFromProposal implements ShouldQueue
                 return;
             }
 
+            // Get active status for this workspace
+            $activeStatus = ProjectStatus::where('workspace_id', $this->proposal->workspace_id)
+                ->where('automation_trigger', 'active')
+                ->first();
+
             $project = Project::create([
                 'workspace_id' => $this->proposal->workspace_id,
                 'account_id' => $this->proposal->account_id,
                 'name' => $this->proposal->title,
                 'description' => null,
-                'status' => 'active',
+                'project_status_id' => $activeStatus?->id,
                 'currency' => $this->proposal->currency ?? 'USD',
                 'start_date' => now(),
                 'due_date' => now()->addMonths(3),

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ProjectStatus;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Models\Project;
+use App\Models\ProjectStatus;
+use App\Models\TaskStatus;
 use App\Services\ProjectService;
 use Exception;
 use Illuminate\Http\RedirectResponse;
@@ -23,9 +24,19 @@ class ProjectController extends Controller
         $filters = $request->only(['status', 'search']);
         $projects = $this->projectService->listProjects($workspace->id, $filters);
 
+        // Get statuses for filter dropdown
+        $projectStatuses = ProjectStatus::where('workspace_id', $workspace->id)
+            ->orderBy('position')
+            ->get()
+            ->map(fn ($status) => [
+                'value' => $status->automation_trigger ?? $status->id,
+                'label' => $status->title,
+                'color' => $status->color,
+            ]);
+
         return Inertia::render('projects/index', [
             'projects' => $projects,
-            'project_statuses' => ProjectStatus::cases(),
+            'project_statuses' => $projectStatuses,
             'filters' => $filters,
         ]);
     }
@@ -60,11 +71,21 @@ class ProjectController extends Controller
 
         $project->load([
             'account',
+            'status',
             'members.user:id,name,email',
+            'tasks' => function ($query) {
+                $query->with(['status:id,title,color', 'assignee:id,name', 'tags:id,name,color'])
+                    ->orderBy('position');
+            },
         ]);
+
+        $taskStatuses = TaskStatus::where('workspace_id', $workspace->id)
+            ->orderBy('position')
+            ->get(['id', 'title', 'color']);
 
         return Inertia::render('projects/show', [
             'project' => $project,
+            'task_statuses' => $taskStatuses,
         ]);
     }
 

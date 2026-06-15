@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Account;
 use App\Models\Invoice;
+use App\Models\InvoiceStatus;
 use App\Models\User;
 use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,7 +28,7 @@ class InvoiceFactory extends Factory
             'created_by' => User::factory(),
             'user_id' => null,
             'invoice_number' => 'INV'.now()->format('Y').'-'.fake()->unique()->numberBetween(1000, 9999),
-            'status' => 'draft',
+            'invoice_status_id' => InvoiceStatus::factory(),
             'token' => Str::uuid(),
             'currency' => fake()->randomElement(['USD', 'KES', 'NGN', 'GHS']),
             'subtotal' => fake()->numberBetween(1000, 50000),
@@ -42,5 +43,20 @@ class InvoiceFactory extends Factory
             'paid_at' => null,
             'voided_at' => null,
         ];
+    }
+
+    public function configure(): static
+    {
+        return $this
+            ->afterMaking(function (Invoice $invoice): void {
+                if ($invoice->status) {
+                    $invoice->status->workspace_id = $invoice->workspace_id;
+                }
+            })
+            ->afterCreating(function (Invoice $invoice): void {
+                if ($invoice->status) {
+                    $invoice->status->update(['workspace_id' => $invoice->workspace_id]);
+                }
+            });
     }
 }

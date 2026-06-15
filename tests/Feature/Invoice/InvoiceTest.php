@@ -84,7 +84,6 @@ class InvoiceTest extends TestCase
         $this->assertDatabaseHas('invoices', [
             'account_id' => $this->account->id,
             'workspace_id' => $this->workspace->id,
-            'status' => 'draft',
             'currency' => 'USD',
         ]);
 

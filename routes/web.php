@@ -4,13 +4,16 @@ use App\Http\Controllers\AccountContactController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BuilderDataController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\InvoiceStatusController;
 use App\Http\Controllers\PortalSetupController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductUnitController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectStatusController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ProposalStatusController;
 use App\Http\Controllers\ProposalTemplateController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskStatusController;
 use App\Http\Controllers\UploadController;
@@ -57,7 +60,10 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('product-units', ProductUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('proposal-status', ProposalStatusController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('project-status', ProjectStatusController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('tags', TagController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('task-status', TaskStatusController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('invoice-status', InvoiceStatusController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('/products/bulk-status', [ProductController::class, 'bulkUpdateStatus'])
         ->name('products.bulk-status');
     Route::post('/products/bulk', [ProductController::class, 'bulkDelete'])

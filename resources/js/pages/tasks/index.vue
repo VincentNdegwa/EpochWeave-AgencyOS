@@ -19,10 +19,13 @@ import DataTable from './datatable/data-table.vue';
 import KanbanView from './KanbanView.vue';
 import TaskFormDialog from './dialogs/TaskFormDialog.vue';
 import TaskStatusFormDialog from '../task-status/dialogs/TaskStatusFormDialog.vue';
+import type { TaskStatus } from '@/types/models/task_status';
+import type { Tag as TagType } from '@/types/models/tag';
 
-const { tasks, task_statuses, display_mode, filters } = defineProps<{
+const { tasks, task_statuses, tags, display_mode, filters } = defineProps<{
     tasks: Task[];
-    task_statuses: any[];
+    task_statuses: TaskStatus[];
+    tags: TagType[];
     display_mode: string;
     filters?: {
         status?: string;
@@ -47,9 +50,9 @@ const columns = createColumns(
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },
-    ...task_statuses.map((status: any) => ({
+    ...task_statuses.map((status: TaskStatus) => ({
         value: String(status.id),
-        label: status.name,
+        label: status.title,
     })),
 ]);
 
@@ -202,10 +205,12 @@ defineOptions({
             :on-filter="updateFilters"
         />
 
-        <KanbanView v-else :tasks="tasks" />
+        <KanbanView v-else :tasks="tasks" :task_statuses="task_statuses" />
 
         <TaskFormDialog
             v-model:open="dialogOpen"
+            :task_statuses="task_statuses"
+            :tags="tags"
             :task="editingTask"
             @success="handleSuccess"
         />

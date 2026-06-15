@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\InvoiceStatus;
 use App\Models\Project;
 use App\Models\Proposal;
 use Exception;
@@ -121,6 +122,11 @@ class InvoiceService
 
                 $invoiceNumber = $this->generateInvoiceNumber($workspace->id);
 
+                // Get draft status for this workspace
+                $draftStatus = InvoiceStatus::where('workspace_id', $proposal->workspace_id)
+                    ->where('automation_trigger', 'draft')
+                    ->first();
+
                 $invoiceData = [
                     'workspace_id' => $proposal->workspace_id,
                     'account_id' => $proposal->account_id,
@@ -130,7 +136,7 @@ class InvoiceService
                     'created_by' => $proposal->created_by,
                     'user_id' => $proposal->user_id,
                     'invoice_number' => $invoiceNumber,
-                    'status' => 'draft',
+                    'invoice_status_id' => $draftStatus?->id,
                     'token' => Str::uuid(),
                     'currency' => $proposal->currency ?? 'USD',
                     'issue_date' => now(),
@@ -213,7 +219,10 @@ class InvoiceService
         $query = Invoice::query()->where('workspace_id', $workspaceId);
 
         if ($status && $status !== 'all') {
-            $query->where('status', $status);
+            // Filter by status automation trigger via relationship
+            $query->whereHas('status', function ($q) use ($status) {
+                $q->where('automation_trigger', $status);
+            });
         }
 
         if ($search) {

@@ -26,7 +26,7 @@ return new class extends Migration
 
             // Public Identification
             $table->string('invoice_number')->unique(); // e.g. INV2026-0001
-            $table->string('status')->default('draft'); // draft, sent, paid, void, overdue
+            $table->foreignId('invoice_status_id')->constrained('invoice_statuses')->restrictOnDelete();
             $table->string('token')->unique(); // For public payment link
 
             // High-Level Financials (Matched to Proposals)
@@ -48,8 +48,8 @@ return new class extends Migration
             $table->timestamps();
 
             // Performance Indexes
-            $table->index(['workspace_id', 'status']);
-            $table->index(['account_id', 'status']);
+            $table->index(['workspace_id', 'invoice_status_id']);
+            $table->index(['account_id', 'invoice_status_id']);
         });
     }
 

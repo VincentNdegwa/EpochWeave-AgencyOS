@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import { Link } from '@inertiajs/vue3';
-import { 
-    LayoutDashboard, 
-    Building2, 
-    Package, 
-    FileText, 
-    LayoutTemplate, 
-    ReceiptText, 
+import {
+    LayoutDashboard,
+    Building2,
+    Package,
+    FileText,
+    LayoutTemplate,
+    ReceiptText,
     FolderKanban,
     CheckSquare,
-    Settings2 
+    Settings2,
+    Tag,
 } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
+import TagController from '@/actions/App/Http/Controllers/TagController';
 import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import {
     Sidebar,
@@ -80,6 +82,11 @@ const projectNavItems: NavItem[] = [
         title: 'Tasks',
         href: TaskController.index().url,
         icon: CheckSquare,
+    },
+    {
+        title: 'Tags',
+        href: TagController.index().url,
+        icon: Tag,
     },
 ];
 

@@ -77,7 +77,7 @@ function initials(name: string) {
 
     <div class="flex flex-col">
 
-        <div class="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm print:hidden">
+        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
             <div class="flex flex-wrap items-center justify-between gap-3">
 
                 <div class="flex min-w-0 flex-col gap-0.5">

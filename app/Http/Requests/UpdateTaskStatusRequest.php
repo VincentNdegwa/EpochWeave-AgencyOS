@@ -12,11 +12,10 @@ class UpdateTaskStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:100'],
-            'color' => ['sometimes', 'nullable', 'regex:/^#([0-9a-f]{6})$/i'],
-            'position' => ['sometimes', 'nullable', 'integer', 'min:0'],
-            'is_default' => ['sometimes', 'nullable', 'boolean'],
-            'is_closed' => ['sometimes', 'nullable', 'boolean'],
+            'title' => 'sometimes|required|string|max:255',
+            'color' => 'sometimes|required|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'position' => 'sometimes|integer|min:0',
+            'automation_trigger' => 'nullable|string|max:30',
         ];
     }
 }

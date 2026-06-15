@@ -1,4 +1,5 @@
 import type { Account } from './proposal';
+import type { ProjectStatus } from './project_status';
 import type { Task } from './task';
 
 export interface ProjectMember {
@@ -22,7 +23,8 @@ export interface Project {
     name: string;
     description: string | null;
     color: string | null;
-    status: string;
+    project_status_id: number;
+    status?: ProjectStatus;
     hourly_rate: number | null;
     currency: string;
     start_date: string | null;

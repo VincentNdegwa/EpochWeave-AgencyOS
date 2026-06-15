@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +20,7 @@ class Invoice extends Model
         'created_by',
         'user_id',
         'invoice_number',
-        'status',
+        'invoice_status_id',
         'token',
         'currency',
         'subtotal',
@@ -38,7 +37,6 @@ class Invoice extends Model
     ];
 
     protected $casts = [
-        'status' => InvoiceStatus::class,
         'issue_date' => 'date',
         'due_date' => 'date',
         'sent_at' => 'datetime',
@@ -89,5 +87,18 @@ class Invoice extends Model
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function invoiceStatus(): BelongsTo
+    {
+        return $this->belongsTo(InvoiceStatus::class, 'invoice_status_id');
+    }
+
+    /**
+     * @deprecated Use invoiceStatus() instead
+     */
+    public function status(): BelongsTo
+    {
+        return $this->invoiceStatus();
     }
 }

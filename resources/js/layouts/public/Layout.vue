@@ -96,14 +96,14 @@ const dynamicThemeStyles = computed(() => {
 </template>
 
 <style scoped>
-:deep(.btn-tenant-primary) {
+:deep(.btn-primary) {
     background-color: var(--tenant-primary, #1e293b);
     color: #ffffff;
 }
-:deep(.btn-tenant-primary:hover) {
+:deep(.btn-primary:hover) {
     background-color: var(--tenant-primary-hover, #0f172a);
 }
-:deep(.text-tenant-accent) {
+:deep(.text-accent) {
     color: var(--tenant-primary, #1e293b);
 }
 </style>

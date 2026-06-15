@@ -17,11 +17,25 @@ class TaskStatusFactory extends Factory
     {
         return [
             'workspace_id' => Workspace::factory(),
-            'name' => fake()->word(),
+            'title' => fake()->word(),
             'color' => fake()->hexColor(),
+            'is_system' => false,
+            'automation_trigger' => null,
             'position' => fake()->numberBetween(0, 10),
-            'is_default' => fake()->boolean(),
-            'is_closed' => fake()->boolean(),
         ];
+    }
+
+    /**
+     * Create a system status.
+     */
+    public function system(string $trigger, string $title, string $color, int $position): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'title' => $title,
+            'color' => $color,
+            'is_system' => true,
+            'automation_trigger' => $trigger,
+            'position' => $position,
+        ]);
     }
 }

@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->string('color', 7)->default('#6366f1');
-            $table->string('status', 30)->default('active');
+            $table->foreignId('project_status_id')->constrained('project_statuses')->restrictOnDelete();
             $table->string('currency', 10)->default('KES');
 
             // Operational Time-Tracking Controls
@@ -46,7 +46,7 @@ return new class extends Migration
 
             $table->index('workspace_id', 'idx_projects_workspace');
             $table->index('account_id', 'idx_projects_account');
-            $table->index(['workspace_id', 'status'], 'idx_projects_status');
+            $table->index(['workspace_id', 'project_status_id'], 'idx_projects_status');
         });
     }
 

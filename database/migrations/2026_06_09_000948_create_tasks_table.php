@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
             $table->foreignId('project_id')->constrained('projects')->cascadeOnDelete();
-            $table->foreignId('task_status_id')->constrained('task_statuses');
+            $table->foreignId('task_status_id')->constrained('task_statuses')->restrictOnDelete();
             $table->foreignId('parent_id')->nullable()->constrained('tasks')->cascadeOnDelete();
 
             $table->string('title', 500);

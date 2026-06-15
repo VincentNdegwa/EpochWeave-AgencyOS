@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Project;
+use App\Models\Tag;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Services\TaskService;
@@ -31,7 +32,7 @@ class TaskController extends Controller
         $query = Task::query()
             ->with([
                 'project:id,name,color',
-                'status:id,name,color',
+                'status:id,title,color',
                 'assignee:id,name',
                 'tags:id,name,color',
             ])
@@ -54,6 +55,11 @@ class TaskController extends Controller
         $taskStatuses = TaskStatus::query()
             ->where('workspace_id', $workspace->id)
             ->orderBy('position')
+            ->get(['id', 'title', 'color']);
+
+        $tags = Tag::query()
+            ->where('workspace_id', $workspace->id)
+            ->orderBy('name')
             ->get(['id', 'name', 'color']);
 
         $displayMode = $this->userPreferenceService->getDisplayMode($workspace->id, $user->id);
@@ -61,6 +67,7 @@ class TaskController extends Controller
         return Inertia::render('tasks/index', [
             'tasks' => $tasks,
             'task_statuses' => $taskStatuses,
+            'tags' => $tags,
             'display_mode' => $displayMode,
             'filters' => $filters,
         ]);
@@ -69,12 +76,21 @@ class TaskController extends Controller
     public function store(StoreTaskRequest $request): RedirectResponse
     {
         $workspace = $request->attributes->get('current_workspace');
-        $data = array_merge($request->validated(), [
+        $validated = $request->validated();
+
+        $projectId = $validated['project_id'] ?? $request->input('project_id');
+
+        if (empty($projectId)) {
+            abort(422, 'Project is required.');
+        }
+
+        $data = array_merge($validated, [
             'workspace_id' => $workspace->id,
             'created_by' => $request->user()?->id,
         ]);
 
-        $project = Project::where('workspace_id', $workspace->id)->findOrFail($data['project_id'] ?? $data['project']['id'] ?? abort(422, 'Project is required.'));
+        $project = Project::where('workspace_id', $workspace->id)
+            ->findOrFail($projectId);
 
         try {
             $task = $this->taskService->createTask($project, $data);
@@ -98,14 +114,14 @@ class TaskController extends Controller
 
         $task->load([
             'project:id,name,color',
-            'status:id,name,color,is_closed',
+            'status:id,title,color,automation_trigger',
             'assignee:id,name,email',
             'tags:id,name,color',
             'comments.user:id,name',
             'attachments.uploader:id,name',
             'timeEntries.user:id,name',
             'children:id,title,task_status_id,position',
-            'children.status:id,name,color',
+            'children.status:id,title,color',
         ]);
 
         return Inertia::render('tasks/show', [

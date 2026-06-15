@@ -12,11 +12,10 @@ class StoreTaskStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:100'],
-            'color' => ['nullable', 'regex:/^#([0-9a-f]{6})$/i'],
-            'position' => ['nullable', 'integer', 'min:0'],
-            'is_default' => ['nullable', 'boolean'],
-            'is_closed' => ['nullable', 'boolean'],
+            'title' => 'required|string|max:255',
+            'color' => 'required|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'position' => 'sometimes|integer|min:0',
+            'automation_trigger' => 'nullable|string|max:30',
         ];
     }
 }

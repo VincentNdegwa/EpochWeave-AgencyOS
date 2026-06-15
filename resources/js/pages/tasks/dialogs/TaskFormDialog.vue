@@ -25,15 +25,29 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useTaskPriorities } from '@/composables/useEnums';
 import { usePage } from '@inertiajs/vue3';
+import { useBuilderDataStore } from '@/stores/builderData';
+import { storeToRefs } from 'pinia';
 import type { Task } from '@/types/models/task';
+import type { TaskStatus } from '@/types/models/task_status';
+import type { Tag } from '@/types/models/tag';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
 
 interface Props {
     open: boolean;
     task?: Task | null;
+    task_statuses?: TaskStatus[];
+    tags?: Tag[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
     task: null,
+    task_statuses: () => [],
+    tags: () => [],
 });
 
 const emit = defineEmits<{
@@ -42,8 +56,30 @@ const emit = defineEmits<{
 }>();
 
 const page = usePage();
-const projects = computed(() => (page.props.projects as any[]) || []);
+const builderData = useBuilderDataStore();
+const { projects, projectsLoaded } = storeToRefs(builderData);
+const taskStatuses = computed(() => props.task_statuses || []);
 const taskPriorities = useTaskPriorities();
+
+function toggleTag(tagId: number) {
+    const idStr = tagId.toString();
+    const idx = form.value.tag_ids.indexOf(idStr);
+    if (idx > -1) {
+        form.value.tag_ids.splice(idx, 1);
+    } else {
+        form.value.tag_ids.push(idStr);
+    }
+}
+
+function isTagSelected(tagId: number): boolean {
+    return form.value.tag_ids.includes(tagId.toString());
+}
+
+watch(() => props.open, (isOpen) => {
+    if (isOpen && !projectsLoaded.value) {
+        builderData.fetchProjects();
+    }
+});
 
 const form = ref({
     project_id: props.task?.project_id?.toString() || '',
@@ -173,11 +209,11 @@ watch(
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
-                                        v-for="status in (page.props.task_statuses || [])"
+                                        v-for="status in taskStatuses"
                                         :key="status.id"
                                         :value="status.id.toString()"
                                     >
-                                        {{ status.name }}
+                                        {{ status.title }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -235,6 +271,65 @@ watch(
                                 placeholder="Describe the task..."
                                 rows="3"
                             />
+                        </div>
+
+                        <div class="grid gap-2 sm:col-span-2">
+                            <Label>Tags</Label>
+                            <input
+                                v-for="id in form.tag_ids"
+                                :key="id"
+                                type="hidden"
+                                name="tag_ids[]"
+                                :value="id"
+                            />
+                            <Popover>
+                                <PopoverTrigger as-child>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        class="h-auto min-h-[36px] flex-wrap justify-start gap-1 px-2 py-1"
+                                    >
+                                        <template v-if="form.tag_ids.length === 0">
+                                            <span class="text-muted-foreground text-sm">Select tags...</span>
+                                        </template>
+                                        <Badge
+                                            v-for="tag in tags.filter((t) => form.tag_ids.includes(t.id.toString()))"
+                                            :key="tag.id"
+                                            class="text-xs"
+                                            :style="{
+                                                backgroundColor: tag.color ? tag.color + '33' : '#f1f5f9',
+                                                color: tag.color || '#475569',
+                                                borderColor: tag.color ? tag.color + '66' : '#e2e8f0',
+                                            }"
+                                        >
+                                            {{ tag.name }}
+                                        </Badge>
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent class="w-[260px] p-2" align="start">
+                                    <div class="flex flex-col gap-1 max-h-[200px] overflow-y-auto">
+                                        <div
+                                            v-for="tag in tags"
+                                            :key="tag.id"
+                                            class="flex items-center gap-2 rounded px-2 py-1.5 cursor-pointer hover:bg-muted transition-colors"
+                                            @click="toggleTag(tag.id)"
+                                        >
+                                            <Checkbox
+                                                :checked="isTagSelected(tag.id)"
+                                                class="pointer-events-none"
+                                            />
+                                            <span
+                                                class="h-2 w-2 rounded-full shrink-0"
+                                                :style="{ backgroundColor: tag.color || '#94a3b8' }"
+                                            />
+                                            <span class="text-sm">{{ tag.name }}</span>
+                                        </div>
+                                        <div v-if="tags.length === 0" class="text-sm text-muted-foreground px-2 py-1">
+                                            No tags available.
+                                        </div>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
                         </div>
 
                         <div class="flex items-center gap-2 sm:col-span-2">

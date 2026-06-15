@@ -18,8 +18,8 @@ export function createColumns(
 ): ColumnDef<TaskStatus>[] {
     return [
         {
-            accessorKey: 'name',
-            header: 'Name',
+            accessorKey: 'title',
+            header: 'Title',
             cell: ({ row }) => {
                 const status = row.original;
                 return h('div', { class: 'flex items-center gap-2' }, [
@@ -27,7 +27,7 @@ export function createColumns(
                         class: 'h-2.5 w-2.5 shrink-0 rounded-full',
                         style: { backgroundColor: status.color || '#94a3b8' },
                     }),
-                    h('span', { class: 'font-medium' }, status.name),
+                    h('span', { class: 'font-medium' }, status.title),
                 ]);
             },
         },
@@ -40,19 +40,19 @@ export function createColumns(
             },
         },
         {
-            accessorKey: 'is_default',
-            header: 'Default',
+            accessorKey: 'is_system',
+            header: 'System',
             cell: ({ row }) => {
-                const value = row.getValue('is_default') as boolean;
-                return h(Badge, { variant: value ? 'default' : 'outline' }, () => (value ? 'Yes' : 'No'));
+                const value = row.getValue('is_system') as boolean;
+                return h(Badge, { variant: value ? 'default' : 'outline' }, () => (value ? 'System' : 'Custom'));
             },
         },
         {
-            accessorKey: 'is_closed',
-            header: 'Closed',
+            accessorKey: 'automation_trigger',
+            header: 'Automation',
             cell: ({ row }) => {
-                const value = row.getValue('is_closed') as boolean;
-                return h(Badge, { variant: value ? 'default' : 'outline' }, () => (value ? 'Yes' : 'No'));
+                const value = row.getValue('automation_trigger') as string | null;
+                return h('span', { class: 'text-xs text-muted-foreground' }, value ?? '—');
             },
         },
         {

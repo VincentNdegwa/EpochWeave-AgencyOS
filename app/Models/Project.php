@@ -19,7 +19,7 @@ class Project extends Model
         'name',
         'description',
         'color',
-        'status',
+        'project_status_id',
         'hourly_rate',
         'currency',
         'start_date',
@@ -81,5 +81,10 @@ class Project extends Model
     public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(ProjectStatus::class, 'project_status_id');
     }
 }

@@ -104,7 +104,7 @@ class BuilderDataController extends Controller
         $workspace = $request->attributes->get('current_workspace');
 
         $query = Project::where('workspace_id', $workspace->id)
-            ->select(['id', 'account_id', 'name', 'status', 'currency'])
+            ->select(['id', 'account_id', 'name', 'project_status_id', 'currency'])
             ->orderBy('name');
 
         if ($request->has('account_id')) {

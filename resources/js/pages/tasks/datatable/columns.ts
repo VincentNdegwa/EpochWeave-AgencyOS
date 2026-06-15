@@ -12,6 +12,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useDateFormat } from '@/composables/useDateFormat';
 import { useTaskPriorities } from '@/composables/useEnums';
 import { show as taskShow } from '@/routes/tasks';
 import type { Task } from '@/types/models/task';
@@ -21,6 +22,7 @@ export function createColumns(
     onDelete?: (task: Task) => void,
 ): ColumnDef<Task>[] {
     const taskPriorities = useTaskPriorities();
+    const { formatDate } = useDateFormat();
 
     return [
         {
@@ -84,7 +86,7 @@ export function createColumns(
                 }
                 return h(Badge, {
                     style: { backgroundColor: status.color || '#6b7280', color: '#fff' },
-                }, () => status.name);
+                }, () => status.title);
             },
         },
         {
@@ -114,7 +116,7 @@ export function createColumns(
             header: 'Due',
             cell: ({ row }) => {
                 const value = row.getValue('due_date') as string | null;
-                return h('span', { class: 'text-sm text-muted-foreground' }, value || '—');
+                return h('span', { class: 'text-sm text-muted-foreground' }, formatDate(value));
             },
         },
         {

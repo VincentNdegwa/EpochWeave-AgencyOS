@@ -12,7 +12,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useProjectStatuses } from '@/composables/useEnums';
 import { show as projectShow } from '@/routes/projects';
 import type { Project } from '@/types/models/project';
 
@@ -20,7 +19,6 @@ export function createColumns(
     onEdit?: (project: Project) => void,
     onDelete?: (project: Project) => void,
 ): ColumnDef<Project>[] {
-    const projectStatuses = useProjectStatuses();
 
     return [
         {
@@ -78,17 +76,16 @@ export function createColumns(
             accessorKey: 'status',
             header: 'Status',
             cell: ({ row }) => {
-                const status = row.getValue('status') as string;
-                const config = projectStatuses.getByValue(status);
-                if (!config) {
-                    return h(Badge, { variant: 'secondary' }, () => status);
+                const status = row.original.status;
+                if (!status) {
+                    return h(Badge, { variant: 'secondary' }, () => '—');
                 }
                 return h(
                     Badge,
                     {
-                        style: { backgroundColor: config.hexColor, color: 'white' },
+                        style: { backgroundColor: status.color, color: 'white' },
                     },
-                    () => config.label,
+                    () => status.title,
                 );
             },
         },

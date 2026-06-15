@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Project;
 use App\Models\ProjectMember;
+use App\Models\ProjectStatus;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -14,11 +15,14 @@ class ProjectService
     public function listProjects(int $workspaceId, array $filters = []): Collection
     {
         $query = Project::query()
-            ->with(['account:id,company_name', 'members.user:id,name'])
+            ->with(['account:id,company_name', 'members.user:id,name', 'status:id,title,color'])
             ->where('workspace_id', $workspaceId);
 
         if (! empty($filters['status'])) {
-            $query->where('status', $filters['status']);
+            // Filter by status automation trigger via relationship
+            $query->whereHas('status', function ($q) use ($filters) {
+                $q->where('automation_trigger', $filters['status']);
+            });
         }
 
         if (! empty($filters['search'])) {
@@ -51,8 +55,15 @@ class ProjectService
                 unset($data['members']);
 
                 $data['color'] = $data['color'] ?? '#6366f1';
-                $data['status'] = $data['status'] ?? 'active';
                 $data['portal_visible'] = $data['portal_visible'] ?? true;
+
+                // If status not provided, get active status from workspace
+                if (empty($data['project_status_id'])) {
+                    $activeStatus = ProjectStatus::where('workspace_id', $data['workspace_id'])
+                        ->where('automation_trigger', 'active')
+                        ->first();
+                    $data['project_status_id'] = $activeStatus?->id;
+                }
 
                 $project = Project::create($data);
 

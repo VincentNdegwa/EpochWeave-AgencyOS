@@ -6,6 +6,7 @@ use App\Actions\SendInvoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
 use App\Models\Invoice;
+use App\Models\InvoiceStatus;
 use App\Models\WorkspaceSetting;
 use App\Services\InvoiceService;
 use App\Services\UserPreferenceService;
@@ -67,11 +68,16 @@ class InvoiceController extends Controller
             $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
             $invoiceNumber = $this->generateInvoiceNumber($numberingSettings);
 
+            // Get draft status for this workspace
+            $draftStatus = InvoiceStatus::where('workspace_id', $workspace->id)
+                ->where('automation_trigger', 'draft')
+                ->first();
+
             $data['workspace_id'] = $workspace->id;
             $data['created_by'] = $request->user()->id;
             $data['user_id'] = $request->user()->id;
             $data['invoice_number'] = $invoiceNumber;
-            $data['status'] = 'draft';
+            $data['invoice_status_id'] = $draftStatus?->id;
             $data['currency'] = $workspace->currency ?? 'USD';
             $data['token'] = Str::uuid();
 

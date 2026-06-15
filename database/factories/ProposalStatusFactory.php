@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\ProposalStatus;
+use App\Models\Workspace;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,7 @@ class ProposalStatusFactory extends Factory
     public function definition(): array
     {
         return [
-            'workspace_id' => 1,
+            'workspace_id' => Workspace::factory(),
             'title' => $this->faker->words(2, true),
             'color' => $this->faker->hexColor(),
             'is_system' => false,

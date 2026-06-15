@@ -1,4 +1,4 @@
-export interface ProposalNumberingSettings {
+export interface NumberingSettings {
     format: string;
     prefix: string;
     delimiter: string;
@@ -14,7 +14,13 @@ export interface ProposalSettings {
     default_terms: string | null;
     sender_name: string;
     sender_title: string | null;
-    numbering: ProposalNumberingSettings;
+    numbering: NumberingSettings;
+}
+
+export interface InvoiceSettings {
+    payment_due_days: number;
+    default_terms: string | null;
+    numbering: NumberingSettings;
 }
 
 export interface NotificationSettings {

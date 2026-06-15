@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
-import { Pencil, ArrowLeft, Clock, CheckCircle } from '@lucide/vue';
+import { Head, router, setLayoutProps } from '@inertiajs/vue3';
+import { Pencil, Clock, CheckCircle } from '@lucide/vue';
 import { ref } from 'vue';
-import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTaskPriorities } from '@/composables/useEnums';
+import { dashboard } from '@/routes';
+import tasks from '@/routes/tasks';
 import type { Task } from '@/types/models/task';
 import TaskFormDialog from './dialogs/TaskFormDialog.vue';
 
@@ -19,6 +20,15 @@ const handleEditSuccess = () => {
     editOpen.value = false;
     router.reload();
 };
+
+setLayoutProps({
+    title: task.title,
+    breadcrumbs: [
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Tasks', href: tasks.index() },
+        { title: task.title },
+    ],
+});
 </script>
 
 <template>
@@ -26,28 +36,21 @@ const handleEditSuccess = () => {
 
     <div class="space-y-6">
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <Link :href="TaskController.index().url">
-                    <Button variant="ghost" size="icon" class="h-8 w-8">
-                        <ArrowLeft class="h-4 w-4" />
-                    </Button>
-                </Link>
-                <div class="flex items-center gap-2">
-                    <h1 class="text-lg font-semibold text-foreground">{{ task.title }}</h1>
-                    <Badge
-                        :variant="priority?.variant || 'secondary'"
-                        class="rounded-md text-[11px]"
-                    >
-                        {{ priority?.label || task.priority }}
-                    </Badge>
-                    <Badge
-                        v-if="task.status"
-                        :style="{ backgroundColor: task.status.color || '#6b7280', color: '#fff' }"
-                        class="rounded-md text-[11px]"
-                    >
-                        {{ task.status.name }}
-                    </Badge>
-                </div>
+            <div class="flex items-center gap-2">
+                <h1 class="text-lg font-semibold text-foreground">{{ task.title }}</h1>
+                <Badge
+                    :variant="priority?.variant || 'secondary'"
+                    class="rounded-md text-[11px]"
+                >
+                    {{ priority?.label || task.priority }}
+                </Badge>
+                <Badge
+                    v-if="task.status"
+                    :style="{ backgroundColor: task.status.color || '#6b7280', color: '#fff' }"
+                    class="rounded-md text-[11px]"
+                >
+                    {{ task.status.title }}
+                </Badge>
             </div>
             <Button size="sm" variant="outline" class="gap-1.5" @click="editOpen = true">
                 <Pencil class="h-3.5 w-3.5" />
@@ -102,7 +105,7 @@ const handleEditSuccess = () => {
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-muted-foreground">Status</span>
-                                <span>{{ task.status?.name || '—' }}</span>
+                                <span>{{ task.status?.title || '—' }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-muted-foreground">Priority</span>

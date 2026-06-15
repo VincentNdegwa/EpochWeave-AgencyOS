@@ -13,17 +13,16 @@ return new class extends Migration
     {
         Schema::create('task_statuses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('workspace_id')->constrained()->cascadeOnDelete();
-
-            $table->string('name', 100);
+            $table->foreignId('workspace_id')->constrained('workspaces')->cascadeOnDelete();
+            $table->string('title');
             $table->string('color', 7)->default('#6366f1');
+            $table->boolean('is_system')->default(false);
+            $table->string('automation_trigger', 30)->nullable();
             $table->integer('position')->default(0);
-            $table->boolean('is_default')->default(false);
-            $table->boolean('is_closed')->default(false);
+            $table->timestamps();
 
-            $table->timestampTz('created_at')->useCurrent();
-
-            $table->index(['workspace_id', 'position'], 'idx_task_statuses_workspace');
+            $table->index(['workspace_id', 'position'], 'idx_task_status_workspace_order');
+            $table->unique(['workspace_id', 'automation_trigger'], 'uidx_task_status_system_trigger');
         });
     }
 

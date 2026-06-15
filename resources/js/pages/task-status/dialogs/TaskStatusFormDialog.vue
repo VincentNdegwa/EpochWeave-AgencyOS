@@ -4,7 +4,6 @@ import { ref, watch } from 'vue';
 import TaskStatusController from '@/actions/App/Http/Controllers/TaskStatusController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -32,11 +31,9 @@ const emit = defineEmits<{
 }>();
 
 const form = ref({
-    name: props.status?.name || '',
+    title: props.status?.title || '',
     color: props.status?.color || '#94a3b8',
     position: props.status?.position?.toString() || '0',
-    is_default: props.status?.is_default || false,
-    is_closed: props.status?.is_closed || false,
 });
 
 watch(
@@ -44,19 +41,15 @@ watch(
     (s) => {
         if (s) {
             form.value = {
-                name: s.name,
+                title: s.title,
                 color: s.color || '#94a3b8',
                 position: s.position?.toString() || '0',
-                is_default: s.is_default,
-                is_closed: s.is_closed,
             };
         } else {
             form.value = {
-                name: '',
+                title: '',
                 color: '#94a3b8',
                 position: '0',
-                is_default: false,
-                is_closed: false,
             };
         }
     },
@@ -67,11 +60,9 @@ watch(
     (isOpen) => {
         if (isOpen && !props.status) {
             form.value = {
-                name: '',
+                title: '',
                 color: '#94a3b8',
                 position: '0',
-                is_default: false,
-                is_closed: false,
             };
         }
     },
@@ -101,15 +92,15 @@ watch(
                 <div class="grid gap-6 py-4">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="grid gap-2 sm:col-span-2">
-                            <Label for="ts-name" required>Name</Label>
+                            <Label for="ts-title" required>Title</Label>
                             <Input
-                                id="ts-name"
-                                name="name"
-                                v-model="form.name"
+                                id="ts-title"
+                                name="title"
+                                v-model="form.title"
                                 required
                                 placeholder="e.g. In Progress"
                             />
-                            <InputError :message="errors.name" />
+                            <InputError :message="errors.title" />
                         </div>
 
                         <div class="grid gap-2">
@@ -137,24 +128,6 @@ watch(
                             <InputError :message="errors.position" />
                         </div>
 
-                        <div class="flex items-center gap-6 sm:col-span-2">
-                            <div class="flex items-center gap-2">
-                                <Checkbox
-                                    id="ts-default"
-                                    name="is_default"
-                                    v-model:checked="form.is_default"
-                                />
-                                <Label for="ts-default" class="font-normal">Default status</Label>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <Checkbox
-                                    id="ts-closed"
-                                    name="is_closed"
-                                    v-model:checked="form.is_closed"
-                                />
-                                <Label for="ts-closed" class="font-normal">Closed status</Label>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
