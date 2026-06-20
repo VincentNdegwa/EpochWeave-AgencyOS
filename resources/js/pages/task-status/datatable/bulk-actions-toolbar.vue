@@ -2,9 +2,9 @@
 import { router } from '@inertiajs/vue3';
 import { Trash2 } from '@lucide/vue';
 import { computed } from 'vue';
+import TaskStatusController from '@/actions/App/Http/Controllers/TaskStatusController';
 import { Button } from '@/components/ui/button';
 import { confirm } from '@/composables/useConfirmation';
-import TaskStatusController from '@/actions/App/Http/Controllers/TaskStatusController';
 import type { TaskStatus } from '@/types/models/task_status';
 
 interface Props {
@@ -16,11 +16,14 @@ const props = defineProps<Props>();
 const hasSelection = computed(() => props.selectedRows.length > 0);
 const selectionText = computed(() => {
     const count = props.selectedRows.length;
+
     return count === 1 ? '1 item selected' : `${count} items selected`;
 });
 
 const handleBulkDelete = async () => {
-    if (!hasSelection.value) return;
+    if (!hasSelection.value) {
+return;
+}
 
     const confirmed = await confirm({
         title: props.selectedRows.length === 1 ? 'Delete Status' : `Delete ${props.selectedRows.length} Statuses`,

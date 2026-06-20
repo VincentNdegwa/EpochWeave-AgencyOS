@@ -102,6 +102,7 @@ watch(
 const handleProductSelect = (value: string) => {
     if (value === 'custom') {
         form.product_id = null;
+
         return;
     }
 
@@ -120,20 +121,28 @@ const handleProductSelect = (value: string) => {
 const lineSubtotal = computed(() => form.quantity * form.unit_price);
 
 const discountAmount = computed(() => {
-    if (form.discount_type === 'none') return 0;
+    if (form.discount_type === 'none') {
+return 0;
+}
+
     if (form.discount_type === 'percentage') {
         return Math.round((lineSubtotal.value * form.discount_value) / 100 * 100) / 100;
     }
+
     return form.discount_value;
 });
 
 const afterDiscount = computed(() => lineSubtotal.value - discountAmount.value);
 
 const taxAmount = computed(() => {
-    if (form.tax_type === 'none') return 0;
+    if (form.tax_type === 'none') {
+return 0;
+}
+
     if (form.tax_type === 'percentage') {
         return Math.round((afterDiscount.value * form.tax_value) / 100 * 100) / 100;
     }
+
     return form.tax_value;
 });
 

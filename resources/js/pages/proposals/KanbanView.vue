@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Calendar, Building, User, AlertCircle } from '@lucide/vue';
+import { ref, computed } from 'vue';
 import type { Proposal } from '@/types/models/proposal';
 
 interface ProposalStatus {
@@ -32,20 +32,30 @@ const isDragging = ref(false);
 const dragStartTime = ref<number>(0);
 
 const canDrop = (toStatusId: number): boolean => {
-    if (!dragging.value) return false;
+    if (!dragging.value) {
+return false;
+}
+
     const allowed = dragging.value.trigger
         ? (movement_rules[dragging.value.trigger] ?? [])
         : [];
+
     return allowed.includes(toStatusId) && dragging.value.fromStatusId !== toStatusId;
 };
 
 const validTargets = (trigger: string | null): number[] => {
-    if (!trigger) return [];
+    if (!trigger) {
+return [];
+}
+
     return movement_rules[trigger] ?? [];
 };
 
 const isTerminal = (trigger: string | null): boolean => {
-    if (!trigger) return false;
+    if (!trigger) {
+return false;
+}
+
     return (movement_rules[trigger] ?? []).length === 0;
 };
 
@@ -81,6 +91,7 @@ function onProposalMouseDown(proposal: Proposal) {
 
 function onProposalMouseUp(proposal: Proposal) {
     const timeSinceMouseDown = Date.now() - mouseDownTime.value;
+
     if (
         mouseDownTarget.value === proposal.id &&
         !isDragging.value &&
@@ -89,15 +100,18 @@ function onProposalMouseUp(proposal: Proposal) {
     ) {
         router.visit(`/proposals/${proposal.id}`);
     }
+
     mouseDownTarget.value = null;
 }
 
 function onDragOver(e: DragEvent, status: ProposalStatus) {
     if (canDrop(status.id)) {
         e.preventDefault();
+
         if (e.dataTransfer) {
             e.dataTransfer.dropEffect = 'move';
         }
+
         dragOverStatus.value = status.automation_trigger;
     }
 }
@@ -105,6 +119,7 @@ function onDragOver(e: DragEvent, status: ProposalStatus) {
 function onDragLeave(e: DragEvent) {
     const target = e.currentTarget as HTMLElement;
     const related = e.relatedTarget as Node | null;
+
     if (!target.contains(related)) {
         dragOverStatus.value = null;
     }
@@ -115,6 +130,7 @@ async function onDrop(e: DragEvent, targetStatus: ProposalStatus) {
     
     if (!dragging.value || !canDrop(targetStatus.id)) {
         onDragEnd();
+
         return;
     }
 
@@ -136,6 +152,7 @@ async function onDrop(e: DragEvent, targetStatus: ProposalStatus) {
 const columns = computed(() =>
     proposal_statuses.map((status) => {
         const trigger = status.automation_trigger;
+
         return {
             status,
             proposals: allProposals.filter((p) => p.proposal_status_id === status.id),

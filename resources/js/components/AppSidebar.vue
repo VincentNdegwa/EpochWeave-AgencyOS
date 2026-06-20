@@ -13,13 +13,13 @@ import {
     Tag,
     BarChart3,
 } from '@lucide/vue';
+import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
+import TagController from '@/actions/App/Http/Controllers/TagController';
+import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
-import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
-import TagController from '@/actions/App/Http/Controllers/TagController';
-import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import {
     Sidebar,
     SidebarContent,
@@ -32,8 +32,8 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import accounts from '@/routes/accounts';
-import products from '@/routes/products';
 import invoices from '@/routes/invoices';
+import products from '@/routes/products';
 import proposalTemplates from '@/routes/proposal-templates';
 import proposals from '@/routes/proposals';
 import reports from '@/routes/reports';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
 import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import type { Workspace } from '@/types/models/workspace';
 
 const props = defineProps<{
@@ -21,7 +21,10 @@ const organizationName = computed(() =>
 );
 
 const dynamicThemeStyles = computed(() => {
-    if (!primaryColor.value) return {};
+    if (!primaryColor.value) {
+return {};
+}
+
     return {
         '--tenant-primary': primaryColor.value,
         '--tenant-primary-hover': `${primaryColor.value}dd`

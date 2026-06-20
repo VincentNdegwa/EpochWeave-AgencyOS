@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
+import { storeToRefs } from 'pinia';
 import { ref, watch, computed } from 'vue';
 import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import InputError from '@/components/InputError.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -16,6 +19,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from '@/components/ui/popover';
+import {
     Select,
     SelectContent,
     SelectItem,
@@ -24,18 +32,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useTaskPriorities } from '@/composables/useEnums';
-import { usePage } from '@inertiajs/vue3';
 import { useBuilderDataStore } from '@/stores/builderData';
-import { storeToRefs } from 'pinia';
+import type { Tag } from '@/types/models/tag';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
-import type { Tag } from '@/types/models/tag';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from '@/components/ui/popover';
-import { Badge } from '@/components/ui/badge';
 
 interface Props {
     open: boolean;
@@ -64,6 +64,7 @@ const taskPriorities = useTaskPriorities();
 function toggleTag(tagId: number) {
     const idStr = tagId.toString();
     const idx = form.value.tag_ids.indexOf(idStr);
+
     if (idx > -1) {
         form.value.tag_ids.splice(idx, 1);
     } else {

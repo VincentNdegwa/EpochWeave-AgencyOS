@@ -1,25 +1,16 @@
 import { Link } from '@inertiajs/vue3';
-import { MoreHorizontal } from '@lucide/vue';
 import type { ColumnDef } from '@tanstack/vue-table';
 import { h } from 'vue';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useCurrency } from '@/composables/useCurrency';
 import { useBillingFrequencies, useBillingTypes } from '@/composables/useEnums';
 import { show as productShow } from '@/routes/products';
-import type { Product } from '@/types/models/product';
+import type { Product, ProductUnit } from '@/types/models/product';
+import ProductActions from '../components/ProductActions.vue';
 
 export function createColumns(
-    onEdit?: (product: Product) => void,
-    onDelete?: (product: Product) => void,
+    units?: ProductUnit[],
 ): ColumnDef<Product>[] {
     const { all: billingTypes } = useBillingTypes();
     const { all: billingFrequencies } = useBillingFrequencies();
@@ -151,65 +142,12 @@ export function createColumns(
             cell: ({ row }) => {
                 const product = row.original;
 
-                return h('div', { class: 'relative' }, [
-                    h(DropdownMenu, {}, () => [
-                        h(DropdownMenuTrigger, { asChild: true }, () =>
-                            h(
-                                Button,
-                                { variant: 'ghost', class: 'w-8 h-8 p-0' },
-                                () => [
-                                    h(
-                                        'span',
-                                        { class: 'sr-only' },
-                                        'Open menu',
-                                    ),
-                                    h(MoreHorizontal, { class: 'w-4 h-4' }),
-                                ],
-                            ),
-                        ),
-                        h(DropdownMenuContent, { align: 'end' }, () => [
-                            h(DropdownMenuItem, { asChild: true }, () =>
-                                h(
-                                    Link,
-                                    { href: productShow(product.id).url },
-                                    () => 'View',
-                                ),
-                            ),
-                            h(
-                                DropdownMenuItem,
-                                {
-                                    onClick: () => onEdit?.(product),
-                                },
-                                () => 'Edit',
-                            ),
-                            h(DropdownMenuSeparator),
-                            h(
-                                DropdownMenuItem,
-                                {
-                                    class: 'text-destructive',
-                                    onClick: async () => {
-                                        const { confirm } =
-                                            await import('@/composables/useConfirmation');
-
-                                        if (
-                                            await confirm({
-                                                title: 'Delete Product',
-                                                description:
-                                                    'Are you sure you want to delete this product? This action cannot be undone.',
-                                                confirmText: 'Delete',
-                                                cancelText: 'Cancel',
-                                                variant: 'destructive',
-                                            })
-                                        ) {
-                                            onDelete?.(product);
-                                        }
-                                    },
-                                },
-                                () => 'Delete',
-                            ),
-                        ]),
-                    ]),
-                ]);
+                return h(ProductActions, {
+                    product,
+                    units,
+                    variant: 'dropdown',
+                    size: 'icon',
+                });
             },
         },
     ];

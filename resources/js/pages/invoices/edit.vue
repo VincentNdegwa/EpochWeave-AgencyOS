@@ -17,12 +17,12 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderDataStore } from '@/stores/builderData';
 import { useCurrency } from '@/composables/useCurrency';
 import { useDateFormat } from '@/composables/useDateFormat';
 import { dashboard } from '@/routes';
-import InvoiceLineItemDialog from './components/InvoiceLineItemDialog.vue';
+import { useBuilderDataStore } from '@/stores/builderData';
 import type { Invoice } from '@/types/models/invoice';
+import InvoiceLineItemDialog from './components/InvoiceLineItemDialog.vue';
 
 const props = defineProps<{ invoice: Invoice }>();
 
@@ -147,6 +147,7 @@ const handleDialogSave = (item: LineItem) => {
     } else {
         form.value.line_items.push(item);
     }
+
     dialogOpen.value = false;
 };
 
@@ -171,7 +172,10 @@ const grandTotal = computed((): number =>
 );
 
 const handleSave = async () => {
-    if (isSaving.value) return;
+    if (isSaving.value) {
+return;
+}
+
     isSaving.value = true;
     errors.value = {};
 

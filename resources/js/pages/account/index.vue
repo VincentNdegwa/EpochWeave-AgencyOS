@@ -36,19 +36,8 @@ defineProps<{
 const { all: accountStatuses } = useAccountStatuses();
 const { format: formatCurrency } = useCurrency();
 const isCreateDialogOpen = ref(false);
-const isEditDialogOpen = ref(false);
-const editingAccount = ref<Account | undefined>(undefined);
-const columns = createColumns(
-    accountStatuses,
-    (account) => {
-        router.delete(AccountController.destroy(account.id).url);
-    },
-    formatCurrency,
-    (account) => {
-        editingAccount.value = account;
-        isEditDialogOpen.value = true;
-    },
-);
+
+const columns = createColumns(accountStatuses, formatCurrency);
 
 const statusTabs = [
     { value: 'all', label: 'All' },
@@ -164,11 +153,6 @@ defineOptions({
         <AccountFormDialog
             :open="isCreateDialogOpen"
             @update:open="isCreateDialogOpen = $event"
-        />
-        <AccountFormDialog
-            :open="isEditDialogOpen"
-            :account="editingAccount"
-            @update:open="isEditDialogOpen = $event"
         />
     </div>
 </template>

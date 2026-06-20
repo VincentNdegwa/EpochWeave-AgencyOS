@@ -22,15 +22,7 @@ const { projects, project_statuses, filters } = defineProps<{
 const dialogOpen = ref(false);
 const editingProject = ref<Project | null>(null);
 
-const columns = createColumns(
-    (project) => {
-        editingProject.value = project;
-        dialogOpen.value = true;
-    },
-    (project) => {
-        router.delete(ProjectController.destroy(project.id).url);
-    },
-);
+const columns = createColumns();
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },

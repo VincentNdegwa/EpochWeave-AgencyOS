@@ -12,8 +12,8 @@ import {
 } from '@lucide/vue';
 import { computed } from 'vue';
 import VueApexCharts from 'vue3-apexcharts';
-import { dashboard } from '@/routes';
 import { useCurrency } from '@/composables/useCurrency';
+import { dashboard } from '@/routes';
 import type { DashboardStats, DashboardActivity, DashboardDeadline, RevenueChartData } from '@/types';
 
 const page = usePage();

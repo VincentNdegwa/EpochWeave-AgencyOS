@@ -15,7 +15,10 @@ const body = ref('');
 const processing = ref(false);
 
 const submitComment = () => {
-    if (!body.value.trim()) return;
+    if (!body.value.trim()) {
+return;
+}
+
     processing.value = true;
 
     router.post(`/tasks/${props.taskId}/comments`, {

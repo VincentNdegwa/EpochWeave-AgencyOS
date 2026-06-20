@@ -10,13 +10,13 @@ import {
     SparklesIcon,
 } from '@lucide/vue';
 import { computed } from 'vue';
-import notifications from '@/routes/workspace-settings/notifications';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { dashboard } from '@/routes';
 import { index } from '@/routes/workspace-settings';
+import notifications from '@/routes/workspace-settings/notifications';
 import type { NotificationSettings } from '@/types';
 
 defineOptions({
@@ -38,19 +38,27 @@ const notificationSettings = computed(
 
 const syncToggle = (path: string) => computed({
     get: () => {
-        if (!notificationSettings.value?.settings) return false;
+        if (!notificationSettings.value?.settings) {
+return false;
+}
         
         return path.split('.').reduce((acc: any, key) => acc?.[key], notificationSettings.value.settings) ?? false;
     },
     set: (value: boolean) => {
-        if (!notificationSettings.value?.settings) return;
+        if (!notificationSettings.value?.settings) {
+return;
+}
 
         const keys = path.split('.');
         let current = notificationSettings.value.settings as any;
 
         for (let i = 0; i < keys.length - 1; i++) {
             const key = keys[i];
-            if (!current[key]) current[key] = {}; // Create nested objects inline if they don't exist
+
+            if (!current[key]) {
+current[key] = {};
+} // Create nested objects inline if they don't exist
+
             current = current[key];
         }
 

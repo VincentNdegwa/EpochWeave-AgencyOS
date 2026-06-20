@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useCurrency } from '@/composables/useCurrency';
 import { useInvoiceStatuses } from '@/composables/useEnums';
-import InvoiceActions from '../components/InvoiceActions.vue';
 import type { Invoice } from '@/types/models/invoice';
+import InvoiceActions from '../components/InvoiceActions.vue';
 
 export function createColumns(): ColumnDef<Invoice>[] {
     const { format: formatCurrency } = useCurrency();

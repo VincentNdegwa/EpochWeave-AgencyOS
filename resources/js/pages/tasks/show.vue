@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { Head, router, setLayoutProps } from '@inertiajs/vue3';
-import { Pencil } from '@lucide/vue';
-import { ref } from 'vue';
+import { Head, setLayoutProps } from '@inertiajs/vue3';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTaskPriorities } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import tasks from '@/routes/tasks';
 import type { Task } from '@/types/models/task';
-import TaskFormDialog from './dialogs/TaskFormDialog.vue';
 import AttachmentList from './components/AttachmentList.vue';
 import CommentThread from './components/CommentThread.vue';
 import SubtaskList from './components/SubtaskList.vue';
-import ActivityTimeline from '@/components/ActivityTimeline.vue';
+import TaskActions from './components/TaskActions.vue';
 import TimeEntriesPanel from './components/TimeEntriesPanel.vue';
 
 const { task, activities } = defineProps<{
@@ -22,12 +19,6 @@ const { task, activities } = defineProps<{
 }>();
 const taskPriorities = useTaskPriorities();
 const priority = taskPriorities.getByValue(task.priority);
-const editOpen = ref(false);
-
-const handleEditSuccess = () => {
-    editOpen.value = false;
-    router.reload();
-};
 
 setLayoutProps({
     title: task.title,
@@ -60,10 +51,11 @@ setLayoutProps({
                     {{ task.status.title }}
                 </Badge>
             </div>
-            <Button size="sm" variant="outline" class="gap-1.5" @click="editOpen = true">
-                <Pencil class="h-3.5 w-3.5" />
-                Edit
-            </Button>
+            <TaskActions
+                :task="task"
+                variant="split"
+                size="sm"
+            />
         </div>
 
         <div class="grid grid-cols-4 gap-4">
@@ -176,6 +168,5 @@ setLayoutProps({
             </TabsContent>
         </Tabs>
 
-        <TaskFormDialog v-model:open="editOpen" :task="task" @success="handleEditSuccess" />
     </div>
 </template>

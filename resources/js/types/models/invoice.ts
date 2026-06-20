@@ -1,6 +1,6 @@
-import type { Account, AccountContact, Proposal, User } from './proposal';
 import type { Payment } from './payment';
 import type { Project } from './project';
+import type { Account, AccountContact, Proposal, User } from './proposal';
 import type {Workspace} from './workspace';
 
 export interface InvoiceItem {

@@ -18,12 +18,17 @@ const subtasks = computed(() => props.parentTask.children || []);
 const completedCount = computed(() => subtasks.value.filter((s) => s.completed_at).length);
 
 const progress = computed(() => {
-    if (subtasks.value.length === 0) return 0;
+    if (subtasks.value.length === 0) {
+return 0;
+}
+
     return Math.round((completedCount.value / subtasks.value.length) * 100);
 });
 
 const addSubtask = () => {
-    if (!newTitle.value.trim()) return;
+    if (!newTitle.value.trim()) {
+return;
+}
 
     router.post(`/tasks`, {
         project_id: props.parentTask.project_id,

@@ -8,18 +8,18 @@ import {
 import { computed, ref, watchEffect } from 'vue';
 
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge }         from '@/components/ui/badge';
 import { Button }        from '@/components/ui/button';
 import { Separator }     from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useCurrency }       from '@/composables/useCurrency';
 import { useDateFormat }     from '@/composables/useDateFormat';
 import { useInvoiceStatuses } from '@/composables/useEnums';
 import { dashboard }         from '@/routes';
 import type { Invoice }      from '@/types/models/invoice';
-import ActivityTimeline from '@/components/ActivityTimeline.vue';
-import InvoiceDocument from './components/InvoiceDocument.vue';
 import InvoiceActions from './components/InvoiceActions.vue';
+import InvoiceDocument from './components/InvoiceDocument.vue';
 import PaymentPanel from './components/PaymentPanel.vue';
 const props = defineProps<{
     invoice: Invoice;
@@ -55,11 +55,24 @@ const formattedTotal = computed(() =>
 );
 
 const dueHint = computed(() => {
-    if (!props.invoice.due_date || props.invoice.status === 'paid') return null;
+    if (!props.invoice.due_date || props.invoice.status === 'paid') {
+return null;
+}
+
     const diff = Math.ceil((new Date(props.invoice.due_date).getTime() - Date.now()) / 86_400_000);
-    if (diff < 0)   return { label: `Overdue by ${Math.abs(diff)}d`, cls: 'text-destructive' };
-    if (diff === 0) return { label: 'Due today',                     cls: 'text-destructive' };
-    if (diff <= 3)  return { label: `Due in ${diff}d`,               cls: 'text-amber-600'   };
+
+    if (diff < 0)   {
+return { label: `Overdue by ${Math.abs(diff)}d`, cls: 'text-destructive' };
+}
+
+    if (diff === 0) {
+return { label: 'Due today',                     cls: 'text-destructive' };
+}
+
+    if (diff <= 3)  {
+return { label: `Due in ${diff}d`,               cls: 'text-amber-600'   };
+}
+
     return null;
 });
 

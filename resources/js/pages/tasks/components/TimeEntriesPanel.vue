@@ -33,6 +33,7 @@ const stopTimer = () => {
         clearInterval(timerInterval.value);
         timerInterval.value = null;
     }
+
     isRunning.value = false;
 
     const startedAt = new Date(Date.now() - elapsedSeconds.value * 1000);
@@ -65,6 +66,7 @@ const formatDuration = (seconds: number): string => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
+
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
@@ -74,6 +76,7 @@ const formatDate = (dateString: string): string => {
 
 const totalHours = computed(() => {
     const totalSeconds = props.timeEntries.reduce((sum, entry) => sum + entry.duration_seconds, 0);
+
     return (totalSeconds / 3600).toFixed(2);
 });
 </script>

@@ -21,6 +21,7 @@ export function createColumns(
             header: 'Name',
             cell: ({ row }) => {
                 const tag = row.original;
+
                 return h('div', { class: 'flex items-center gap-2' }, [
                     h('span', {
                         class: 'h-2.5 w-2.5 shrink-0 rounded-full',
@@ -35,6 +36,7 @@ export function createColumns(
             header: 'Color',
             cell: ({ row }) => {
                 const value = row.getValue('color') as string;
+
                 return h('div', { class: 'flex items-center gap-2' }, [
                     h('span', {
                         class: 'h-4 w-4 rounded border',
@@ -49,6 +51,7 @@ export function createColumns(
             enableHiding: false,
             cell: ({ row }) => {
                 const tag = row.original;
+
                 return h('div', { class: 'relative' }, [
                     h(DropdownMenu, {}, () => [
                         h(DropdownMenuTrigger, { asChild: true }, () =>
@@ -66,6 +69,7 @@ export function createColumns(
                                     class: 'text-destructive',
                                     onClick: async () => {
                                         const { confirm } = await import('@/composables/useConfirmation');
+
                                         if (
                                             await confirm({
                                                 title: 'Delete Tag',

@@ -2,10 +2,10 @@
 import { Head, Link, router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import {
     Building2,
-    Pencil,
     Send,
 } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog/ConfirmationDialog.vue';
@@ -13,11 +13,11 @@ import { useCurrency } from '@/composables/useCurrency';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import { dashboard } from '@/routes';
 import { show as accountShow } from '@/routes/accounts';
-import proposals, { edit as proposalEdit } from '@/routes/proposals';
-import ActivityTimeline from '@/components/ActivityTimeline.vue';
+import proposals from '@/routes/proposals';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { Proposal } from '@/types/models/proposal';
+import ProposalActions from './components/ProposalActions.vue';
 
 const props = defineProps<{
     proposal: Proposal;
@@ -197,12 +197,11 @@ function describeValidity(value?: string | null): string {
                         <Send class="h-4 w-4" />
                         {{ props.proposal.sent_at ? 'Resend' : 'Send' }}
                     </Button>
-                    <Link :href="proposalEdit(props.proposal.id).url">
-                        <Button class="gap-2">
-                            <Pencil class="h-4 w-4" />
-                            Edit
-                        </Button>
-                    </Link>
+                    <ProposalActions
+                        :proposal="props.proposal"
+                        variant="split"
+                        size="sm"
+                    />
                 </div>
             </div>
         </div>

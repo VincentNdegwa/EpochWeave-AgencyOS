@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePage } from '@inertiajs/vue3';
 import {
     FileTextIcon,
     CoinsIcon,
@@ -10,7 +11,6 @@ import {
 } from '@lucide/vue';
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
-import { usePage } from '@inertiajs/vue3';
 import type { Ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +42,7 @@ fetchUsers();
 
 const currentUser = computed(() => {
     const page = usePage();
+
     return page.props.auth?.user;
 });
 
@@ -57,6 +58,7 @@ watch(() => proposal.value.account_id, async (newAccountId) => {
 watch(() => accountContacts.value, (contacts) => {
     if (contacts.length > 0 && !proposal.value.account_contact_id) {
         const primaryContact = contacts.find(contact => contact.is_primary);
+
         if (primaryContact) {
             proposal.value.account_contact_id = primaryContact.id;
         }

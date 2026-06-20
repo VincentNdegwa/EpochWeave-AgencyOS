@@ -1,23 +1,21 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import {
-    Edit,
-    Trash2,
     Package,
     DollarSign,
     Clock,
     CheckCircle2,
     XCircle,
 } from '@lucide/vue';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrency } from '@/composables/useCurrency';
 import { useBillingFrequencies, useBillingTypes } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
-import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { index as productIndex } from '@/routes/products';
 import type { Product } from '@/types/models/product';
+import ProductActions from './components/ProductActions.vue';
 
 const props = defineProps<{
     product: Product;
@@ -66,14 +64,11 @@ defineOptions({
                 </div>
             </div>
             <div class="flex gap-2">
-                <Button variant="outline">
-                    <Edit class="mr-2 h-4 w-4" />
-                    Edit
-                </Button>
-                <Button variant="destructive">
-                    <Trash2 class="mr-2 h-4 w-4" />
-                    Delete
-                </Button>
+                <ProductActions
+                    :product="props.product"
+                    variant="split"
+                    size="sm"
+                />
             </div>
         </div>
 

@@ -22,6 +22,7 @@ export function createColumns(
             header: 'Title',
             cell: ({ row }) => {
                 const status = row.original;
+
                 return h('div', { class: 'flex items-center gap-2' }, [
                     h('span', {
                         class: 'h-2.5 w-2.5 shrink-0 rounded-full',
@@ -36,6 +37,7 @@ export function createColumns(
             header: 'Position',
             cell: ({ row }) => {
                 const value = row.getValue('position') as number;
+
                 return h('span', { class: 'text-sm tabular-nums text-muted-foreground' }, String(value));
             },
         },
@@ -44,6 +46,7 @@ export function createColumns(
             header: 'System',
             cell: ({ row }) => {
                 const value = row.getValue('is_system') as boolean;
+
                 return h(Badge, { variant: value ? 'default' : 'outline' }, () => (value ? 'System' : 'Custom'));
             },
         },
@@ -52,6 +55,7 @@ export function createColumns(
             header: 'Automation',
             cell: ({ row }) => {
                 const value = row.getValue('automation_trigger') as string | null;
+
                 return h('span', { class: 'text-xs text-muted-foreground' }, value ?? '—');
             },
         },
@@ -60,6 +64,7 @@ export function createColumns(
             enableHiding: false,
             cell: ({ row }) => {
                 const status = row.original;
+
                 return h('div', { class: 'relative' }, [
                     h(DropdownMenu, {}, () => [
                         h(DropdownMenuTrigger, { asChild: true }, () =>
@@ -77,6 +82,7 @@ export function createColumns(
                                     class: 'text-destructive',
                                     onClick: async () => {
                                         const { confirm } = await import('@/composables/useConfirmation');
+
                                         if (
                                             await confirm({
                                                 title: 'Delete Status',

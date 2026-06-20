@@ -1,24 +1,13 @@
 import { Link } from '@inertiajs/vue3';
-import { MoreHorizontal } from '@lucide/vue';
 import type { ColumnDef } from '@tanstack/vue-table';
 import { h } from 'vue';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { show as projectShow } from '@/routes/projects';
 import type { Project } from '@/types/models/project';
+import ProjectActions from '../components/ProjectActions.vue';
 
-export function createColumns(
-    onEdit?: (project: Project) => void,
-    onDelete?: (project: Project) => void,
-): ColumnDef<Project>[] {
+export function createColumns(): ColumnDef<Project>[] {
 
     return [
         {
@@ -45,6 +34,7 @@ export function createColumns(
             header: 'Project',
             cell: ({ row }) => {
                 const project = row.original;
+
                 return h('div', { class: 'flex items-center gap-2' }, [
                     h('span', {
                         class: 'h-2.5 w-2.5 shrink-0 rounded-full',
@@ -66,9 +56,11 @@ export function createColumns(
             header: 'Account',
             cell: ({ row }) => {
                 const account = row.original.account;
+
                 if (!account) {
                     return h('span', { class: 'text-muted-foreground' }, '—');
                 }
+
                 return h('span', {}, account.company_name);
             },
         },
@@ -77,9 +69,11 @@ export function createColumns(
             header: 'Status',
             cell: ({ row }) => {
                 const status = row.original.status;
+
                 if (!status) {
                     return h(Badge, { variant: 'secondary' }, () => '—');
                 }
+
                 return h(
                     Badge,
                     {
@@ -96,6 +90,7 @@ export function createColumns(
                 const total = row.original.tasks_total || 0;
                 const completed = row.original.tasks_completed || 0;
                 const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
                 return h('div', { class: 'flex items-center gap-2' }, [
                     h('div', { class: 'h-1.5 w-16 overflow-hidden rounded-full bg-muted' }, [
                         h('div', {
@@ -112,44 +107,12 @@ export function createColumns(
             enableHiding: false,
             cell: ({ row }) => {
                 const project = row.original;
-                return h('div', { class: 'relative' }, [
-                    h(DropdownMenu, {}, () => [
-                        h(DropdownMenuTrigger, { asChild: true }, () =>
-                            h(Button, { variant: 'ghost', class: 'w-8 h-8 p-0' }, () => [
-                                h('span', { class: 'sr-only' }, 'Open menu'),
-                                h(MoreHorizontal, { class: 'w-4 h-4' }),
-                            ]),
-                        ),
-                        h(DropdownMenuContent, { align: 'end' }, () => [
-                            h(DropdownMenuItem, { asChild: true }, () =>
-                                h(Link, { href: projectShow(project.id).url }, () => 'View'),
-                            ),
-                            h(DropdownMenuItem, { onClick: () => onEdit?.(project) }, () => 'Edit'),
-                            h(DropdownMenuSeparator),
-                            h(
-                                DropdownMenuItem,
-                                {
-                                    class: 'text-destructive',
-                                    onClick: async () => {
-                                        const { confirm } = await import('@/composables/useConfirmation');
-                                        if (
-                                            await confirm({
-                                                title: 'Delete Project',
-                                                description: 'Are you sure you want to delete this project? This action cannot be undone.',
-                                                confirmText: 'Delete',
-                                                cancelText: 'Cancel',
-                                                variant: 'destructive',
-                                            })
-                                        ) {
-                                            onDelete?.(project);
-                                        }
-                                    },
-                                },
-                                () => 'Delete',
-                            ),
-                        ]),
-                    ]),
-                ]);
+
+                return h(ProjectActions, {
+                    project,
+                    variant: 'dropdown',
+                    size: 'icon',
+                });
             },
         },
     ];

@@ -10,13 +10,13 @@ import {
     SparklesIcon,
 } from '@lucide/vue';
 import { computed } from 'vue';
-import automation from '@/routes/workspace-settings/automation';
 import Heading from '@/components/Heading.vue';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { dashboard } from '@/routes';
 import { index } from '@/routes/workspace-settings';
+import automation from '@/routes/workspace-settings/automation';
 import type { AutomationSettings } from '@/types';
 
 defineOptions({
@@ -37,19 +37,27 @@ const automationSettings = computed(
 
 const syncToggle = (path: string) => computed({
     get: () => {
-        if (!automationSettings.value?.settings) return false;
+        if (!automationSettings.value?.settings) {
+return false;
+}
         
         return path.split('.').reduce((acc: any, key) => acc?.[key], automationSettings.value.settings) ?? false;
     },
     set: (value: boolean) => {
-        if (!automationSettings.value?.settings) return;
+        if (!automationSettings.value?.settings) {
+return;
+}
 
         const keys = path.split('.');
         let current = automationSettings.value.settings as any;
 
         for (let i = 0; i < keys.length - 1; i++) {
             const key = keys[i];
-            if (!current[key]) current[key] = {};
+
+            if (!current[key]) {
+current[key] = {};
+}
+
             current = current[key];
         }
 

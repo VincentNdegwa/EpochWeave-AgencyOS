@@ -13,14 +13,14 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { dashboard } from '@/routes';
+import type { Tag as TagType } from '@/types/models/tag';
 import type { Task } from '@/types/models/task';
+import type { TaskStatus } from '@/types/models/task_status';
+import TaskStatusFormDialog from '../task-status/dialogs/TaskStatusFormDialog.vue';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
-import KanbanView from './KanbanView.vue';
 import TaskFormDialog from './dialogs/TaskFormDialog.vue';
-import TaskStatusFormDialog from '../task-status/dialogs/TaskStatusFormDialog.vue';
-import type { TaskStatus } from '@/types/models/task_status';
-import type { Tag as TagType } from '@/types/models/tag';
+import KanbanView from './KanbanView.vue';
 
 const { tasks, task_statuses, tags, display_mode, filters } = defineProps<{
     tasks: Task[];
@@ -38,15 +38,7 @@ const dialogOpen = ref(false);
 const editingTask = ref<Task | null>(null);
 const statusDialogOpen = ref(false);
 
-const columns = createColumns(
-    (task) => {
-        editingTask.value = task;
-        dialogOpen.value = true;
-    },
-    (task) => {
-        router.delete(TaskController.destroy(task.id).url);
-    },
-);
+const columns = createColumns(task_statuses, tags);
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },

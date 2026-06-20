@@ -75,6 +75,12 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('accounts.contacts.update');
     Route::delete('/accounts/{account}/contacts/{contact}', [AccountContactController::class, 'destroy'])
         ->name('accounts.contacts.destroy');
+    Route::patch('/accounts/{account}/contacts/{contact}/primary', [AccountContactController::class, 'setPrimary'])
+        ->name('accounts.contacts.primary');
+    Route::post('/accounts/{account}/contacts/{contact}/portal', [AccountContactController::class, 'grantPortalAccess'])
+        ->name('accounts.contacts.portal.grant');
+    Route::delete('/accounts/{account}/contacts/{contact}/portal', [AccountContactController::class, 'revokePortalAccess'])
+        ->name('accounts.contacts.portal.revoke');
 
     Route::resource('product-units', ProductUnitController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);

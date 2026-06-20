@@ -20,7 +20,10 @@ const triggerUpload = () => {
 const handleFileChange = (event: Event) => {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    if (!file) return;
+
+    if (!file) {
+return;
+}
 
     processing.value = true;
     const formData = new FormData();
@@ -30,7 +33,10 @@ const handleFileChange = (event: Event) => {
         preserveScroll: true,
         onFinish: () => {
             processing.value = false;
-            if (fileInput.value) fileInput.value.value = '';
+
+            if (fileInput.value) {
+fileInput.value.value = '';
+}
         },
     });
 };
@@ -42,10 +48,14 @@ const deleteAttachment = (attachmentId: number) => {
 };
 
 const formatSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
+    if (bytes === 0) {
+return '0 B';
+}
+
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
+
     return `${parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
 };
 </script>

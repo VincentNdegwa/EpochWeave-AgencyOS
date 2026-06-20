@@ -26,12 +26,28 @@ const hasDiscount = computed(() => (props.invoice.discount_total ?? 0) > 0);
 const hasTax = computed(() => (props.invoice.total_tax_amount ?? 0) > 0);
 
 const dueStatus = computed(() => {
-    if (!props.invoice.due_date) return null;
+    if (!props.invoice.due_date) {
+return null;
+}
+
     const diff = Math.ceil((new Date(props.invoice.due_date).getTime() - Date.now()) / 86_400_000);
-    if (props.invoice.status === 'paid') return null;
-    if (diff < 0) return { label: `Overdue by ${Math.abs(diff)} day${Math.abs(diff) === 1 ? '' : 's'}`, variant: 'destructive' as const };
-    if (diff === 0) return { label: 'Due today', variant: 'destructive' as const };
-    if (diff <= 3) return { label: `Due in ${diff} days`, variant: 'secondary' as const };
+
+    if (props.invoice.status === 'paid') {
+return null;
+}
+
+    if (diff < 0) {
+return { label: `Overdue by ${Math.abs(diff)} day${Math.abs(diff) === 1 ? '' : 's'}`, variant: 'destructive' as const };
+}
+
+    if (diff === 0) {
+return { label: 'Due today', variant: 'destructive' as const };
+}
+
+    if (diff <= 3) {
+return { label: `Due in ${diff} days`, variant: 'secondary' as const };
+}
+
     return null;
 });
 </script>

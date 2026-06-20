@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
+import { storeToRefs } from 'pinia';
 import { ref, watch, computed } from 'vue';
+import { onMounted } from 'vue';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
@@ -22,19 +25,19 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { usePage } from '@inertiajs/vue3';
 import { useBuilderDataStore } from '@/stores/builderData';
-import { storeToRefs } from 'pinia';
-import { onMounted } from 'vue';
+import type { Account } from '@/types/models/account';
 import type { Proposal } from '@/types/models/proposal';
 
 interface Props {
     open: boolean;
     proposal?: Proposal | null;
+    account?: Account | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     proposal: null,
+    account: null,
 });
 
 const emit = defineEmits<{
@@ -50,7 +53,7 @@ const { accounts, templates, accountContacts } = storeToRefs(builderDataStore);
 const form = ref({
     title: props.proposal?.title || '',
     description: props.proposal?.description || '',
-    account_id: props.proposal?.account_id || '',
+    account_id: props.proposal?.account_id?.toString() || props.account?.id?.toString() || '',
     account_contact_id: props.proposal?.account_contact_id || '',
     template_id: props.proposal?.template_id || '',
 });
@@ -67,6 +70,7 @@ watch(() => form.value.account_id, async (newAccountId) => {
         const contacts = await builderDataStore.fetchAccountContacts({
             account_id: newAccountId.toString(),
         });
+
         // Auto-select first contact if available
         if (contacts && contacts.length > 0) {
             form.value.account_contact_id = contacts[0].id.toString();
@@ -94,7 +98,7 @@ watch(
             form.value = {
                 title: '',
                 description: '',
-                account_id: '',
+                account_id: props.account?.id?.toString() || '',
                 account_contact_id: '',
                 template_id: '',
             };
@@ -149,6 +153,7 @@ watch(
                                 name="account_id"
                                 v-model="form.account_id"
                                 required
+                                :disabled="!!props.account"
                             >
                                 <SelectTrigger class="w-full">
                                     <SelectValue

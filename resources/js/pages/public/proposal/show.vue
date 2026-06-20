@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { usePage } from '@inertiajs/vue3';
+import { computed, onMounted, ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { SignatureModal } from '@/components/ui/signature-modal';
 import { useCurrency } from '@/composables/useCurrency';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
-import { SignatureModal } from '@/components/ui/signature-modal';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
-import { usePage } from '@inertiajs/vue3';
 import type { Proposal } from '@/types/models/proposal';
 
 const props = defineProps<{
@@ -26,7 +26,10 @@ const showSignatureModal = ref(false);
 const signatureModalMode = ref<'sign' | 'reject'>('sign');
 
 const hasSignatureBlock = computed(() => {
-    if (!props.proposal.content) return false;
+    if (!props.proposal.content) {
+return false;
+}
+
     return props.proposal.content.some((block: any) => block.type === 'signature');
 });
 

@@ -9,6 +9,7 @@ const props = defineProps<{
 const hasSelection = computed(() => props.selectedRows.length > 0);
 const selectionText = computed(() => {
     const count = props.selectedRows.length;
+
     return count === 1 ? '1 item selected' : `${count} items selected`;
 });
 </script>

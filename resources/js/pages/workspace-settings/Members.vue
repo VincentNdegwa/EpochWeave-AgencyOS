@@ -44,7 +44,9 @@ const submitInvite = () => {
 };
 
 const removeMember = (userId: number) => {
-    if (!confirm('Remove this member from the workspace?')) return;
+    if (!confirm('Remove this member from the workspace?')) {
+return;
+}
 
     const form = useForm({});
     form.delete(`/workspace/members/${userId}`);

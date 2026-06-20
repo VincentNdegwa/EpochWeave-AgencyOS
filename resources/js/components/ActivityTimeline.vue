@@ -40,26 +40,74 @@ const iconMap: Record<string, unknown> = {
 };
 
 function iconFor(type: string): unknown {
-  if (type.includes('created')) return iconMap.Plus;
-  if (type.includes('updated')) return iconMap.Pencil;
-  if (type.includes('deleted')) return iconMap.Trash;
-  if (type.includes('viewed')) return iconMap.Eye;
-  if (type.includes('sent')) return iconMap.Send;
-  if (type.includes('accepted')) return iconMap.CheckCircle;
-  if (type.includes('declined')) return iconMap.XCircle;
-  if (type.includes('paid') || type.includes('payment')) return iconMap.Banknote;
+  if (type.includes('created')) {
+return iconMap.Plus;
+}
+
+  if (type.includes('updated')) {
+return iconMap.Pencil;
+}
+
+  if (type.includes('deleted')) {
+return iconMap.Trash;
+}
+
+  if (type.includes('viewed')) {
+return iconMap.Eye;
+}
+
+  if (type.includes('sent')) {
+return iconMap.Send;
+}
+
+  if (type.includes('accepted')) {
+return iconMap.CheckCircle;
+}
+
+  if (type.includes('declined')) {
+return iconMap.XCircle;
+}
+
+  if (type.includes('paid') || type.includes('payment')) {
+return iconMap.Banknote;
+}
+
   return iconMap.Activity;
 }
 
 function iconColorFor(type: string): string {
-  if (type.includes('created')) return 'bg-green-500';
-  if (type.includes('updated')) return 'bg-blue-500';
-  if (type.includes('deleted')) return 'bg-red-500';
-  if (type.includes('viewed')) return 'bg-purple-500';
-  if (type.includes('sent')) return 'bg-indigo-500';
-  if (type.includes('accepted')) return 'bg-emerald-500';
-  if (type.includes('declined')) return 'bg-orange-500';
-  if (type.includes('paid') || type.includes('payment')) return 'bg-cyan-500';
+  if (type.includes('created')) {
+return 'bg-green-500';
+}
+
+  if (type.includes('updated')) {
+return 'bg-blue-500';
+}
+
+  if (type.includes('deleted')) {
+return 'bg-red-500';
+}
+
+  if (type.includes('viewed')) {
+return 'bg-purple-500';
+}
+
+  if (type.includes('sent')) {
+return 'bg-indigo-500';
+}
+
+  if (type.includes('accepted')) {
+return 'bg-emerald-500';
+}
+
+  if (type.includes('declined')) {
+return 'bg-orange-500';
+}
+
+  if (type.includes('paid') || type.includes('payment')) {
+return 'bg-cyan-500';
+}
+
   return 'bg-gray-500';
 }
 </script>

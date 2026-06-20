@@ -1,21 +1,20 @@
 <script setup lang="ts">
-import { Head, router, setLayoutProps } from '@inertiajs/vue3';
-import { Pencil, List, Kanban, MessageSquare, Paperclip, StickyNote } from '@lucide/vue';
+import { Head, setLayoutProps } from '@inertiajs/vue3';
+import { List, Kanban, MessageSquare, Paperclip, StickyNote } from '@lucide/vue';
 import { ref, computed } from 'vue';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
+import { useDateFormat } from '@/composables/useDateFormat';
 import { dashboard } from '@/routes';
 import projects from '@/routes/projects';
 import type { Project } from '@/types/models/project';
-import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
-import ActivityTimeline from '@/components/ActivityTimeline.vue';
-import ProjectFormDialog from './dialogs/ProjectFormDialog.vue';
-import KanbanView from '../tasks/KanbanView.vue';
-import TaskDataTable from '../tasks/datatable/data-table.vue';
 import { createColumns as createTaskColumns } from '../tasks/datatable/columns';
-import { useDateFormat } from '@/composables/useDateFormat';
+import TaskDataTable from '../tasks/datatable/data-table.vue';
+import KanbanView from '../tasks/KanbanView.vue';
+import ProjectActions from './components/ProjectActions.vue';
 
 const { formatDate } = useDateFormat();
 
@@ -25,7 +24,6 @@ const { project, task_statuses, activities } = defineProps<{
     activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
 }>();
 
-const editOpen = ref(false);
 const activeTab = ref<'overview' | 'tasks'>('overview');
 const taskViewMode = ref<'kanban' | 'list'>('kanban');
 
@@ -33,19 +31,7 @@ const progress = project.tasks_total > 0
     ? Math.round((project.tasks_completed / project.tasks_total) * 100)
     : 0;
 
-const handleEditSuccess = () => {
-    editOpen.value = false;
-    router.reload();
-};
-
-const taskColumns = createTaskColumns(
-    (task: Task) => {
-        router.visit(`/tasks/${task.id}/edit`);
-    },
-    (task: Task) => {
-        router.delete(`/tasks/${task.id}`);
-    },
-);
+const taskColumns = createTaskColumns();
 
 const tabs = [
     { key: 'overview' as const, label: 'Overview' },
@@ -57,6 +43,7 @@ const timelineItems = computed(() => {
     items.push({ icon: MessageSquare, title: 'Comments', count: 0, color: '#3b82f6' });
     items.push({ icon: StickyNote, title: 'Notes', count: 0, color: '#f59e0b' });
     items.push({ icon: Paperclip, title: 'Attachments', count: 0, color: '#10b981' });
+
     return items;
 });
 
@@ -88,10 +75,11 @@ setLayoutProps({
                     {{ project.status?.title }}
                 </Badge>
             </div>
-            <Button size="sm" variant="outline" class="gap-1.5" @click="editOpen = true">
-                <Pencil class="h-3.5 w-3.5" />
-                Edit Project
-            </Button>
+            <ProjectActions
+                :project="project"
+                variant="split"
+                size="sm"
+            />
         </div>
 
         <div class="flex items-center justify-between">
@@ -228,6 +216,5 @@ setLayoutProps({
             </div>
         </div>
 
-        <ProjectFormDialog v-model:open="editOpen" :project="project" @success="handleEditSuccess" />
     </div>
 </template>

@@ -27,7 +27,9 @@ const paidAt = ref(new Date().toISOString().split('T')[0]);
 const balance = computed(() => props.grandTotal - props.amountPaid);
 
 const submitPayment = () => {
-    if (!amount.value || parseFloat(amount.value) <= 0) return;
+    if (!amount.value || parseFloat(amount.value) <= 0) {
+return;
+}
 
     router.post(`/invoices/${props.invoiceId}/payments`, {
         amount: parseFloat(amount.value),

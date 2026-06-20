@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import {
     DollarSign,
-    Edit,
     ExternalLink,
     Globe,
     Plus,
-    Trash2,
     UserRound,
     Users,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import AccountController from '@/actions/App/Http/Controllers/AccountController';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,10 +19,9 @@ import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import { index as accountIndex } from '@/routes/accounts';
 import type { Account, AccountContact } from '@/types/models/account';
+import AccountActions from './components/AccountActions.vue';
 import { createContactColumns } from './contacts-datatable/columns';
 import ContactsDataTable from './contacts-datatable/data-table.vue';
-import AccountFormDialog from './dialogs/AccountFormDialog.vue';
-import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import ContactFormDialog from './dialogs/ContactFormDialog.vue';
 
 const props = defineProps<{
@@ -35,7 +32,6 @@ const props = defineProps<{
 const { getVariant, getLabel } = useAccountStatuses();
 const { format: formatCurrency } = useCurrency();
 
-const accountDialogOpen = ref(false);
 const contactDialogOpen = ref(false);
 const editingContact = ref<AccountContact | null>(null);
 
@@ -48,36 +44,11 @@ const companyInitials = computed(() => {
         .toUpperCase();
 });
 
-const contactColumns = createContactColumns(
-    (contact) => {
-        editingContact.value = contact;
-        contactDialogOpen.value = true;
-    },
-    (contact) => {
-        router.delete(`/accounts/${props.account.id}/contacts/${contact.id}`);
-    },
-);
+const contactColumns = createContactColumns(props.account.id);
 
 const openNewContactDialog = () => {
     editingContact.value = null;
     contactDialogOpen.value = true;
-};
-
-const deleteAccount = async () => {
-    const { confirm } = await import('@/composables/useConfirmation');
-
-    if (
-        await confirm({
-            title: 'Delete Account',
-            description:
-                'Are you sure you want to delete this account? This action cannot be undone.',
-            confirmText: 'Delete',
-            cancelText: 'Cancel',
-            variant: 'destructive',
-        })
-    ) {
-        router.delete(AccountController.destroy(props.account.id).url);
-    }
 };
 
 defineOptions({
@@ -132,26 +103,11 @@ defineOptions({
                 </div>
             </div>
             <div class="flex shrink-0 items-center gap-2">
-                <Button
-                    type="button"
-                    variant="outline"
+                <AccountActions
+                    :account="props.account"
+                    variant="split"
                     size="sm"
-                    class="gap-2"
-                    @click="accountDialogOpen = true"
-                >
-                    <Edit class="h-3.5 w-3.5" />
-                    Edit
-                </Button>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    class="gap-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    @click="deleteAccount"
-                >
-                    <Trash2 class="h-3.5 w-3.5" />
-                    Delete
-                </Button>
+                />
             </div>
         </div>
 
@@ -313,16 +269,10 @@ defineOptions({
             </div>
         </Card>
 
-        <!-- Dialogs -->
         <ContactFormDialog
             v-model:open="contactDialogOpen"
             :account-id="props.account.id"
             :contact="editingContact"
-        />
-        <AccountFormDialog
-            :open="accountDialogOpen"
-            :account="props.account"
-            @update:open="accountDialogOpen = $event"
         />
     </div>
 </template>

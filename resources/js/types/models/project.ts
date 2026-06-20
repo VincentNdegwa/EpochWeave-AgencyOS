@@ -1,5 +1,5 @@
-import type { Account } from './proposal';
 import type { ProjectStatus } from './project_status';
+import type { Account } from './proposal';
 import type { Task } from './task';
 
 export interface ProjectMember {

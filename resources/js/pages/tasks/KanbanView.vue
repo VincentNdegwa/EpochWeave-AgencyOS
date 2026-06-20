@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Calendar, Clock, DollarSign, Hash } from '@lucide/vue';
-import type { Task } from '@/types/models/task';
-import type { TaskStatus } from '@/types/models/task_status';
+import { ref, computed, watch } from 'vue';
 import { useDateFormat } from '@/composables/useDateFormat';
 import { useTaskPriorities } from '@/composables/useEnums';
 import { getInitials } from '@/composables/useInitials';
+import type { Task } from '@/types/models/task';
+import type { TaskStatus } from '@/types/models/task_status';
 
 const props = withDefaults(
     defineProps<{
@@ -44,12 +44,16 @@ const dragging = ref<{ id: number; fromStatusId: number } | null>(null);
 const dragOverStatus = ref<number | null>(null);
 
 const canDrop = (toStatusId: number): boolean => {
-    if (!dragging.value) return false;
+    if (!dragging.value) {
+return false;
+}
+
     return dragging.value.fromStatusId !== toStatusId;
 };
 
 function onDragStart(e: DragEvent, task: Task) {
     dragging.value = { id: task.id, fromStatusId: task.task_status_id };
+
     if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'move';
     }
@@ -69,14 +73,18 @@ function onDragOver(e: DragEvent, statusId: number) {
 
 function onDrop(e: DragEvent, targetStatusId: number) {
     e.preventDefault();
+
     if (!dragging.value || !canDrop(targetStatusId)) {
         onDragEnd();
+
         return;
     }
+
     const taskId = dragging.value.id;
     onDragEnd();
 
     const taskIndex = localTasks.value.findIndex((t) => t.id === taskId);
+
     if (taskIndex !== -1) {
         localTasks.value[taskIndex] = {
             ...localTasks.value[taskIndex],

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { Calendar, Building, AlertCircle } from '@lucide/vue';
+import { ref, computed } from 'vue';
 import { useInvoiceStatuses } from '@/composables/useEnums';
-import InvoiceActions from './components/InvoiceActions.vue';
 import type { Invoice } from '@/types/models/invoice';
+import InvoiceActions from './components/InvoiceActions.vue';
 
 interface StatusColumn {
     key: string;
@@ -38,9 +38,16 @@ const hoveredInvoiceId = ref<number | null>(null);
 const isDragging = ref(false);
 
 const canDrop = (toStatusKey: string): boolean => {
-    if (!dragging.value) return false;
+    if (!dragging.value) {
+return false;
+}
+
     const targetCol = statusColumns.value.find((c) => c.key === toStatusKey);
-    if (!targetCol || targetCol.locked) return false;
+
+    if (!targetCol || targetCol.locked) {
+return false;
+}
+
     return dragging.value.fromStatus !== toStatusKey;
 };
 
@@ -78,6 +85,7 @@ function onInvoiceMouseDown(invoice: Invoice) {
 
 function onInvoiceMouseUp(invoice: Invoice) {
     const timeSinceMouseDown = Date.now() - mouseDownTime.value;
+
     if (
         mouseDownTarget.value === invoice.id &&
         !isDragging.value &&
@@ -86,15 +94,18 @@ function onInvoiceMouseUp(invoice: Invoice) {
     ) {
         router.visit(`/invoices/${invoice.id}`);
     }
+
     mouseDownTarget.value = null;
 }
 
 function onDragOver(e: DragEvent, statusKey: string) {
     if (canDrop(statusKey)) {
         e.preventDefault();
+
         if (e.dataTransfer) {
             e.dataTransfer.dropEffect = 'move';
         }
+
         dragOverStatus.value = statusKey;
     }
 }
@@ -102,6 +113,7 @@ function onDragOver(e: DragEvent, statusKey: string) {
 function onDragLeave(e: DragEvent) {
     const target = e.currentTarget as HTMLElement;
     const related = e.relatedTarget as Node | null;
+
     if (!target.contains(related)) {
         dragOverStatus.value = null;
     }
@@ -112,6 +124,7 @@ async function onDrop(e: DragEvent, targetStatus: StatusColumn) {
 
     if (!dragging.value || !canDrop(targetStatus.key)) {
         onDragEnd();
+
         return;
     }
 

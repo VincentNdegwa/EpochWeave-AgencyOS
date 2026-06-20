@@ -2,9 +2,9 @@
 import { router } from '@inertiajs/vue3';
 import { Trash2 } from '@lucide/vue';
 import { computed } from 'vue';
+import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import { Button } from '@/components/ui/button';
 import { confirm } from '@/composables/useConfirmation';
-import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import type { Invoice } from '@/types/models/invoice';
 
 interface Props {

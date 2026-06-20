@@ -25,15 +25,18 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useProjectStatuses } from '@/composables/useEnums';
 import { useBuilderDataStore } from '@/stores/builderData';
+import type { Account } from '@/types/models/account';
 import type { Project } from '@/types/models/project';
 
 interface Props {
     open: boolean;
     project?: Project | null;
+    account?: Account | null;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     project: null,
+    account: null,
 });
 
 const emit = defineEmits<{
@@ -55,7 +58,7 @@ function randomColor(): string {
 }
 
 const form = ref({
-    account_id: props.project?.account_id?.toString() || '',
+    account_id: props.project?.account_id?.toString() || props.account?.id?.toString() || '',
     name: props.project?.name || '',
     description: props.project?.description || '',
     color: props.project?.color || randomColor(),
@@ -81,7 +84,7 @@ watch(
             };
         } else {
             form.value = {
-                account_id: '',
+                account_id: props.account?.id?.toString() || '',
                 name: '',
                 description: '',
                 color: randomColor(),
@@ -99,9 +102,10 @@ watch(
     (isOpen) => {
         if (isOpen) {
             builderStore.fetchAccounts();
+
             if (!props.project) {
                 form.value = {
-                    account_id: '',
+                    account_id: props.account?.id?.toString() || '',
                     name: '',
                     description: '',
                     color: randomColor(),
@@ -152,7 +156,7 @@ watch(
 
                         <div class="grid gap-2">
                             <Label for="project-account" required>Account</Label>
-                            <Select name="account_id" v-model="form.account_id" required>
+                            <Select name="account_id" v-model="form.account_id" required :disabled="!!props.account">
                                 <SelectTrigger class="w-full">
                                     <SelectValue placeholder="Select an account" />
                                 </SelectTrigger>

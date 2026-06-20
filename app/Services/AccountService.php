@@ -303,6 +303,56 @@ class AccountService
         return Account::with('contacts')->find($id);
     }
 
+    public function setPrimaryContact(AccountContact $contact): void
+    {
+        try {
+            DB::transaction(function () use ($contact) {
+                $contact->account->contacts()
+                    ->where('id', '!=', $contact->id)
+                    ->update(['is_primary' => false]);
+
+                $contact->update(['is_primary' => true]);
+            });
+        } catch (\Exception $e) {
+            throw AccountException::contactNotFound();
+        }
+    }
+
+    public function grantPortalAccess(Account $account, AccountContact $contact): PortalInvitation
+    {
+        try {
+            return DB::transaction(function () use ($account, $contact) {
+                if ($contact->client_profile_id) {
+                    throw AccountException::contactAlreadyHasPortalAccess();
+                }
+
+                return $this->createInvitation($account, $contact);
+            });
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    public function revokePortalAccess(AccountContact $contact): void
+    {
+        try {
+            DB::transaction(function () use ($contact) {
+                $profileId = $contact->client_profile_id;
+
+                if (! $profileId) {
+                    throw AccountException::contactHasNoPortalAccess();
+                }
+
+                $contact->update(['client_profile_id' => null]);
+
+                // Also delete the invitation if it exists and is unused
+                $contact->portalInvitation()?->delete();
+            });
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
     public function bulkUpdateStatus(array $accountIds, AccountStatus $status): int
     {
         return Account::whereIn('id', $accountIds)->update(['status' => $status->value]);

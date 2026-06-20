@@ -19,7 +19,7 @@ import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
 import ProductFormDialog from './dialogs/ProductFormDialog.vue';
 
-defineProps<{
+const props = defineProps<{
     products: Product[];
     units: ProductUnit[];
     stats: {
@@ -37,15 +37,7 @@ const dialogOpen = ref(false);
 const editingProduct = ref<Product | null>(null);
 const unitDialogOpen = ref(false);
 
-const columns = createColumns(
-    (product) => {
-        editingProduct.value = product;
-        dialogOpen.value = true;
-    },
-    (product) => {
-        router.delete(ProductController.destroy(product.id).url);
-    },
-);
+const columns = createColumns(props.units);
 
 const statusTabs = [
     { value: 'all', label: 'All' },

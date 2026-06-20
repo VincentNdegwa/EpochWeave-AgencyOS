@@ -21,17 +21,26 @@ const isRejected = computed(() => builderStore.proposal.proposal_status?.automat
 const signerName = computed(() => builderStore.proposal.signer_name || null);
 const signerDate = computed(() => {
     const signedAt = builderStore.proposal.signed_at;
-    if (!signedAt) return null;
+
+    if (!signedAt) {
+return null;
+}
+
     const date = new Date(signedAt as string);
+
     return date.toISOString().split('T')[0];
 });
 const signatureDataUrl = computed(() => {
     const signatureData = builderStore.proposal.signature_data;
-    if (!signatureData) return null;
+
+    if (!signatureData) {
+return null;
+}
     
     if (typeof signatureData === 'string') {
         try {
             const parsed = JSON.parse(signatureData);
+
             return parsed.data || null;
         } catch {
             return signatureData;

@@ -45,4 +45,14 @@ class AccountException extends Exception
     {
         return new self($message);
     }
+
+    public static function contactAlreadyHasPortalAccess(): self
+    {
+        return new self('Contact already has portal access.');
+    }
+
+    public static function contactHasNoPortalAccess(): self
+    {
+        return new self('Contact does not have portal access.');
+    }
 }

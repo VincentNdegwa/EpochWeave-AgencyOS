@@ -37,15 +37,7 @@ const editingProposal = ref<Proposal | null>(null);
 const statusDialogOpen = ref(false);
 const editingStatus = ref<any>(null);
 
-const columns = createColumns(
-    (proposal) => {
-        editingProposal.value = proposal;
-        dialogOpen.value = true;
-    },
-    (proposal) => {
-        router.delete(ProposalController.destroy(proposal.id).url);
-    },
-);
+const columns = createColumns();
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },

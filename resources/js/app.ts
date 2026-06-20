@@ -4,9 +4,9 @@ import { createApp, h } from 'vue';
 import { initializeTheme } from '@/composables/useAppearance';
 import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import PublicLayout from '@/layouts/public/Layout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import WorkspaceSettingsLayout from '@/layouts/workspace-settings/Layout.vue';
-import PublicLayout from '@/layouts/public/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
