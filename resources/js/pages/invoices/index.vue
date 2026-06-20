@@ -7,29 +7,28 @@ import { Button } from '@/components/ui/button';
 import {
     ButtonGroup,
 } from '@/components/ui/button-group';
-import { useInvoiceStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import type { Invoice } from '@/types/models/invoice';
+import type { InvoiceStatus } from '@/types/models/invoice_status';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
 import KanbanView from './KanbanView.vue';
 
-const { invoices, display_mode, filters } = defineProps<{
+const { invoices, display_mode, filters, invoice_statuses } = defineProps<{
     invoices: Invoice[];
     display_mode: string;
+    invoice_statuses: InvoiceStatus[];
     filters?: {
         status?: string;
         search?: string;
     };
 }>();
 
-const invoiceStatuses = useInvoiceStatuses();
-
 const columns = createColumns();
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },
-    ...invoiceStatuses.values.map((s) => ({ value: s.value, label: s.label })),
+    ...invoice_statuses.map((s) => ({ value: String(s.id), label: s.title })),
 ]);
 
 const handleCreate = () => {
@@ -145,6 +144,7 @@ defineOptions({
         <KanbanView
             v-else
             :invoices="invoices"
+            :invoice_statuses="invoice_statuses"
         />
     </div>
 </template>

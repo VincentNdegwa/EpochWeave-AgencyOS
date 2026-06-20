@@ -99,11 +99,8 @@ class Invoice extends Model
         return $this->hasMany(Payment::class)->orderByDesc('paid_at');
     }
 
-    /**
-     * @deprecated Use invoiceStatus() instead
-     */
-    public function status(): BelongsTo
+    public function creditNotes(): HasMany
     {
-        return $this->invoiceStatus();
+        return $this->hasMany(CreditNote::class)->orderByDesc('refunded_at');
     }
 }

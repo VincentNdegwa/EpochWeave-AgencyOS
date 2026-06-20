@@ -3,12 +3,10 @@ import { Link, router } from '@inertiajs/vue3';
 import {
     Ban,
     Bell,
-    CheckCircle2,
     ChevronDown,
     Copy,
     CreditCard,
     Download,
-    History,
     Link as LinkIcon,
     MoreHorizontal,
     Pencil,
@@ -16,7 +14,8 @@ import {
     Send,
     Trash2,
 } from '@lucide/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,9 +26,13 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Invoice } from '@/types/models/invoice';
+import type { InvoiceStatus } from '@/types/models/invoice_status';
+import RecordPaymentDialog from '../dialogs/RecordPaymentDialog.vue';
+import RecordRefundDialog from '../dialogs/RecordRefundDialog.vue';
 
 interface Props {
     invoice: Invoice;
+    invoice_statuses: InvoiceStatus[];
     variant?: 'dropdown' | 'split';
     size?: 'sm' | 'default' | 'icon';
 }
@@ -39,14 +42,8 @@ const props = withDefaults(defineProps<Props>(), {
     size: 'sm',
 });
 
-const emit = defineEmits<{
-    'record-payment': [invoice: Invoice];
-    'download-receipt': [invoice: Invoice];
-    'record-refund': [invoice: Invoice];
-    duplicate: [invoice: Invoice];
-    'send-reminder': [invoice: Invoice];
-    'view-history': [invoice: Invoice];
-}>();
+const recordPaymentOpen = ref(false);
+const recordRefundOpen = ref(false);
 
 interface ActionItem {
     label: string;
@@ -82,7 +79,7 @@ const sizeClasses = computed(() => {
     }
 });
 
-const status = computed(() => props.invoice.status ?? 'draft');
+const status = computed(() => props.invoice.invoice_status?.automation_trigger ?? 'draft');
 
 const viewAction: ActionItem = {
     label: 'View',
@@ -108,25 +105,17 @@ const sendAction: ActionItem = {
     },
 };
 
-const markAsSentAction: ActionItem = {
-    label: 'Mark as Sent',
-    icon: CheckCircle2,
-    handler: () => {
-        router.patch(`/invoices/${props.invoice.id}/status`, { status: 'sent' });
-    },
-};
-
 const recordPaymentAction: ActionItem = {
     label: 'Record Payment',
     icon: CreditCard,
     primary: true,
     handler: () => {
-        emit('record-payment', props.invoice);
+        recordPaymentOpen.value = true;
     },
 };
 
 const resendEmailAction: ActionItem = {
-    label: 'Resend Email',
+    label: 'Resend',
     icon: Send,
     handler: () => {
         router.post(`/invoices/${props.invoice.id}/send`);
@@ -138,7 +127,11 @@ const copyPublicLinkAction: ActionItem = {
     icon: LinkIcon,
     handler: () => {
         const url = `${window.location.origin}/invoices/${props.invoice.token}/public`;
-        navigator.clipboard.writeText(url);
+        navigator.clipboard.writeText(url).then(() => {
+            toast.success('Public link copied to clipboard');
+        }).catch(() => {
+            toast.error('Failed to copy public link');
+        });
     },
 };
 
@@ -159,7 +152,16 @@ const voidAction: ActionItem = {
                 variant: 'destructive',
             })
         ) {
-            router.patch(`/invoices/${props.invoice.id}/status`, { status: 'void' });
+
+            const voidStatus = props.invoice_statuses.find(
+                (s) => s.automation_trigger === 'voided',
+            );
+
+            if (voidStatus) {
+                router.patch(`/invoices/${props.invoice.id}/status`, {
+                    invoice_status_id: voidStatus.id,
+                });
+            }
         }
     },
 };
@@ -169,23 +171,34 @@ const downloadReceiptAction: ActionItem = {
     icon: Download,
     primary: true,
     handler: () => {
-        emit('download-receipt', props.invoice);
+        window.open(InvoiceController.downloadReceipt(props.invoice.id).url, '_blank');
     },
 };
 
 const recordRefundAction: ActionItem = {
-    label: 'Record Refund / Issue Credit Note',
+    label: 'Issue Credit Note',
     icon: RotateCcw,
     handler: () => {
-        emit('record-refund', props.invoice);
+        recordRefundOpen.value = true;
     },
 };
 
 const duplicateAction: ActionItem = {
     label: 'Duplicate',
     icon: Copy,
-    handler: () => {
-        emit('duplicate', props.invoice);
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Duplicate Invoice',
+                description: 'This will create a copy of this invoice as a new draft.',
+                confirmText: 'Duplicate',
+                cancelText: 'Cancel',
+            })
+        ) {
+            router.post(InvoiceController.duplicate(props.invoice.id).url);
+        }
     },
 };
 
@@ -214,8 +227,19 @@ const deleteAction: ActionItem = {
 const sendLateReminderAction: ActionItem = {
     label: 'Send Late Reminder',
     icon: Bell,
-    handler: () => {
-        emit('send-reminder', props.invoice);
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Send Late Reminder',
+                description: 'This will send a late payment reminder email to the invoice contact.',
+                confirmText: 'Send',
+                cancelText: 'Cancel',
+            })
+        ) {
+            router.post(InvoiceController.sendReminder(props.invoice.id).url);
+        }
     },
 };
 
@@ -223,16 +247,19 @@ const duplicateToDraftAction: ActionItem = {
     label: 'Duplicate to Draft',
     icon: Copy,
     primary: true,
-    handler: () => {
-        emit('duplicate', props.invoice);
-    },
-};
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
 
-const viewHistoryAuditAction: ActionItem = {
-    label: 'View History Audit',
-    icon: History,
-    handler: () => {
-        emit('view-history', props.invoice);
+        if (
+            await confirm({
+                title: 'Duplicate to Draft',
+                description: 'This will create a copy of this invoice as a new draft.',
+                confirmText: 'Duplicate',
+                cancelText: 'Cancel',
+            })
+        ) {
+            router.post(InvoiceController.duplicate(props.invoice.id).url);
+        }
     },
 };
 
@@ -243,7 +270,6 @@ const allActions = computed((): ActionItem[] => {
                 viewAction,
                 editAction,
                 sendAction,
-                markAsSentAction,
                 deleteAction,
             ];
         case 'sent':
@@ -269,11 +295,10 @@ const allActions = computed((): ActionItem[] => {
                 copyPublicLinkAction,
                 voidAction,
             ];
-        case 'void':
+        case 'voided':
             return [
                 viewAction,
                 duplicateToDraftAction,
-                viewHistoryAuditAction,
             ];
         default:
             return [viewAction];
@@ -405,4 +430,15 @@ return [];
             </template>
         </DropdownMenuContent>
     </DropdownMenu>
+
+    <RecordPaymentDialog
+        :open="recordPaymentOpen"
+        :invoice="props.invoice"
+        @update:open="recordPaymentOpen = $event"
+    />
+    <RecordRefundDialog
+        :open="recordRefundOpen"
+        :invoice="props.invoice"
+        @update:open="recordRefundOpen = $event"
+    />
 </template>

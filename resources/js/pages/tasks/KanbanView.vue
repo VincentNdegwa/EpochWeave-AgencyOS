@@ -7,6 +7,7 @@ import { useTaskPriorities } from '@/composables/useEnums';
 import { getInitials } from '@/composables/useInitials';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
+import TaskActions from './components/TaskActions.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -42,6 +43,11 @@ const columns = computed(() =>
 
 const dragging = ref<{ id: number; fromStatusId: number } | null>(null);
 const dragOverStatus = ref<number | null>(null);
+const isDragging = ref(false);
+const hoveredTaskId = ref<number | null>(null);
+
+const mouseDownTime = ref<number>(0);
+const mouseDownTarget = ref<number | null>(null);
 
 const canDrop = (toStatusId: number): boolean => {
     if (!dragging.value) {
@@ -52,6 +58,8 @@ return false;
 };
 
 function onDragStart(e: DragEvent, task: Task) {
+    hoveredTaskId.value = null;
+    isDragging.value = true;
     dragging.value = { id: task.id, fromStatusId: task.task_status_id };
 
     if (e.dataTransfer) {
@@ -62,6 +70,27 @@ function onDragStart(e: DragEvent, task: Task) {
 function onDragEnd() {
     dragging.value = null;
     dragOverStatus.value = null;
+    isDragging.value = false;
+}
+
+function onTaskMouseDown(task: Task) {
+    mouseDownTime.value = Date.now();
+    mouseDownTarget.value = task.id;
+}
+
+function onTaskMouseUp(task: Task) {
+    const elapsed = Date.now() - mouseDownTime.value;
+
+    if (
+        mouseDownTarget.value === task.id &&
+        !isDragging.value &&
+        elapsed < 200 &&
+        elapsed > 50
+    ) {
+        router.visit(`/tasks/${task.id}`);
+    }
+
+    mouseDownTarget.value = null;
 }
 
 function onDragOver(e: DragEvent, statusId: number) {
@@ -127,14 +156,20 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                 <div
                     v-for="task in col.tasks"
                     :key="task.id"
-                    class="cursor-grab rounded-lg border bg-background p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing"
-                    :class="dragging?.id === task.id ? 'scale-95 opacity-40' : ''"
+                    class="group relative rounded-lg border bg-background p-3 shadow-sm transition-all select-none"
+                    :class="[
+                        'cursor-grab hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing',
+                        dragging?.id === task.id ? 'scale-95 opacity-40' : '',
+                    ]"
                     draggable="true"
+                    @mouseenter="hoveredTaskId = task.id"
+                    @mouseleave="hoveredTaskId = null"
                     @dragstart="onDragStart($event, task)"
                     @dragend="onDragEnd"
+                    @mousedown="onTaskMouseDown(task)"
+                    @mouseup="onTaskMouseUp(task)"
                 >
-                    <!-- Project + Priority Row -->
-                    <div class="flex items-center gap-2 mb-1.5">
+                    <div class="mb-1.5 flex items-start justify-between gap-1">
                         <span
                             v-if="task.project"
                             class="flex items-center gap-1 text-[11px] font-medium text-muted-foreground truncate"
@@ -145,10 +180,11 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                             />
                             {{ task.project.name }}
                         </span>
-                        <span
-                            v-if="task.priority"
-                            class="ml-auto inline-block h-2 w-2 rounded-full shrink-0"
-                            :style="{ backgroundColor: taskPriorities.getHexColor(task.priority) }"
+                        <TaskActions
+                            :task="task"
+                            :task-statuses="props.task_statuses"
+                            variant="dropdown"
+                            size="icon"
                         />
                     </div>
 

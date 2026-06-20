@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\Invoice;
 
-use App\Enums\InvoiceStatus;
 use App\Jobs\CreateInvoiceFromProposal;
 use App\Jobs\ProvisionProjectFromProposal;
 use App\Models\Account;
+use App\Models\AccountContact;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\InvoiceStatus;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\Proposal;
@@ -15,9 +17,11 @@ use App\Models\ProposalItem;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Notifications\InvoiceLateReminder;
 use App\Services\InvoiceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class InvoiceTest extends TestCase
@@ -47,6 +51,27 @@ class InvoiceTest extends TestCase
 
         $this->actingAs($this->user)
             ->withSession(['current_workspace_id' => $this->workspace->id]);
+
+        InvoiceStatus::firstOrCreate(
+            ['workspace_id' => $this->workspace->id, 'automation_trigger' => 'draft'],
+            ['title' => 'Draft', 'color' => '#6b7280', 'is_system' => true, 'position' => 0]
+        );
+        InvoiceStatus::firstOrCreate(
+            ['workspace_id' => $this->workspace->id, 'automation_trigger' => 'sent'],
+            ['title' => 'Sent', 'color' => '#3b82f6', 'is_system' => true, 'position' => 1]
+        );
+        InvoiceStatus::firstOrCreate(
+            ['workspace_id' => $this->workspace->id, 'automation_trigger' => 'paid'],
+            ['title' => 'Paid', 'color' => '#16a34a', 'is_system' => true, 'position' => 2]
+        );
+        InvoiceStatus::firstOrCreate(
+            ['workspace_id' => $this->workspace->id, 'automation_trigger' => 'overdue'],
+            ['title' => 'Overdue', 'color' => '#f59e0b', 'is_system' => true, 'position' => 3]
+        );
+        InvoiceStatus::firstOrCreate(
+            ['workspace_id' => $this->workspace->id, 'automation_trigger' => 'voided'],
+            ['title' => 'Voided', 'color' => '#ef4444', 'is_system' => true, 'position' => 4]
+        );
     }
 
     public function test_it_can_create_invoice_with_line_items(): void
@@ -292,12 +317,195 @@ class InvoiceTest extends TestCase
         ]);
     }
 
-    public function test_invoice_status_enum_values(): void
+    public function test_it_can_duplicate_invoice(): void
     {
-        $this->assertEquals('draft', InvoiceStatus::Draft->value);
-        $this->assertEquals('sent', InvoiceStatus::Sent->value);
-        $this->assertEquals('paid', InvoiceStatus::Paid->value);
-        $this->assertEquals('void', InvoiceStatus::Void->value);
-        $this->assertEquals('overdue', InvoiceStatus::Overdue->value);
+        $draftStatus = InvoiceStatus::where('workspace_id', $this->workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+            'invoice_status_id' => $draftStatus->id,
+        ]);
+
+        InvoiceItem::factory()->create([
+            'invoice_id' => $invoice->id,
+            'product_id' => null,
+        ]);
+
+        $response = $this->post(route('invoices.duplicate', $invoice->id));
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('invoices', [
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+        ]);
+
+        $this->assertDatabaseCount('invoices', 2);
+        $this->assertDatabaseCount('invoice_items', 2);
+    }
+
+    public function test_it_can_send_late_reminder(): void
+    {
+        Notification::fake();
+
+        $contact = AccountContact::factory()->create([
+            'account_id' => $this->account->id,
+        ]);
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+            'account_contact_id' => $contact->id,
+        ]);
+
+        $response = $this->post(route('invoices.reminder', $invoice->id));
+
+        $response->assertRedirect();
+        Notification::assertSentTo($contact, InvoiceLateReminder::class);
+    }
+
+    public function test_it_can_download_receipt(): void
+    {
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+        ]);
+
+        $response = $this->get(route('invoices.receipt', $invoice->id));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'text/html; charset=UTF-8');
+        $response->assertSee('RECEIPT');
+    }
+
+    public function test_it_can_record_refund(): void
+    {
+        $paidStatus = InvoiceStatus::where('workspace_id', $this->workspace->id)
+            ->where('automation_trigger', 'paid')
+            ->first();
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+            'invoice_status_id' => $paidStatus->id,
+            'grand_total' => 10000,
+            'amount_paid' => 10000,
+        ]);
+
+        Payment::factory()->create([
+            'invoice_id' => $invoice->id,
+            'workspace_id' => $this->workspace->id,
+            'amount' => 10000,
+        ]);
+
+        $response = $this->post(route('invoices.refunds.store', $invoice->id), [
+            'amount' => 5000,
+            'refunded_at' => now()->toDateString(),
+            'reason' => 'Partial refund',
+            'reference' => 'REF-001',
+        ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('credit_notes', [
+            'invoice_id' => $invoice->id,
+            'amount' => 5000,
+            'reason' => 'Partial refund',
+        ]);
+
+        $invoice->refresh();
+        $this->assertEquals(5000, $invoice->amount_paid);
+    }
+
+    public function test_recording_payment_increases_account_lifetime_value(): void
+    {
+        $draftStatus = InvoiceStatus::where('workspace_id', $this->workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+            'invoice_status_id' => $draftStatus->id,
+            'grand_total' => 5000,
+            'amount_paid' => 0,
+        ]);
+
+        $initialLtv = $this->account->lifetime_value;
+
+        $this->post(route('invoices.payments.store', $invoice->id), [
+            'amount' => 2500,
+            'method' => 'cash',
+            'paid_at' => now()->toDateString(),
+            'reference' => null,
+            'notes' => null,
+        ]);
+
+        $this->account->refresh();
+        $this->assertEquals($initialLtv + 2500, $this->account->lifetime_value);
+    }
+
+    public function test_deleting_payment_decreases_account_lifetime_value(): void
+    {
+        $draftStatus = InvoiceStatus::where('workspace_id', $this->workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+            'invoice_status_id' => $draftStatus->id,
+            'grand_total' => 5000,
+            'amount_paid' => 3000,
+        ]);
+
+        $payment = Payment::factory()->create([
+            'invoice_id' => $invoice->id,
+            'workspace_id' => $this->workspace->id,
+            'amount' => 3000,
+        ]);
+
+        $this->account->update(['lifetime_value' => 3000]);
+
+        $this->delete(route('invoices.payments.destroy', [$invoice->id, $payment->id]));
+
+        $this->account->refresh();
+        $this->assertEquals(0, $this->account->lifetime_value);
+    }
+
+    public function test_recording_refund_decreases_account_lifetime_value(): void
+    {
+        $paidStatus = InvoiceStatus::where('workspace_id', $this->workspace->id)
+            ->where('automation_trigger', 'paid')
+            ->first();
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $this->account->id,
+            'invoice_status_id' => $paidStatus->id,
+            'grand_total' => 10000,
+            'amount_paid' => 10000,
+        ]);
+
+        Payment::factory()->create([
+            'invoice_id' => $invoice->id,
+            'workspace_id' => $this->workspace->id,
+            'amount' => 10000,
+        ]);
+
+        $this->account->update(['lifetime_value' => 10000]);
+
+        $this->post(route('invoices.refunds.store', $invoice->id), [
+            'amount' => 4000,
+            'refunded_at' => now()->toDateString(),
+            'reason' => 'Partial refund',
+            'reference' => 'REF-001',
+        ]);
+
+        $this->account->refresh();
+        $this->assertEquals(6000, $this->account->lifetime_value);
     }
 }

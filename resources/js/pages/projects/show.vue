@@ -60,27 +60,64 @@ setLayoutProps({
 <template>
     <Head :title="project.name" />
 
-    <div class="space-y-4">
-        <div class="flex items-center justify-between border-b border-border pb-4">
-            <div class="flex items-center gap-2.5">
-                <span
-                    class="h-3.5 w-3.5 rounded-full ring-2 ring-offset-2 ring-offset-background"
-                    :style="{ backgroundColor: project.color || '#6366f1' }"
+    <div class="flex flex-col">
+        <!-- Header -->
+        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Badge
+                            :style="{ backgroundColor: project.status?.color || '#6b7280', color: '#fff' }"
+                            class="rounded-md text-[11px]"
+                        >
+                            {{ project.status?.title }}
+                        </Badge>
+                        <!-- <span class="inline-flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                            <span
+                                class="h-2.5 w-2.5 rounded-full"
+                                :style="{ backgroundColor: project.color || '#6366f1' }"
+                            />
+                            {{ project.id }}
+                        </span> -->
+                    </div>
+                    <h1 class="text-base font-semibold text-foreground">
+                        {{ project.name }}
+                        <span class="font-normal text-muted-foreground">· {{ project.account?.company_name || 'Unassigned' }}</span>
+                    </h1>
+                </div>
+                <ProjectActions
+                    :project="project"
+                    variant="split"
+                    size="sm"
                 />
-                <h1 class="text-xl font-bold tracking-tight text-foreground">{{ project.name }}</h1>
-                <Badge
-                    :style="{ backgroundColor: project.status?.color || '#6b7280', color: '#fff' }"
-                    class="rounded-md text-[11px] font-semibold uppercase tracking-wider"
-                >
-                    {{ project.status?.title }}
-                </Badge>
             </div>
-            <ProjectActions
-                :project="project"
-                variant="split"
-                size="sm"
-            />
         </div>
+
+        <!-- Stats -->
+        <div class="border-b border-border bg-background print:hidden">
+            <div class="grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Progress</p>
+                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">{{ progress }}%</p>
+                    <p class="text-[10px] text-muted-foreground">{{ project.tasks_completed }}/{{ project.tasks_total }} tasks</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Start Date</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ formatDate(project.start_date) }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Due Date</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ formatDate(project.due_date) }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Hourly Rate</p>
+                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">${{ project.hourly_rate || '0' }}</p>
+                    <p class="text-[10px] text-muted-foreground">Per hour</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-4 pt-4">
 
         <div class="flex items-center justify-between">
             <div class="flex border-b">
@@ -216,5 +253,6 @@ setLayoutProps({
             </div>
         </div>
 
+    </div>
     </div>
 </template>

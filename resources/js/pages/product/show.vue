@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import {
-    Package,
-    DollarSign,
-    Clock,
-    CheckCircle2,
-    XCircle,
+    Hash,
 } from '@lucide/vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
@@ -50,20 +46,27 @@ defineOptions({
 <template>
     <Head title="Product Details" />
 
-    <div class="space-y-6">
+    <div class="flex flex-col">
         <!-- Header -->
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div>
-                    <h1 class="text-3xl font-bold tracking-tight">
+        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Badge
+                            :variant="props.product.is_active ? 'default' : 'secondary'"
+                            class="rounded-md text-[11px]"
+                        >
+                            {{ props.product.is_active ? 'Active' : 'Inactive' }}
+                        </Badge>
+                        <span class="inline-flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                            <Hash class="h-2.5 w-2.5" />{{ props.product.sku ?? props.product.id }}
+                        </span>
+                    </div>
+                    <h1 class="text-base font-semibold text-foreground">
                         {{ props.product.name }}
+                        <span class="font-normal text-muted-foreground">· {{ formatCurrency(props.product.unit_price) }}</span>
                     </h1>
-                    <p class="text-muted-foreground">
-                        Product details and pricing information
-                    </p>
                 </div>
-            </div>
-            <div class="flex gap-2">
                 <ProductActions
                     :product="props.product"
                     variant="split"
@@ -72,93 +75,34 @@ defineOptions({
             </div>
         </div>
 
-        <!-- Product Details -->
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-                <CardHeader
-                    class="flex flex-row items-center justify-between space-y-0 pb-2"
-                >
-                    <CardTitle class="text-sm font-medium">Price</CardTitle>
-                    <DollarSign class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold">
-                        {{ formatCurrency(props.product.unit_price) }}
-                    </div>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader
-                    class="flex flex-row items-center justify-between space-y-0 pb-2"
-                >
-                    <CardTitle class="text-sm font-medium"
-                        >Billing Type</CardTitle
-                    >
-                    <Clock class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <Badge :variant="getVariant(props.product.billing_type)">
-                        {{ getLabel(props.product.billing_type) }}
-                    </Badge>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader
-                    class="flex flex-row items-center justify-between space-y-0 pb-2"
-                >
-                    <CardTitle class="text-sm font-medium"
-                        >Billing Frequency</CardTitle
-                    >
-                    <Clock class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <Badge variant="secondary">
-                        {{ getFrequencyLabel(props.product.billing_frequency) }}
-                    </Badge>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader
-                    class="flex flex-row items-center justify-between space-y-0 pb-2"
-                >
-                    <CardTitle class="text-sm font-medium">Status</CardTitle>
-                    <CheckCircle2
-                        v-if="props.product.is_active"
-                        class="h-4 w-4 text-muted-foreground"
-                    />
-                    <XCircle v-else class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <Badge
-                        :variant="
-                            props.product.is_active ? 'default' : 'secondary'
-                        "
-                    >
-                        {{ props.product.is_active ? 'Active' : 'Inactive' }}
-                    </Badge>
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader
-                    class="flex flex-row items-center justify-between space-y-0 pb-2"
-                >
-                    <CardTitle class="text-sm font-medium">Unit</CardTitle>
-                    <Package class="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div class="text-2xl font-bold">
-                        {{ props.product.unit?.name || '—' }}
-                    </div>
-                    <div class="text-sm text-muted-foreground">
-                        {{ props.product.unit?.abbreviation || '' }}
-                    </div>
-                </CardContent>
-            </Card>
+        <!-- Stats -->
+        <div class="border-b border-border bg-background print:hidden">
+            <div class="grid grid-cols-2 divide-x divide-border sm:grid-cols-5">
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Price</p>
+                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">{{ formatCurrency(props.product.unit_price) }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Billing Type</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ getLabel(props.product.billing_type) }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Frequency</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ getFrequencyLabel(props.product.billing_frequency) }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Status</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ props.product.is_active ? 'Active' : 'Inactive' }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Unit</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ props.product.unit?.name || '—' }}</p>
+                    <p v-if="props.product.unit?.abbreviation" class="text-[10px] text-muted-foreground">{{ props.product.unit.abbreviation }}</p>
+                </div>
+            </div>
         </div>
+
+        <div class="space-y-6 pt-6">
 
         <!-- Additional Details -->
         <Card>
@@ -197,5 +141,6 @@ defineOptions({
                 <ActivityTimeline :activities="props.activities" />
             </CardContent>
         </Card>
+    </div>
     </div>
 </template>

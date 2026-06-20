@@ -118,7 +118,7 @@ class DashboardService
         $invoices = Invoice::query()
             ->where('workspace_id', $workspaceId)
             ->whereBetween('due_date', [$today, $weekFromNow])
-            ->whereDoesntHave('status', fn ($q) => $q->where('automation_trigger', 'paid'))
+            ->whereDoesntHave('invoiceStatus', fn ($q) => $q->where('automation_trigger', 'paid'))
             ->with('account:id,company_name')
             ->orderBy('due_date')
             ->limit(5)
@@ -195,7 +195,7 @@ class DashboardService
     {
         return Invoice::query()
             ->where('workspace_id', $workspaceId)
-            ->whereHas('status', fn ($q) => $q->whereIn('automation_trigger', ['sent', 'overdue']))
+            ->whereHas('invoiceStatus', fn ($q) => $q->whereIn('automation_trigger', ['sent', 'overdue']))
             ->count();
     }
 
@@ -203,7 +203,7 @@ class DashboardService
     {
         return Invoice::query()
             ->where('workspace_id', $workspaceId)
-            ->whereHas('status', fn ($q) => $q->where('automation_trigger', 'overdue'))
+            ->whereHas('invoiceStatus', fn ($q) => $q->where('automation_trigger', 'overdue'))
             ->count();
     }
 

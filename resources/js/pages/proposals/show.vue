@@ -2,6 +2,7 @@
 import { Head, Link, router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import {
     Building2,
+    HashIcon,
     Send,
 } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
@@ -157,12 +158,9 @@ function describeValidity(value?: string | null): string {
     <Head :title="`Proposal · ${props.proposal.title}`" />
 
     <div class="flex h-[calc(100vh-64px)] flex-col">
-        <div class="border-b border-border pb-4 bg-background/95 backdrop-blur">
-            <div class="flex items-center justify-between">
-                <div class="flex flex-col gap-2">
-                    <h1 class="text-2xl leading-snug font-semibold text-foreground">
-                        {{ props.proposal.title }}
-                    </h1>
+        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
                     <div class="flex flex-wrap items-center gap-2">
                         <Badge
                             v-if="props.proposal.proposal_status"
@@ -171,21 +169,22 @@ function describeValidity(value?: string | null): string {
                                     ? {
                                           backgroundColor:
                                               props.proposal.proposal_status.color,
-                                          color: 'white',
+                                          color: '#fff',
                                       }
                                     : {}
                             "
+                            class="rounded-md text-[11px]"
                         >
                             {{ props.proposal.proposal_status.title }}
                         </Badge>
-                        <Badge variant="outline" class="font-mono text-xs">
-                            #{{ proposalNumber }}
-                        </Badge>
-                        <p class="text-xs text-muted-foreground">
-                            Updated {{ formatDateTime(props.proposal.updated_at) }} •
-                            Views {{ props.proposal.view_count ?? 0 }}
-                        </p>
+                        <span class="inline-flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                            <HashIcon class="h-2.5 w-2.5" />{{ proposalNumber }}
+                        </span>
                     </div>
+                    <h1 class="text-base font-semibold text-foreground">
+                        {{ props.proposal.title }}
+                        <span class="font-normal text-muted-foreground">· {{ formattedValue }}</span>
+                    </h1>
                 </div>
                 <div class="flex gap-2">
                     <Button 
@@ -202,6 +201,29 @@ function describeValidity(value?: string | null): string {
                         variant="split"
                         size="sm"
                     />
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="border-b border-border bg-background print:hidden">
+            <div class="grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Total Value</p>
+                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">{{ formattedValue }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Deposit</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ depositSummary }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Validity</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ validUntilDisplay }}</p>
+                    <p class="text-[10px] text-muted-foreground">{{ validityStatus }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Account</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground truncate">{{ accountName }}</p>
                 </div>
             </div>
         </div>
@@ -229,23 +251,6 @@ function describeValidity(value?: string | null): string {
         <div class="flex-1 overflow-hidden">
             <!-- Overview Tab -->
             <div v-if="activeTab === 'overview'" class="h-full overflow-y-auto p-6 space-y-6">
-                    <!-- Financial Stats -->
-                    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-muted/50 rounded-lg p-4">
-                            <p class="text-xs text-muted-foreground uppercase mb-1">Total Value</p>
-                            <p class="text-2xl font-semibold">{{ formattedValue }}</p>
-                        </div>
-                        <div class="bg-muted/50 rounded-lg p-4">
-                            <p class="text-xs text-muted-foreground uppercase mb-1">Deposit</p>
-                            <p class="text-sm">{{ depositSummary }}</p>
-                        </div>
-                        <div class="bg-muted/50 rounded-lg p-4">
-                            <p class="text-xs text-muted-foreground uppercase mb-1">Validity</p>
-                            <p class="text-sm font-medium">{{ validUntilDisplay }}</p>
-                            <p class="text-xs text-muted-foreground">{{ validityStatus }}</p>
-                        </div>
-                    </section>
-
                     <!-- Account & Contact -->
                     <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-3">

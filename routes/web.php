@@ -7,6 +7,7 @@ use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\BuilderDataController;
 use App\Http\Controllers\ClientAuthController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceStatusController;
@@ -107,9 +108,13 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
 
     Route::resource('invoices', InvoiceController::class);
     Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');
+    Route::post('/invoices/{invoice}/duplicate', [InvoiceController::class, 'duplicate'])->name('invoices.duplicate');
+    Route::post('/invoices/{invoice}/reminder', [InvoiceController::class, 'sendReminder'])->name('invoices.reminder');
+    Route::get('/invoices/{invoice}/receipt', [InvoiceController::class, 'downloadReceipt'])->name('invoices.receipt');
     Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.status.update');
     Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('invoices.payments.store');
     Route::delete('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'destroy'])->name('invoices.payments.destroy');
+    Route::post('/invoices/{invoice}/refunds', [CreditNoteController::class, 'store'])->name('invoices.refunds.store');
     Route::post('/invoices/bulk', [InvoiceController::class, 'bulkDelete'])->name('invoices.bulk-delete');
 
     Route::resource('proposals', ProposalController::class);

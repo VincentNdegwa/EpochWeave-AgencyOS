@@ -9,6 +9,7 @@ use App\Models\Activity;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\WorkspaceSetting;
+use App\Notifications\InvoiceLateReminder;
 use App\Services\ActivityService;
 use App\Services\InvoiceService;
 use App\Services\UserPreferenceService;
@@ -41,9 +42,14 @@ class InvoiceController extends Controller
         );
         $displayMode = $this->userPreferenceService->getDisplayMode($workspace->id, $user->id);
 
+        $invoiceStatuses = InvoiceStatus::where('workspace_id', $workspace->id)
+            ->orderBy('position')
+            ->get();
+
         return Inertia::render('invoices/index', [
             'invoices' => $result['invoices'],
             'display_mode' => $displayMode,
+            'invoice_statuses' => $invoiceStatuses,
             'filters' => [
                 'status' => $request->query('status', 'all'),
                 'search' => $request->query('search'),
@@ -116,9 +122,14 @@ class InvoiceController extends Controller
             ->limit(20)
             ->get();
 
+        $invoiceStatuses = InvoiceStatus::where('workspace_id', $invoice->workspace_id)
+            ->orderBy('position')
+            ->get();
+
         return Inertia::render('invoices/show', [
             'invoice' => $invoice,
             'activities' => $activities,
+            'invoice_statuses' => $invoiceStatuses,
         ]);
     }
 
@@ -184,7 +195,7 @@ class InvoiceController extends Controller
     public function publicShow(string $token)
     {
         $invoice = Invoice::where('token', $token)
-            ->with(['account', 'items', 'accountContact', 'user', 'workspace'])
+            ->with(['account', 'items', 'accountContact', 'user', 'workspace', 'invoiceStatus'])
             ->firstOrFail();
 
         $invoice->update([
@@ -220,15 +231,58 @@ class InvoiceController extends Controller
         }
     }
 
+    public function sendReminder(Request $request, int $id): RedirectResponse
+    {
+        try {
+            $workspace = $request->attributes->get('current_workspace');
+            $invoice = Invoice::where('workspace_id', $workspace->id)
+                ->with('accountContact')
+                ->findOrFail($id);
+
+            $contact = $invoice->accountContact;
+
+            if ($contact) {
+                $contact->notify(new InvoiceLateReminder($invoice));
+            }
+
+            $this->activityService->record($invoice, 'invoice.reminder_sent', 'Late payment reminder sent to '.$contact?->email.'.');
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Reminder sent successfully.']);
+
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return redirect()->back();
+        }
+    }
+
+    public function downloadReceipt(Request $request, int $id)
+    {
+        $workspace = $request->attributes->get('current_workspace');
+        $invoice = Invoice::where('workspace_id', $workspace->id)
+            ->with(['account', 'items', 'accountContact', 'user', 'workspace', 'invoiceStatus', 'payments.user'])
+            ->findOrFail($id);
+
+        return response()->view('invoices.receipt', [
+            'invoice' => $invoice,
+        ])->header('Content-Type', 'text/html');
+    }
+
     public function updateStatus(Request $request, int $id): RedirectResponse
     {
         try {
             $request->validate([
-                'status' => 'required|in:draft,sent,paid,void,overdue',
+                'invoice_status_id' => 'required|integer|exists:invoice_statuses,id',
             ]);
 
-            if (in_array($request->status, ['paid', 'overdue'])) {
-                Inertia::flash('toast', ['type' => 'error', 'message' => 'The '.ucfirst($request->status).' status is system-controlled and cannot be set manually.']);
+            $workspace = $request->attributes->get('current_workspace');
+            $status = InvoiceStatus::where('workspace_id', $workspace->id)
+                ->where('id', $request->input('invoice_status_id'))
+                ->firstOrFail();
+
+            if (in_array($status->automation_trigger, ['paid', 'overdue'])) {
+                Inertia::flash('toast', ['type' => 'error', 'message' => 'The '.$status->title.' status is system-controlled and cannot be set manually.']);
 
                 return redirect()->back();
             }
@@ -239,12 +293,12 @@ class InvoiceController extends Controller
                 abort(404);
             }
 
-            if ($request->status === 'sent') {
+            if ($status->automation_trigger === 'sent') {
                 $this->sendInvoice->send($invoice);
             } else {
-                $updateData = ['status' => $request->status];
+                $updateData = ['invoice_status_id' => $status->id];
 
-                if ($request->status === 'void') {
+                if ($status->automation_trigger === 'voided') {
                     $updateData['voided_at'] = now();
                 }
 
@@ -281,6 +335,43 @@ class InvoiceController extends Controller
         ]);
     }
 
+    public function duplicate(Request $request, int $id): RedirectResponse
+    {
+        try {
+            $workspace = $request->attributes->get('current_workspace');
+            $invoice = Invoice::where('workspace_id', $workspace->id)->findOrFail($id);
+
+            $settings = $this->workspaceSettingService->getOrCreate(
+                $workspace->id,
+                WorkspaceSetting::SUBMODULE_INVOICES
+            );
+
+            $numberingSettings = $settings->settings['numbering'] ?? [];
+            $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
+            $newInvoiceNumber = $this->generateInvoiceNumber($numberingSettings);
+
+            $draftStatus = InvoiceStatus::where('workspace_id', $workspace->id)
+                ->where('automation_trigger', 'draft')
+                ->first();
+
+            $newInvoice = $this->invoiceService->duplicateInvoice(
+                $invoice,
+                $draftStatus?->id ?? 0,
+                $newInvoiceNumber
+            );
+
+            $this->workspaceSettingService->incrementNumberingSequence($settings, $nextSequenceNumber);
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Invoice duplicated successfully.']);
+
+            return redirect()->route('invoices.edit', $newInvoice->id);
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return redirect()->back();
+        }
+    }
+
     public function bulkDelete(Request $request): RedirectResponse
     {
         try {
@@ -294,11 +385,15 @@ class InvoiceController extends Controller
 
             $invoices = Invoice::where('workspace_id', $workspace->id)
                 ->whereIn('id', $ids)
-                ->select(['id', 'status'])
+                ->with('invoiceStatus')
                 ->get();
 
-            $draftIds = $invoices->where('status', 'draft')->pluck('id')->toArray();
-            $skippedCount = $invoices->where('status', '!=', 'draft')->count();
+            $draftIds = $invoices->filter(
+                fn ($i) => $i->invoiceStatus?->automation_trigger === 'draft'
+            )->pluck('id')->toArray();
+            $skippedCount = $invoices->reject(
+                fn ($i) => $i->invoiceStatus?->automation_trigger === 'draft'
+            )->count();
 
             if (! empty($draftIds)) {
                 Invoice::whereIn('id', $draftIds)->delete();

@@ -7,7 +7,6 @@ use App\Models\InvoiceItem;
 use App\Models\InvoiceStatus;
 use App\Models\Project;
 use App\Models\Proposal;
-use App\Services\ActivityService;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -201,10 +200,12 @@ class InvoiceService
             'workspace',
             'proposal',
             'project',
+            'invoiceStatus',
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price']);
             },
             'payments.user:id,name',
+            'creditNotes.user:id,name',
         ])->find($id);
     }
 
@@ -214,6 +215,7 @@ class InvoiceService
             ->with([
                 'account',
                 'user',
+                'invoiceStatus',
                 'items.product' => function ($query) {
                     $query->select(['id', 'name', 'unit_price']);
                 },
@@ -226,11 +228,8 @@ class InvoiceService
     {
         $query = Invoice::query()->where('workspace_id', $workspaceId);
 
-        if ($status && $status !== 'all') {
-            // Filter by status automation trigger via relationship
-            $query->whereHas('status', function ($q) use ($status) {
-                $q->where('automation_trigger', $status);
-            });
+        if ($status && $status !== 'all' && is_numeric($status)) {
+            $query->where('invoice_status_id', (int) $status);
         }
 
         if ($search) {
@@ -241,6 +240,7 @@ class InvoiceService
             'account',
             'accountContact',
             'user',
+            'invoiceStatus',
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price']);
             },
@@ -251,6 +251,43 @@ class InvoiceService
         return [
             'invoices' => $invoices,
         ];
+    }
+
+    public function duplicateInvoice(Invoice $invoice, int $draftStatusId, string $newInvoiceNumber): Invoice
+    {
+        try {
+            return DB::transaction(function () use ($invoice, $draftStatusId, $newInvoiceNumber) {
+                $cloneData = $invoice->replicate([
+                    'invoice_number',
+                    'token',
+                    'sent_at',
+                    'paid_at',
+                    'voided_at',
+                    'amount_paid',
+                    'created_at',
+                    'updated_at',
+                ])->toArray();
+
+                $cloneData['invoice_number'] = $newInvoiceNumber;
+                $cloneData['invoice_status_id'] = $draftStatusId;
+                $cloneData['token'] = Str::uuid();
+                $cloneData['amount_paid'] = 0;
+
+                $newInvoice = Invoice::create($cloneData);
+
+                foreach ($invoice->items as $item) {
+                    $itemData = $item->replicate(['invoice_id', 'created_at', 'updated_at'])->toArray();
+                    $itemData['invoice_id'] = $newInvoice->id;
+                    InvoiceItem::create($itemData);
+                }
+
+                $this->activityService->record($newInvoice, 'invoice.duplicated', 'Invoice duplicated from #'.$invoice->invoice_number.'.');
+
+                return $newInvoice->fresh(['items.product', 'accountContact', 'user', 'invoiceStatus']);
+            });
+        } catch (\Throwable $e) {
+            throw new Exception('Failed to duplicate invoice: '.$e->getMessage());
+        }
     }
 
     private function computeItemFinancials(array $item): array

@@ -2,30 +2,32 @@
 import { router } from '@inertiajs/vue3';
 import { Calendar, Building, AlertCircle } from '@lucide/vue';
 import { ref, computed } from 'vue';
-import { useInvoiceStatuses } from '@/composables/useEnums';
 import type { Invoice } from '@/types/models/invoice';
+import type { InvoiceStatus } from '@/types/models/invoice_status';
 import InvoiceActions from './components/InvoiceActions.vue';
 
 interface StatusColumn {
+    id: number;
     key: string;
     label: string;
     color: string;
     locked: boolean;
 }
 
-const { invoices: allInvoices } = defineProps<{
+const { invoices: allInvoices, invoice_statuses } = defineProps<{
     invoices: Invoice[];
+    invoice_statuses: InvoiceStatus[];
 }>();
 
-const invoiceStatuses = useInvoiceStatuses();
 const LOCKED_STATUSES = ['paid', 'overdue'];
 
 const statusColumns = computed<StatusColumn[]>(() =>
-    invoiceStatuses.values.map((s) => ({
-        key: s.value,
-        label: s.label,
-        color: s.hexColor,
-        locked: LOCKED_STATUSES.includes(s.value),
+    invoice_statuses.map((s) => ({
+        id: s.id,
+        key: s.automation_trigger ?? s.title,
+        label: s.title,
+        color: s.color,
+        locked: LOCKED_STATUSES.includes(s.automation_trigger ?? ''),
     })),
 );
 
@@ -60,7 +62,7 @@ function onDragStart(e: DragEvent, invoice: Invoice) {
     isDragging.value = true;
     dragging.value = {
         id: invoice.id,
-        fromStatus: invoice.status,
+        fromStatus: invoice.invoice_status?.automation_trigger ?? 'draft',
     };
 
     if (e.dataTransfer) {
@@ -133,7 +135,7 @@ async function onDrop(e: DragEvent, targetStatus: StatusColumn) {
 
     router.patch(
         `/invoices/${invoiceId}/status`,
-        { status: targetStatus.key },
+        { invoice_status_id: targetStatus.id },
         {
             preserveScroll: true,
             onError: (err) => {
@@ -146,7 +148,7 @@ async function onDrop(e: DragEvent, targetStatus: StatusColumn) {
 const columns = computed(() =>
     statusColumns.value.map((status) => ({
         status,
-        invoices: allInvoices.filter((i) => i.status === status.key),
+        invoices: allInvoices.filter((i) => i.invoice_status?.automation_trigger === status.key),
     })),
 );
 
@@ -286,6 +288,7 @@ const fmtDate = (s: string) =>
                             </span>
                             <InvoiceActions
                                 :invoice="invoice"
+                                :invoice_statuses="invoice_statuses"
                                 variant="dropdown"
                                 size="icon"
                             />

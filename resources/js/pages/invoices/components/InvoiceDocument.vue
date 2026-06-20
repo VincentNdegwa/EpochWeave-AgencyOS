@@ -32,7 +32,7 @@ return null;
 
     const diff = Math.ceil((new Date(props.invoice.due_date).getTime() - Date.now()) / 86_400_000);
 
-    if (props.invoice.status === 'paid') {
+    if (props.invoice.invoice_status?.automation_trigger === 'paid') {
 return null;
 }
 
@@ -90,7 +90,7 @@ return { label: `Due in ${diff} days`, variant: 'secondary' as const };
             </div>
             <div class="px-5 py-4">
                 <p class="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Status</p>
-                <p class="mt-1 text-sm font-semibold capitalize text-slate-800">{{ invoice.status ?? 'Draft' }}</p>
+                <p class="mt-1 text-sm font-semibold capitalize text-slate-800">{{ invoice.invoice_status?.title ?? 'Draft' }}</p>
             </div>
         </div>
 
@@ -165,7 +165,7 @@ return { label: `Due in ${diff} days`, variant: 'secondary' as const };
                     <span>Total</span>
                     <span>{{ f(invoice.grand_total) }}</span>
                 </div>
-                <template v-if="invoice.status === 'paid'">
+                <template v-if="invoice.invoice_status?.automation_trigger === 'paid'">
                     <div class="flex justify-between text-green-600 font-medium">
                         <span>Paid</span>
                         <span>{{ f(invoice.grand_total) }}</span>

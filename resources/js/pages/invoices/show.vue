@@ -15,21 +15,20 @@ import { Button }        from '@/components/ui/button';
 import { Separator }     from '@/components/ui/separator';
 import { useCurrency }       from '@/composables/useCurrency';
 import { useDateFormat }     from '@/composables/useDateFormat';
-import { useInvoiceStatuses } from '@/composables/useEnums';
 import { dashboard }         from '@/routes';
 import type { Invoice }      from '@/types/models/invoice';
+import type { InvoiceStatus } from '@/types/models/invoice_status';
 import InvoiceActions from './components/InvoiceActions.vue';
 import InvoiceDocument from './components/InvoiceDocument.vue';
 import PaymentPanel from './components/PaymentPanel.vue';
 const props = defineProps<{
     invoice: Invoice;
+    invoice_statuses: InvoiceStatus[];
     activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
 }>();
 
 const { format: fmt }  = useCurrency();
 const { formatDate, formatDateTime } = useDateFormat();
-const invoiceStatuses  = useInvoiceStatuses();
-
 watchEffect(() => {
     setLayoutProps({
         title:       `Invoice ${props.invoice.invoice_number ? '#' + props.invoice.invoice_number : ''}`,
@@ -42,9 +41,10 @@ watchEffect(() => {
     });
 });
 
-const status = computed(() =>
-    invoiceStatuses.getByValue(props.invoice.status) ?? { label: props.invoice.status ?? 'Draft', hexColor: '#6b7280' },
-);
+const status = computed(() => ({
+    label: props.invoice.invoice_status?.title ?? 'Draft',
+    hexColor: props.invoice.invoice_status?.color ?? '#6b7280',
+}));
 
 const invoiceNumber = computed(() =>
     props.invoice.invoice_number ? `#${props.invoice.invoice_number}` : `#${props.invoice.id}`,
@@ -55,7 +55,7 @@ const formattedTotal = computed(() =>
 );
 
 const dueHint = computed(() => {
-    if (!props.invoice.due_date || props.invoice.status === 'paid') {
+    if (!props.invoice.due_date || props.invoice.invoice_status?.automation_trigger === 'paid') {
 return null;
 }
 
@@ -76,14 +76,6 @@ return { label: `Due in ${diff}d`,               cls: 'text-amber-600'   };
     return null;
 });
 
-const timelineEntries = computed(() =>
-    [
-        { label: 'Created',  date: props.invoice.created_at, icon: ClockIcon,        cls: 'text-muted-foreground' },
-        { label: 'Sent',     date: props.invoice.sent_at,    icon: Send,             cls: 'text-blue-500'         },
-        { label: 'Paid',     date: props.invoice.paid_at,    icon: CheckCircle2Icon, cls: 'text-green-500'        },
-        { label: 'Voided',   date: props.invoice.voided_at,  icon: FileTextIcon,     cls: 'text-destructive'      },
-    ].filter(e => Boolean(e.date)),
-);
 
 function initials(name: string) {
     return name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -122,6 +114,7 @@ function initials(name: string) {
 
                 <InvoiceActions
                     :invoice="invoice"
+                    :invoice_statuses="props.invoice_statuses"
                     variant="split"
                     size="sm"
                 />
@@ -242,6 +235,7 @@ function initials(name: string) {
                     :grand-total="invoice.grand_total"
                     :amount-paid="invoice.amount_paid"
                     :payments="invoice.payments || []"
+                    :credit-notes="invoice.credit_notes || []"
                 />
 
                 <Separator />

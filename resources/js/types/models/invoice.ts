@@ -1,7 +1,9 @@
+import type { CreditNote } from './credit_note';
+import type { InvoiceStatus } from './invoice_status';
 import type { Payment } from './payment';
 import type { Project } from './project';
 import type { Account, AccountContact, Proposal, User } from './proposal';
-import type {Workspace} from './workspace';
+import type { Workspace } from './workspace';
 
 export interface InvoiceItem {
     id: number;
@@ -40,7 +42,6 @@ export interface Invoice {
     created_by: number | null;
     user_id: number | null;
     invoice_number: string | null;
-    status: 'draft' | 'sent' | 'paid' | 'void' | 'overdue';
     token: string | null;
     payment_reference?: string | null;
     currency: string;
@@ -65,4 +66,6 @@ export interface Invoice {
     workspace?: Workspace | null;
     items?: InvoiceItem[];
     payments?: Payment[];
+    credit_notes?: CreditNote[];
+    invoice_status?: InvoiceStatus | null;
 }

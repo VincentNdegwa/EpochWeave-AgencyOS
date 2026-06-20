@@ -3,6 +3,7 @@ import { router } from '@inertiajs/vue3';
 import { Calendar, Building, User, AlertCircle } from '@lucide/vue';
 import { ref, computed } from 'vue';
 import type { Proposal } from '@/types/models/proposal';
+import ProposalActions from './components/ProposalActions.vue';
 
 interface ProposalStatus {
     id: number;
@@ -301,8 +302,13 @@ const fmtDate = (s: string) =>
                             <span
                                 class="font-mono text-xs text-muted-foreground"
                             >
-                                #{{ proposal.id }}
+                                #{{ proposal.proposal_number }}
                             </span>
+                            <ProposalActions
+                                :proposal="proposal"
+                                variant="dropdown"
+                                size="icon"
+                            />
                         </div>
 
                         <p

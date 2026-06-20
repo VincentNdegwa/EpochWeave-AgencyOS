@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\AccountContact;
 use App\Models\Invoice;
+use App\Models\InvoiceStatus;
 use App\Notifications\InvoiceSent;
 
 class SendInvoice
@@ -22,8 +23,12 @@ class SendInvoice
             throw new \InvalidArgumentException('Invoice must have a token to generate a public link.');
         }
 
+        $sentStatus = InvoiceStatus::where('workspace_id', $invoice->workspace_id)
+            ->where('automation_trigger', 'sent')
+            ->first();
+
         $invoice->update([
-            'status' => 'sent',
+            'invoice_status_id' => $sentStatus?->id,
             'sent_at' => now(),
         ]);
 

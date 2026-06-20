@@ -49,13 +49,13 @@ class InvoiceFactory extends Factory
     {
         return $this
             ->afterMaking(function (Invoice $invoice): void {
-                if ($invoice->status) {
-                    $invoice->status->workspace_id = $invoice->workspace_id;
+                if ($invoice->invoiceStatus) {
+                    $invoice->invoiceStatus->workspace_id = $invoice->workspace_id;
                 }
             })
             ->afterCreating(function (Invoice $invoice): void {
-                if ($invoice->status) {
-                    $invoice->status->update(['workspace_id' => $invoice->workspace_id]);
+                if ($invoice->invoiceStatus) {
+                    $invoice->invoiceStatus->update(['workspace_id' => $invoice->workspace_id]);
                 }
             });
     }

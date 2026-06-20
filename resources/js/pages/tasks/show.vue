@@ -33,55 +33,68 @@ setLayoutProps({
 <template>
     <Head :title="task.title" />
 
-    <div class="space-y-6">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <h1 class="text-lg font-semibold text-foreground">{{ task.title }}</h1>
-                <Badge
-                    :variant="priority?.variant || 'secondary'"
-                    class="rounded-md text-[11px]"
-                >
-                    {{ priority?.label || task.priority }}
-                </Badge>
-                <Badge
-                    v-if="task.status"
-                    :style="{ backgroundColor: task.status.color || '#6b7280', color: '#fff' }"
-                    class="rounded-md text-[11px]"
-                >
-                    {{ task.status.title }}
-                </Badge>
+    <div class="flex flex-col">
+        <!-- Header -->
+        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <Badge
+                            v-if="task.status"
+                            :style="{ backgroundColor: task.status.color || '#6b7280', color: '#fff' }"
+                            class="rounded-md text-[11px]"
+                        >
+                            {{ task.status.title }}
+                        </Badge>
+                        <Badge
+                            :variant="priority?.variant || 'secondary'"
+                            class="rounded-md text-[11px]"
+                        >
+                            {{ priority?.label || task.priority }}
+                        </Badge>
+                    </div>
+                    <h1 class="text-base font-semibold text-foreground">
+                        {{ task.title }}
+                        <span class="font-normal text-muted-foreground">· {{ task.project?.name || 'No project' }}</span>
+                    </h1>
+                </div>
+                <TaskActions
+                    :task="task"
+                    variant="split"
+                    size="sm"
+                />
             </div>
-            <TaskActions
-                :task="task"
-                variant="split"
-                size="sm"
-            />
         </div>
 
-        <div class="grid grid-cols-4 gap-4">
-            <div class="rounded-lg border p-4">
-                <p class="text-xs text-muted-foreground">Project</p>
-                <div class="mt-1 flex items-center gap-1.5">
-                    <span
-                        class="h-2 w-2 rounded-full"
-                        :style="{ backgroundColor: task.project?.color || '#6366f1' }"
-                    />
-                    <p class="text-sm font-semibold">{{ task.project?.name || '—' }}</p>
+        <!-- Stats -->
+        <div class="border-b border-border bg-background print:hidden">
+            <div class="grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Project</p>
+                    <div class="mt-0.5 flex items-center gap-1.5">
+                        <span
+                            class="h-2 w-2 rounded-full"
+                            :style="{ backgroundColor: task.project?.color || '#6366f1' }"
+                        />
+                        <p class="text-base font-bold text-foreground">{{ task.project?.name || '—' }}</p>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Assignee</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ task.assignee?.name || 'Unassigned' }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Due Date</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ task.due_date || '—' }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Estimated</p>
+                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">{{ task.estimated_hours ? `${task.estimated_hours}h` : '—' }}</p>
                 </div>
             </div>
-            <div class="rounded-lg border p-4">
-                <p class="text-xs text-muted-foreground">Assignee</p>
-                <p class="mt-1 text-sm font-semibold">{{ task.assignee?.name || 'Unassigned' }}</p>
-            </div>
-            <div class="rounded-lg border p-4">
-                <p class="text-xs text-muted-foreground">Due Date</p>
-                <p class="mt-1 text-sm font-semibold">{{ task.due_date || '—' }}</p>
-            </div>
-            <div class="rounded-lg border p-4">
-                <p class="text-xs text-muted-foreground">Estimated</p>
-                <p class="mt-1 text-sm font-semibold">{{ task.estimated_hours ? `${task.estimated_hours}h` : '—' }}</p>
-            </div>
         </div>
+
+        <div class="space-y-6 pt-6">
 
         <Tabs default-value="overview">
             <TabsList>
@@ -168,5 +181,6 @@ setLayoutProps({
             </TabsContent>
         </Tabs>
 
+    </div>
     </div>
 </template>

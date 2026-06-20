@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Payment;
-use App\Services\ActivityService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
@@ -32,6 +31,10 @@ class PaymentService
                 $this->updateInvoicePaymentState($invoice);
                 $this->activityService->record($invoice, 'invoice.payment_recorded', "Payment of {$data['amount']} was recorded on invoice.");
 
+                if ($invoice->account_id) {
+                    $invoice->account()->increment('lifetime_value', $data['amount']);
+                }
+
                 return $payment->load('user');
             });
         } catch (Throwable $e) {
@@ -47,6 +50,10 @@ class PaymentService
                 $payment->delete();
                 $this->activityService->record($invoice, 'invoice.payment_deleted', 'A payment was deleted from invoice.');
                 $this->updateInvoicePaymentState($invoice);
+
+                if ($invoice->account_id) {
+                    $invoice->account()->decrement('lifetime_value', $payment->amount);
+                }
             });
         } catch (Throwable $e) {
             throw new Exception('Failed to delete payment: '.$e->getMessage(), 0, $e);

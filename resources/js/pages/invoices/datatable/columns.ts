@@ -4,13 +4,11 @@ import { h } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useCurrency } from '@/composables/useCurrency';
-import { useInvoiceStatuses } from '@/composables/useEnums';
 import type { Invoice } from '@/types/models/invoice';
 import InvoiceActions from '../components/InvoiceActions.vue';
 
 export function createColumns(): ColumnDef<Invoice>[] {
     const { format: formatCurrency } = useCurrency();
-    const invoiceStatuses = useInvoiceStatuses();
 
     return [
         {
@@ -73,21 +71,24 @@ export function createColumns(): ColumnDef<Invoice>[] {
             },
         },
         {
-            accessorKey: 'status',
+            accessorKey: 'invoice_status',
             header: 'Status',
             cell: ({ row }) => {
-                const status = row.getValue('status') as string;
-                const config = invoiceStatuses.getByValue(status);
+                const status = row.original.invoice_status;
+
+                if (!status) {
+                    return h(Badge, { variant: 'secondary' }, () => 'Unknown');
+                }
 
                 return h(
                     Badge,
                     {
                         style: {
-                            backgroundColor: config?.hexColor || '#6b7280',
+                            backgroundColor: status.color || '#6b7280',
                             color: 'white',
                         },
                     },
-                    () => config?.label || status,
+                    () => status.title,
                 );
             },
         },

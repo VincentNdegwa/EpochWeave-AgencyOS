@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import {
-    DollarSign,
-    ExternalLink,
-    Globe,
+    Hash,
     Plus,
     UserRound,
     Users,
@@ -34,15 +32,6 @@ const { format: formatCurrency } = useCurrency();
 
 const contactDialogOpen = ref(false);
 const editingContact = ref<AccountContact | null>(null);
-
-const companyInitials = computed(() => {
-    return props.account.company_name
-        .split(' ')
-        .slice(0, 2)
-        .map((w) => w[0])
-        .join('')
-        .toUpperCase();
-});
 
 const contactColumns = createContactColumns(props.account.id);
 
@@ -75,34 +64,24 @@ defineOptions({
 <template>
     <Head title="Account Details" />
 
-    <div class="space-y-6">
+    <div class="flex flex-col">
         <!-- Header -->
-        <div class="flex items-start justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <!-- Company Avatar -->
-                <div
-                    class="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-lg font-semibold text-primary"
-                >
-                    {{ companyInitials }}
-                </div>
-                <div>
-                    <div class="flex items-center gap-2.5">
-                        <h1 class="text-2xl font-semibold tracking-tight">
-                            {{ props.account.company_name }}
-                        </h1>
+        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex min-w-0 flex-col gap-0.5">
+                    <div class="flex flex-wrap items-center gap-2">
                         <Badge
                             :variant="getVariant(props.account.status)"
-                            class="text-xs"
+                            class="rounded-md text-[11px]"
                         >
                             {{ getLabel(props.account.status) }}
                         </Badge>
                     </div>
-                    <p class="mt-0.5 text-sm text-muted-foreground">
-                        Account details and contacts
-                    </p>
+                    <h1 class="text-base font-semibold text-foreground">
+                        {{ props.account.company_name }}
+                        <span class="font-normal text-muted-foreground">· {{ formatCurrency(props.account.lifetime_value) }}</span>
+                    </h1>
                 </div>
-            </div>
-            <div class="flex shrink-0 items-center gap-2">
                 <AccountActions
                     :account="props.account"
                     variant="split"
@@ -111,104 +90,42 @@ defineOptions({
             </div>
         </div>
 
-        <!-- Key Metrics -->
-        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <!-- Website -->
-            <Card class="gap-0 py-0 shadow-none">
-                <CardContent class="p-5">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <p
-                                class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                            >
-                                Website
-                            </p>
-                            <div class="mt-2">
-                                <a
-                                    v-if="props.account.website"
-                                    :href="props.account.website"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
-                                >
-                                    <span class="truncate">{{
-                                        props.account.website.replace(
-                                            /^https?:\/\//,
-                                            '',
-                                        )
-                                    }}</span>
-                                    <ExternalLink
-                                        class="h-3.5 w-3.5 shrink-0"
-                                    />
-                                </a>
-                                <span
-                                    v-else
-                                    class="text-sm text-muted-foreground"
-                                    >Not provided</span
-                                >
-                            </div>
-                        </div>
-                        <div
-                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10"
+        <!-- Stats -->
+        <div class="border-b border-border bg-background print:hidden">
+            <div class="grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Lifetime Value</p>
+                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">{{ formatCurrency(props.account.lifetime_value) }}</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Website</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground truncate">
+                        <a
+                            v-if="props.account.website"
+                            :href="props.account.website"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="hover:underline"
                         >
-                            <Globe class="h-4 w-4 text-blue-500" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Lifetime Value -->
-            <Card class="gap-0 py-0 shadow-none">
-                <CardContent class="p-5">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <p
-                                class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                            >
-                                Lifetime Value
-                            </p>
-                            <p
-                                class="mt-2 text-2xl font-semibold tracking-tight"
-                            >
-                                {{
-                                    formatCurrency(props.account.lifetime_value)
-                                }}
-                            </p>
-                        </div>
-                        <div
-                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10"
-                        >
-                            <DollarSign class="h-4 w-4 text-emerald-500" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <!-- Total Contacts -->
-            <Card class="gap-0 py-0 shadow-none">
-                <CardContent class="p-5">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <p
-                                class="text-xs font-medium tracking-wider text-muted-foreground uppercase"
-                            >
-                                Contacts
-                            </p>
-                            <p
-                                class="mt-2 text-2xl font-semibold tracking-tight"
-                            >
-                                {{ props.account.contacts?.length || 0 }}
-                            </p>
-                        </div>
-                        <div
-                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10"
-                        >
-                            <Users class="h-4 w-4 text-violet-500" />
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
+                            {{ props.account.website.replace(/^https?:\/\//, '') }}
+                        </a>
+                        <span v-else class="text-muted-foreground">Not provided</span>
+                    </p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Contacts</p>
+                    <p class="mt-0.5 text-xl font-bold text-foreground">{{ props.account.contacts?.length || 0 }}</p>
+                    <p class="text-[10px] text-muted-foreground">People</p>
+                </div>
+                <div class="px-6 py-4">
+                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Status</p>
+                    <p class="mt-0.5 text-base font-bold text-foreground">{{ getLabel(props.account.status) }}</p>
+                    <p class="text-[10px] text-muted-foreground">Account</p>
+                </div>
+            </div>
         </div>
+
+        <div class="space-y-6 pt-6">
 
         <!-- Contacts Section -->
         <Card class="gap-0 py-0 shadow-none">
@@ -274,5 +191,6 @@ defineOptions({
             :account-id="props.account.id"
             :contact="editingContact"
         />
+    </div>
     </div>
 </template>
