@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Comment;
-use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\Workspace;
@@ -20,8 +19,8 @@ class CommentFactory extends Factory
     {
         return [
             'workspace_id' => Workspace::factory(),
-            'project_id' => Project::factory(),
-            'task_id' => Task::factory(),
+            'commentable_type' => Task::class,
+            'commentable_id' => Task::factory(),
             'user_id' => User::factory(),
             'body' => fake()->paragraph(),
             'is_internal' => fake()->boolean(20),

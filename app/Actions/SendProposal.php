@@ -5,9 +5,12 @@ namespace App\Actions;
 use App\Models\Proposal;
 use App\Models\ProposalStatus;
 use App\Notifications\ProposalSent;
+use App\Services\ActivityService;
 
 class SendProposal
 {
+    public function __construct(private ActivityService $activityService) {}
+
     public function send(Proposal $proposal): Proposal
     {
         $proposal->loadMissing('accountContact');
@@ -29,6 +32,7 @@ class SendProposal
         }
 
         $proposal->update($data);
+        $this->activityService->sent($proposal);
         $proposal->accountContact->notify(new ProposalSent($proposal));
 
         return $proposal->fresh();

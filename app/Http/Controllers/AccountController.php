@@ -61,8 +61,16 @@ class AccountController extends Controller
             abort(404);
         }
 
+        $activities = \App\Models\Activity::where('subject_type', \App\Models\Account::class)
+            ->where('subject_id', $account->id)
+            ->with('user:id,name')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
         return Inertia::render('account/show', [
             'account' => $account,
+            'activities' => $activities,
         ]);
     }
 

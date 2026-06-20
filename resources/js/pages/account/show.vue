@@ -24,10 +24,12 @@ import type { Account, AccountContact } from '@/types/models/account';
 import { createContactColumns } from './contacts-datatable/columns';
 import ContactsDataTable from './contacts-datatable/data-table.vue';
 import AccountFormDialog from './dialogs/AccountFormDialog.vue';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import ContactFormDialog from './dialogs/ContactFormDialog.vue';
 
 const props = defineProps<{
     account: Account;
+    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
 }>();
 
 const { getVariant, getLabel } = useAccountStatuses();
@@ -297,6 +299,17 @@ defineOptions({
                         Add the first contact for this account.
                     </p>
                 </div>
+            </div>
+        </Card>
+
+        <!-- Activity Timeline -->
+        <Card class="gap-0 py-0 shadow-none">
+            <div class="flex items-center gap-2 px-5 py-4">
+                <h2 class="text-sm font-semibold">Activity</h2>
+            </div>
+            <Separator />
+            <div class="px-5 py-4">
+                <ActivityTimeline :activities="props.activities" />
             </div>
         </Card>
 

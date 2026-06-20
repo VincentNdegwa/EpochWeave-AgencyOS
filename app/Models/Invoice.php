@@ -94,6 +94,11 @@ class Invoice extends Model
         return $this->belongsTo(InvoiceStatus::class, 'invoice_status_id');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->orderByDesc('paid_at');
+    }
+
     /**
      * @deprecated Use invoiceStatus() instead
      */

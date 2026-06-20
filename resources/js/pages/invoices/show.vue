@@ -17,9 +17,14 @@ import { useDateFormat }     from '@/composables/useDateFormat';
 import { useInvoiceStatuses } from '@/composables/useEnums';
 import { dashboard }         from '@/routes';
 import type { Invoice }      from '@/types/models/invoice';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import InvoiceDocument from './components/InvoiceDocument.vue';
 import InvoiceActions from './components/InvoiceActions.vue';
-const props = defineProps<{ invoice: Invoice }>();
+import PaymentPanel from './components/PaymentPanel.vue';
+const props = defineProps<{
+    invoice: Invoice;
+    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
+}>();
 
 const { format: fmt }  = useCurrency();
 const { formatDate, formatDateTime } = useDateFormat();
@@ -219,29 +224,18 @@ function initials(name: string) {
 
                 <Separator />
 
+                <PaymentPanel
+                    :invoice-id="invoice.id"
+                    :grand-total="invoice.grand_total"
+                    :amount-paid="invoice.amount_paid"
+                    :payments="invoice.payments || []"
+                />
+
+                <Separator />
+
                 <div class="space-y-1">
-                    <p class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Timeline</p>
-
-                    <div v-if="timelineEntries.length" class="relative space-y-0 pl-6">
-                        <div class="absolute left-[8px] top-1.5 bottom-1.5 w-px bg-border" />
-                        <div
-                            v-for="entry in timelineEntries"
-                            :key="entry.label"
-                            class="relative flex items-start gap-3 pb-4 last:pb-0"
-                        >
-                            <div class="absolute -left-[25px] top-0 flex h-5 w-5 items-center justify-center rounded-full border bg-background">
-                                <component :is="entry.icon" class="h-3 w-3" :class="entry.cls" />
-                            </div>
-                            <div>
-                                <p class="text-xs font-medium">{{ entry.label }}</p>
-                                <p class="text-[11px] text-muted-foreground">{{ formatDateTime(entry.date) }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div v-else class="rounded-md border border-dashed border-border py-4 text-center text-xs text-muted-foreground">
-                        No events yet.
-                    </div>
+                    <p class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Activity</p>
+                    <ActivityTimeline :activities="props.activities" />
                 </div>
 
             </aside>

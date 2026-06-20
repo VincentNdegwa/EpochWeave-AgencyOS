@@ -6,6 +6,7 @@ use App\Models\Proposal;
 use App\Models\ProposalStatus;
 use App\Models\User;
 use App\Notifications\ProposalDeclined;
+use App\Services\ActivityService;
 use App\Services\WorkspaceSettingService;
 use App\Models\WorkspaceSetting;
 use Illuminate\Support\Facades\DB;
@@ -14,7 +15,8 @@ use Illuminate\Support\Facades\Log;
 class RejectProposal
 {
     public function __construct(
-        private WorkspaceSettingService $workspaceSettingService
+        private WorkspaceSettingService $workspaceSettingService,
+        private ActivityService $activityService,
     ) {}
 
     public function reject(Proposal $proposal, ?string $reason = null): Proposal
@@ -34,6 +36,7 @@ class RejectProposal
                     'decline_reason' => $reason,
                 ]);
 
+                $this->activityService->declined($proposal, "Proposal '{$proposal->title}' was declined.");
                 $this->sendDeclinedNotification($proposal, $reason);
 
                 return $proposal->fresh();

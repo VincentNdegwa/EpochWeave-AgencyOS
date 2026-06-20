@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Actions\SendInvoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use App\Models\Activity;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\WorkspaceSetting;
+use App\Services\ActivityService;
 use App\Services\InvoiceService;
 use App\Services\UserPreferenceService;
 use App\Services\WorkspaceSettingService;
@@ -24,6 +26,7 @@ class InvoiceController extends Controller
         private UserPreferenceService $userPreferenceService,
         private WorkspaceSettingService $workspaceSettingService,
         private SendInvoice $sendInvoice,
+        private ActivityService $activityService,
     ) {}
 
     public function index(Request $request)
@@ -106,8 +109,16 @@ class InvoiceController extends Controller
             abort(404);
         }
 
+        $activities = Activity::where('subject_type', Invoice::class)
+            ->where('subject_id', $invoice->id)
+            ->with('user:id,name')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
         return Inertia::render('invoices/show', [
             'invoice' => $invoice,
+            'activities' => $activities,
         ]);
     }
 
@@ -175,6 +186,13 @@ class InvoiceController extends Controller
         $invoice = Invoice::where('token', $token)
             ->with(['account', 'items', 'accountContact', 'user', 'workspace'])
             ->firstOrFail();
+
+        $invoice->update([
+            'view_count' => ($invoice->view_count ?? 0) + 1,
+            'last_viewed_at' => now(),
+        ]);
+
+        $this->activityService->viewed($invoice, "Invoice '{$invoice->invoice_number}' was viewed by a visitor.");
 
         return Inertia::render('public/invoice/show', [
             'invoice' => $invoice,

@@ -6,12 +6,15 @@ use App\Models\Project;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Services\ActivityService;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class TaskService
 {
+    public function __construct(private ActivityService $activityService) {}
+
     public function createTask(Project $project, array $data): Task
     {
         try {
@@ -36,6 +39,7 @@ class TaskService
                 ];
 
                 $task = Task::create($payload);
+                $this->activityService->created($task);
 
                 $this->syncTags($task, $data['tag_ids'] ?? []);
                 $this->updateCompletionState($task, $status);
@@ -62,6 +66,7 @@ class TaskService
                 }
 
                 $task->update($data);
+                $this->activityService->updated($task);
 
                 if (array_key_exists('tag_ids', $data)) {
                     $this->syncTags($task, $data['tag_ids'] ?? []);
@@ -84,6 +89,7 @@ class TaskService
     {
         try {
             $project = $task->project;
+            $this->activityService->deleted($task);
             $task->delete();
             $this->updateProjectCounters($project);
         } catch (Throwable $e) {

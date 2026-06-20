@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Activity;
 use App\Services\ProductService;
 use App\Services\ProductUnitService;
 use Exception;
@@ -66,8 +67,16 @@ class ProductController extends Controller
             abort(404);
         }
 
+        $activities = Activity::where('subject_type', \App\Models\Product::class)
+            ->where('subject_id', $product->id)
+            ->with('user:id,name')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
         return Inertia::render('product/show', [
             'product' => $product,
+            'activities' => $activities,
         ]);
     }
 

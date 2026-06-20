@@ -5,15 +5,18 @@ namespace App\Services;
 use App\Enums\BillingFrequency;
 use App\Enums\BillingType;
 use App\Models\Product;
+use App\Services\ActivityService;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
 class ProductService
 {
+    public function __construct(private ActivityService $activityService) {}
+
     public function createProduct(array $data): Product
     {
         try {
-            return Product::create([
+            $product = Product::create([
                 'workspace_id' => $data['workspace_id'],
                 'unit_id' => $data['unit_id'],
                 'name' => $data['name'],
@@ -24,6 +27,9 @@ class ProductService
                 'billing_frequency' => $data['billing_frequency'] ?? BillingFrequency::None->value,
                 'is_active' => $data['is_active'] ?? true,
             ]);
+            $this->activityService->created($product);
+
+            return $product;
         } catch (Exception $e) {
             throw new Exception('Failed to create product: '.$e->getMessage());
         }
@@ -43,6 +49,7 @@ class ProductService
                 'is_active' => $data['is_active'] ?? $product->is_active,
             ]);
 
+            $this->activityService->updated($product);
             return $product;
         } catch (Exception $e) {
             throw new Exception('Failed to update product: '.$e->getMessage());
@@ -52,6 +59,7 @@ class ProductService
     public function deleteProduct(Product $product): void
     {
         try {
+            $this->activityService->deleted($product);
             $product->delete();
         } catch (Exception $e) {
             throw new Exception('Failed to delete product: '.$e->getMessage());

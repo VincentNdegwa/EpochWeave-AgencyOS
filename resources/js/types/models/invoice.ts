@@ -1,4 +1,5 @@
 import type { Account, AccountContact, Proposal, User } from './proposal';
+import type { Payment } from './payment';
 import type { Project } from './project';
 import type {Workspace} from './workspace';
 
@@ -63,4 +64,5 @@ export interface Invoice {
     project?: Project | null;
     workspace?: Workspace | null;
     items?: InvoiceItem[];
+    payments?: Payment[];
 }

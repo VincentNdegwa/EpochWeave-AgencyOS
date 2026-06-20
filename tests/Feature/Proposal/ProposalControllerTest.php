@@ -156,7 +156,7 @@ class ProposalControllerTest extends TestCase
         $this->assertSame('internal note', $proposal->content[1]['meta']['notes']);
     }
 
-    public function test_blocks_are_required_by_form_request(): void
+    public function test_blocks_are_optional_when_creating_proposal(): void
     {
         $user = User::factory()->create();
         $workspace = Workspace::factory()->create();
@@ -169,14 +169,16 @@ class ProposalControllerTest extends TestCase
             ->withSession(['current_workspace_id' => $workspace->id])
             ->post(route('proposals.store'), [
                 'account_id' => $account->id,
-                'title' => 'Missing blocks',
+                'title' => 'No blocks yet',
                 'currency' => 'USD',
                 'valid_until' => now()->addWeek()->toDateString(),
             ]);
 
-        $response->assertSessionHasErrors('blocks');
-        $this->assertDatabaseMissing('proposals', [
-            'title' => 'Missing blocks',
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('proposals', [
+            'title' => 'No blocks yet',
+            'workspace_id' => $workspace->id,
         ]);
     }
 

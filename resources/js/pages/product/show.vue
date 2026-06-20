@@ -15,11 +15,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrency } from '@/composables/useCurrency';
 import { useBillingFrequencies, useBillingTypes } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { index as productIndex } from '@/routes/products';
 import type { Product } from '@/types/models/product';
 
 const props = defineProps<{
     product: Product;
+    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
 }>();
 
 const { getVariant, getLabel } = useBillingTypes();
@@ -188,6 +190,16 @@ defineOptions({
                         }}
                     </div>
                 </div>
+            </CardContent>
+        </Card>
+
+        <!-- Activity Timeline -->
+        <Card>
+            <CardHeader>
+                <CardTitle>Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ActivityTimeline :activities="props.activities" />
             </CardContent>
         </Card>
     </div>

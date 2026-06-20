@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue';
-import { usePage } from '@inertiajs/vue3';
-import { BellIcon, BellOffIcon } from '@lucide/vue';
-import { ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { BellIcon, BellOffIcon, CheckCheck } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
     Command,
@@ -19,10 +19,28 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Notification } from '@/types/models/notification';
 
 const page = usePage();
-const notifications = page.props.notifications as Notification[];
+const notifications = computed(() => page.props.notifications as Notification[]);
 const open = ref(false);
 
-const unreadCount = notifications.length;
+const unreadCount = computed(() => notifications.value.length);
+
+const markAsRead = (id: string) => {
+    router.patch(`/notifications/${id}/read`, {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            open.value = false;
+        },
+    });
+};
+
+const markAllAsRead = () => {
+    router.patch('/notifications/read-all', {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            open.value = false;
+        },
+    });
+};
 
 const getNotificationData = (notification: Notification) => {
     if (typeof notification.data === 'string') {
@@ -60,7 +78,20 @@ const getColorClass = (color: string) => {
         <PopoverContent class="w-80 p-0" align="end">
             <Command>
                 <CommandList>
-                    <CommandGroup heading="Notifications">
+                    <CommandGroup>
+                        <div class="flex items-center justify-between px-3 py-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notifications</span>
+                            <Button
+                                v-if="unreadCount > 0"
+                                variant="ghost"
+                                size="sm"
+                                class="h-7 text-xs"
+                                @click="markAllAsRead"
+                            >
+                                <CheckCheck class="h-3.5 w-3.5 mr-1" />
+                                Mark all read
+                            </Button>
+                        </div>
                         <ScrollArea class="h-80">
                             <div
                                 v-if="notifications.length === 0"
@@ -77,12 +108,13 @@ const getColorClass = (color: string) => {
                                 v-for="notification in notifications"
                                 v-else
                                 :key="notification.id"
-                                class="flex flex-col items-start gap-2 p-4"
+                                class="flex flex-col items-start gap-2 p-4 cursor-pointer"
+                                @select="markAsRead(notification.id)"
                             >
                                 <div
                                     class="flex w-full items-start gap-3"
                                 >
-                                    <Icon 
+                                    <Icon
                                         :icon="getNotificationData(notification).icon || 'mdi:bell'"
                                         :class="getColorClass(getNotificationData(notification).color || 'gray-500')"
                                         class="h-5 w-5 mt-0.5 flex-shrink-0"

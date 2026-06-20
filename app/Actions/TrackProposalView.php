@@ -6,6 +6,7 @@ use App\Models\Proposal;
 use App\Models\ProposalView;
 use App\Notifications\ProposalViewed;
 use App\Notifications\ProposalRevisited;
+use App\Services\ActivityService;
 use App\Services\WorkspaceSettingService;
 use App\Models\WorkspaceSetting;
 use Exception;
@@ -14,7 +15,8 @@ use Illuminate\Support\Facades\Log;
 class TrackProposalView
 {
     public function __construct(
-        private WorkspaceSettingService $workspaceSettingService
+        private WorkspaceSettingService $workspaceSettingService,
+        private ActivityService $activityService,
     ) {}
 
     public function execute(Proposal $proposal, $viewer = null): void
@@ -47,6 +49,9 @@ class TrackProposalView
                     'ip_address' => request()->ip(),
                     'user_agent' => request()->userAgent(),
                 ]);
+
+                $viewerName = $viewer?->first_name ?? 'a visitor';
+                $this->activityService->viewed($proposal, "Proposal '{$proposal->title}' was viewed by {$viewerName}.");
 
                 if ($viewedEnabled && $proposal->user_id) {
                     $proposal->user->notify(new ProposalViewed($proposal, $viewer));

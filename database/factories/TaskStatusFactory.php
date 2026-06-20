@@ -20,6 +20,7 @@ class TaskStatusFactory extends Factory
             'title' => fake()->word(),
             'color' => fake()->hexColor(),
             'is_system' => false,
+            'is_closed' => false,
             'automation_trigger' => null,
             'position' => fake()->numberBetween(0, 10),
         ];

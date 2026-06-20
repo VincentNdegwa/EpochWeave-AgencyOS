@@ -10,6 +10,7 @@ use App\Http\Requests\AcceptProposalRequest;
 use App\Http\Requests\RejectProposalRequest;
 use App\Http\Requests\StoreProposalRequest;
 use App\Http\Requests\UpdateProposalRequest;
+use App\Models\Activity;
 use App\Models\Proposal;
 use App\Models\WorkspaceSetting;
 use App\Services\MovementRulesService;
@@ -140,8 +141,16 @@ class ProposalController extends Controller
             abort(404);
         }
 
+        $activities = Activity::where('subject_type', Proposal::class)
+            ->where('subject_id', $proposal->id)
+            ->with('user:id,name')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
         return Inertia::render('proposals/show', [
             'proposal' => $proposal,
+            'activities' => $activities,
         ]);
     }
 

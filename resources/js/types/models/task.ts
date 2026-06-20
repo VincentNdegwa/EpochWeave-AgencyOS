@@ -1,5 +1,8 @@
+import type { Attachment } from './attachment';
+import type { Comment } from './comment';
 import type { Tag } from './tag';
 import type { TaskStatus } from './task_status';
+import type { TimeEntry } from './time_entry';
 
 export interface Task {
     id: number;
@@ -33,4 +36,7 @@ export interface Task {
     } | null;
     tags?: Tag[];
     children?: Task[];
+    comments?: Comment[];
+    attachments?: Attachment[];
+    timeEntries?: TimeEntry[];
 }

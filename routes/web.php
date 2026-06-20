@@ -2,9 +2,17 @@
 
 use App\Http\Controllers\AccountContactController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\BuilderDataController;
+use App\Http\Controllers\ClientAuthController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceStatusController;
+use App\Http\Controllers\NotificationController as InAppNotificationController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PortalDashboardController;
 use App\Http\Controllers\PortalSetupController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductUnitController;
@@ -13,12 +21,15 @@ use App\Http\Controllers\ProjectStatusController;
 use App\Http\Controllers\ProposalController;
 use App\Http\Controllers\ProposalStatusController;
 use App\Http\Controllers\ProposalTemplateController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskStatusController;
+use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\UserPreferenceController;
 use App\Http\Controllers\WorkspaceController;
+use App\Http\Controllers\WorkspaceMemberController;
 use App\Http\Controllers\WorkspaceSettings\AutomationController;
 use App\Http\Controllers\WorkspaceSettings\GeneralController as WorkspaceGeneralSettingsController;
 use App\Http\Controllers\WorkspaceSettings\InvoiceController as WorkspaceInvoiceSettingsController;
@@ -39,8 +50,16 @@ Route::get('/invoices/{token}/public', [InvoiceController::class, 'publicShow'])
 Route::get('/portal/setup/{token}', [PortalSetupController::class, 'show'])->name('portal.setup');
 Route::post('/portal/setup/{token}', [PortalSetupController::class, 'complete'])->name('portal.setup.complete');
 
+Route::get('/portal/login', [ClientAuthController::class, 'showLogin'])->name('portal.login');
+Route::post('/portal/login', [ClientAuthController::class, 'login'])->name('portal.login.post');
+Route::post('/portal/logout', [ClientAuthController::class, 'logout'])->name('portal.logout');
+
+Route::middleware(['auth:client'])->group(function () {
+    Route::get('/portal', [PortalDashboardController::class, 'index'])->name('portal.dashboard');
+});
+
 Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function () {
-    Route::inertia('dashboard', 'Dashboard')->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
     Route::post('/workspaces/{workspace}/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
@@ -72,10 +91,19 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::resource('tasks', TaskController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.status.update');
+    Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('tasks.comments.store');
+    Route::delete('/tasks/{task}/comments/{comment}', [CommentController::class, 'destroy'])->name('tasks.comments.destroy');
+    Route::post('/tasks/{task}/attachments', [AttachmentController::class, 'store'])->name('tasks.attachments.store');
+    Route::delete('/tasks/{task}/attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('tasks.attachments.destroy');
+    Route::post('/tasks/{task}/time-entries', [TimeEntryController::class, 'store'])->name('tasks.time-entries.store');
+    Route::patch('/tasks/{task}/time-entries/{timeEntry}', [TimeEntryController::class, 'update'])->name('tasks.time-entries.update');
+    Route::delete('/tasks/{task}/time-entries/{timeEntry}', [TimeEntryController::class, 'destroy'])->name('tasks.time-entries.destroy');
 
     Route::resource('invoices', InvoiceController::class);
     Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');
     Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.status.update');
+    Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('invoices.payments.store');
+    Route::delete('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'destroy'])->name('invoices.payments.destroy');
     Route::post('/invoices/bulk', [InvoiceController::class, 'bulkDelete'])->name('invoices.bulk-delete');
 
     Route::resource('proposals', ProposalController::class);
@@ -85,6 +113,9 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('proposal-templates', ProposalTemplateController::class);
     Route::post('proposal-templates/{template}/duplicate', [ProposalTemplateController::class, 'duplicate'])->name('proposal-templates.duplicate');
     Route::post('proposal-templates/{template}/set-default', [ProposalTemplateController::class, 'setDefault'])->name('proposal-templates.set-default');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
 
     Route::prefix('builder-data')->name('builder-data.')->group(function () {
         Route::get('products', [BuilderDataController::class, 'products'])->name('products');
@@ -102,6 +133,14 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
 
     Route::redirect('workspace/settings', '/workspace/settings/general')
         ->name('workspace-settings.index');
+    Route::get('workspace/members', [WorkspaceMemberController::class, 'index'])
+        ->name('workspace.members');
+    Route::post('workspace/members', [WorkspaceMemberController::class, 'invite'])
+        ->name('workspace.members.invite');
+    Route::patch('workspace/members/{user}/role', [WorkspaceMemberController::class, 'updateRole'])
+        ->name('workspace.members.role');
+    Route::delete('workspace/members/{user}', [WorkspaceMemberController::class, 'remove'])
+        ->name('workspace.members.remove');
     Route::get('workspace/settings/general', [WorkspaceGeneralSettingsController::class, 'edit'])
         ->name('workspace-settings.general');
     Route::patch('workspace/settings/general', [WorkspaceGeneralSettingsController::class, 'update'])
@@ -122,6 +161,11 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('workspace-settings.automation');
     Route::patch('workspace/settings/automation', [AutomationController::class, 'update'])
         ->name('workspace-settings.automation.update');
+
+    Route::patch('/notifications/{notification}/read', [InAppNotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+    Route::patch('/notifications/read-all', [InAppNotificationController::class, 'markAllAsRead'])
+        ->name('notifications.read-all');
 
     Route::post('/user-preferences/display-mode', [UserPreferenceController::class, 'updateDisplayMode'])
         ->name('user-preferences.display-mode.update');

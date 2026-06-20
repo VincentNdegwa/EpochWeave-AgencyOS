@@ -62,9 +62,20 @@ onMounted(() => {
 });
 
 // Fetch contacts when account changes
-watch(() => form.value.account_id, (newAccountId) => {
+watch(() => form.value.account_id, async (newAccountId) => {
     if (newAccountId) {
-        builderDataStore.fetchAccountContacts();
+        const contacts = await builderDataStore.fetchAccountContacts({
+            account_id: newAccountId.toString(),
+        });
+        // Auto-select first contact if available
+        if (contacts && contacts.length > 0) {
+            form.value.account_contact_id = contacts[0].id.toString();
+        } else {
+            form.value.account_contact_id = '';
+        }
+    } else {
+        builderDataStore.accountContacts = [];
+        form.value.account_contact_id = '';
     }
 }, { immediate: true });
 
@@ -162,6 +173,7 @@ watch(
                             <Select
                                 name="account_contact_id"
                                 v-model="form.account_contact_id"
+                                :disabled="!form.account_id"
                             >
                                 <SelectTrigger class="w-full">
                                     <SelectValue

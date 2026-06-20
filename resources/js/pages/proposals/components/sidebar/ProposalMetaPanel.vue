@@ -45,9 +45,9 @@ const currentUser = computed(() => {
     return page.props.auth?.user;
 });
 
-watch(() => proposal.value.account_id, (newAccountId) => {
+watch(() => proposal.value.account_id, async (newAccountId) => {
     if (newAccountId) {
-        fetchAccountContacts();
+        await fetchAccountContacts({ account_id: newAccountId.toString() });
     } else {
         accountContacts.value = [];
         proposal.value.account_contact_id = null;

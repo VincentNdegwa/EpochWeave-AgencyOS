@@ -7,6 +7,7 @@ use App\Models\InvoiceItem;
 use App\Models\InvoiceStatus;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Services\ActivityService;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +15,13 @@ use Illuminate\Support\Str;
 
 class InvoiceService
 {
+    public function __construct(private ActivityService $activityService) {}
+
     public function createInvoiceWithItems(array $data, array $items = []): Invoice
     {
         try {
             $invoice = Invoice::create($data);
+            $this->activityService->created($invoice);
 
             if (! empty($items)) {
                 $this->createInvoiceItems($invoice, $items);
@@ -71,6 +75,7 @@ class InvoiceService
     {
         try {
             $invoice->update($data);
+            $this->activityService->updated($invoice);
             $invoice->items()->delete();
             $this->createInvoiceItems($invoice, $items);
             $this->updateInvoiceTotals($invoice);
@@ -84,6 +89,7 @@ class InvoiceService
     public function deleteInvoice(Invoice $invoice): void
     {
         try {
+            $this->activityService->deleted($invoice);
             $invoice->delete();
         } catch (Exception $e) {
             throw new Exception('Failed to delete invoice: '.$e->getMessage());
@@ -177,6 +183,7 @@ class InvoiceService
                 }
 
                 $this->updateInvoiceTotals($invoice);
+                $this->activityService->record($invoice, 'invoice.created_from_proposal', "Invoice '{$invoice->invoice_number}' was created from proposal.");
 
                 return $invoice->fresh(['items', 'account', 'accountContact', 'user', 'proposal', 'project']);
             });
@@ -197,6 +204,7 @@ class InvoiceService
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price']);
             },
+            'payments.user:id,name',
         ])->find($id);
     }
 

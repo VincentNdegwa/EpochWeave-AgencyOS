@@ -8,6 +8,7 @@ use App\Models\Proposal;
 use App\Models\ProposalStatus;
 use App\Models\WorkspaceSetting;
 use App\Notifications\ProposalSigned;
+use App\Services\ActivityService;
 use App\Services\WorkspaceSettingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,8 @@ use Illuminate\Support\Facades\Log;
 class AcceptProposal
 {
     public function __construct(
-        private WorkspaceSettingService $workspaceSettingService
+        private WorkspaceSettingService $workspaceSettingService,
+        private ActivityService $activityService,
     ) {}
 
     public function accept(Proposal $proposal, array $data): Proposal
@@ -39,6 +41,8 @@ class AcceptProposal
                 'signed_user_agent' => request()->userAgent(),
             ]);
 
+            $signerName = $data['name'] ?? 'Client';
+            $this->activityService->accepted($proposal, "Proposal '{$proposal->title}' was accepted by {$signerName}.");
             $this->sendSignedNotification($proposal, $data);
             $this->dispatchAutomationJobs($proposal);
 

@@ -14,12 +14,14 @@ import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.v
 import { dashboard } from '@/routes';
 import { show as accountShow } from '@/routes/accounts';
 import proposals, { edit as proposalEdit } from '@/routes/proposals';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { Proposal } from '@/types/models/proposal';
 
 const props = defineProps<{
     proposal: Proposal;
+    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
 }>();
 
 const { format: formatCurrency } = useCurrency();
@@ -97,11 +99,11 @@ const sendProposal = () => {
 
 
 setLayoutProps({
-    title: 'proposal preview',
+    title: 'Proposal Preview',
     description: 'Review the live client experience and supporting details.',
     breadcrumbs: [
-        { title: 'dashboard', href: dashboard() },
-        { title: 'proposals', href: '/proposals' },
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Proposals', href: '/proposals' },
         { title: props.proposal.title },
     ],
 });
@@ -289,6 +291,12 @@ function describeValidity(value?: string | null): string {
                                 No contact assigned
                             </div>
                         </div>
+                    </section>
+
+                    <!-- Activity -->
+                    <section>
+                        <h3 class="text-sm font-semibold text-muted-foreground uppercase mb-3">Activity</h3>
+                        <ActivityTimeline :activities="props.activities" />
                     </section>
 
                     <!-- Team Member -->

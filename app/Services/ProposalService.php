@@ -5,13 +5,15 @@ namespace App\Services;
 use App\Models\Proposal;
 use App\Models\ProposalItem;
 use App\Models\ProposalStatus;
+use App\Services\ActivityService;
 use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 
 class ProposalService
 {
-    
+    public function __construct(private ActivityService $activityService) {}
+
     public function createProposalWithItems(array $data, array $items = []): Proposal
     {
         try {
@@ -20,7 +22,8 @@ class ProposalService
             }
             
             $proposal = Proposal::create($data);
-            
+            $this->activityService->created($proposal);
+
             if (!empty($items)) {
                 $this->createProposalItems($proposal, $items);
                 $this->updateProposalTotals($proposal);
@@ -77,9 +80,11 @@ class ProposalService
     {
         try {
             $proposal->update($data);
-                $proposal->items()->delete();
-                $this->createProposalItems($proposal, $items);
-                $this->updateProposalTotals($proposal);
+            $this->activityService->updated($proposal);
+
+            $proposal->items()->delete();
+            $this->createProposalItems($proposal, $items);
+            $this->updateProposalTotals($proposal);
 
             return $proposal->fresh(['items.product']);
         } catch (Exception $e) {
@@ -90,6 +95,7 @@ class ProposalService
     public function deleteProposal(Proposal $proposal): void
     {
         try {
+            $this->activityService->deleted($proposal);
             $proposal->delete();
         } catch (Exception $e) {
             throw new Exception('Failed to delete proposal: '.$e->getMessage());

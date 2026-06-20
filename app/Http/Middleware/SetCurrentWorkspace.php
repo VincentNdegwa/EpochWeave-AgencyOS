@@ -20,7 +20,13 @@ class SetCurrentWorkspace
         $workspaces = [];
 
         if ($request->user()) {
-            $workspaces = $request->user()->rolesTeams()->get();
+            $workspaces = method_exists($request->user(), 'rolesTeams') && $request->user()->rolesTeams()
+                ? $request->user()->rolesTeams()->get()
+                : collect();
+
+            if ($workspaces->isEmpty() && method_exists($request->user(), 'workspaces')) {
+                $workspaces = $request->user()->workspaces()->get();
+            }
 
             if ($request->session()->has('current_workspace_id')) {
                 $workspace = Workspace::find($request->session()->get('current_workspace_id'));

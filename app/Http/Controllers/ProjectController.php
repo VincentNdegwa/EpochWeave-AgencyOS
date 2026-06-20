@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Models\Activity;
 use App\Models\Project;
 use App\Models\ProjectStatus;
 use App\Models\TaskStatus;
@@ -83,9 +84,17 @@ class ProjectController extends Controller
             ->orderBy('position')
             ->get(['id', 'title', 'color']);
 
+        $activities = Activity::where('subject_type', Project::class)
+            ->where('subject_id', $project->id)
+            ->with('user:id,name')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
         return Inertia::render('projects/show', [
             'project' => $project,
             'task_statuses' => $taskStatuses,
+            'activities' => $activities,
         ]);
     }
 

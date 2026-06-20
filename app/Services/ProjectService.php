@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\ProjectStatus;
+use App\Services\ActivityService;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,8 @@ use Throwable;
 
 class ProjectService
 {
+    public function __construct(private ActivityService $activityService) {}
+
     public function listProjects(int $workspaceId, array $filters = []): Collection
     {
         $query = Project::query()
@@ -66,6 +69,7 @@ class ProjectService
                 }
 
                 $project = Project::create($data);
+                $this->activityService->created($project);
 
                 $this->syncMembers($project, $members);
 
@@ -86,6 +90,7 @@ class ProjectService
                 unset($data['members']);
 
                 $project->update($data);
+                $this->activityService->updated($project);
 
                 if ($membersProvided) {
                     $this->syncMembers($project, $members ?? []);
@@ -101,6 +106,7 @@ class ProjectService
     public function deleteProject(Project $project): void
     {
         try {
+            $this->activityService->deleted($project);
             $project->delete();
         } catch (Throwable $e) {
             throw new Exception('Failed to delete project: '.$e->getMessage(), 0, $e);

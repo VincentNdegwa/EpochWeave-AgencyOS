@@ -28,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'set.current.workspace' => SetCurrentWorkspace::class,
         ]);
+
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('portal*') ? route('portal.login') : route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

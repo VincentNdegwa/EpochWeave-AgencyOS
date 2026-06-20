@@ -7,6 +7,7 @@ use App\Exceptions\AccountException;
 use App\Models\Account;
 use App\Models\AccountContact;
 use App\Models\PortalInvitation;
+use App\Services\ActivityService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class AccountService
 {
+    public function __construct(private ActivityService $activityService) {}
+
     public function createAccount(array $data): Account
     {
         try {
@@ -26,6 +29,7 @@ class AccountService
                     'token' => Str::random(32),
                     'lifetime_value' => $data['lifetime_value'] ?? 0,
                 ]);
+                $this->activityService->created($account);
 
                 if (isset($data['contacts']) && is_array($data['contacts'])) {
                     foreach ($data['contacts'] as $contactData) {
@@ -49,6 +53,7 @@ class AccountService
                 'status' => $data['status'] ?? $account->status,
                 'lifetime_value' => $data['lifetime_value'] ?? $account->lifetime_value,
             ]);
+            $this->activityService->updated($account);
 
             return $account;
         } catch (\Exception $e) {
@@ -58,6 +63,8 @@ class AccountService
 
     public function deleteAccount(Account $account): void
     {
+        $this->activityService->deleted($account);
+
         if ($account->contacts()->exists()) {
             throw AccountException::cannotDeleteAccount();
         }

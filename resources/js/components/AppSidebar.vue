@@ -11,6 +11,7 @@ import {
     CheckSquare,
     Settings2,
     Tag,
+    BarChart3,
 } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -35,6 +36,7 @@ import products from '@/routes/products';
 import invoices from '@/routes/invoices';
 import proposalTemplates from '@/routes/proposal-templates';
 import proposals from '@/routes/proposals';
+import reports from '@/routes/reports';
 import { index as workspaceSettings } from '@/routes/workspace-settings';
 import type { NavItem } from '@/types';
 
@@ -98,6 +100,14 @@ const financeNavItems: NavItem[] = [
     },
 ];
 
+const reportsNavItems: NavItem[] = [
+    {
+        title: 'Reports',
+        href: reports.index().url,
+        icon: BarChart3,
+    },
+];
+
 const footerNavItems: NavItem[] = [
     {
         title: 'Business settings',
@@ -129,6 +139,7 @@ const footerNavItems: NavItem[] = [
             <NavMain :items="salesNavItems" group-label="Sales Pipeline" />
             <NavMain :items="projectNavItems" group-label="Project Delivery" />
             <NavMain :items="financeNavItems" group-label="Finance" />
+            <NavMain :items="reportsNavItems" group-label="Reports" />
         </SidebarContent>
 
         <SidebarFooter class="p-0">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Models\Activity;
 use App\Models\Project;
 use App\Models\Tag;
 use App\Models\Task;
@@ -124,8 +125,16 @@ class TaskController extends Controller
             'children.status:id,title,color',
         ]);
 
+        $activities = Activity::where('subject_type', Task::class)
+            ->where('subject_id', $task->id)
+            ->with('user:id,name')
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
         return Inertia::render('tasks/show', [
             'task' => $task,
+            'activities' => $activities,
         ]);
     }
 

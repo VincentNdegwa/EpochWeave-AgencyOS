@@ -23,7 +23,7 @@ class PortalInvitationFlowTest extends TestCase
         $role = Role::create(['name' => 'admin']);
         $user->addRole($role, $workspace);
 
-        $accountService = new AccountService;
+        $accountService = app(AccountService::class);
 
         $account = $accountService->createAccount([
             'workspace_id' => $workspace->id,
@@ -186,7 +186,7 @@ class PortalInvitationFlowTest extends TestCase
     public function test_invitation_created_with_send_invitation_flag(): void
     {
         $workspace = Workspace::factory()->create();
-        $accountService = new AccountService;
+        $accountService = app(AccountService::class);
 
         $account = $accountService->createAccount([
             'workspace_id' => $workspace->id,
@@ -208,7 +208,7 @@ class PortalInvitationFlowTest extends TestCase
     public function test_invitation_not_created_without_send_invitation_flag(): void
     {
         $workspace = Workspace::factory()->create();
-        $accountService = new AccountService;
+        $accountService = app(AccountService::class);
 
         $account = $accountService->createAccount([
             'workspace_id' => $workspace->id,

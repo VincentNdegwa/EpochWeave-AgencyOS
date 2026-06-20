@@ -19,7 +19,7 @@ class ProductTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->productService = new ProductService;
+        $this->productService = app(ProductService::class);
     }
 
     public function test_can_create_product(): void

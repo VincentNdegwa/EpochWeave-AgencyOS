@@ -10,6 +10,7 @@ import projects from '@/routes/projects';
 import type { Project } from '@/types/models/project';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import ProjectFormDialog from './dialogs/ProjectFormDialog.vue';
 import KanbanView from '../tasks/KanbanView.vue';
 import TaskDataTable from '../tasks/datatable/data-table.vue';
@@ -18,9 +19,10 @@ import { useDateFormat } from '@/composables/useDateFormat';
 
 const { formatDate } = useDateFormat();
 
-const { project, task_statuses } = defineProps<{
+const { project, task_statuses, activities } = defineProps<{
     project: Project;
     task_statuses: TaskStatus[];
+    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
 }>();
 
 const editOpen = ref(false);
@@ -211,21 +213,7 @@ setLayoutProps({
                 <div class="space-y-4">
                     <div class="border-b p-5 space-y-4">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity Timeline</h3>
-                        <div class="relative space-y-6 pl-6">
-                            <div class="absolute left-0 top-2 bottom-2 w-px bg-border" />
-                            <div v-for="item in timelineItems" :key="item.title" class="relative">
-                                <div
-                                    class="absolute -left-9 top-0.5 flex h-6 w-6 items-center justify-center rounded-full border-2 border-background"
-                                    :style="{ backgroundColor: item.color }"
-                                >
-                                    <component :is="item.icon" class="h-3 w-3 text-white" />
-                                </div>
-                                <div>
-                                    <p class="text-sm font-medium">{{ item.title }}</p>
-                                    <p class="text-xs text-muted-foreground">{{ item.count }} items</p>
-                                </div>
-                            </div>
-                        </div>
+                        <ActivityTimeline :activities="activities" />
                     </div>
                 </div>
             </div>

@@ -17,18 +17,6 @@ class UploadControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Ensure the testing disk directory exists with proper permissions for Docker
-        $testingDiskPath = storage_path('framework/testing/disks/public');
-        if (! is_dir($testingDiskPath)) {
-            mkdir($testingDiskPath, 0777, true);
-        }
-
-        // Ensure uploads subdirectory also exists
-        $uploadsPath = $testingDiskPath.'/uploads';
-        if (! is_dir($uploadsPath)) {
-            mkdir($uploadsPath, 0777, true);
-        }
     }
 
     public function test_admin_can_upload_and_delete_a_temporary_file(): void

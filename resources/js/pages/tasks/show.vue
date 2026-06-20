@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router, setLayoutProps } from '@inertiajs/vue3';
-import { Pencil, Clock, CheckCircle } from '@lucide/vue';
+import { Pencil } from '@lucide/vue';
 import { ref } from 'vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,8 +10,16 @@ import { dashboard } from '@/routes';
 import tasks from '@/routes/tasks';
 import type { Task } from '@/types/models/task';
 import TaskFormDialog from './dialogs/TaskFormDialog.vue';
+import AttachmentList from './components/AttachmentList.vue';
+import CommentThread from './components/CommentThread.vue';
+import SubtaskList from './components/SubtaskList.vue';
+import ActivityTimeline from '@/components/ActivityTimeline.vue';
+import TimeEntriesPanel from './components/TimeEntriesPanel.vue';
 
-const { task } = defineProps<{ task: Task }>();
+const { task, activities } = defineProps<{
+    task: Task;
+    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
+}>();
 const taskPriorities = useTaskPriorities();
 const priority = taskPriorities.getByValue(task.priority);
 const editOpen = ref(false);
@@ -86,8 +94,11 @@ setLayoutProps({
         <Tabs default-value="overview">
             <TabsList>
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="comments">Comments</TabsTrigger>
+                <TabsTrigger value="attachments">Attachments</TabsTrigger>
                 <TabsTrigger value="subtasks">Subtasks</TabsTrigger>
                 <TabsTrigger value="time">Time Entries</TabsTrigger>
+                <TabsTrigger value="activity">Activity</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" class="space-y-4">
@@ -130,15 +141,37 @@ setLayoutProps({
                 </div>
             </TabsContent>
 
+            <TabsContent value="comments">
+                <div class="rounded-lg border p-4">
+                    <CommentThread :task-id="task.id" :comments="task.comments || []" />
+                </div>
+            </TabsContent>
+
+            <TabsContent value="attachments">
+                <div class="rounded-lg border p-4">
+                    <AttachmentList :task-id="task.id" :attachments="task.attachments || []" />
+                </div>
+            </TabsContent>
+
             <TabsContent value="subtasks">
-                <div class="rounded-lg border p-8 text-center text-sm text-muted-foreground">
-                    Subtasks integration coming soon.
+                <div class="rounded-lg border p-4">
+                    <SubtaskList :parent-task="task" />
                 </div>
             </TabsContent>
 
             <TabsContent value="time">
-                <div class="rounded-lg border p-8 text-center text-sm text-muted-foreground">
-                    Time entries integration coming soon.
+                <div class="rounded-lg border p-4">
+                    <TimeEntriesPanel
+                        :task-id="task.id"
+                        :project-id="task.project_id"
+                        :time-entries="task.timeEntries || []"
+                    />
+                </div>
+            </TabsContent>
+
+            <TabsContent value="activity">
+                <div class="rounded-lg border p-4">
+                    <ActivityTimeline :activities="activities" />
                 </div>
             </TabsContent>
         </Tabs>
