@@ -5,7 +5,6 @@ import {
 } from '@lucide/vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCurrency } from '@/composables/useCurrency';
 import { useBillingFrequencies, useBillingTypes } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
@@ -102,45 +101,39 @@ defineOptions({
             </div>
         </div>
 
-        <div class="space-y-6 pt-6">
-
-        <!-- Additional Details -->
-        <Card>
-            <CardHeader>
-                <CardTitle>Product Information</CardTitle>
-            </CardHeader>
-            <CardContent class="space-y-4">
-                <div>
-                    <div class="mb-1 text-sm font-medium text-muted-foreground">
-                        SKU
+        <div class="space-y-4 pt-4">
+            <div class="border-b p-5 space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Product Information</h3>
+                <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">SKU</span>
+                        <span class="font-medium font-mono">{{ props.product.sku || '—' }}</span>
                     </div>
-                    <div class="font-mono text-sm">
-                        {{ props.product.sku || '—' }}
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Billing Type</span>
+                        <span class="font-medium">{{ getLabel(props.product.billing_type) }}</span>
                     </div>
-                </div>
-                <div>
-                    <div class="mb-1 text-sm font-medium text-muted-foreground">
-                        Description
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Frequency</span>
+                        <span class="font-medium">{{ getFrequencyLabel(props.product.billing_frequency) }}</span>
                     </div>
-                    <div class="text-sm">
-                        {{
-                            props.product.description ||
-                            'No description provided.'
-                        }}
+                    <div class="flex justify-between">
+                        <span class="text-muted-foreground">Unit</span>
+                        <span class="font-medium">{{ props.product.unit?.name || '—' }}</span>
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+                <div class="space-y-1">
+                    <p class="text-sm font-medium text-muted-foreground">Description</p>
+                    <p class="text-sm leading-relaxed text-foreground/90">
+                        {{ props.product.description || 'No description provided.' }}
+                    </p>
+                </div>
+            </div>
 
-        <!-- Activity Timeline -->
-        <Card>
-            <CardHeader>
-                <CardTitle>Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
+            <div class="border-b p-5 space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
                 <ActivityTimeline :activities="props.activities" />
-            </CardContent>
-        </Card>
-    </div>
+            </div>
+        </div>
     </div>
 </template>

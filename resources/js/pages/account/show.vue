@@ -6,12 +6,10 @@ import {
     UserRound,
     Users,
 } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { useCurrency } from '@/composables/useCurrency';
 import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
@@ -125,31 +123,24 @@ defineOptions({
             </div>
         </div>
 
-        <div class="space-y-6 pt-6">
-
-        <!-- Contacts Section -->
-        <Card class="gap-0 py-0 shadow-none">
-            <!-- Card Header -->
-            <div class="flex items-center justify-between px-5 py-4">
-                <div class="flex items-center gap-2">
-                    <UserRound class="h-4 w-4 text-muted-foreground" />
-                    <h2 class="text-sm font-semibold">Contacts</h2>
-                    <span
-                        class="rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
-                    >
-                        {{ props.account.contacts?.length || 0 }}
-                    </span>
+        <div class="space-y-4 pt-4">
+            <!-- Contacts Section -->
+            <div class="border-b p-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <UserRound class="h-4 w-4 text-muted-foreground" />
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Contacts</h3>
+                        <span
+                            class="rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
+                        >
+                            {{ props.account.contacts?.length || 0 }}
+                        </span>
+                    </div>
+                    <Button size="sm" class="gap-2" @click="openNewContactDialog">
+                        <Plus class="h-3.5 w-3.5" />
+                        Add Contact
+                    </Button>
                 </div>
-                <Button size="sm" class="gap-2" @click="openNewContactDialog">
-                    <Plus class="h-3.5 w-3.5" />
-                    Add Contact
-                </Button>
-            </div>
-
-            <Separator />
-
-            <!-- Contacts Table -->
-            <div class="p-0">
                 <ContactsDataTable
                     v-if="
                         props.account.contacts &&
@@ -173,24 +164,18 @@ defineOptions({
                     </p>
                 </div>
             </div>
-        </Card>
 
-        <!-- Activity Timeline -->
-        <Card class="gap-0 py-0 shadow-none">
-            <div class="flex items-center gap-2 px-5 py-4">
-                <h2 class="text-sm font-semibold">Activity</h2>
-            </div>
-            <Separator />
-            <div class="px-5 py-4">
+            <!-- Activity Timeline -->
+            <div class="border-b p-5 space-y-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
                 <ActivityTimeline :activities="props.activities" />
             </div>
-        </Card>
+        </div>
 
         <ContactFormDialog
             v-model:open="contactDialogOpen"
             :account-id="props.account.id"
             :contact="editingContact"
         />
-    </div>
     </div>
 </template>

@@ -178,7 +178,7 @@ watch(
                                 name="title"
                                 v-model="form.title"
                                 required
-                                placeholder="Implement authentication"
+                                placeholder="Enter task title..."
                             />
                             <InputError :message="errors.title" />
                         </div>
@@ -259,7 +259,7 @@ watch(
                                 type="number"
                                 min="0"
                                 step="0.5"
-                                placeholder="8"
+                                placeholder="e.g. 8"
                             />
                         </div>
 

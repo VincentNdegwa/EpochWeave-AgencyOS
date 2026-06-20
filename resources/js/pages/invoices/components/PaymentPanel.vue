@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { CreditCard, Trash2, DollarSign } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { CreditCard, Trash2 } from '@lucide/vue';
+import { computed } from 'vue';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useCurrency } from '@/composables/useCurrency';
 import type { CreditNote } from '@/types/models/credit_note';
 import type { Payment } from '@/types/models/payment';
@@ -20,40 +17,9 @@ const props = defineProps<{
 
 const { format: formatCurrency } = useCurrency();
 
-const amount = ref('');
-const method = ref('bank_transfer');
-const reference = ref('');
-const notes = ref('');
-const paidAt = ref(new Date().toISOString().split('T')[0]);
-
-const totalRefunded = computed(() =>
-    props.creditNotes.reduce((sum, cn) => sum + (cn.amount ?? 0), 0),
-);
-
 const actualBalance = computed(() =>
     props.grandTotal - props.amountPaid,
 );
-
-const submitPayment = () => {
-    if (!amount.value || parseFloat(amount.value) <= 0) {
-return;
-}
-
-    router.post(`/invoices/${props.invoiceId}/payments`, {
-        amount: parseFloat(amount.value),
-        method: method.value,
-        paid_at: paidAt.value,
-        reference: reference.value || null,
-        notes: notes.value || null,
-    }, {
-        preserveScroll: true,
-        onFinish: () => {
-            amount.value = '';
-            reference.value = '';
-            notes.value = '';
-        },
-    });
-};
 
 const deletePayment = (paymentId: number) => {
     router.delete(`/invoices/${props.invoiceId}/payments/${paymentId}`, {
@@ -77,45 +43,6 @@ const formatDate = (dateString: string): string => {
             <span class="text-sm font-medium" :class="actualBalance > 0 ? 'text-destructive' : 'text-emerald-600'">
                 Balance: {{ formatCurrency(actualBalance) }}
             </span>
-        </div>
-
-        <div v-if="actualBalance > 0" class="rounded-lg border p-4">
-            <div class="grid gap-3">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <Label class="text-xs">Amount</Label>
-                        <Input v-model="amount" type="number" step="0.01" placeholder="0.00" />
-                    </div>
-                    <div>
-                        <Label class="text-xs">Method</Label>
-                        <select v-model="method" class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm">
-                            <option value="bank_transfer">Bank Transfer</option>
-                            <option value="credit_card">Credit Card</option>
-                            <option value="cash">Cash</option>
-                            <option value="check">Check</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <Label class="text-xs">Date</Label>
-                    <Input v-model="paidAt" type="date" />
-                </div>
-                <div>
-                    <Label class="text-xs">Reference</Label>
-                    <Input v-model="reference" placeholder="Transaction reference" />
-                </div>
-                <div>
-                    <Label class="text-xs">Notes</Label>
-                    <Textarea v-model="notes" rows="2" placeholder="Optional notes" />
-                </div>
-                <div class="flex justify-end">
-                    <Button size="sm" :disabled="!amount || parseFloat(amount) <= 0" @click="submitPayment">
-                        <DollarSign class="h-3.5 w-3.5 mr-1" />
-                        Record Payment
-                    </Button>
-                </div>
-            </div>
         </div>
 
         <div class="space-y-2">

@@ -137,7 +137,7 @@ watch(
                                 name="name"
                                 v-model="form.name"
                                 required
-                                placeholder="Web Development"
+                                placeholder="Enter product name..."
                             />
                             <InputError :message="errors.name" />
                         </div>
@@ -201,7 +201,7 @@ watch(
                                 id="sku"
                                 name="sku"
                                 v-model="form.sku"
-                                placeholder="WEB-001"
+                                placeholder="Enter SKU..."
                             />
                             <InputError :message="errors.sku" />
                         </div>

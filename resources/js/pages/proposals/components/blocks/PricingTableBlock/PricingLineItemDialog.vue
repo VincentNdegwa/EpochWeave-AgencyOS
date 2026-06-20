@@ -209,7 +209,7 @@ const handleSave = () => {
                         <Input
                             id="description"
                             v-model="form.description"
-                            placeholder="e.g. Website Design, Logo Package…"
+                            placeholder="Enter item name..."
                             required
                         />
                     </div>

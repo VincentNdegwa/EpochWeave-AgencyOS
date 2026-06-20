@@ -104,7 +104,7 @@ watch(
                             name="name"
                             v-model="form.name"
                             required
-                            placeholder="Hour"
+                            placeholder="Enter unit name..."
                         />
                         <InputError :message="errors.name" />
                     </div>
@@ -116,7 +116,7 @@ watch(
                             name="abbreviation"
                             v-model="form.abbreviation"
                             required
-                            placeholder="hr"
+                            placeholder="Enter abbreviation..."
                             maxlength="10"
                         />
                         <InputError :message="errors.abbreviation" />

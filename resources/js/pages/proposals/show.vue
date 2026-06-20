@@ -250,64 +250,51 @@ function describeValidity(value?: string | null): string {
         <!-- Tab Content -->
         <div class="flex-1 overflow-hidden">
             <!-- Overview Tab -->
-            <div v-if="activeTab === 'overview'" class="h-full overflow-y-auto p-6 space-y-6">
-                    <!-- Account & Contact -->
-                    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-3">
-                            <h3 class="text-sm font-semibold text-muted-foreground uppercase">Account</h3>
-                            <div class="bg-muted/50 rounded-lg p-4">
-                                <div class="flex items-center gap-2 text-sm font-medium">
-                                    <Building2 class="h-4 w-4 text-muted-foreground" />
-                                    <template v-if="accountHref">
-                                        <Link
-                                            :href="accountHref"
-                                            class="text-primary underline-offset-4 hover:underline"
-                                        >
-                                            {{ accountName }}
-                                        </Link>
-                                    </template>
-                                    <template v-else>
+            <div v-if="activeTab === 'overview'" class="h-full overflow-y-auto space-y-4">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="border-b p-5 space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Account</h3>
+                            <div class="flex items-center gap-2 text-sm font-medium">
+                                <Building2 class="h-4 w-4 text-muted-foreground" />
+                                <template v-if="accountHref">
+                                    <Link
+                                        :href="accountHref"
+                                        class="text-primary underline-offset-4 hover:underline"
+                                    >
                                         {{ accountName }}
-                                    </template>
-                                </div>
+                                    </Link>
+                                </template>
+                                <template v-else>
+                                    {{ accountName }}
+                                </template>
                             </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <h3 class="text-sm font-semibold text-muted-foreground uppercase">Contact Person</h3>
-                            <div v-if="props.proposal.account_contact" class="bg-muted/50 rounded-lg p-4">
-                                <div class="flex items-start gap-2 text-sm">
-                                    <div class="h-4 w-4 text-muted-foreground mt-0.5">👤</div>
-                                    <div>
-                                        <p class="font-medium">
-                                            {{ `${props.proposal.account_contact.first_name} ${props.proposal.account_contact.last_name}` }}
-                                        </p>
-                                        <p class="text-muted-foreground text-xs">
-                                            {{ props.proposal.account_contact.email }}
-                                        </p>
-                                        <p v-if="props.proposal.account_contact.job_title" class="text-muted-foreground text-xs">
-                                            {{ props.proposal.account_contact.job_title }}
-                                        </p>
-                                    </div>
+                        <div class="border-b p-5 space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Contact Person</h3>
+                            <div v-if="props.proposal.account_contact" class="flex items-start gap-2 text-sm">
+                                <div class="h-4 w-4 text-muted-foreground mt-0.5">👤</div>
+                                <div>
+                                    <p class="font-medium">
+                                        {{ `${props.proposal.account_contact.first_name} ${props.proposal.account_contact.last_name}` }}
+                                    </p>
+                                    <p class="text-muted-foreground text-xs">
+                                        {{ props.proposal.account_contact.email }}
+                                    </p>
+                                    <p v-if="props.proposal.account_contact.job_title" class="text-muted-foreground text-xs">
+                                        {{ props.proposal.account_contact.job_title }}
+                                    </p>
                                 </div>
                             </div>
-                            <div v-else class="bg-muted/50 rounded-lg p-4 text-center text-muted-foreground text-sm">
+                            <div v-else class="text-sm text-muted-foreground">
                                 No contact assigned
                             </div>
                         </div>
-                    </section>
 
-                    <!-- Activity -->
-                    <section>
-                        <h3 class="text-sm font-semibold text-muted-foreground uppercase mb-3">Activity</h3>
-                        <ActivityTimeline :activities="props.activities" />
-                    </section>
-
-                    <!-- Team Member -->
-                    <section>
-                        <h3 class="text-sm font-semibold text-muted-foreground uppercase mb-3">Assigned Team Member</h3>
-                        <div v-if="props.proposal.user" class="bg-muted/50 rounded-lg p-4">
-                            <div class="flex items-start gap-2 text-sm">
+                        <div class="border-b p-5 space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Assigned Team Member</h3>
+                            <div v-if="props.proposal.user" class="flex items-start gap-2 text-sm">
                                 <div class="h-4 w-4 text-muted-foreground mt-0.5">👨‍💼</div>
                                 <div>
                                     <p class="font-medium">
@@ -316,31 +303,51 @@ function describeValidity(value?: string | null): string {
                                     <p class="text-muted-foreground text-xs">
                                         {{ props.proposal.user.email }}
                                     </p>
-                                    <p class="text-muted-foreground text-xs">
-                                        Assigned to proposal
-                                    </p>
                                 </div>
                             </div>
+                            <div v-else class="text-sm text-muted-foreground">
+                                No team member assigned
+                            </div>
                         </div>
-                        <div v-else class="bg-muted/50 rounded-lg p-4 text-center text-muted-foreground text-sm">
-                            No team member assigned
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="border-b p-5 space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
+                            <ActivityTimeline :activities="props.activities" />
                         </div>
-                    </section>
+                    </div>
                 </div>
+            </div>
 
             <!-- Preview Tab -->
             <div v-else-if="activeTab === 'preview'" class="h-full">
                 <ProposalCanvas :is-locked="true" :builder-mode="'proposal'" />
             </div>
 
-            <!-- Coming Soon Tabs -->
-            <div v-else class="h-full flex items-center justify-center">
+            <!-- Comments Tab -->
+            <div v-else-if="activeTab === 'comments'" class="h-full flex items-center justify-center">
                 <div class="text-center">
                     <div class="text-6xl mb-4">🚧</div>
                     <h2 class="text-xl font-semibold mb-2">Coming Soon</h2>
-                    <p class="text-muted-foreground">
-                        {{ tabs.find(t => t.key === activeTab)?.label }} feature is under development
-                    </p>
+                    <p class="text-muted-foreground">Comments feature is under development</p>
+                </div>
+            </div>
+
+            <!-- Notes Tab -->
+            <div v-else-if="activeTab === 'notes'" class="h-full flex items-center justify-center">
+                <div class="text-center">
+                    <div class="text-6xl mb-4">🚧</div>
+                    <h2 class="text-xl font-semibold mb-2">Coming Soon</h2>
+                    <p class="text-muted-foreground">Notes feature is under development</p>
+                </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div v-else-if="activeTab === 'activity'" class="h-full overflow-y-auto space-y-4">
+                <div class="border-b p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
+                    <ActivityTimeline :activities="props.activities" />
                 </div>
             </div>
         </div>

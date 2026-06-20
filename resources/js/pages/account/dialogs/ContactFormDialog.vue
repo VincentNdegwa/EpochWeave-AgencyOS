@@ -107,7 +107,7 @@ watch(
                             name="first_name"
                             v-model="form.first_name"
                             required
-                            placeholder="John"
+                            placeholder="Enter first name..."
                         />
                         <InputError :message="errors.first_name" />
                     </div>
@@ -119,7 +119,7 @@ watch(
                             name="last_name"
                             v-model="form.last_name"
                             required
-                            placeholder="Doe"
+                            placeholder="Enter last name..."
                         />
                         <InputError :message="errors.last_name" />
                     </div>
@@ -132,7 +132,7 @@ watch(
                             type="email"
                             v-model="form.email"
                             required
-                            placeholder="john@example.com"
+                            placeholder="contact@company.com"
                         />
                         <InputError :message="errors.email" />
                     </div>
@@ -154,7 +154,7 @@ watch(
                             id="job_title"
                             name="job_title"
                             v-model="form.job_title"
-                            placeholder="CEO"
+                            placeholder="Enter job title..."
                         />
                         <InputError :message="errors.job_title" />
                     </div>

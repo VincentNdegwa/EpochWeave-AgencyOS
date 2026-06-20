@@ -142,7 +142,7 @@ watch(
                                 name="title"
                                 v-model="form.title"
                                 required
-                                placeholder="Website Redesign Proposal"
+                                placeholder="Enter proposal title..."
                             />
                             <InputError :message="errors.title" />
                         </div>

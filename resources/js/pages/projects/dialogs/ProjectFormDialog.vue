@@ -149,7 +149,7 @@ watch(
                                 name="name"
                                 v-model="form.name"
                                 required
-                                placeholder="Website Redesign"
+                                placeholder="Enter project name..."
                             />
                             <InputError :message="errors.name" />
                         </div>
@@ -220,7 +220,7 @@ watch(
                                 id="project-description"
                                 name="description"
                                 v-model="form.description"
-                                placeholder="Brief description of the project..."
+                                placeholder="Enter project description..."
                                 rows="3"
                             />
                         </div>

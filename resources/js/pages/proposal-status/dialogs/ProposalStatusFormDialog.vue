@@ -94,7 +94,7 @@ watch(
                                 name="title"
                                 v-model="form.title"
                                 required
-                                placeholder="In Review"
+                                placeholder="Enter status name..."
                             />
                             <InputError :message="errors.title" />
                         </div>

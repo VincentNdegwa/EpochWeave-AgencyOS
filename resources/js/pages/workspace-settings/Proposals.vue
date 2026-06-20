@@ -215,7 +215,7 @@ const toolbarOptions = [
                                 :default-value="
                                     proposalSettings?.sender_name ?? ''
                                 "
-                                placeholder="e.g. Jane Doe"
+                                placeholder="Enter full name..."
                             />
                             <InputError :message="errors.sender_name" />
                         </div>
@@ -228,7 +228,7 @@ const toolbarOptions = [
                                 :default-value="
                                     proposalSettings?.sender_title ?? ''
                                 "
-                                placeholder="e.g. Director of Delivery"
+                                placeholder="Enter job title..."
                             />
                             <InputError :message="errors.sender_title" />
                         </div>

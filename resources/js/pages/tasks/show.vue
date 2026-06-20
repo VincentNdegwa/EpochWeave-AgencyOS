@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Head, setLayoutProps } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTaskPriorities } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import tasks from '@/routes/tasks';
@@ -19,6 +19,17 @@ const { task, activities } = defineProps<{
 }>();
 const taskPriorities = useTaskPriorities();
 const priority = taskPriorities.getByValue(task.priority);
+
+const activeTab = ref<'overview' | 'comments' | 'attachments' | 'subtasks' | 'time' | 'activity'>('overview');
+
+const tabs = [
+    { key: 'overview' as const, label: 'Overview' },
+    { key: 'comments' as const, label: 'Comments' },
+    { key: 'attachments' as const, label: 'Attachments' },
+    { key: 'subtasks' as const, label: 'Subtasks' },
+    { key: 'time' as const, label: 'Time Entries' },
+    { key: 'activity' as const, label: 'Activity' },
+];
 
 setLayoutProps({
     title: task.title,
@@ -94,93 +105,119 @@ setLayoutProps({
             </div>
         </div>
 
-        <div class="space-y-6 pt-6">
+        <div class="space-y-4 pt-4">
+            <div class="flex border-b">
+                <button
+                    v-for="tab in tabs"
+                    :key="tab.key"
+                    @click="activeTab = tab.key"
+                    :class="[
+                        '-mb-px border-b-2 px-4 py-2 text-sm font-medium transition-colors',
+                        activeTab === tab.key
+                            ? 'border-primary text-foreground'
+                            : 'border-transparent text-muted-foreground hover:text-foreground',
+                    ]"
+                >
+                    {{ tab.label }}
+                </button>
+            </div>
 
-        <Tabs default-value="overview">
-            <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="comments">Comments</TabsTrigger>
-                <TabsTrigger value="attachments">Attachments</TabsTrigger>
-                <TabsTrigger value="subtasks">Subtasks</TabsTrigger>
-                <TabsTrigger value="time">Time Entries</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
-            </TabsList>
+            <!-- Overview -->
+            <div v-if="activeTab === 'overview'" class="space-y-4">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="border-b p-5 space-y-4">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</h3>
+                            <p class="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap">
+                                {{ task.description || 'No description provided.' }}
+                            </p>
+                        </div>
 
-            <TabsContent value="overview" class="space-y-4">
-                <div class="rounded-lg border p-4">
-                    <h3 class="text-sm font-semibold">Description</h3>
-                    <p class="mt-1 text-sm text-muted-foreground">{{ task.description || 'No description.' }}</p>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="rounded-lg border p-4">
-                        <h3 class="text-sm font-semibold">Details</h3>
-                        <div class="mt-2 space-y-1 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-muted-foreground">Billable</span>
-                                <span>{{ task.is_billable ? 'Yes' : 'No' }}</span>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="border-b p-4 space-y-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Details</h3>
+                                <div class="grid grid-cols-1 gap-3 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-muted-foreground">Billable</span>
+                                        <span class="font-medium">{{ task.is_billable ? 'Yes' : 'No' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-muted-foreground">Status</span>
+                                        <span class="font-medium">{{ task.status?.title || '—' }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-muted-foreground">Priority</span>
+                                        <span class="font-medium">{{ priority?.label || task.priority }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-muted-foreground">Estimated Hours</span>
+                                        <span class="font-medium">{{ task.estimated_hours ? `${task.estimated_hours}h` : '—' }}</span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-muted-foreground">Status</span>
-                                <span>{{ task.status?.title || '—' }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-muted-foreground">Priority</span>
-                                <span>{{ priority?.label || task.priority }}</span>
+                            <div class="border-b p-4 space-y-3">
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tags</h3>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <Badge
+                                        v-for="tag in task.tags"
+                                        :key="tag.id"
+                                        :style="{ backgroundColor: tag.color || '#94a3b8', color: '#fff' }"
+                                        class="text-[11px]"
+                                    >
+                                        {{ tag.name }}
+                                    </Badge>
+                                    <span v-if="!task.tags?.length" class="text-sm text-muted-foreground">No tags.</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="rounded-lg border p-4">
-                        <h3 class="text-sm font-semibold">Tags</h3>
-                        <div class="mt-2 flex flex-wrap gap-1.5">
-                            <Badge
-                                v-for="tag in task.tags"
-                                :key="tag.id"
-                                :style="{ backgroundColor: tag.color || '#94a3b8', color: '#fff' }"
-                                class="text-[11px]"
-                            >
-                                {{ tag.name }}
-                            </Badge>
-                            <span v-if="!task.tags?.length" class="text-sm text-muted-foreground">No tags.</span>
-                        </div>
-                    </div>
                 </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="comments">
-                <div class="rounded-lg border p-4">
+            <!-- Comments -->
+            <div v-if="activeTab === 'comments'" class="space-y-4">
+                <div class="border-b p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Comments</h3>
                     <CommentThread :task-id="task.id" :comments="task.comments || []" />
                 </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="attachments">
-                <div class="rounded-lg border p-4">
+            <!-- Attachments -->
+            <div v-if="activeTab === 'attachments'" class="space-y-4">
+                <div class="border-b p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Attachments</h3>
                     <AttachmentList :task-id="task.id" :attachments="task.attachments || []" />
                 </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="subtasks">
-                <div class="rounded-lg border p-4">
+            <!-- Subtasks -->
+            <div v-if="activeTab === 'subtasks'" class="space-y-4">
+                <div class="border-b p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Subtasks</h3>
                     <SubtaskList :parent-task="task" />
                 </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="time">
-                <div class="rounded-lg border p-4">
+            <!-- Time Entries -->
+            <div v-if="activeTab === 'time'" class="space-y-4">
+                <div class="border-b p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Time Entries</h3>
                     <TimeEntriesPanel
                         :task-id="task.id"
                         :project-id="task.project_id"
                         :time-entries="task.timeEntries || []"
                     />
                 </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="activity">
-                <div class="rounded-lg border p-4">
+            <!-- Activity -->
+            <div v-if="activeTab === 'activity'" class="space-y-4">
+                <div class="border-b p-5 space-y-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
                     <ActivityTimeline :activities="activities" />
                 </div>
-            </TabsContent>
-        </Tabs>
+            </div>
+        </div>
 
-    </div>
     </div>
 </template>

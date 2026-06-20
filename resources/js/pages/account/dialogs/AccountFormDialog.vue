@@ -153,7 +153,7 @@ watch(
                                 name="company_name"
                                 required
                                 v-model="companyName"
-                                placeholder="Acme Corporation"
+                                placeholder="Enter company name..."
                             />
                             <InputError :message="errors.company_name" />
                         </div>
@@ -224,7 +224,7 @@ watch(
                                         :name="`contacts.${index}.first_name`"
                                         v-model="contact.first_name"
                                         required
-                                        placeholder="John"
+                                        placeholder="Enter first name..."
                                     />
                                     <InputError
                                         :message="
@@ -247,7 +247,7 @@ watch(
                                         :name="`contacts.${index}.last_name`"
                                         v-model="contact.last_name"
                                         required
-                                        placeholder="Doe"
+                                        placeholder="Enter last name..."
                                     />
                                     <InputError
                                         :message="
@@ -271,7 +271,7 @@ watch(
                                         type="email"
                                         v-model="contact.email"
                                         required
-                                        placeholder="john@example.com"
+                                        placeholder="contact@company.com"
                                     />
                                     <InputError
                                         :message="
@@ -305,7 +305,7 @@ watch(
                                         :id="`contacts.${index}.job_title`"
                                         :name="`contacts.${index}.job_title`"
                                         v-model="contact.job_title"
-                                        placeholder="CEO"
+                                        placeholder="Enter job title..."
                                     />
                                     <InputError
                                         :message="
