@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Calendar, Building, User, AlertCircle } from '@lucide/vue';
+import { Calendar, Building, AlertCircle } from '@lucide/vue';
 import { ref, computed } from 'vue';
 import type { Proposal } from '@/types/models/proposal';
 import ProposalActions from './components/ProposalActions.vue';
@@ -18,7 +18,11 @@ interface Props {
     movement_rules: Record<string, number[]>;
 }
 
-const { proposals: allProposals, proposal_statuses, movement_rules } = defineProps<Props>();
+const {
+    proposals: allProposals,
+    proposal_statuses,
+    movement_rules,
+} = defineProps<Props>();
 
 const LOCKED_STATUSES = ['accepted', 'declined', 'expired'];
 
@@ -34,28 +38,31 @@ const dragStartTime = ref<number>(0);
 
 const canDrop = (toStatusId: number): boolean => {
     if (!dragging.value) {
-return false;
-}
+        return false;
+    }
 
     const allowed = dragging.value.trigger
         ? (movement_rules[dragging.value.trigger] ?? [])
         : [];
 
-    return allowed.includes(toStatusId) && dragging.value.fromStatusId !== toStatusId;
+    return (
+        allowed.includes(toStatusId) &&
+        dragging.value.fromStatusId !== toStatusId
+    );
 };
 
 const validTargets = (trigger: string | null): number[] => {
     if (!trigger) {
-return [];
-}
+        return [];
+    }
 
     return movement_rules[trigger] ?? [];
 };
 
 const isTerminal = (trigger: string | null): boolean => {
     if (!trigger) {
-return false;
-}
+        return false;
+    }
 
     return (movement_rules[trigger] ?? []).length === 0;
 };
@@ -69,7 +76,7 @@ function onDragStart(e: DragEvent, proposal: Proposal, status: ProposalStatus) {
         trigger: status.automation_trigger,
         fromStatusId: status.id,
     };
-    
+
     if (e.dataTransfer) {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', String(proposal.id));
@@ -128,7 +135,7 @@ function onDragLeave(e: DragEvent) {
 
 async function onDrop(e: DragEvent, targetStatus: ProposalStatus) {
     e.preventDefault();
-    
+
     if (!dragging.value || !canDrop(targetStatus.id)) {
         onDragEnd();
 
@@ -156,17 +163,23 @@ const columns = computed(() =>
 
         return {
             status,
-            proposals: allProposals.filter((p) => p.proposal_status_id === status.id),
+            proposals: allProposals.filter(
+                (p) => p.proposal_status_id === status.id,
+            ),
             locked: trigger ? LOCKED_STATUSES.includes(trigger) : false,
         };
     }),
 );
 
-const getStatusFromId = (id: number): ProposalStatus | undefined => 
-    proposal_statuses.find(s => s.id === id);
+const getStatusFromId = (id: number): ProposalStatus | undefined =>
+    proposal_statuses.find((s) => s.id === id);
 
 const fmt = (n: number, currency = 'USD') =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 0,
+    }).format(n);
 
 const fmtDate = (s: string) =>
     new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
@@ -194,8 +207,9 @@ const fmtDate = (s: string) =>
                 :key="col.status.id"
                 class="flex w-[240px] shrink-0 flex-col rounded-xl border bg-muted/30 transition-all duration-150"
                 :class="[
-                    dragOverStatus === col.status.automation_trigger && canDrop(col.status.id)
-                        ? 'ring-2 ring-border bg-muted/30'
+                    dragOverStatus === col.status.automation_trigger &&
+                    canDrop(col.status.id)
+                        ? 'bg-muted/30 ring-2 ring-border'
                         : '',
                     dragging &&
                     !canDrop(col.status.id) &&
@@ -227,7 +241,7 @@ const fmtDate = (s: string) =>
 
                         <template v-if="!dragging">
                             <span
-                                class="rounded-full bg-muted/50 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-foreground"
+                                class="rounded-full bg-muted/50 px-1.5 py-0.5 text-xs font-semibold text-foreground tabular-nums"
                             >
                                 {{ col.proposals.length }}
                             </span>
@@ -283,7 +297,7 @@ const fmtDate = (s: string) =>
                         :class="[
                             col.locked
                                 ? 'cursor-pointer hover:bg-muted/50'
-                                : 'cursor-grab hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing hover:bg-muted/30',
+                                : 'cursor-grab hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md active:cursor-grabbing',
                             dragging?.id === proposal.id
                                 ? 'scale-95 opacity-40'
                                 : '',
@@ -335,7 +349,11 @@ const fmtDate = (s: string) =>
                             >
                                 {{
                                     fmt(
-                                        Number(proposal.grand_total || proposal.total_value || 0),
+                                        Number(
+                                            proposal.grand_total ||
+                                                proposal.total_value ||
+                                                0,
+                                        ),
                                         proposal.currency ?? 'USD',
                                     )
                                 }}
@@ -351,13 +369,16 @@ const fmtDate = (s: string) =>
                         <Transition name="hint-slide">
                             <div
                                 v-if="
-                                    hoveredProposalId === proposal.id && !dragging
+                                    hoveredProposalId === proposal.id &&
+                                    !dragging
                                 "
                                 class="mt-2 border-t border-border/30 pt-2"
                             >
                                 <div
                                     v-if="
-                                        isTerminal(col.status.automation_trigger)
+                                        isTerminal(
+                                            col.status.automation_trigger,
+                                        )
                                     "
                                     class="text-[10px] text-muted-foreground italic"
                                 >
@@ -372,13 +393,19 @@ const fmtDate = (s: string) =>
                                         >Move to:</span
                                     >
                                     <span
-                                        v-for="targetId in validTargets(col.status.automation_trigger)"
+                                        v-for="targetId in validTargets(
+                                            col.status.automation_trigger,
+                                        )"
                                         :key="targetId"
-                                        class="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] leading-none font-semibold bg-muted/50 text-muted-foreground"
+                                        class="inline-flex items-center gap-1 rounded-full bg-muted/50 px-1.5 py-0.5 text-[10px] leading-none font-semibold text-muted-foreground"
                                     >
                                         <span
                                             class="h-1.5 w-1.5 rounded-full"
-                                            :style="{ backgroundColor: getStatusFromId(targetId)?.color || '#6b7280' }"
+                                            :style="{
+                                                backgroundColor:
+                                                    getStatusFromId(targetId)
+                                                        ?.color || '#6b7280',
+                                            }"
                                         />
                                         {{ getStatusFromId(targetId)?.title }}
                                     </span>

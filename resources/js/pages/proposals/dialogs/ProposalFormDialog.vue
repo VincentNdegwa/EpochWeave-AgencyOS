@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { usePage } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { onMounted } from 'vue';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import InputError from '@/components/InputError.vue';
@@ -45,15 +44,16 @@ const emit = defineEmits<{
     success: [];
 }>();
 
-const page = usePage();
-const workspace = computed(() => page.props.workspace as any);
 const builderDataStore = useBuilderDataStore();
 const { accounts, templates, accountContacts } = storeToRefs(builderDataStore);
 
 const form = ref({
     title: props.proposal?.title || '',
     description: props.proposal?.description || '',
-    account_id: props.proposal?.account_id?.toString() || props.account?.id?.toString() || '',
+    account_id:
+        props.proposal?.account_id?.toString() ||
+        props.account?.id?.toString() ||
+        '',
     account_contact_id: props.proposal?.account_contact_id || '',
     template_id: props.proposal?.template_id || '',
 });
@@ -65,23 +65,27 @@ onMounted(() => {
 });
 
 // Fetch contacts when account changes
-watch(() => form.value.account_id, async (newAccountId) => {
-    if (newAccountId) {
-        const contacts = await builderDataStore.fetchAccountContacts({
-            account_id: newAccountId.toString(),
-        });
+watch(
+    () => form.value.account_id,
+    async (newAccountId) => {
+        if (newAccountId) {
+            const contacts = await builderDataStore.fetchAccountContacts({
+                account_id: newAccountId.toString(),
+            });
 
-        // Auto-select first contact if available
-        if (contacts && contacts.length > 0) {
-            form.value.account_contact_id = contacts[0].id.toString();
+            // Auto-select first contact if available
+            if (contacts && contacts.length > 0) {
+                form.value.account_contact_id = contacts[0].id.toString();
+            } else {
+                form.value.account_contact_id = '';
+            }
         } else {
+            builderDataStore.accountContacts = [];
             form.value.account_contact_id = '';
         }
-    } else {
-        builderDataStore.accountContacts = [];
-        form.value.account_contact_id = '';
-    }
-}, { immediate: true });
+    },
+    { immediate: true },
+);
 
 watch(
     () => props.proposal,
@@ -91,7 +95,8 @@ watch(
                 title: newProposal.title,
                 description: newProposal.description || '',
                 account_id: newProposal.account_id?.toString() || '',
-                account_contact_id: newProposal.account_contact_id?.toString() || '',
+                account_contact_id:
+                    newProposal.account_contact_id?.toString() || '',
                 template_id: newProposal.template_id?.toString() || '',
             };
         } else {
@@ -161,12 +166,14 @@ watch(
                                     />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem 
-                                        v-for="account in accounts" 
-                                        :key="account.id" 
+                                    <SelectItem
+                                        v-for="account in accounts"
+                                        :key="account.id"
                                         :value="account.id.toString()"
                                     >
-                                        {{ account.company_name || account.name }}
+                                        {{
+                                            account.company_name || account.name
+                                        }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -186,12 +193,13 @@ watch(
                                     />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem 
-                                        v-for="contact in accountContacts" 
-                                        :key="contact.id" 
+                                    <SelectItem
+                                        v-for="contact in accountContacts"
+                                        :key="contact.id"
                                         :value="contact.id.toString()"
                                     >
-                                        {{ contact.first_name }} {{ contact.last_name }}
+                                        {{ contact.first_name }}
+                                        {{ contact.last_name }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -210,9 +218,9 @@ watch(
                                     />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem 
-                                        v-for="template in templates" 
-                                        :key="template.id" 
+                                    <SelectItem
+                                        v-for="template in templates"
+                                        :key="template.id"
                                         :value="template.id.toString()"
                                     >
                                         {{ template.name }}

@@ -22,14 +22,18 @@ const selectionText = computed(() => {
 
 const handleBulkDelete = async () => {
     if (!hasSelection.value) {
-return;
-}
+        return;
+    }
 
     const confirmed = await confirm({
-        title: props.selectedRows.length === 1 ? 'Delete Task' : `Delete ${props.selectedRows.length} Tasks`,
-        description: props.selectedRows.length === 1
-            ? 'Are you sure you want to delete this task? This action cannot be undone.'
-            : `Are you sure you want to delete ${props.selectedRows.length} tasks? This action cannot be undone.`,
+        title:
+            props.selectedRows.length === 1
+                ? 'Delete Task'
+                : `Delete ${props.selectedRows.length} Tasks`,
+        description:
+            props.selectedRows.length === 1
+                ? 'Are you sure you want to delete this task? This action cannot be undone.'
+                : `Are you sure you want to delete ${props.selectedRows.length} tasks? This action cannot be undone.`,
         confirmText: 'Delete',
         cancelText: 'Cancel',
         variant: 'destructive',
@@ -47,12 +51,22 @@ return;
 </script>
 
 <template>
-    <div v-if="hasSelection" class="flex items-center justify-between border-b bg-muted/50 p-3">
+    <div
+        v-if="hasSelection"
+        class="flex items-center justify-between border-b bg-muted/50 p-3"
+    >
         <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-muted-foreground">{{ selectionText }}</span>
+            <span class="text-sm font-medium text-muted-foreground">{{
+                selectionText
+            }}</span>
         </div>
         <div class="flex items-center gap-2">
-            <Button variant="outline" size="sm" @click="handleBulkDelete" class="gap-1">
+            <Button
+                variant="outline"
+                size="sm"
+                @click="handleBulkDelete"
+                class="gap-1"
+            >
                 <Trash2 class="h-4 w-4" />
                 Delete
             </Button>

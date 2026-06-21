@@ -122,11 +122,15 @@ const lineSubtotal = computed(() => form.quantity * form.unit_price);
 
 const discountAmount = computed(() => {
     if (form.discount_type === 'none') {
-return 0;
-}
+        return 0;
+    }
 
     if (form.discount_type === 'percentage') {
-        return Math.round((lineSubtotal.value * form.discount_value) / 100 * 100) / 100;
+        return (
+            Math.round(
+                ((lineSubtotal.value * form.discount_value) / 100) * 100,
+            ) / 100
+        );
     }
 
     return form.discount_value;
@@ -136,11 +140,14 @@ const afterDiscount = computed(() => lineSubtotal.value - discountAmount.value);
 
 const taxAmount = computed(() => {
     if (form.tax_type === 'none') {
-return 0;
-}
+        return 0;
+    }
 
     if (form.tax_type === 'percentage') {
-        return Math.round((afterDiscount.value * form.tax_value) / 100 * 100) / 100;
+        return (
+            Math.round(((afterDiscount.value * form.tax_value) / 100) * 100) /
+            100
+        );
     }
 
     return form.tax_value;
@@ -166,7 +173,7 @@ const handleSave = () => {
 
 <template>
     <Dialog :open="open" @update:open="(v) => !v && emit('cancel')">
-        <DialogContent class="sm:max-w-xl max-h-[90dvh] overflow-y-auto">
+        <DialogContent class="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
             <DialogHeader>
                 <DialogTitle class="text-base font-semibold text-foreground">
                     {{ item.item_name ? 'Edit line item' : 'Add line item' }}
@@ -177,18 +184,28 @@ const handleSave = () => {
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="grid gap-2 sm:col-span-2">
                         <Label for="product_id">Product catalog</Label>
-                        <Select :model-value="form.product_id?.toString() ?? 'custom'" @update:model-value="handleProductSelect">
-                            <SelectTrigger class="w-full" >
-                                <SelectValue placeholder="Select a product or enter custom item" />
+                        <Select
+                            :model-value="
+                                form.product_id?.toString() ?? 'custom'
+                            "
+                            @update:model-value="handleProductSelect"
+                        >
+                            <SelectTrigger class="w-full">
+                                <SelectValue
+                                    placeholder="Select a product or enter custom item"
+                                />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="custom">Custom item</SelectItem>
+                                <SelectItem value="custom"
+                                    >Custom item</SelectItem
+                                >
                                 <SelectItem
                                     v-for="product in products"
                                     :key="product.id"
                                     :value="product.id.toString()"
                                 >
-                                    {{ product.name }} — {{ fmt(product.unit_price) }}
+                                    {{ product.name }} —
+                                    {{ fmt(product.unit_price) }}
                                 </SelectItem>
                             </SelectContent>
                         </Select>
@@ -237,7 +254,9 @@ const handleSave = () => {
 
                     <div class="grid gap-2">
                         <Label>Discount</Label>
-                        <div class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                        <div
+                            class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
+                        >
                             <button
                                 v-for="opt in [
                                     { value: 'none', label: 'None' },
@@ -247,29 +266,53 @@ const handleSave = () => {
                                 :key="opt.value"
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.discount_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
-                                @click="form.discount_type = opt.value as typeof form.discount_type"
+                                :class="
+                                    form.discount_type === opt.value
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                "
+                                @click="
+                                    form.discount_type =
+                                        opt.value as typeof form.discount_type
+                                "
                             >
                                 {{ opt.label }}
                             </button>
                         </div>
-                        <div v-if="form.discount_type !== 'none'" class="flex items-center gap-3">
+                        <div
+                            v-if="form.discount_type !== 'none'"
+                            class="flex items-center gap-3"
+                        >
                             <div class="relative flex-1">
                                 <Input
                                     v-model.number="form.discount_value"
                                     type="number"
                                     min="0"
-                                    :max="form.discount_type === 'percentage' ? 100 : undefined"
+                                    :max="
+                                        form.discount_type === 'percentage'
+                                            ? 100
+                                            : undefined
+                                    "
                                     class="pr-10"
                                     placeholder="0"
                                 />
-                                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                                    {{ form.discount_type === 'percentage' ? '%' : 'Amt' }}
+                                <span
+                                    class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground"
+                                >
+                                    {{
+                                        form.discount_type === 'percentage'
+                                            ? '%'
+                                            : 'Amt'
+                                    }}
                                 </span>
                             </div>
                             <div class="text-right">
-                                <p class="text-[11px] text-muted-foreground">Discount</p>
-                                <p class="text-sm font-semibold text-red-500 dark:text-red-400">
+                                <p class="text-[11px] text-muted-foreground">
+                                    Discount
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-red-500 dark:text-red-400"
+                                >
                                     −{{ fmt(discountAmount) }}
                                 </p>
                             </div>
@@ -278,7 +321,9 @@ const handleSave = () => {
 
                     <div class="grid gap-2">
                         <Label>Tax</Label>
-                        <div class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                        <div
+                            class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
+                        >
                             <button
                                 v-for="opt in [
                                     { value: 'none', label: 'None' },
@@ -288,13 +333,23 @@ const handleSave = () => {
                                 :key="opt.value"
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.tax_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
-                                @click="form.tax_type = opt.value as typeof form.tax_type"
+                                :class="
+                                    form.tax_type === opt.value
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                "
+                                @click="
+                                    form.tax_type =
+                                        opt.value as typeof form.tax_type
+                                "
                             >
                                 {{ opt.label }}
                             </button>
                         </div>
-                        <div v-if="form.tax_type !== 'none'" class="flex items-center gap-3">
+                        <div
+                            v-if="form.tax_type !== 'none'"
+                            class="flex items-center gap-3"
+                        >
                             <div class="relative flex-1">
                                 <Input
                                     v-model.number="form.tax_value"
@@ -303,13 +358,23 @@ const handleSave = () => {
                                     class="pr-10"
                                     placeholder="0"
                                 />
-                                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                                    {{ form.tax_type === 'percentage' ? '%' : 'Amt' }}
+                                <span
+                                    class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground"
+                                >
+                                    {{
+                                        form.tax_type === 'percentage'
+                                            ? '%'
+                                            : 'Amt'
+                                    }}
                                 </span>
                             </div>
                             <div class="text-right">
-                                <p class="text-[11px] text-muted-foreground">Tax</p>
-                                <p class="text-sm font-semibold text-foreground">
+                                <p class="text-[11px] text-muted-foreground">
+                                    Tax
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-foreground"
+                                >
                                     +{{ fmt(taxAmount) }}
                                 </p>
                             </div>
@@ -328,9 +393,13 @@ const handleSave = () => {
 
                     <div class="grid gap-2 sm:col-span-2">
                         <Label>Line summary</Label>
-                        <div class="overflow-hidden rounded-lg border border-border">
+                        <div
+                            class="overflow-hidden rounded-lg border border-border"
+                        >
                             <div class="divide-y divide-border text-sm">
-                                <div class="flex justify-between px-4 py-2.5 text-muted-foreground">
+                                <div
+                                    class="flex justify-between px-4 py-2.5 text-muted-foreground"
+                                >
                                     <span>Subtotal</span>
                                     <span>{{ fmt(lineSubtotal) }}</span>
                                 </div>
@@ -339,7 +408,9 @@ const handleSave = () => {
                                     class="flex justify-between px-4 py-2.5 text-muted-foreground"
                                 >
                                     <span>Discount</span>
-                                    <span class="text-red-500 dark:text-red-400">−{{ fmt(discountAmount) }}</span>
+                                    <span class="text-red-500 dark:text-red-400"
+                                        >−{{ fmt(discountAmount) }}</span
+                                    >
                                 </div>
                                 <div
                                     v-if="form.tax_type !== 'none'"
@@ -348,7 +419,9 @@ const handleSave = () => {
                                     <span>Tax</span>
                                     <span>+{{ fmt(taxAmount) }}</span>
                                 </div>
-                                <div class="flex justify-between bg-muted/30 px-4 py-3 font-semibold text-foreground">
+                                <div
+                                    class="flex justify-between bg-muted/30 px-4 py-3 font-semibold text-foreground"
+                                >
                                     <span>Line total</span>
                                     <span>{{ fmt(lineTotal) }}</span>
                                 </div>
@@ -359,7 +432,9 @@ const handleSave = () => {
             </div>
 
             <DialogFooter>
-                <Button variant="outline" @click="emit('cancel')">Cancel</Button>
+                <Button variant="outline" @click="emit('cancel')"
+                    >Cancel</Button
+                >
                 <Button :disabled="!form.item_name.trim()" @click="handleSave">
                     {{ item.item_name ? 'Update' : 'Add' }} line item
                 </Button>

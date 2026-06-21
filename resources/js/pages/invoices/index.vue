@@ -4,9 +4,7 @@ import { Plus, List, Kanban } from '@lucide/vue';
 import { computed } from 'vue';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import { Button } from '@/components/ui/button';
-import {
-    ButtonGroup,
-} from '@/components/ui/button-group';
+import { ButtonGroup } from '@/components/ui/button-group';
 import { dashboard } from '@/routes';
 import type { Invoice } from '@/types/models/invoice';
 import type { InvoiceStatus } from '@/types/models/invoice_status';
@@ -32,20 +30,24 @@ const statusTabs = computed(() => [
 ]);
 
 const handleCreate = () => {
-    router.visit(InvoiceController.create().url)
+    router.visit(InvoiceController.create().url);
 };
 
 const handleDisplayModeChange = (mode: string) => {
-    router.post('/user-preferences/display-mode', {
-        display_mode: mode,
-    }, {
-        preserveState: true,
-        onSuccess: () => {
-            router.reload({
-                only: ['display_mode'],
-            });
+    router.post(
+        '/user-preferences/display-mode',
+        {
+            display_mode: mode,
         },
-    });
+        {
+            preserveState: true,
+            onSuccess: () => {
+                router.reload({
+                    only: ['display_mode'],
+                });
+            },
+        },
+    );
 };
 
 function updateFilters(newFilters: Record<string, string | undefined>) {
@@ -81,15 +83,16 @@ defineOptions({
             <div>
                 <h4 class="font-bold tracking-tight">Invoices</h4>
                 <p class="text-muted-foreground">
-                    Manage your invoices and track payment status throughout the billing lifecycle.
+                    Manage your invoices and track payment status throughout the
+                    billing lifecycle.
                 </p>
             </div>
-            <div class="flex gap-2">
+            <ButtonGroup>
                 <Button type="button" @click="handleCreate">
                     <Plus class="mr-2 h-4 w-4" />
                     New Invoice
                 </Button>
-            </div>
+            </ButtonGroup>
         </div>
 
         <div class="flex items-center justify-between">

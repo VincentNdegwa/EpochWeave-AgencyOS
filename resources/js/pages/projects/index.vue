@@ -4,6 +4,7 @@ import { Plus } from '@lucide/vue';
 import { ref, computed } from 'vue';
 import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
 import { dashboard } from '@/routes';
 import type { Project } from '@/types/models/project';
 import { createColumns } from './datatable/columns';
@@ -78,12 +79,12 @@ defineOptions({
                     Manage your projects and track their status and progress.
                 </p>
             </div>
-            <div class="flex gap-2">
+            <ButtonGroup>
                 <Button type="button" @click="handleCreate">
                     <Plus class="mr-2 h-4 w-4" />
                     New Project
                 </Button>
-            </div>
+            </ButtonGroup>
         </div>
 
         <div class="flex gap-2 border-b">

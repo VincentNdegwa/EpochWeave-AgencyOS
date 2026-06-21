@@ -1,15 +1,12 @@
 <script setup lang="ts">
 import { Head, Link, router, setLayoutProps, usePage } from '@inertiajs/vue3';
-import {
-    Building2,
-    HashIcon,
-    Send,
-} from '@lucide/vue';
+import { Building2, HashIcon, Send } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog/ConfirmationDialog.vue';
+import { StatBar } from '@/components/ui/stat-bar';
 import { useCurrency } from '@/composables/useCurrency';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import { dashboard } from '@/routes';
@@ -22,7 +19,13 @@ import ProposalActions from './components/ProposalActions.vue';
 
 const props = defineProps<{
     proposal: Proposal;
-    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
+    activities: {
+        id: number;
+        type: string;
+        description: string;
+        created_at: string;
+        user?: { id: number; name: string } | null;
+    }[];
 }>();
 
 const { format: formatCurrency } = useCurrency();
@@ -66,9 +69,6 @@ const proposalNumber = computed(
 const validUntilDisplay = computed(() =>
     formatDate(props.proposal.valid_until),
 );
-const validityStatus = computed(() =>
-    describeValidity(props.proposal.valid_until),
-);
 
 const accountName = computed(
     () => props.proposal.account?.company_name ?? 'Unassigned',
@@ -91,13 +91,16 @@ const tabs = [
 ];
 
 const sendProposal = () => {
-    router.post(proposals.send(props.proposal).url, {}, {
-        onSuccess: () => {
-            showSendDialog.value = false;
+    router.post(
+        proposals.send(props.proposal).url,
+        {},
+        {
+            onSuccess: () => {
+                showSendDialog.value = false;
+            },
         },
-    });
+    );
 };
-
 
 setLayoutProps({
     title: 'Proposal Preview',
@@ -118,47 +121,15 @@ function formatDate(value?: string | null): string {
         new Date(value),
     );
 }
-
-function formatDateTime(value?: string | null): string {
-    if (!value) {
-        return '—';
-    }
-
-    return new Intl.DateTimeFormat(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(value));
-}
-
-function describeValidity(value?: string | null): string {
-    if (!value) {
-        return 'No expiry date';
-    }
-
-    const target = new Date(value).getTime();
-    const diffDays = Math.ceil((target - Date.now()) / 86_400_000);
-
-    if (diffDays < 0) {
-        return 'Expired';
-    }
-
-    if (diffDays === 0) {
-        return 'Expires today';
-    }
-
-    if (diffDays === 1) {
-        return 'Expires tomorrow';
-    }
-
-    return `Expires in ${diffDays} days`;
-}
 </script>
 
 <template>
     <Head :title="`Proposal · ${props.proposal.title}`" />
 
     <div class="flex h-[calc(100vh-64px)] flex-col">
-        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
+        <div
+            class="sticky top-0 z-30 bg-background/95 pb-4 backdrop-blur-sm print:hidden"
+        >
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex min-w-0 flex-col gap-0.5">
                     <div class="flex flex-wrap items-center gap-2">
@@ -168,7 +139,8 @@ function describeValidity(value?: string | null): string {
                                 props.proposal.proposal_status.color
                                     ? {
                                           backgroundColor:
-                                              props.proposal.proposal_status.color,
+                                              props.proposal.proposal_status
+                                                  .color,
                                           color: '#fff',
                                       }
                                     : {}
@@ -177,18 +149,22 @@ function describeValidity(value?: string | null): string {
                         >
                             {{ props.proposal.proposal_status.title }}
                         </Badge>
-                        <span class="inline-flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground">
+                        <span
+                            class="inline-flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground"
+                        >
                             <HashIcon class="h-2.5 w-2.5" />{{ proposalNumber }}
                         </span>
                     </div>
                     <h1 class="text-base font-semibold text-foreground">
                         {{ props.proposal.title }}
-                        <span class="font-normal text-muted-foreground">· {{ formattedValue }}</span>
+                        <span class="font-normal text-muted-foreground"
+                            >· {{ formattedValue }}</span
+                        >
                     </h1>
                 </div>
                 <div class="flex gap-2">
-                    <Button 
-                        variant="outline" 
+                    <Button
+                        variant="outline"
                         class="gap-2"
                         @click="showSendDialog = true"
                         :disabled="!props.proposal.account_contact"
@@ -205,28 +181,14 @@ function describeValidity(value?: string | null): string {
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="border-b border-border bg-background print:hidden">
-            <div class="grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Total Value</p>
-                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">{{ formattedValue }}</p>
-                </div>
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Deposit</p>
-                    <p class="mt-0.5 text-base font-bold text-foreground">{{ depositSummary }}</p>
-                </div>
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Validity</p>
-                    <p class="mt-0.5 text-base font-bold text-foreground">{{ validUntilDisplay }}</p>
-                    <p class="text-[10px] text-muted-foreground">{{ validityStatus }}</p>
-                </div>
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Account</p>
-                    <p class="mt-0.5 text-base font-bold text-foreground truncate">{{ accountName }}</p>
-                </div>
-            </div>
-        </div>
+        <StatBar
+            :items="[
+                { label: 'Total Value', value: formattedValue },
+                { label: 'Deposit', value: depositSummary },
+                { label: 'Validity', value: validUntilDisplay },
+                { label: 'Account', value: accountName },
+            ]"
+        />
 
         <!-- Tabs -->
         <div class="border-b border-border bg-background">
@@ -235,7 +197,7 @@ function describeValidity(value?: string | null): string {
                     v-for="tab in tabs"
                     :key="tab.key"
                     @click="activeTab = tab.key"
-                    class="px-4 py-3 text-sm font-medium border-b-2 transition-colors"
+                    class="border-b-2 px-4 py-3 text-sm font-medium transition-colors"
                     :class="
                         activeTab === tab.key
                             ? 'border-primary text-primary'
@@ -250,13 +212,24 @@ function describeValidity(value?: string | null): string {
         <!-- Tab Content -->
         <div class="flex-1 overflow-hidden">
             <!-- Overview Tab -->
-            <div v-if="activeTab === 'overview'" class="h-full overflow-y-auto space-y-4">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                    <div class="lg:col-span-2 space-y-4">
-                        <div class="border-b p-5 space-y-4">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Account</h3>
-                            <div class="flex items-center gap-2 text-sm font-medium">
-                                <Building2 class="h-4 w-4 text-muted-foreground" />
+            <div
+                v-if="activeTab === 'overview'"
+                class="h-full space-y-4 overflow-y-auto"
+            >
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="space-y-4 lg:col-span-2">
+                        <div class="space-y-4 border-b p-5">
+                            <h3
+                                class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            >
+                                Account
+                            </h3>
+                            <div
+                                class="flex items-center gap-2 text-sm font-medium"
+                            >
+                                <Building2
+                                    class="h-4 w-4 text-muted-foreground"
+                                />
                                 <template v-if="accountHref">
                                     <Link
                                         :href="accountHref"
@@ -271,19 +244,43 @@ function describeValidity(value?: string | null): string {
                             </div>
                         </div>
 
-                        <div class="border-b p-5 space-y-4">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Contact Person</h3>
-                            <div v-if="props.proposal.account_contact" class="flex items-start gap-2 text-sm">
-                                <div class="h-4 w-4 text-muted-foreground mt-0.5">👤</div>
+                        <div class="space-y-4 border-b p-5">
+                            <h3
+                                class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            >
+                                Contact Person
+                            </h3>
+                            <div
+                                v-if="props.proposal.account_contact"
+                                class="flex items-start gap-2 text-sm"
+                            >
+                                <div
+                                    class="mt-0.5 h-4 w-4 text-muted-foreground"
+                                >
+                                    👤
+                                </div>
                                 <div>
                                     <p class="font-medium">
-                                        {{ `${props.proposal.account_contact.first_name} ${props.proposal.account_contact.last_name}` }}
+                                        {{
+                                            `${props.proposal.account_contact.first_name} ${props.proposal.account_contact.last_name}`
+                                        }}
                                     </p>
-                                    <p class="text-muted-foreground text-xs">
-                                        {{ props.proposal.account_contact.email }}
+                                    <p class="text-xs text-muted-foreground">
+                                        {{
+                                            props.proposal.account_contact.email
+                                        }}
                                     </p>
-                                    <p v-if="props.proposal.account_contact.job_title" class="text-muted-foreground text-xs">
-                                        {{ props.proposal.account_contact.job_title }}
+                                    <p
+                                        v-if="
+                                            props.proposal.account_contact
+                                                .job_title
+                                        "
+                                        class="text-xs text-muted-foreground"
+                                    >
+                                        {{
+                                            props.proposal.account_contact
+                                                .job_title
+                                        }}
                                     </p>
                                 </div>
                             </div>
@@ -292,15 +289,26 @@ function describeValidity(value?: string | null): string {
                             </div>
                         </div>
 
-                        <div class="border-b p-5 space-y-4">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Assigned Team Member</h3>
-                            <div v-if="props.proposal.user" class="flex items-start gap-2 text-sm">
-                                <div class="h-4 w-4 text-muted-foreground mt-0.5">👨‍💼</div>
+                        <div class="space-y-4 border-b p-5">
+                            <h3
+                                class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            >
+                                Assigned Team Member
+                            </h3>
+                            <div
+                                v-if="props.proposal.user"
+                                class="flex items-start gap-2 text-sm"
+                            >
+                                <div
+                                    class="mt-0.5 h-4 w-4 text-muted-foreground"
+                                >
+                                    👨‍💼
+                                </div>
                                 <div>
                                     <p class="font-medium">
                                         {{ props.proposal.user.name }}
                                     </p>
-                                    <p class="text-muted-foreground text-xs">
+                                    <p class="text-xs text-muted-foreground">
                                         {{ props.proposal.user.email }}
                                     </p>
                                 </div>
@@ -312,8 +320,12 @@ function describeValidity(value?: string | null): string {
                     </div>
 
                     <div class="space-y-4">
-                        <div class="border-b p-5 space-y-4">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
+                        <div class="space-y-4 border-b p-5">
+                            <h3
+                                class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                            >
+                                Activity
+                            </h3>
                             <ActivityTimeline :activities="props.activities" />
                         </div>
                     </div>
@@ -326,27 +338,44 @@ function describeValidity(value?: string | null): string {
             </div>
 
             <!-- Comments Tab -->
-            <div v-else-if="activeTab === 'comments'" class="h-full flex items-center justify-center">
+            <div
+                v-else-if="activeTab === 'comments'"
+                class="flex h-full items-center justify-center"
+            >
                 <div class="text-center">
-                    <div class="text-6xl mb-4">🚧</div>
-                    <h2 class="text-xl font-semibold mb-2">Coming Soon</h2>
-                    <p class="text-muted-foreground">Comments feature is under development</p>
+                    <div class="mb-4 text-6xl">🚧</div>
+                    <h2 class="mb-2 text-xl font-semibold">Coming Soon</h2>
+                    <p class="text-muted-foreground">
+                        Comments feature is under development
+                    </p>
                 </div>
             </div>
 
             <!-- Notes Tab -->
-            <div v-else-if="activeTab === 'notes'" class="h-full flex items-center justify-center">
+            <div
+                v-else-if="activeTab === 'notes'"
+                class="flex h-full items-center justify-center"
+            >
                 <div class="text-center">
-                    <div class="text-6xl mb-4">🚧</div>
-                    <h2 class="text-xl font-semibold mb-2">Coming Soon</h2>
-                    <p class="text-muted-foreground">Notes feature is under development</p>
+                    <div class="mb-4 text-6xl">🚧</div>
+                    <h2 class="mb-2 text-xl font-semibold">Coming Soon</h2>
+                    <p class="text-muted-foreground">
+                        Notes feature is under development
+                    </p>
                 </div>
             </div>
 
             <!-- Activity Tab -->
-            <div v-else-if="activeTab === 'activity'" class="h-full overflow-y-auto space-y-4">
-                <div class="border-b p-5 space-y-4">
-                    <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
+            <div
+                v-else-if="activeTab === 'activity'"
+                class="h-full space-y-4 overflow-y-auto"
+            >
+                <div class="space-y-4 border-b p-5">
+                    <h3
+                        class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Activity
+                    </h3>
                     <ActivityTimeline :activities="props.activities" />
                 </div>
             </div>
@@ -357,8 +386,14 @@ function describeValidity(value?: string | null): string {
     <ConfirmationDialog
         v-model:open="showSendDialog"
         :title="props.proposal.sent_at ? 'Resend Proposal' : 'Send Proposal'"
-        :description="props.proposal.sent_at ? 'Are you sure you want to resend this proposal to the assigned contact? This will send them another email with a link to view the proposal.' : 'Are you sure you want to send this proposal to the assigned contact? This will send them an email with a link to view the proposal.'"
-        :confirm-text="props.proposal.sent_at ? 'Resend Proposal' : 'Send Proposal'"
+        :description="
+            props.proposal.sent_at
+                ? 'Are you sure you want to resend this proposal to the assigned contact? This will send them another email with a link to view the proposal.'
+                : 'Are you sure you want to send this proposal to the assigned contact? This will send them an email with a link to view the proposal.'
+        "
+        :confirm-text="
+            props.proposal.sent_at ? 'Resend Proposal' : 'Send Proposal'
+        "
         cancel-text="Cancel"
         variant="default"
         @confirm="sendProposal"

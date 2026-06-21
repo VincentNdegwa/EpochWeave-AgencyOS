@@ -19,7 +19,8 @@ const props = defineProps<{
 }>();
 
 const emptyTitle = props.emptyTitle ?? 'No contacts found';
-const emptyDescription = props.emptyDescription ?? 'No contacts available for this account.';
+const emptyDescription =
+    props.emptyDescription ?? 'No contacts available for this account.';
 
 const table = useVueTable({
     get data() {

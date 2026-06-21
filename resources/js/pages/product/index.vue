@@ -4,13 +4,14 @@ import { Plus, Package } from '@lucide/vue';
 import { ref } from 'vue';
 import ProductController from '@/actions/App/Http/Controllers/ProductController';
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { StatsCard } from '@/components/ui/stats-card';
+import { StatBar } from '@/components/ui/stat-bar';
 import { dashboard } from '@/routes';
 import { index as productUnitIndex } from '@/routes/product-units';
 import type { Product, ProductUnit } from '@/types/models/product';
@@ -108,7 +109,7 @@ defineOptions({
                     information.
                 </p>
             </div>
-            <div class="flex gap-2">
+            <ButtonGroup>
                 <Button type="button" @click="handleCreate">
                     <Plus class="mr-2 h-4 w-4" />
                     New Product
@@ -131,26 +132,29 @@ defineOptions({
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
+            </ButtonGroup>
         </div>
 
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <StatsCard
-                title="Total Products"
-                :value="stats.total.value"
-                :change="stats.total.change"
-            />
-            <StatsCard
-                title="Active"
-                :value="stats.active.value"
-                :change="stats.active.change"
-            />
-            <StatsCard
-                title="Inactive"
-                :value="stats.inactive.value"
-                :change="stats.inactive.change"
-            />
-        </div>
+        <StatBar
+            :items="[
+                {
+                    label: 'Total Products',
+                    value: stats.total.value,
+                    change: stats.total.change,
+                },
+                {
+                    label: 'Active',
+                    value: stats.active.value,
+                    change: stats.active.change,
+                },
+                {
+                    label: 'Inactive',
+                    value: stats.inactive.value,
+                    change: stats.inactive.change,
+                },
+            ]"
+            :columns="3"
+        />
 
         <div class="flex gap-2 border-b">
             <button

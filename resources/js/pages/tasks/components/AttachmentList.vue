@@ -22,8 +22,8 @@ const handleFileChange = (event: Event) => {
     const file = target.files?.[0];
 
     if (!file) {
-return;
-}
+        return;
+    }
 
     processing.value = true;
     const formData = new FormData();
@@ -35,8 +35,8 @@ return;
             processing.value = false;
 
             if (fileInput.value) {
-fileInput.value.value = '';
-}
+                fileInput.value.value = '';
+            }
         },
     });
 };
@@ -49,8 +49,8 @@ const deleteAttachment = (attachmentId: number) => {
 
 const formatSize = (bytes: number): string => {
     if (bytes === 0) {
-return '0 B';
-}
+        return '0 B';
+    }
 
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -66,7 +66,9 @@ return '0 B';
             <div class="flex items-center gap-2">
                 <Paperclip class="h-4 w-4 text-muted-foreground" />
                 <h3 class="text-sm font-semibold">Attachments</h3>
-                <span class="text-xs text-muted-foreground">({{ attachments.length }})</span>
+                <span class="text-xs text-muted-foreground"
+                    >({{ attachments.length }})</span
+                >
             </div>
             <Button
                 size="sm"
@@ -93,10 +95,14 @@ return '0 B';
                 class="flex items-center justify-between rounded-lg border p-3"
             >
                 <div class="min-w-0">
-                    <p class="truncate text-sm font-medium">{{ attachment.original_name }}</p>
+                    <p class="truncate text-sm font-medium">
+                        {{ attachment.original_name }}
+                    </p>
                     <p class="text-xs text-muted-foreground">
                         {{ formatSize(attachment.size) }}
-                        <span v-if="attachment.uploader">&middot; {{ attachment.uploader.name }}</span>
+                        <span v-if="attachment.uploader"
+                            >&middot; {{ attachment.uploader.name }}</span
+                        >
                     </p>
                 </div>
                 <Button
@@ -109,7 +115,9 @@ return '0 B';
                 </Button>
             </div>
 
-            <p v-if="!attachments.length" class="text-sm text-muted-foreground">No attachments yet.</p>
+            <p v-if="!attachments.length" class="text-sm text-muted-foreground">
+                No attachments yet.
+            </p>
         </div>
     </div>
 </template>

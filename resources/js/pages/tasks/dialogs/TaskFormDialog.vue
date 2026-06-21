@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
-import { usePage } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
-import { ref, watch, computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import InputError from '@/components/InputError.vue';
 import { Badge } from '@/components/ui/badge';
@@ -55,7 +54,6 @@ const emit = defineEmits<{
     success: [];
 }>();
 
-const page = usePage();
 const builderData = useBuilderDataStore();
 const { projects, projectsLoaded } = storeToRefs(builderData);
 const taskStatuses = computed(() => props.task_statuses || []);
@@ -76,11 +74,14 @@ function isTagSelected(tagId: number): boolean {
     return form.value.tag_ids.includes(tagId.toString());
 }
 
-watch(() => props.open, (isOpen) => {
-    if (isOpen && !projectsLoaded.value) {
-        builderData.fetchProjects();
-    }
-});
+watch(
+    () => props.open,
+    (isOpen) => {
+        if (isOpen && !projectsLoaded.value) {
+            builderData.fetchProjects();
+        }
+    },
+);
 
 const form = ref({
     project_id: props.task?.project_id?.toString() || '',
@@ -155,7 +156,11 @@ watch(
             <DialogHeader>
                 <DialogTitle>{{ task ? 'Edit Task' : 'New Task' }}</DialogTitle>
                 <DialogDescription>
-                    {{ task ? 'Update the task details below.' : 'Create a new task.' }}
+                    {{
+                        task
+                            ? 'Update the task details below.'
+                            : 'Create a new task.'
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -166,7 +171,10 @@ watch(
                         : TaskController.store.form()) as any
                 "
                 :options="{ preserveScroll: true, preserveState: true }"
-                @success="emit('success'); emit('update:open', false);"
+                @success="
+                    emit('success');
+                    emit('update:open', false);
+                "
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-6 py-4">
@@ -187,7 +195,9 @@ watch(
                             <Label for="task-project">Project</Label>
                             <Select name="project_id" v-model="form.project_id">
                                 <SelectTrigger class="w-full">
-                                    <SelectValue placeholder="Select a project" />
+                                    <SelectValue
+                                        placeholder="Select a project"
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
@@ -204,9 +214,14 @@ watch(
 
                         <div class="grid gap-2">
                             <Label for="task-status">Status</Label>
-                            <Select name="task_status_id" v-model="form.task_status_id">
+                            <Select
+                                name="task_status_id"
+                                v-model="form.task_status_id"
+                            >
                                 <SelectTrigger class="w-full">
-                                    <SelectValue placeholder="Select a status" />
+                                    <SelectValue
+                                        placeholder="Select a status"
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
@@ -290,29 +305,47 @@ watch(
                                         variant="outline"
                                         class="h-auto min-h-[36px] flex-wrap justify-start gap-1 px-2 py-1"
                                     >
-                                        <template v-if="form.tag_ids.length === 0">
-                                            <span class="text-muted-foreground text-sm">Select tags...</span>
+                                        <template
+                                            v-if="form.tag_ids.length === 0"
+                                        >
+                                            <span
+                                                class="text-sm text-muted-foreground"
+                                                >Select tags...</span
+                                            >
                                         </template>
                                         <Badge
-                                            v-for="tag in tags.filter((t) => form.tag_ids.includes(t.id.toString()))"
+                                            v-for="tag in tags.filter((t) =>
+                                                form.tag_ids.includes(
+                                                    t.id.toString(),
+                                                ),
+                                            )"
                                             :key="tag.id"
                                             class="text-xs"
                                             :style="{
-                                                backgroundColor: tag.color ? tag.color + '33' : '#f1f5f9',
+                                                backgroundColor: tag.color
+                                                    ? tag.color + '33'
+                                                    : '#f1f5f9',
                                                 color: tag.color || '#475569',
-                                                borderColor: tag.color ? tag.color + '66' : '#e2e8f0',
+                                                borderColor: tag.color
+                                                    ? tag.color + '66'
+                                                    : '#e2e8f0',
                                             }"
                                         >
                                             {{ tag.name }}
                                         </Badge>
                                     </Button>
                                 </PopoverTrigger>
-                                <PopoverContent class="w-[260px] p-2" align="start">
-                                    <div class="flex flex-col gap-1 max-h-[200px] overflow-y-auto">
+                                <PopoverContent
+                                    class="w-[260px] p-2"
+                                    align="start"
+                                >
+                                    <div
+                                        class="flex max-h-[200px] flex-col gap-1 overflow-y-auto"
+                                    >
                                         <div
                                             v-for="tag in tags"
                                             :key="tag.id"
-                                            class="flex items-center gap-2 rounded px-2 py-1.5 cursor-pointer hover:bg-muted transition-colors"
+                                            class="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 transition-colors hover:bg-muted"
                                             @click="toggleTag(tag.id)"
                                         >
                                             <Checkbox
@@ -320,12 +353,20 @@ watch(
                                                 class="pointer-events-none"
                                             />
                                             <span
-                                                class="h-2 w-2 rounded-full shrink-0"
-                                                :style="{ backgroundColor: tag.color || '#94a3b8' }"
+                                                class="h-2 w-2 shrink-0 rounded-full"
+                                                :style="{
+                                                    backgroundColor:
+                                                        tag.color || '#94a3b8',
+                                                }"
                                             />
-                                            <span class="text-sm">{{ tag.name }}</span>
+                                            <span class="text-sm">{{
+                                                tag.name
+                                            }}</span>
                                         </div>
-                                        <div v-if="tags.length === 0" class="text-sm text-muted-foreground px-2 py-1">
+                                        <div
+                                            v-if="tags.length === 0"
+                                            class="px-2 py-1 text-sm text-muted-foreground"
+                                        >
                                             No tags available.
                                         </div>
                                     </div>
@@ -347,7 +388,11 @@ watch(
                 </div>
 
                 <DialogFooter>
-                    <Button type="button" variant="outline" @click="emit('update:open', false)">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="emit('update:open', false)"
+                    >
                         Cancel
                     </Button>
                     <Button type="submit" :disabled="processing">

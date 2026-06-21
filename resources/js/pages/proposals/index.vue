@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Plus, Tag, List, Kanban } from '@lucide/vue';
+import { Plus, List, Kanban, ListFilter } from '@lucide/vue';
 import { ref, computed } from 'vue';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import { Button } from '@/components/ui/button';
-import {
-    ButtonGroup,
-} from '@/components/ui/button-group';
+import { ButtonGroup } from '@/components/ui/button-group';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -21,16 +19,17 @@ import DataTable from './datatable/data-table.vue';
 import ProposalFormDialog from './dialogs/ProposalFormDialog.vue';
 import KanbanView from './KanbanView.vue';
 
-const { proposals, proposal_statuses, display_mode, movement_rules, filters } = defineProps<{
-    proposals: Proposal[];
-    proposal_statuses: any[];
-    display_mode: string;
-    movement_rules: Record<string, number[]>;
-    filters?: {
-        status?: string;
-        search?: string;
-    };
-}>();
+const { proposals, proposal_statuses, display_mode, movement_rules, filters } =
+    defineProps<{
+        proposals: Proposal[];
+        proposal_statuses: any[];
+        display_mode: string;
+        movement_rules: Record<string, number[]>;
+        filters?: {
+            status?: string;
+            search?: string;
+        };
+    }>();
 
 const dialogOpen = ref(false);
 const editingProposal = ref<Proposal | null>(null);
@@ -43,8 +42,8 @@ const statusTabs = computed(() => [
     { value: 'all', label: 'All' },
     ...proposal_statuses.map((status: any) => ({
         value: String(status.id),
-        label: status.title
-    }))
+        label: status.title,
+    })),
 ]);
 
 const handleCreate = () => {
@@ -76,16 +75,20 @@ const handleStatusSuccess = () => {
 };
 
 const handleDisplayModeChange = (mode: string) => {
-    router.post('/user-preferences/display-mode', {
-        display_mode: mode,
-    }, {
-        preserveState: true,
-        onSuccess: () => {
-            router.reload({
-                only: ['display_mode'],
-            });
+    router.post(
+        '/user-preferences/display-mode',
+        {
+            display_mode: mode,
         },
-    });
+        {
+            preserveState: true,
+            onSuccess: () => {
+                router.reload({
+                    only: ['display_mode'],
+                });
+            },
+        },
+    );
 };
 
 function updateFilters(newFilters: Record<string, string | undefined>) {
@@ -125,7 +128,7 @@ defineOptions({
                     sales pipeline.
                 </p>
             </div>
-            <div class="flex gap-2">
+            <ButtonGroup>
                 <Button type="button" @click="handleCreate">
                     <Plus class="mr-2 h-4 w-4" />
                     New Proposal
@@ -133,7 +136,7 @@ defineOptions({
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                         <Button variant="outline">
-                            <Tag class="mr-2 h-4 w-4" />
+                            <ListFilter class="mr-2 h-4 w-4" />
                             Status
                         </Button>
                     </DropdownMenuTrigger>
@@ -143,12 +146,12 @@ defineOptions({
                             New Status
                         </DropdownMenuItem>
                         <DropdownMenuItem @click="handleViewStatuses">
-                            <Tag class="mr-2 h-4 w-4" />
+                            <ListFilter class="mr-2 h-4 w-4" />
                             View Statuses
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
+            </ButtonGroup>
         </div>
 
         <div class="flex items-center justify-between">

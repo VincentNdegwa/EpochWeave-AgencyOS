@@ -42,7 +42,10 @@ const payments = computed<Payment[]>(() => props.invoice.payments ?? []);
 
 const maxRefundAmount = computed(() => {
     const totalPaid = props.invoice.amount_paid ?? 0;
-    const totalRefunded = payments.value.reduce((sum, p) => sum + (p.refunded_amount ?? 0), 0);
+    const totalRefunded = payments.value.reduce(
+        (sum, p) => sum + (p.refunded_amount ?? 0),
+        0,
+    );
 
     return Math.max(totalPaid - totalRefunded, 0);
 });
@@ -61,7 +64,10 @@ watch(
         if (isOpen) {
             errors.value = {};
             form.value = {
-                amount: maxRefundAmount.value > 0 ? maxRefundAmount.value.toFixed(2) : '',
+                amount:
+                    maxRefundAmount.value > 0
+                        ? maxRefundAmount.value.toFixed(2)
+                        : '',
                 payment_id: payments.value[0]?.id?.toString() ?? '',
                 refunded_at: formatDateInput(new Date()),
                 reason: '',
@@ -75,22 +81,18 @@ function handleSubmit() {
     isSubmitting.value = true;
     errors.value = {};
 
-    router.post(
-        `/invoices/${props.invoice.id}/refunds`,
-        form.value,
-        {
-            onSuccess: () => {
-                isSubmitting.value = false;
-                toast.success('Refund recorded successfully');
-                emit('success');
-                emit('update:open', false);
-            },
-            onError: (pageErrors) => {
-                isSubmitting.value = false;
-                errors.value = pageErrors as Record<string, string>;
-            },
+    router.post(`/invoices/${props.invoice.id}/refunds`, form.value, {
+        onSuccess: () => {
+            isSubmitting.value = false;
+            toast.success('Refund recorded successfully');
+            emit('success');
+            emit('update:open', false);
         },
-    );
+        onError: (pageErrors) => {
+            isSubmitting.value = false;
+            errors.value = pageErrors as Record<string, string>;
+        },
+    });
 }
 </script>
 
@@ -101,8 +103,13 @@ function handleSubmit() {
                 <DialogTitle>Record Refund / Issue Credit Note</DialogTitle>
                 <DialogDescription>
                     Record a refund for invoice
-                    <span class="font-mono">#{{ invoice.invoice_number ?? invoice.id }}</span>
-                    <span v-if="maxRefundAmount > 0" class="ml-1 text-muted-foreground">
+                    <span class="font-mono"
+                        >#{{ invoice.invoice_number ?? invoice.id }}</span
+                    >
+                    <span
+                        v-if="maxRefundAmount > 0"
+                        class="ml-1 text-muted-foreground"
+                    >
                         · Max refund: {{ fmtCurrency(maxRefundAmount) }}
                     </span>
                 </DialogDescription>
@@ -127,7 +134,7 @@ function handleSubmit() {
                     <select
                         id="refund-payment"
                         v-model="form.payment_id"
-                        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <option value="">None</option>
                         <option
@@ -135,7 +142,14 @@ function handleSubmit() {
                             :key="payment.id"
                             :value="payment.id"
                         >
-                            {{ payment.paid_at ? new Date(payment.paid_at).toLocaleDateString() : 'N/A' }} — {{ fmtCurrency(payment.amount) }}
+                            {{
+                                payment.paid_at
+                                    ? new Date(
+                                          payment.paid_at,
+                                      ).toLocaleDateString()
+                                    : 'N/A'
+                            }}
+                            — {{ fmtCurrency(payment.amount) }}
                         </option>
                     </select>
                     <InputError :message="errors.payment_id" />
@@ -143,7 +157,11 @@ function handleSubmit() {
 
                 <div class="grid gap-2">
                     <Label for="refunded_at" required>Refund Date</Label>
-                    <Input id="refunded_at" v-model="form.refunded_at" type="date" />
+                    <Input
+                        id="refunded_at"
+                        v-model="form.refunded_at"
+                        type="date"
+                    />
                     <InputError :message="errors.refunded_at" />
                 </div>
 

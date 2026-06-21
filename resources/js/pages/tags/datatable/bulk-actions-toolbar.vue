@@ -15,9 +15,14 @@ const selectionText = computed(() => {
 </script>
 
 <template>
-    <div v-if="hasSelection" class="flex items-center justify-between border-b bg-muted/50 p-3">
+    <div
+        v-if="hasSelection"
+        class="flex items-center justify-between border-b bg-muted/50 p-3"
+    >
         <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-muted-foreground">{{ selectionText }}</span>
+            <span class="text-sm font-medium text-muted-foreground">{{
+                selectionText
+            }}</span>
         </div>
     </div>
 </template>

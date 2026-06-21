@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Plus, List, Kanban, Tag } from '@lucide/vue';
+import { Plus, List, Kanban, Tag, ListFilter } from '@lucide/vue';
 import { ref, computed } from 'vue';
+import TagController from '@/actions/App/Http/Controllers/TagController';
 import TaskController from '@/actions/App/Http/Controllers/TaskController';
-import TaskStatusController from '@/actions/App/Http/Controllers/TaskStatusController';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import {
@@ -16,6 +16,7 @@ import { dashboard } from '@/routes';
 import type { Tag as TagType } from '@/types/models/tag';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
+import TagFormDialog from '../tags/dialogs/TagFormDialog.vue';
 import TaskStatusFormDialog from '../task-status/dialogs/TaskStatusFormDialog.vue';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
@@ -37,6 +38,7 @@ const { tasks, task_statuses, tags, display_mode, filters } = defineProps<{
 const dialogOpen = ref(false);
 const editingTask = ref<Task | null>(null);
 const statusDialogOpen = ref(false);
+const tagDialogOpen = ref(false);
 
 const columns = createColumns(task_statuses, tags);
 
@@ -67,6 +69,21 @@ const handleViewStatuses = () => {
     router.visit('/task-status');
 };
 
+const handleCreateTag = () => {
+    tagDialogOpen.value = true;
+};
+
+const handleViewTags = () => {
+    router.visit(TagController.index().url);
+};
+
+const handleTagSuccess = () => {
+    tagDialogOpen.value = false;
+    router.reload({
+        only: ['tags'],
+    });
+};
+
 const handleStatusSuccess = () => {
     statusDialogOpen.value = false;
     router.reload({
@@ -75,16 +92,20 @@ const handleStatusSuccess = () => {
 };
 
 const handleDisplayModeChange = (mode: string) => {
-    router.post('/user-preferences/display-mode', {
-        display_mode: mode,
-    }, {
-        preserveState: true,
-        onSuccess: () => {
-            router.reload({
-                only: ['display_mode'],
-            });
+    router.post(
+        '/user-preferences/display-mode',
+        {
+            display_mode: mode,
         },
-    });
+        {
+            preserveState: true,
+            onSuccess: () => {
+                router.reload({
+                    only: ['display_mode'],
+                });
+            },
+        },
+    );
 };
 
 function updateFilters(newFilters: Record<string, string | undefined>) {
@@ -122,7 +143,7 @@ defineOptions({
                     Manage tasks and track progress across projects.
                 </p>
             </div>
-            <div class="flex gap-2">
+            <ButtonGroup>
                 <Button type="button" @click="handleCreate">
                     <Plus class="mr-2 h-4 w-4" />
                     New Task
@@ -130,7 +151,7 @@ defineOptions({
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
                         <Button variant="outline">
-                            <Tag class="mr-2 h-4 w-4" />
+                            <ListFilter class="mr-2 h-4 w-4" />
                             Statuses
                         </Button>
                     </DropdownMenuTrigger>
@@ -140,12 +161,30 @@ defineOptions({
                             New Status
                         </DropdownMenuItem>
                         <DropdownMenuItem @click="handleViewStatuses">
-                            <Tag class="mr-2 h-4 w-4" />
+                            <ListFilter class="mr-2 h-4 w-4" />
                             View Statuses
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-            </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <Button variant="outline">
+                            <Tag class="mr-2 h-4 w-4" />
+                            Tags
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem @click="handleCreateTag">
+                            <Plus class="mr-2 h-4 w-4" />
+                            New Tag
+                        </DropdownMenuItem>
+                        <DropdownMenuItem @click="handleViewTags">
+                            <Tag class="mr-2 h-4 w-4" />
+                            View Tags
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </ButtonGroup>
         </div>
 
         <div class="flex items-center justify-between">
@@ -211,6 +250,11 @@ defineOptions({
             v-model:open="statusDialogOpen"
             :status="null"
             @success="handleStatusSuccess"
+        />
+
+        <TagFormDialog
+            v-model:open="tagDialogOpen"
+            @success="handleTagSuccess"
         />
     </div>
 </template>

@@ -48,9 +48,16 @@ const builderStore = useBuilderDataStore();
 const projectStatuses = useProjectStatuses();
 
 const PRESET_COLORS = [
-    '#6366f1', '#ec4899', '#10b981', '#f59e0b',
-    '#3b82f6', '#ef4444', '#8b5cf6', '#14b8a6',
-    '#f97316', '#06b6d4',
+    '#6366f1',
+    '#ec4899',
+    '#10b981',
+    '#f59e0b',
+    '#3b82f6',
+    '#ef4444',
+    '#8b5cf6',
+    '#14b8a6',
+    '#f97316',
+    '#06b6d4',
 ];
 
 function randomColor(): string {
@@ -58,7 +65,10 @@ function randomColor(): string {
 }
 
 const form = ref({
-    account_id: props.project?.account_id?.toString() || props.account?.id?.toString() || '',
+    account_id:
+        props.project?.account_id?.toString() ||
+        props.account?.id?.toString() ||
+        '',
     name: props.project?.name || '',
     description: props.project?.description || '',
     color: props.project?.color || randomColor(),
@@ -124,9 +134,15 @@ watch(
     <Dialog :open="open" @update:open="emit('update:open', $event)">
         <DialogContent class="sm:max-w-xl">
             <DialogHeader>
-                <DialogTitle>{{ project ? 'Edit Project' : 'New Project' }}</DialogTitle>
+                <DialogTitle>{{
+                    project ? 'Edit Project' : 'New Project'
+                }}</DialogTitle>
                 <DialogDescription>
-                    {{ project ? 'Update the project details below.' : 'Create a new project for your workspace.' }}
+                    {{
+                        project
+                            ? 'Update the project details below.'
+                            : 'Create a new project for your workspace.'
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -137,7 +153,10 @@ watch(
                         : ProjectController.store.form()) as any
                 "
                 :options="{ preserveScroll: true, preserveState: true }"
-                @success="emit('success'); emit('update:open', false);"
+                @success="
+                    emit('success');
+                    emit('update:open', false);
+                "
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-6 py-4">
@@ -155,10 +174,19 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="project-account" required>Account</Label>
-                            <Select name="account_id" v-model="form.account_id" required :disabled="!!props.account">
+                            <Label for="project-account" required
+                                >Account</Label
+                            >
+                            <Select
+                                name="account_id"
+                                v-model="form.account_id"
+                                required
+                                :disabled="!!props.account"
+                            >
                                 <SelectTrigger class="w-full">
-                                    <SelectValue placeholder="Select an account" />
+                                    <SelectValue
+                                        placeholder="Select an account"
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
@@ -166,7 +194,9 @@ watch(
                                         :key="account.id"
                                         :value="account.id.toString()"
                                     >
-                                        {{ account.company_name || account.name }}
+                                        {{
+                                            account.company_name || account.name
+                                        }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
@@ -239,7 +269,11 @@ watch(
                 </div>
 
                 <DialogFooter>
-                    <Button type="button" variant="outline" @click="emit('update:open', false)">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="emit('update:open', false)"
+                    >
                         Cancel
                     </Button>
                     <Button type="submit" :disabled="processing">

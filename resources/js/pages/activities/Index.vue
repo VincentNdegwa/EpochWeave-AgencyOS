@@ -30,14 +30,21 @@ defineProps<{
             >
                 <div class="flex items-center justify-between">
                     <p class="text-sm font-medium">{{ item.description }}</p>
-                    <span class="text-xs text-muted-foreground">{{ new Date(item.created_at).toLocaleString() }}</span>
+                    <span class="text-xs text-muted-foreground">{{
+                        new Date(item.created_at).toLocaleString()
+                    }}</span>
                 </div>
-                <p v-if="item.user" class="text-xs text-muted-foreground mt-1">
+                <p v-if="item.user" class="mt-1 text-xs text-muted-foreground">
                     By {{ item.user.name }}
                 </p>
             </div>
 
-            <p v-if="!activities.data.length" class="text-sm text-muted-foreground">No activities yet.</p>
+            <p
+                v-if="!activities.data.length"
+                class="text-sm text-muted-foreground"
+            >
+                No activities yet.
+            </p>
         </div>
     </div>
 </template>

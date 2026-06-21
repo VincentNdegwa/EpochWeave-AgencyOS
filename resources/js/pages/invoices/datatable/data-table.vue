@@ -6,7 +6,7 @@ import DataTable from '@/components/DataTable.vue';
 import type { Invoice } from '@/types/models/invoice';
 import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 
-const props = defineProps<{
+defineProps<{
     columns: ColumnDef<Invoice>[];
     data: Invoice[];
     filters?: Record<string, string | undefined>;
@@ -14,7 +14,11 @@ const props = defineProps<{
 }>();
 
 const filterConfigs = [
-    { key: 'search', type: 'search' as const, placeholder: 'Search invoices...' },
+    {
+        key: 'search',
+        type: 'search' as const,
+        placeholder: 'Search invoices...',
+    },
 ];
 </script>
 

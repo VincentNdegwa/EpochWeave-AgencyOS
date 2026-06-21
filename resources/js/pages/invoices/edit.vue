@@ -29,7 +29,8 @@ const props = defineProps<{ invoice: Invoice }>();
 const { format: fmtCurrency } = useCurrency();
 const { formatDateInput } = useDateFormat();
 const builderDataStore = useBuilderDataStore();
-const { accounts, accountContacts, projects, products } = storeToRefs(builderDataStore);
+const { accounts, accountContacts, projects, products } =
+    storeToRefs(builderDataStore);
 
 builderDataStore.fetchAccounts();
 builderDataStore.fetchProducts();
@@ -82,7 +83,10 @@ const form = ref<InvoiceForm>({
         quantity: item.quantity,
         unit_price: item.unit_price,
         subtotal: item.subtotal,
-        discount_type: (item.discount_type || 'none') as 'none' | 'percentage' | 'fixed',
+        discount_type: (item.discount_type || 'none') as
+            | 'none'
+            | 'percentage'
+            | 'fixed',
         discount_value: item.discount_value || 0,
         discount_amount: item.discount_amount || 0,
         tax_type: (item.tax_type || 'none') as 'none' | 'percentage' | 'fixed',
@@ -93,7 +97,9 @@ const form = ref<InvoiceForm>({
 });
 
 if (form.value.account_id) {
-    builderDataStore.fetchAccountContacts({ account_id: form.value.account_id });
+    builderDataStore.fetchAccountContacts({
+        account_id: form.value.account_id,
+    });
     builderDataStore.fetchProjects({ account_id: form.value.account_id });
 }
 
@@ -173,19 +179,23 @@ const grandTotal = computed((): number =>
 
 const handleSave = async () => {
     if (isSaving.value) {
-return;
-}
+        return;
+    }
 
     isSaving.value = true;
     errors.value = {};
 
     try {
-        await router.patch(InvoiceController.update(props.invoice.id).url, form.value as any, {
-            onError: (pageErrors) => {
-                errors.value = pageErrors as Record<string, string>;
-                isSaving.value = false;
+        await router.patch(
+            InvoiceController.update(props.invoice.id).url,
+            form.value as any,
+            {
+                onError: (pageErrors) => {
+                    errors.value = pageErrors as Record<string, string>;
+                    isSaving.value = false;
+                },
             },
-        });
+        );
     } catch (error) {
         console.error('Failed to update invoice:', error);
         isSaving.value = false;
@@ -207,7 +217,6 @@ watchEffect(() => {
         ],
     });
 });
-
 </script>
 
 <template>
@@ -246,7 +255,9 @@ watchEffect(() => {
                                 <Label for="account_id" required>Account</Label>
                                 <Select v-model="form.account_id">
                                     <SelectTrigger class="w-full">
-                                        <SelectValue placeholder="Select an account" />
+                                        <SelectValue
+                                            placeholder="Select an account"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem
@@ -254,7 +265,10 @@ watchEffect(() => {
                                             :key="account.id"
                                             :value="account.id.toString()"
                                         >
-                                            {{ account.company_name || account.name }}
+                                            {{
+                                                account.company_name ||
+                                                account.name
+                                            }}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -265,7 +279,9 @@ watchEffect(() => {
                                 <Label for="account_contact_id">Contact</Label>
                                 <Select v-model="form.account_contact_id">
                                     <SelectTrigger class="w-full">
-                                        <SelectValue placeholder="Select a contact" />
+                                        <SelectValue
+                                            placeholder="Select a contact"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem
@@ -273,18 +289,23 @@ watchEffect(() => {
                                             :key="contact.id"
                                             :value="contact.id.toString()"
                                         >
-                                            {{ contact.first_name }} {{ contact.last_name }}
+                                            {{ contact.first_name }}
+                                            {{ contact.last_name }}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <InputError :message="errors.account_contact_id" />
+                                <InputError
+                                    :message="errors.account_contact_id"
+                                />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="project_id">Project</Label>
                                 <Select v-model="form.project_id">
                                     <SelectTrigger class="w-full">
-                                        <SelectValue placeholder="Select a project" />
+                                        <SelectValue
+                                            placeholder="Select a project"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem
@@ -300,14 +321,24 @@ watchEffect(() => {
                             </div>
 
                             <div class="grid gap-2">
-                                <Label for="issue_date" required>Issue Date</Label>
-                                <Input id="issue_date" type="date" v-model="form.issue_date" />
+                                <Label for="issue_date" required
+                                    >Issue Date</Label
+                                >
+                                <Input
+                                    id="issue_date"
+                                    type="date"
+                                    v-model="form.issue_date"
+                                />
                                 <InputError :message="errors.issue_date" />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="due_date" required>Due Date</Label>
-                                <Input id="due_date" type="date" v-model="form.due_date" />
+                                <Input
+                                    id="due_date"
+                                    type="date"
+                                    v-model="form.due_date"
+                                />
                                 <InputError :message="errors.due_date" />
                             </div>
                         </div>
@@ -323,13 +354,21 @@ watchEffect(() => {
                                     Products and services to invoice
                                 </p>
                             </div>
-                            <Button type="button" variant="outline" size="sm" @click="addLineItem">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                @click="addLineItem"
+                            >
                                 + Add Item
                             </Button>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div v-if="form.line_items.length === 0" class="py-8 text-center text-muted-foreground">
+                        <div
+                            v-if="form.line_items.length === 0"
+                            class="py-8 text-center text-muted-foreground"
+                        >
                             No line items yet. Click "Add Item" to start.
                         </div>
 
@@ -339,23 +378,43 @@ watchEffect(() => {
                                 :key="item.id"
                                 class="flex items-center gap-4 rounded-lg border p-3"
                             >
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium truncate">{{ item.item_name }}</p>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium">
+                                        {{ item.item_name }}
+                                    </p>
                                     <p class="text-xs text-muted-foreground">
-                                        {{ item.quantity }} {{ item.unit_label }} × {{ fmtCurrency(item.unit_price) }}
+                                        {{ item.quantity }}
+                                        {{ item.unit_label }} ×
+                                        {{ fmtCurrency(item.unit_price) }}
                                     </p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-sm font-semibold">{{ fmtCurrency(item.total) }}</p>
-                                    <p v-if="item.discount_type !== 'none'" class="text-xs text-red-500">
+                                    <p class="text-sm font-semibold">
+                                        {{ fmtCurrency(item.total) }}
+                                    </p>
+                                    <p
+                                        v-if="item.discount_type !== 'none'"
+                                        class="text-xs text-red-500"
+                                    >
                                         −{{ fmtCurrency(item.discount_amount) }}
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-1">
-                                    <Button type="button" variant="ghost" size="sm" @click="editLineItem(index)">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        @click="editLineItem(index)"
+                                    >
                                         Edit
                                     </Button>
-                                    <Button type="button" variant="ghost" size="sm" class="text-destructive" @click="removeLineItem(index)">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        class="text-destructive"
+                                        @click="removeLineItem(index)"
+                                    >
                                         Remove
                                     </Button>
                                 </div>
@@ -372,7 +431,11 @@ watchEffect(() => {
                         </p>
                     </CardHeader>
                     <CardContent>
-                        <Textarea v-model="form.notes" placeholder="Additional notes for the invoice..." rows="4" />
+                        <Textarea
+                            v-model="form.notes"
+                            placeholder="Additional notes for the invoice..."
+                            rows="4"
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -388,19 +451,27 @@ watchEffect(() => {
                     <CardContent>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground">Subtotal</span>
+                                <span class="text-muted-foreground"
+                                    >Subtotal</span
+                                >
                                 <span>{{ fmtCurrency(subtotal) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground">Discount</span>
-                                <span class="text-red-500">−{{ fmtCurrency(discountTotal) }}</span>
+                                <span class="text-muted-foreground"
+                                    >Discount</span
+                                >
+                                <span class="text-red-500"
+                                    >−{{ fmtCurrency(discountTotal) }}</span
+                                >
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-muted-foreground">Tax</span>
                                 <span>{{ fmtCurrency(taxTotal) }}</span>
                             </div>
                             <Separator />
-                            <div class="flex justify-between text-base font-semibold">
+                            <div
+                                class="flex justify-between text-base font-semibold"
+                            >
                                 <span>Total</span>
                                 <span>{{ fmtCurrency(grandTotal) }}</span>
                             </div>

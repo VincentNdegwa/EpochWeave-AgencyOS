@@ -84,7 +84,9 @@ export function useProjectStatuses() {
 
     return {
         all: projectStatuses,
-        getByValue: (value: string): (EnumOption & { hexColor: string }) | undefined =>
+        getByValue: (
+            value: string,
+        ): (EnumOption & { hexColor: string }) | undefined =>
             projectStatuses[value],
         getLabel: (value: string): string =>
             projectStatuses[value]?.label || value,
@@ -103,14 +105,15 @@ export function useTaskPriorities() {
 
     return {
         all: taskPriorities,
-        getByValue: (value: string): (EnumOption & { hexColor: string }) | undefined =>
+        getByValue: (
+            value: string,
+        ): (EnumOption & { hexColor: string }) | undefined =>
             taskPriorities[value],
         getLabel: (value: string): string =>
             taskPriorities[value]?.label || value,
         getVariant: (value: string): BadgeVariants['variant'] =>
             taskPriorities[value]?.variant || 'default',
-        getColor: (value: string): string =>
-            taskPriorities[value]?.color || '',
+        getColor: (value: string): string => taskPriorities[value]?.color || '',
         getHexColor: (value: string): string =>
             taskPriorities[value]?.hexColor || '#6b7280',
         values: Object.values(taskPriorities),

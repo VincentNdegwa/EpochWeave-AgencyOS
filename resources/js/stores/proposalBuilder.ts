@@ -75,7 +75,8 @@ const toNumber = (value: unknown, fallback = 0): number => {
         return fallback;
     }
 
-    const parsed = typeof value === 'string' ? Number.parseFloat(value) : Number(value);
+    const parsed =
+        typeof value === 'string' ? Number.parseFloat(value) : Number(value);
 
     return Number.isFinite(parsed) ? parsed : fallback;
 };
@@ -95,7 +96,7 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
         thumbnailUrl: null,
     });
     const lineItemsCatalog = ref<PricingLineItem[]>([]);
-    
+
     const portalMode = ref(false);
 
     function findBlockRecursive(
@@ -350,7 +351,9 @@ export const useProposalBuilderStore = defineStore('proposalBuilder', () => {
                     'none',
                 discount_value: toNumber(item.discount_value, 0),
                 discount_amount: toNumber(item.discount_amount, 0),
-                tax_type: (item.tax_type as 'percentage' | 'fixed' | 'none') || 'none',
+                tax_type:
+                    (item.tax_type as 'percentage' | 'fixed' | 'none') ||
+                    'none',
                 tax_value: toNumber(item.tax_value, 0),
                 total_tax_amount: toNumber(item.total_tax_amount, 0),
                 total: toNumber(item.total, 0),

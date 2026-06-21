@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Plus, Tag } from '@lucide/vue';
+import { Plus } from '@lucide/vue';
 import { ref } from 'vue';
 import TagController from '@/actions/App/Http/Controllers/TagController';
 import { Button } from '@/components/ui/button';

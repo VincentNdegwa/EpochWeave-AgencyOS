@@ -10,11 +10,9 @@ import {
     FolderKanban,
     CheckSquare,
     Settings2,
-    Tag,
     BarChart3,
 } from '@lucide/vue';
 import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
-import TagController from '@/actions/App/Http/Controllers/TagController';
 import TaskController from '@/actions/App/Http/Controllers/TaskController';
 import AppLogo from '@/components/AppLogo.vue';
 import NavFooter from '@/components/NavFooter.vue';
@@ -85,11 +83,6 @@ const projectNavItems: NavItem[] = [
         href: TaskController.index().url,
         icon: CheckSquare,
     },
-    {
-        title: 'Tags',
-        href: TagController.index().url,
-        icon: Tag,
-    },
 ];
 
 const financeNavItems: NavItem[] = [
@@ -118,7 +111,11 @@ const footerNavItems: NavItem[] = [
 </script>
 
 <template>
-    <Sidebar collapsible="icon" variant="inset" class="epochweave-sidebar border-r-0">
+    <Sidebar
+        collapsible="icon"
+        variant="inset"
+        class="epochweave-sidebar border-r-0"
+    >
         <SidebarHeader class="p-0 ps-2">
             <SidebarMenu>
                 <SidebarMenuItem>
@@ -143,7 +140,7 @@ const footerNavItems: NavItem[] = [
         </SidebarContent>
 
         <SidebarFooter class="p-0">
-            <div class="mx-3 border-t border-border/60 mb-2" />
+            <div class="mx-3 mb-2 border-t border-border/60" />
             <NavFooter :items="footerNavItems" class="px-2 pb-1" />
             <div class="px-2 pb-3">
                 <NavUser />

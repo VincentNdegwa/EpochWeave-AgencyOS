@@ -9,9 +9,7 @@ import { show as productShow } from '@/routes/products';
 import type { Product, ProductUnit } from '@/types/models/product';
 import ProductActions from '../components/ProductActions.vue';
 
-export function createColumns(
-    units?: ProductUnit[],
-): ColumnDef<Product>[] {
+export function createColumns(units?: ProductUnit[]): ColumnDef<Product>[] {
     const { all: billingTypes } = useBillingTypes();
     const { all: billingFrequencies } = useBillingFrequencies();
     const { format: formatCurrency } = useCurrency();

@@ -130,7 +130,6 @@ watch(
                     class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"
                 ></div>
                 {{ isSaving ? 'Saving...' : 'Save' }}
-
             </Button>
 
             <!-- Hide action menu in template mode -->

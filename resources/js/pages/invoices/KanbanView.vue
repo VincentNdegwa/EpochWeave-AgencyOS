@@ -41,20 +41,16 @@ const isDragging = ref(false);
 
 const canDrop = (toStatusKey: string): boolean => {
     if (!dragging.value) {
-return false;
-}
+        return false;
+    }
 
     const targetCol = statusColumns.value.find((c) => c.key === toStatusKey);
 
     if (!targetCol || targetCol.locked) {
-return false;
-}
+        return false;
+    }
 
     return dragging.value.fromStatus !== toStatusKey;
-};
-
-const isLocked = (statusKey: string): boolean => {
-    return LOCKED_STATUSES.includes(statusKey);
 };
 
 function onDragStart(e: DragEvent, invoice: Invoice) {
@@ -148,12 +144,18 @@ async function onDrop(e: DragEvent, targetStatus: StatusColumn) {
 const columns = computed(() =>
     statusColumns.value.map((status) => ({
         status,
-        invoices: allInvoices.filter((i) => i.invoice_status?.automation_trigger === status.key),
+        invoices: allInvoices.filter(
+            (i) => i.invoice_status?.automation_trigger === status.key,
+        ),
     })),
 );
 
 const fmt = (n: number, currency = 'USD') =>
-    new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 }).format(n);
+    new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency,
+        maximumFractionDigits: 0,
+    }).format(n);
 
 const fmtDate = (s: string) =>
     new Date(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
@@ -182,7 +184,7 @@ const fmtDate = (s: string) =>
                 class="flex w-[240px] shrink-0 flex-col rounded-xl border bg-muted/30 transition-all duration-150"
                 :class="[
                     dragOverStatus === col.status.key && canDrop(col.status.key)
-                        ? 'ring-2 ring-border bg-muted/30'
+                        ? 'bg-muted/30 ring-2 ring-border'
                         : '',
                     dragging &&
                     !canDrop(col.status.key) &&
@@ -200,7 +202,9 @@ const fmtDate = (s: string) =>
                             class="h-2.5 w-2.5 shrink-0 rounded-full"
                             :style="{ backgroundColor: col.status.color }"
                         />
-                        <span class="truncate text-sm font-semibold text-foreground">
+                        <span
+                            class="truncate text-sm font-semibold text-foreground"
+                        >
                             {{ col.status.label }}
                         </span>
                     </div>
@@ -213,7 +217,7 @@ const fmtDate = (s: string) =>
 
                         <template v-if="!dragging">
                             <span
-                                class="rounded-full bg-muted/50 px-1.5 py-0.5 text-xs font-semibold tabular-nums text-foreground"
+                                class="rounded-full bg-muted/50 px-1.5 py-0.5 text-xs font-semibold text-foreground tabular-nums"
                             >
                                 {{ col.invoices.length }}
                             </span>
@@ -269,7 +273,7 @@ const fmtDate = (s: string) =>
                         :class="[
                             col.status.locked
                                 ? 'cursor-pointer hover:bg-muted/50'
-                                : 'cursor-grab hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing hover:bg-muted/30',
+                                : 'cursor-grab hover:-translate-y-0.5 hover:bg-muted/30 hover:shadow-md active:cursor-grabbing',
                             dragging?.id === invoice.id
                                 ? 'scale-95 opacity-40'
                                 : '',
@@ -282,9 +286,16 @@ const fmtDate = (s: string) =>
                         @mousedown="onInvoiceMouseDown(invoice)"
                         @mouseup="onInvoiceMouseUp(invoice)"
                     >
-                        <div class="mb-1.5 flex items-start justify-between gap-1">
-                            <span class="font-mono text-xs text-muted-foreground">
-                                #{{ invoice.invoice_number || `INV-${invoice.id}` }}
+                        <div
+                            class="mb-1.5 flex items-start justify-between gap-1"
+                        >
+                            <span
+                                class="font-mono text-xs text-muted-foreground"
+                            >
+                                #{{
+                                    invoice.invoice_number ||
+                                    `INV-${invoice.id}`
+                                }}
                             </span>
                             <InvoiceActions
                                 :invoice="invoice"
@@ -294,7 +305,9 @@ const fmtDate = (s: string) =>
                             />
                         </div>
 
-                        <p class="mb-2 line-clamp-2 text-sm leading-snug font-medium text-foreground">
+                        <p
+                            class="mb-2 line-clamp-2 text-sm leading-snug font-medium text-foreground"
+                        >
                             {{ invoice.account?.company_name || 'No account' }}
                         </p>
 
@@ -303,24 +316,41 @@ const fmtDate = (s: string) =>
                             class="mb-1.5 flex items-center gap-1.5 text-xs text-muted-foreground"
                         >
                             <Building class="h-3 w-3 shrink-0" />
-                            <span class="truncate">{{ invoice.user.name }}</span>
+                            <span class="truncate">{{
+                                invoice.user.name
+                            }}</span>
                         </div>
 
                         <div
                             class="flex items-center justify-between gap-2 border-t border-border/50 pt-1.5"
                         >
-                            <span class="text-xs font-semibold text-foreground tabular-nums">
-                                {{ fmt(Number(invoice.grand_total || 0), invoice.currency ?? 'USD') }}
+                            <span
+                                class="text-xs font-semibold text-foreground tabular-nums"
+                            >
+                                {{
+                                    fmt(
+                                        Number(invoice.grand_total || 0),
+                                        invoice.currency ?? 'USD',
+                                    )
+                                }}
                             </span>
-                            <div class="flex items-center gap-1 text-xs text-muted-foreground">
+                            <div
+                                class="flex items-center gap-1 text-xs text-muted-foreground"
+                            >
                                 <Calendar class="h-3 w-3 shrink-0" />
-                                <span>{{ fmtDate(invoice.due_date || invoice.created_at) }}</span>
+                                <span>{{
+                                    fmtDate(
+                                        invoice.due_date || invoice.created_at,
+                                    )
+                                }}</span>
                             </div>
                         </div>
 
                         <Transition name="hint-slide">
                             <div
-                                v-if="hoveredInvoiceId === invoice.id && !dragging"
+                                v-if="
+                                    hoveredInvoiceId === invoice.id && !dragging
+                                "
                                 class="mt-2 border-t border-border/30 pt-2"
                             >
                                 <div

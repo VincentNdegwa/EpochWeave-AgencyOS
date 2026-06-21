@@ -3,7 +3,6 @@ import { router } from '@inertiajs/vue3';
 import { Calendar, Clock, DollarSign, Hash } from '@lucide/vue';
 import { ref, computed, watch } from 'vue';
 import { useDateFormat } from '@/composables/useDateFormat';
-import { useTaskPriorities } from '@/composables/useEnums';
 import { getInitials } from '@/composables/useInitials';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
@@ -20,7 +19,6 @@ const props = withDefaults(
 );
 
 const { formatDate } = useDateFormat();
-const taskPriorities = useTaskPriorities();
 
 const localTasks = ref<Task[]>([...props.tasks]);
 
@@ -37,7 +35,9 @@ watch(
 const columns = computed(() =>
     props.task_statuses.map((status) => ({
         status,
-        tasks: localTasks.value.filter((t) => t.task_status_id === status.id).sort((a, b) => a.position - b.position),
+        tasks: localTasks.value
+            .filter((t) => t.task_status_id === status.id)
+            .sort((a, b) => a.position - b.position),
     })),
 );
 
@@ -51,8 +51,8 @@ const mouseDownTarget = ref<number | null>(null);
 
 const canDrop = (toStatusId: number): boolean => {
     if (!dragging.value) {
-return false;
-}
+        return false;
+    }
 
     return dragging.value.fromStatusId !== toStatusId;
 };
@@ -130,12 +130,16 @@ function onDrop(e: DragEvent, targetStatusId: number) {
 </script>
 
 <template>
-    <div class="flex gap-3 overflow-x-auto pb-4">
+    <div class="custom-scrollbar flex gap-3 overflow-x-auto pb-4">
         <div
             v-for="col in columns"
             :key="col.status.id"
             class="flex w-[260px] shrink-0 flex-col rounded-xl border bg-muted/30"
-            :class="dragOverStatus === col.status.id && canDrop(col.status.id) ? 'ring-2 ring-border' : ''"
+            :class="
+                dragOverStatus === col.status.id && canDrop(col.status.id)
+                    ? 'ring-2 ring-border'
+                    : ''
+            "
             @dragover="onDragOver($event, col.status.id)"
             @drop="onDrop($event, col.status.id)"
         >
@@ -144,15 +148,25 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                     class="h-2.5 w-2.5 shrink-0 rounded-full"
                     :style="{ backgroundColor: col.status.color || '#94a3b8' }"
                 />
-                <span class="truncate text-sm font-semibold text-foreground">{{ col.status.title }}</span>
-                <span class="ml-auto rounded-full bg-muted/50 px-1.5 py-0.5 text-xs font-semibold tabular-nums">
+                <span class="truncate text-sm font-semibold text-foreground">{{
+                    col.status.title
+                }}</span>
+                <span
+                    class="ml-auto rounded-full bg-muted/50 px-1.5 py-0.5 text-xs font-semibold tabular-nums"
+                >
                     {{ col.tasks.length }}
                 </span>
             </div>
 
-            <div class="mx-3 mb-2 h-0.5 rounded-full" :style="{ backgroundColor: col.status.color || '#94a3b8' }" />
+            <div
+                class="mx-3 mb-2 h-0.5 rounded-full"
+                :style="{ backgroundColor: col.status.color || '#94a3b8' }"
+            />
 
-            <div class="flex flex-1 flex-col gap-2 overflow-y-auto px-2 pb-3" style="max-height: 72vh; min-height: 120px">
+            <div
+                class="flex flex-1 flex-col gap-2 overflow-y-auto px-2 pb-3"
+                style="max-height: 72vh; min-height: 120px"
+            >
                 <div
                     v-for="task in col.tasks"
                     :key="task.id"
@@ -172,11 +186,14 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                     <div class="mb-1.5 flex items-start justify-between gap-1">
                         <span
                             v-if="task.project"
-                            class="flex items-center gap-1 text-[11px] font-medium text-muted-foreground truncate"
+                            class="flex items-center gap-1 truncate text-[11px] font-medium text-muted-foreground"
                         >
                             <span
-                                class="inline-block h-1.5 w-1.5 rounded-full shrink-0"
-                                :style="{ backgroundColor: task.project.color || '#94a3b8' }"
+                                class="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                                :style="{
+                                    backgroundColor:
+                                        task.project.color || '#94a3b8',
+                                }"
                             />
                             {{ task.project.name }}
                         </span>
@@ -189,16 +206,23 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                     </div>
 
                     <!-- Title -->
-                    <p class="text-sm font-medium text-foreground leading-snug">{{ task.title }}</p>
+                    <p class="text-sm leading-snug font-medium text-foreground">
+                        {{ task.title }}
+                    </p>
 
                     <!-- Tags -->
-                    <div v-if="task.tags?.length" class="flex flex-wrap gap-1 mt-2">
+                    <div
+                        v-if="task.tags?.length"
+                        class="mt-2 flex flex-wrap gap-1"
+                    >
                         <span
                             v-for="tag in task.tags"
                             :key="tag.id"
                             class="inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium"
                             :style="{
-                                backgroundColor: tag.color ? tag.color + '26' : '#f1f5f9',
+                                backgroundColor: tag.color
+                                    ? tag.color + '26'
+                                    : '#f1f5f9',
                                 color: tag.color || '#475569',
                             }"
                         >
@@ -227,28 +251,46 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                             </span>
                         </div>
 
-                        <div class="flex items-center gap-2.5 text-[10px] text-muted-foreground">
+                        <div
+                            class="flex items-center gap-2.5 text-[10px] text-muted-foreground"
+                        >
                             <!-- Due Date -->
-                            <span v-if="task.due_date" class="flex items-center gap-0.5" :class="{ 'text-orange-500 font-medium': new Date(task.due_date) < new Date() }">
+                            <span
+                                v-if="task.due_date"
+                                class="flex items-center gap-0.5"
+                                :class="{
+                                    'font-medium text-orange-500':
+                                        new Date(task.due_date) < new Date(),
+                                }"
+                            >
                                 <Calendar class="h-3 w-3" />
                                 {{ formatDate(task.due_date) }}
                             </span>
 
                             <!-- Estimated Hours -->
-                            <span v-if="task.estimated_hours" class="flex items-center gap-0.5">
+                            <span
+                                v-if="task.estimated_hours"
+                                class="flex items-center gap-0.5"
+                            >
                                 <Clock class="h-3 w-3" />
                                 {{ task.estimated_hours }}h
                             </span>
 
                             <!-- Billable -->
-                            <span v-if="task.is_billable" class="flex items-center gap-0.5 text-emerald-600">
+                            <span
+                                v-if="task.is_billable"
+                                class="flex items-center gap-0.5 text-emerald-600"
+                            >
                                 <DollarSign class="h-3 w-3" />
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div v-if="col.tasks.length === 0" class="flex h-16 items-center justify-center text-xs text-muted-foreground/50">
+                <div
+                    v-if="col.tasks.length === 0"
+                    class="flex h-16 items-center justify-center text-xs text-muted-foreground/50"
+                >
                     No tasks
                 </div>
             </div>

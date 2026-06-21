@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import {
     ChevronDown,
     Edit,
@@ -16,7 +16,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ProjectFormDialog from '@/pages/projects/dialogs/ProjectFormDialog.vue';
@@ -149,8 +148,8 @@ const dropdownActions = computed((): ActionItem[] => {
 
 const primaryAction = computed((): ActionItem | null => {
     if (props.variant !== 'split') {
-return null;
-}
+        return null;
+    }
 
     const candidates = dropdownActions.value.filter(
         (a) => a.label !== 'View' && a.label !== 'Delete',
@@ -161,8 +160,8 @@ return null;
 
 const splitDropdownItems = computed((): ActionItem[] => {
     if (props.variant !== 'split') {
-return [];
-}
+        return [];
+    }
 
     const primary = primaryAction.value;
 
@@ -176,18 +175,12 @@ return [];
         <Button
             v-if="primaryAction"
             :size="size === 'icon' ? 'sm' : size"
-            :class="[
-                sizeClasses.button,
-                'rounded-r-none border-r-0',
-            ]"
+            :class="[sizeClasses.button, 'rounded-r-none border-r-0']"
             @mousedown.stop
             @mouseup.stop
             @click.stop="primaryAction.handler()"
         >
-            <component
-                :is="primaryAction.icon"
-                :class="sizeClasses.iconSize"
-            />
+            <component :is="primaryAction.icon" :class="sizeClasses.iconSize" />
             <span class="hidden sm:inline">{{ primaryAction.label }}</span>
         </Button>
 
@@ -208,10 +201,7 @@ return [];
                         v-if="primaryAction"
                         :class="sizeClasses.iconSize"
                     />
-                    <MoreHorizontal
-                        v-else
-                        :class="sizeClasses.iconSize"
-                    />
+                    <MoreHorizontal v-else :class="sizeClasses.iconSize" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -259,10 +249,7 @@ return [];
                 ]"
                 @click="action.handler()"
             >
-                <component
-                    :is="action.icon"
-                    :class="sizeClasses.iconSize"
-                />
+                <component :is="action.icon" :class="sizeClasses.iconSize" />
                 {{ action.label }}
             </DropdownMenuItem>
         </DropdownMenuContent>

@@ -128,7 +128,11 @@ export function createColumns(): ColumnDef<Invoice>[] {
             cell: ({ row }) => {
                 const invoice = row.original;
 
-                return h(InvoiceActions, { invoice, variant: 'dropdown', size: 'icon' });
+                return h(InvoiceActions, {
+                    invoice,
+                    variant: 'dropdown',
+                    size: 'icon',
+                });
             },
         },
     ];

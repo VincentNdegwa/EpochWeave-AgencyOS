@@ -5,7 +5,7 @@ import type { Component } from 'vue';
 import DataTable from '@/components/DataTable.vue';
 import type { InvoiceStatus } from '@/types/models/invoice_status';
 
-const props = defineProps<{
+defineProps<{
     columns: ColumnDef<InvoiceStatus>[];
     data: InvoiceStatus[];
     filters?: Record<string, string | undefined>;
@@ -13,7 +13,11 @@ const props = defineProps<{
 }>();
 
 const filterConfigs = [
-    { key: 'search', type: 'search' as const, placeholder: 'Search statuses...' },
+    {
+        key: 'search',
+        type: 'search' as const,
+        placeholder: 'Search statuses...',
+    },
 ];
 </script>
 

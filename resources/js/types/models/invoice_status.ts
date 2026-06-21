@@ -4,13 +4,7 @@ export interface InvoiceStatus {
     title: string;
     color: string;
     is_system: boolean;
-    automation_trigger:
-        | 'draft'
-        | 'sent'
-        | 'overdue'
-        | 'paid'
-        | 'voided'
-        | null;
+    automation_trigger: 'draft' | 'sent' | 'overdue' | 'paid' | 'voided' | null;
     position: number;
     created_at: string;
     updated_at: string;

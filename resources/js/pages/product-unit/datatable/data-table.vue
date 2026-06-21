@@ -5,7 +5,7 @@ import type { Component } from 'vue';
 import DataTable from '@/components/DataTable.vue';
 import type { ProductUnit } from '@/types/models/product';
 
-const props = defineProps<{
+defineProps<{
     columns: ColumnDef<ProductUnit>[];
     data: ProductUnit[];
     filters?: Record<string, string | undefined>;

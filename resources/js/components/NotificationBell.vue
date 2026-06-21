@@ -19,27 +19,37 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Notification } from '@/types/models/notification';
 
 const page = usePage();
-const notifications = computed(() => page.props.notifications as Notification[]);
+const notifications = computed(
+    () => page.props.notifications as Notification[],
+);
 const open = ref(false);
 
 const unreadCount = computed(() => notifications.value.length);
 
 const markAsRead = (id: string) => {
-    router.patch(`/notifications/${id}/read`, {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            open.value = false;
+    router.patch(
+        `/notifications/${id}/read`,
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                open.value = false;
+            },
         },
-    });
+    );
 };
 
 const markAllAsRead = () => {
-    router.patch('/notifications/read-all', {}, {
-        preserveScroll: true,
-        onSuccess: () => {
-            open.value = false;
+    router.patch(
+        '/notifications/read-all',
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                open.value = false;
+            },
         },
-    });
+    );
 };
 
 const getNotificationData = (notification: Notification) => {
@@ -79,8 +89,13 @@ const getColorClass = (color: string) => {
             <Command>
                 <CommandList>
                     <CommandGroup>
-                        <div class="flex items-center justify-between px-3 py-2">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notifications</span>
+                        <div
+                            class="flex items-center justify-between px-3 py-2"
+                        >
+                            <span
+                                class="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
+                                >Notifications</span
+                            >
                             <Button
                                 v-if="unreadCount > 0"
                                 variant="ghost"
@@ -88,7 +103,7 @@ const getColorClass = (color: string) => {
                                 class="h-7 text-xs"
                                 @click="markAllAsRead"
                             >
-                                <CheckCheck class="h-3.5 w-3.5 mr-1" />
+                                <CheckCheck class="mr-1 h-3.5 w-3.5" />
                                 Mark all read
                             </Button>
                         </div>
@@ -108,30 +123,55 @@ const getColorClass = (color: string) => {
                                 v-for="notification in notifications"
                                 v-else
                                 :key="notification.id"
-                                class="flex flex-col items-start gap-2 p-4 cursor-pointer"
+                                class="flex cursor-pointer flex-col items-start gap-2 p-4"
                                 @select="markAsRead(notification.id)"
                             >
-                                <div
-                                    class="flex w-full items-start gap-3"
-                                >
+                                <div class="flex w-full items-start gap-3">
                                     <Icon
-                                        :icon="getNotificationData(notification).icon || 'mdi:bell'"
-                                        :class="getColorClass(getNotificationData(notification).color || 'gray-500')"
-                                        class="h-5 w-5 mt-0.5 flex-shrink-0"
+                                        :icon="
+                                            getNotificationData(notification)
+                                                .icon || 'mdi:bell'
+                                        "
+                                        :class="
+                                            getColorClass(
+                                                getNotificationData(
+                                                    notification,
+                                                ).color || 'gray-500',
+                                            )
+                                        "
+                                        class="mt-0.5 h-5 w-5 flex-shrink-0"
                                     />
-                                    <div class="flex-1 min-w-0">
+                                    <div class="min-w-0 flex-1">
                                         <div
                                             class="flex w-full items-center justify-between"
                                         >
-                                            <span class="text-sm font-medium truncate">
-                                                {{ getNotificationData(notification).title }}
+                                            <span
+                                                class="truncate text-sm font-medium"
+                                            >
+                                                {{
+                                                    getNotificationData(
+                                                        notification,
+                                                    ).title
+                                                }}
                                             </span>
-                                            <span class="text-xs text-muted-foreground ml-2 flex-shrink-0">
-                                                {{ new Date(notification.created_at).toLocaleDateString() }}
+                                            <span
+                                                class="ml-2 flex-shrink-0 text-xs text-muted-foreground"
+                                            >
+                                                {{
+                                                    new Date(
+                                                        notification.created_at,
+                                                    ).toLocaleDateString()
+                                                }}
                                             </span>
                                         </div>
-                                        <p class="text-sm text-muted-foreground mt-1">
-                                            {{ getNotificationData(notification).message }}
+                                        <p
+                                            class="mt-1 text-sm text-muted-foreground"
+                                        >
+                                            {{
+                                                getNotificationData(
+                                                    notification,
+                                                ).message
+                                            }}
                                         </p>
                                     </div>
                                 </div>

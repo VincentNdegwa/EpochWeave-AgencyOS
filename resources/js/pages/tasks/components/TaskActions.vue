@@ -154,10 +154,7 @@ const splitDropdownItems = computed((): ActionItem[] => {
         <Button
             v-if="primaryAction"
             :size="size === 'icon' ? 'sm' : size"
-            :class="[
-                sizeClasses.button,
-                'rounded-r-none border-r-0',
-            ]"
+            :class="[sizeClasses.button, 'rounded-r-none border-r-0']"
             @mousedown.stop
             @mouseup.stop
             @click.stop="primaryAction.handler"
@@ -182,23 +179,28 @@ const splitDropdownItems = computed((): ActionItem[] => {
                         v-if="primaryAction"
                         :class="sizeClasses.iconSize"
                     />
-                    <MoreHorizontal
-                        v-else
-                        :class="sizeClasses.iconSize"
-                    />
+                    <MoreHorizontal v-else :class="sizeClasses.iconSize" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <template v-for="(item, idx) in splitDropdownItems" :key="item.label">
+                <template
+                    v-for="(item, idx) in splitDropdownItems"
+                    :key="item.label"
+                >
                     <DropdownMenuSeparator v-if="idx > 0 && item.destructive" />
                     <DropdownMenuItem
                         :class="[
                             sizeClasses.menuItem,
-                            item.destructive ? 'text-destructive focus:text-destructive' : '',
+                            item.destructive
+                                ? 'text-destructive focus:text-destructive'
+                                : '',
                         ]"
                         @click="item.handler"
                     >
-                        <component :is="item.icon" :class="sizeClasses.iconSize" />
+                        <component
+                            :is="item.icon"
+                            :class="sizeClasses.iconSize"
+                        />
                         {{ item.label }}
                     </DropdownMenuItem>
                 </template>
@@ -224,7 +226,9 @@ const splitDropdownItems = computed((): ActionItem[] => {
         <DropdownMenuContent align="end">
             <template v-for="(item, idx) in dropdownActions" :key="item.label">
                 <DropdownMenuSeparator
-                    v-if="idx > 0 && (item.destructive || item.label === 'Delete')"
+                    v-if="
+                        idx > 0 && (item.destructive || item.label === 'Delete')
+                    "
                 />
                 <DropdownMenuItem
                     v-if="item.label === 'View'"
@@ -232,7 +236,10 @@ const splitDropdownItems = computed((): ActionItem[] => {
                     as-child
                 >
                     <Link :href="TaskController.show(task.id).url">
-                        <component :is="item.icon" :class="sizeClasses.iconSize" />
+                        <component
+                            :is="item.icon"
+                            :class="sizeClasses.iconSize"
+                        />
                         {{ item.label }}
                     </Link>
                 </DropdownMenuItem>
@@ -240,7 +247,9 @@ const splitDropdownItems = computed((): ActionItem[] => {
                     v-else
                     :class="[
                         sizeClasses.menuItem,
-                        item.destructive ? 'text-destructive focus:text-destructive' : '',
+                        item.destructive
+                            ? 'text-destructive focus:text-destructive'
+                            : '',
                     ]"
                     @click="item.handler"
                 >

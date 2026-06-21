@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import {
-    Key,
-    Lock,
-    MoreHorizontal,
-    Pencil,
-    Star,
-    Trash2,
-} from '@lucide/vue';
+import { Key, Lock, MoreHorizontal, Pencil, Star, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,11 +27,15 @@ const handleEdit = () => {
 };
 
 const handleSetPrimary = () => {
-    router.patch(`/accounts/${props.accountId}/contacts/${props.contact.id}/primary`);
+    router.patch(
+        `/accounts/${props.accountId}/contacts/${props.contact.id}/primary`,
+    );
 };
 
 const handleGrantPortal = () => {
-    router.post(`/accounts/${props.accountId}/contacts/${props.contact.id}/portal`);
+    router.post(
+        `/accounts/${props.accountId}/contacts/${props.contact.id}/portal`,
+    );
 };
 
 const handleRevokePortal = async () => {
@@ -54,7 +51,9 @@ const handleRevokePortal = async () => {
             variant: 'destructive',
         })
     ) {
-        router.delete(`/accounts/${props.accountId}/contacts/${props.contact.id}/portal`);
+        router.delete(
+            `/accounts/${props.accountId}/contacts/${props.contact.id}/portal`,
+        );
     }
 };
 
@@ -71,7 +70,9 @@ const handleDelete = async () => {
             variant: 'destructive',
         })
     ) {
-        router.delete(`/accounts/${props.accountId}/contacts/${props.contact.id}`);
+        router.delete(
+            `/accounts/${props.accountId}/contacts/${props.contact.id}`,
+        );
     }
 };
 </script>

@@ -111,7 +111,10 @@ const fmt = (amount: number) =>
         minimumFractionDigits: 0,
     }).format(amount);
 
-const ensureNumber = (value: number | string | undefined | null, fallback = 0): number => {
+const ensureNumber = (
+    value: number | string | undefined | null,
+    fallback = 0,
+): number => {
     if (typeof value === 'number') {
         return Number.isFinite(value) ? value : fallback;
     }
@@ -125,7 +128,9 @@ const ensureNumber = (value: number | string | undefined | null, fallback = 0): 
     return fallback;
 };
 
-const nonOptionalItems = computed(() => catalogItems.value.filter((i) => !i.is_optional));
+const nonOptionalItems = computed(() =>
+    catalogItems.value.filter((i) => !i.is_optional),
+);
 
 const resolveDiscountAmount = (item: PricingLineItem): number => {
     if (item.discount_amount !== undefined) {
@@ -183,7 +188,10 @@ const resolveLineTotal = (item: PricingLineItem): number => {
 };
 
 const subtotal = computed(() =>
-    nonOptionalItems.value.reduce((sum, item) => sum + ensureNumber(item.subtotal), 0),
+    nonOptionalItems.value.reduce(
+        (sum, item) => sum + ensureNumber(item.subtotal),
+        0,
+    ),
 );
 
 const tableDiscountAmount = computed(() => {
@@ -197,18 +205,29 @@ const tableDiscountAmount = computed(() => {
 });
 
 const lineDiscountTotal = computed(() =>
-    nonOptionalItems.value.reduce((sum, item) => sum + resolveDiscountAmount(item), 0),
+    nonOptionalItems.value.reduce(
+        (sum, item) => sum + resolveDiscountAmount(item),
+        0,
+    ),
 );
 
 const lineTaxTotal = computed(() =>
-    nonOptionalItems.value.reduce((sum, item) => sum + resolveTaxAmount(item), 0),
+    nonOptionalItems.value.reduce(
+        (sum, item) => sum + resolveTaxAmount(item),
+        0,
+    ),
 );
 
 const baseGrandTotal = computed(() =>
-    nonOptionalItems.value.reduce((sum, item) => sum + resolveLineTotal(item), 0),
+    nonOptionalItems.value.reduce(
+        (sum, item) => sum + resolveLineTotal(item),
+        0,
+    ),
 );
 
-const grandTotal = computed(() => Math.max(baseGrandTotal.value - tableDiscountAmount.value, 0));
+const grandTotal = computed(() =>
+    Math.max(baseGrandTotal.value - tableDiscountAmount.value, 0),
+);
 
 const gridCols = computed(() => {
     if (props.data.show_quantity_column && props.data.show_unit_column) {
@@ -296,14 +315,19 @@ const gridCols = computed(() => {
                                 >
                             </div>
                             <div
-                                v-if="resolveDiscountAmount(item) > 0 || resolveTaxAmount(item) > 0"
+                                v-if="
+                                    resolveDiscountAmount(item) > 0 ||
+                                    resolveTaxAmount(item) > 0
+                                "
                                 class="mt-1 flex flex-wrap gap-1.5 text-[11px]"
                             >
                                 <span
                                     v-if="resolveDiscountAmount(item) > 0"
                                     class="rounded-full bg-rose-50 px-1.5 py-0.5 font-medium text-rose-500 dark:bg-rose-500/10 dark:text-rose-300"
                                 >
-                                    Discount −{{ fmt(resolveDiscountAmount(item)) }}
+                                    Discount −{{
+                                        fmt(resolveDiscountAmount(item))
+                                    }}
                                 </span>
                                 <span
                                     v-if="resolveTaxAmount(item) > 0"

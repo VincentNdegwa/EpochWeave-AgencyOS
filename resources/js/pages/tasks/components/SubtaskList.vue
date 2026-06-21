@@ -15,42 +15,54 @@ const adding = ref(false);
 
 const subtasks = computed(() => props.parentTask.children || []);
 
-const completedCount = computed(() => subtasks.value.filter((s) => s.completed_at).length);
+const completedCount = computed(
+    () => subtasks.value.filter((s) => s.completed_at).length,
+);
 
 const progress = computed(() => {
     if (subtasks.value.length === 0) {
-return 0;
-}
+        return 0;
+    }
 
     return Math.round((completedCount.value / subtasks.value.length) * 100);
 });
 
 const addSubtask = () => {
     if (!newTitle.value.trim()) {
-return;
-}
+        return;
+    }
 
-    router.post(`/tasks`, {
-        project_id: props.parentTask.project_id,
-        title: newTitle.value,
-        parent_id: props.parentTask.id,
-        task_status_id: props.parentTask.task_status_id,
-    }, {
-        preserveScroll: true,
-        onFinish: () => {
-            newTitle.value = '';
-            adding.value = false;
+    router.post(
+        `/tasks`,
+        {
+            project_id: props.parentTask.project_id,
+            title: newTitle.value,
+            parent_id: props.parentTask.id,
+            task_status_id: props.parentTask.task_status_id,
         },
-    });
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                newTitle.value = '';
+                adding.value = false;
+            },
+        },
+    );
 };
 
 const toggleSubtask = (subtask: Task) => {
-    const closedStatusId = subtask.status?.is_closed ? null : props.parentTask.task_status_id;
-    router.patch(`/tasks/${subtask.id}/status`, {
-        task_status_id: closedStatusId,
-    }, {
-        preserveScroll: true,
-    });
+    const closedStatusId = subtask.status?.is_closed
+        ? null
+        : props.parentTask.task_status_id;
+    router.patch(
+        `/tasks/${subtask.id}/status`,
+        {
+            task_status_id: closedStatusId,
+        },
+        {
+            preserveScroll: true,
+        },
+    );
 };
 
 const deleteSubtask = (subtaskId: number) => {
@@ -66,9 +78,16 @@ const deleteSubtask = (subtaskId: number) => {
             <div class="flex items-center gap-2">
                 <ListChecks class="h-4 w-4 text-muted-foreground" />
                 <h3 class="text-sm font-semibold">Subtasks</h3>
-                <span class="text-xs text-muted-foreground">({{ completedCount }}/{{ subtasks.length }})</span>
+                <span class="text-xs text-muted-foreground"
+                    >({{ completedCount }}/{{ subtasks.length }})</span
+                >
             </div>
-            <Button size="sm" variant="outline" class="gap-1" @click="adding = true">
+            <Button
+                size="sm"
+                variant="outline"
+                class="gap-1"
+                @click="adding = true"
+            >
                 <Plus class="h-3.5 w-3.5" />
                 Add
             </Button>
@@ -100,7 +119,11 @@ const deleteSubtask = (subtaskId: number) => {
                     </button>
                     <span
                         class="flex-1 text-sm"
-                        :class="subtask.completed_at ? 'text-muted-foreground line-through' : 'text-foreground'"
+                        :class="
+                            subtask.completed_at
+                                ? 'text-muted-foreground line-through'
+                                : 'text-foreground'
+                        "
                     >
                         {{ subtask.title }}
                     </span>
@@ -124,9 +147,16 @@ const deleteSubtask = (subtaskId: number) => {
                 @keyup.enter="addSubtask"
             />
             <Button size="sm" @click="addSubtask">Add</Button>
-            <Button size="sm" variant="ghost" @click="adding = false">Cancel</Button>
+            <Button size="sm" variant="ghost" @click="adding = false"
+                >Cancel</Button
+            >
         </div>
 
-        <p v-if="!subtasks.length && !adding" class="text-sm text-muted-foreground">No subtasks yet.</p>
+        <p
+            v-if="!subtasks.length && !adding"
+            class="text-sm text-muted-foreground"
+        >
+            No subtasks yet.
+        </p>
     </div>
 </template>

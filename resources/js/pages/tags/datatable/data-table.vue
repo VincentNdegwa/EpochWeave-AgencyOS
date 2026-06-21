@@ -6,7 +6,7 @@ import DataTable from '@/components/DataTable.vue';
 import type { Tag as TagType } from '@/types/models/tag';
 import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 
-const props = defineProps<{
+defineProps<{
     columns: ColumnDef<TagType>[];
     data: TagType[];
     filters?: Record<string, string | undefined>;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form, Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import { Trash2, UserPlus, Users } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -45,8 +45,8 @@ const submitInvite = () => {
 
 const removeMember = (userId: number) => {
     if (!confirm('Remove this member from the workspace?')) {
-return;
-}
+        return;
+    }
 
     const form = useForm({});
     form.delete(`/workspace/members/${userId}`);
@@ -61,7 +61,9 @@ return;
             <div class="flex items-center gap-2">
                 <Users class="h-5 w-5 text-muted-foreground" />
                 <h1 class="text-lg font-semibold">Workspace Members</h1>
-                <span class="text-sm text-muted-foreground">({{ members.length }})</span>
+                <span class="text-sm text-muted-foreground"
+                    >({{ members.length }})</span
+                >
             </div>
             <Button size="sm" class="gap-1" @click="showInvite = true">
                 <UserPlus class="h-4 w-4" />
@@ -73,20 +75,48 @@ return;
             <form class="grid gap-3" @submit.prevent="submitInvite">
                 <div>
                     <Label class="text-xs">Email</Label>
-                    <Input v-model="inviteForm.email" type="email" placeholder="colleague@company.com" required />
-                    <p v-if="inviteForm.errors.email" class="text-xs text-destructive">{{ inviteForm.errors.email }}</p>
+                    <Input
+                        v-model="inviteForm.email"
+                        type="email"
+                        placeholder="colleague@company.com"
+                        required
+                    />
+                    <p
+                        v-if="inviteForm.errors.email"
+                        class="text-xs text-destructive"
+                    >
+                        {{ inviteForm.errors.email }}
+                    </p>
                 </div>
                 <div>
                     <Label class="text-xs">Role</Label>
-                    <select v-model="inviteForm.role_id" class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm">
-                        <option v-for="role in roles" :key="role.id" :value="role.id">
+                    <select
+                        v-model="inviteForm.role_id"
+                        class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                    >
+                        <option
+                            v-for="role in roles"
+                            :key="role.id"
+                            :value="role.id"
+                        >
                             {{ role.display_name ?? role.name }}
                         </option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-2">
-                    <Button type="button" variant="ghost" size="sm" @click="showInvite = false">Cancel</Button>
-                    <Button type="submit" size="sm" :disabled="inviteForm.processing">Send Invite</Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        @click="showInvite = false"
+                        >Cancel</Button
+                    >
+                    <Button
+                        type="submit"
+                        size="sm"
+                        :disabled="inviteForm.processing"
+                        >Send Invite</Button
+                    >
                 </div>
             </form>
         </div>
@@ -99,9 +129,15 @@ return;
             >
                 <div>
                     <p class="text-sm font-medium">{{ member.name }}</p>
-                    <p class="text-xs text-muted-foreground">{{ member.email }}</p>
                     <p class="text-xs text-muted-foreground">
-                        <span v-for="role in member.roles" :key="role.id" class="mr-1 rounded bg-muted px-1.5 py-0.5 text-[10px] uppercase tracking-wider">
+                        {{ member.email }}
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                        <span
+                            v-for="role in member.roles"
+                            :key="role.id"
+                            class="mr-1 rounded bg-muted px-1.5 py-0.5 text-[10px] tracking-wider uppercase"
+                        >
                             {{ role.display_name ?? role.name }}
                         </span>
                     </p>
@@ -116,7 +152,9 @@ return;
                 </Button>
             </div>
 
-            <p v-if="!members.length" class="text-sm text-muted-foreground">No members in this workspace yet.</p>
+            <p v-if="!members.length" class="text-sm text-muted-foreground">
+                No members in this workspace yet.
+            </p>
         </div>
     </div>
 </template>

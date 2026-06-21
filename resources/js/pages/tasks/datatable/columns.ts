@@ -83,9 +83,16 @@ export function createColumns(
                     return h(Badge, { variant: 'secondary' }, () => '—');
                 }
 
-                return h(Badge, {
-                    style: { backgroundColor: status.color || '#6b7280', color: '#fff' },
-                }, () => status.title);
+                return h(
+                    Badge,
+                    {
+                        style: {
+                            backgroundColor: status.color || '#6b7280',
+                            color: '#fff',
+                        },
+                    },
+                    () => status.title,
+                );
             },
         },
         {
@@ -99,9 +106,13 @@ export function createColumns(
                     return h(Badge, { variant: 'secondary' }, () => priority);
                 }
 
-                return h(Badge, {
-                    variant: config.variant,
-                }, () => config.label);
+                return h(
+                    Badge,
+                    {
+                        variant: config.variant,
+                    },
+                    () => config.label,
+                );
             },
         },
         {
@@ -110,7 +121,11 @@ export function createColumns(
             cell: ({ row }) => {
                 const assignee = row.original.assignee;
 
-                return h('span', { class: 'text-sm text-muted-foreground' }, assignee?.name || 'Unassigned');
+                return h(
+                    'span',
+                    { class: 'text-sm text-muted-foreground' },
+                    assignee?.name || 'Unassigned',
+                );
             },
         },
         {
@@ -119,7 +134,11 @@ export function createColumns(
             cell: ({ row }) => {
                 const value = row.getValue('due_date') as string | null;
 
-                return h('span', { class: 'text-sm text-muted-foreground' }, formatDate(value));
+                return h(
+                    'span',
+                    { class: 'text-sm text-muted-foreground' },
+                    formatDate(value),
+                );
             },
         },
         {

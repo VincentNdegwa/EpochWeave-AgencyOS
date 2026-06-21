@@ -30,12 +30,14 @@ import type { Proposal } from '@/types/models/proposal';
 const builderStore = useProposalBuilderStore();
 const { proposal } = storeToRefs(builderStore) as { proposal: Ref<Proposal> };
 const builderDataStore = useBuilderDataStore();
-const { templates, accounts, users, accountContacts } = storeToRefs(builderDataStore);
+const { templates, accounts, users, accountContacts } =
+    storeToRefs(builderDataStore);
 
 const isApplyingTemplate = ref(false);
 const selectedTemplateId = ref<string | null>(null);
 
-const { fetchTemplates, fetchAccounts, fetchUsers, fetchAccountContacts } = builderDataStore;
+const { fetchTemplates, fetchAccounts, fetchUsers, fetchAccountContacts } =
+    builderDataStore;
 fetchTemplates();
 fetchAccounts();
 fetchUsers();
@@ -46,24 +48,33 @@ const currentUser = computed(() => {
     return page.props.auth?.user;
 });
 
-watch(() => proposal.value.account_id, async (newAccountId) => {
-    if (newAccountId) {
-        await fetchAccountContacts({ account_id: newAccountId.toString() });
-    } else {
-        accountContacts.value = [];
-        proposal.value.account_contact_id = null;
-    }
-}, { immediate: true });
-
-watch(() => accountContacts.value, (contacts) => {
-    if (contacts.length > 0 && !proposal.value.account_contact_id) {
-        const primaryContact = contacts.find(contact => contact.is_primary);
-
-        if (primaryContact) {
-            proposal.value.account_contact_id = primaryContact.id;
+watch(
+    () => proposal.value.account_id,
+    async (newAccountId) => {
+        if (newAccountId) {
+            await fetchAccountContacts({ account_id: newAccountId.toString() });
+        } else {
+            accountContacts.value = [];
+            proposal.value.account_contact_id = null;
         }
-    }
-});
+    },
+    { immediate: true },
+);
+
+watch(
+    () => accountContacts.value,
+    (contacts) => {
+        if (contacts.length > 0 && !proposal.value.account_contact_id) {
+            const primaryContact = contacts.find(
+                (contact) => contact.is_primary,
+            );
+
+            if (primaryContact) {
+                proposal.value.account_contact_id = primaryContact.id;
+            }
+        }
+    },
+);
 
 if (currentUser.value && !proposal.value.user_id) {
     proposal.value.user_id = currentUser.value.id;
@@ -91,7 +102,9 @@ const selectedAccountModel = computed({
 
 const selectedContactModel = computed({
     get: () =>
-        proposal.value.account_contact_id ? proposal.value.account_contact_id.toString() : null,
+        proposal.value.account_contact_id
+            ? proposal.value.account_contact_id.toString()
+            : null,
     set: (value: string | null) => {
         proposal.value.account_contact_id = value ? Number(value) : null;
     },
@@ -248,7 +261,7 @@ const applyTemplate = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col gap-0 text-sm h-full">
+    <div class="flex h-full flex-col gap-0 text-sm">
         <div class="border-b border-border px-4 py-3">
             <p
                 class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
@@ -313,7 +326,10 @@ const applyTemplate = async () => {
                 <Label class="mb-1.5 block text-xs text-muted-foreground"
                     >Contact person</Label
                 >
-                <Select v-model="selectedContactModel" :disabled="!selectedAccountModel">
+                <Select
+                    v-model="selectedContactModel"
+                    :disabled="!selectedAccountModel"
+                >
                     <SelectTrigger class="w-full">
                         <SelectValue placeholder="Choose contact..." />
                     </SelectTrigger>
@@ -323,7 +339,8 @@ const applyTemplate = async () => {
                             :key="contact.id"
                             :value="contact.id.toString()"
                         >
-                            {{ `${contact.first_name} ${contact.last_name}` }} - {{ contact.email }}
+                            {{ `${contact.first_name} ${contact.last_name}` }} -
+                            {{ contact.email }}
                         </SelectItem>
                     </SelectContent>
                 </Select>

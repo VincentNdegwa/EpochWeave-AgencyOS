@@ -6,7 +6,7 @@ import DataTable from '@/components/DataTable.vue';
 import type { Account } from '@/types/models/account';
 import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 
-const props = defineProps<{
+defineProps<{
     columns: ColumnDef<Account>[];
     data: Account[];
     filters?: Record<string, string | undefined>;
@@ -14,7 +14,11 @@ const props = defineProps<{
 }>();
 
 const filterConfigs = [
-    { key: 'search', type: 'search' as const, placeholder: 'Search accounts...' },
+    {
+        key: 'search',
+        type: 'search' as const,
+        placeholder: 'Search accounts...',
+    },
     { key: 'date_from', type: 'date' as const, placeholder: 'From' },
     { key: 'date_to', type: 'date' as const, placeholder: 'To' },
 ];

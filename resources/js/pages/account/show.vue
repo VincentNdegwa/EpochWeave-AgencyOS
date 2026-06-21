@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
-import {
-    Hash,
-    Plus,
-    UserRound,
-    Users,
-} from '@lucide/vue';
+import { Plus, UserRound, Users } from '@lucide/vue';
 import { ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { StatBar } from '@/components/ui/stat-bar';
 import { useCurrency } from '@/composables/useCurrency';
 import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
@@ -22,7 +18,13 @@ import ContactFormDialog from './dialogs/ContactFormDialog.vue';
 
 const props = defineProps<{
     account: Account;
-    activities: { id: number; type: string; description: string; created_at: string; user?: { id: number; name: string } | null }[];
+    activities: {
+        id: number;
+        type: string;
+        description: string;
+        created_at: string;
+        user?: { id: number; name: string } | null;
+    }[];
 }>();
 
 const { getVariant, getLabel } = useAccountStatuses();
@@ -64,7 +66,9 @@ defineOptions({
 
     <div class="flex flex-col">
         <!-- Header -->
-        <div class="sticky top-0 z-30 border-b pb-4 border-border bg-background/95 backdrop-blur-sm print:hidden">
+        <div
+            class="sticky top-0 z-30 bg-background/95 pb-4 backdrop-blur-sm print:hidden"
+        >
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex min-w-0 flex-col gap-0.5">
                     <div class="flex flex-wrap items-center gap-2">
@@ -77,7 +81,12 @@ defineOptions({
                     </div>
                     <h1 class="text-base font-semibold text-foreground">
                         {{ props.account.company_name }}
-                        <span class="font-normal text-muted-foreground">· {{ formatCurrency(props.account.lifetime_value) }}</span>
+                        <span class="font-normal text-muted-foreground"
+                            >·
+                            {{
+                                formatCurrency(props.account.lifetime_value)
+                            }}</span
+                        >
                     </h1>
                 </div>
                 <AccountActions
@@ -88,55 +97,48 @@ defineOptions({
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="border-b border-border bg-background print:hidden">
-            <div class="grid grid-cols-2 divide-x divide-border sm:grid-cols-4">
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Lifetime Value</p>
-                    <p class="mt-0.5 text-xl font-bold tabular-nums text-foreground">{{ formatCurrency(props.account.lifetime_value) }}</p>
-                </div>
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Website</p>
-                    <p class="mt-0.5 text-base font-bold text-foreground truncate">
-                        <a
-                            v-if="props.account.website"
-                            :href="props.account.website"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="hover:underline"
-                        >
-                            {{ props.account.website.replace(/^https?:\/\//, '') }}
-                        </a>
-                        <span v-else class="text-muted-foreground">Not provided</span>
-                    </p>
-                </div>
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Contacts</p>
-                    <p class="mt-0.5 text-xl font-bold text-foreground">{{ props.account.contacts?.length || 0 }}</p>
-                    <p class="text-[10px] text-muted-foreground">People</p>
-                </div>
-                <div class="px-6 py-4">
-                    <p class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Status</p>
-                    <p class="mt-0.5 text-base font-bold text-foreground">{{ getLabel(props.account.status) }}</p>
-                    <p class="text-[10px] text-muted-foreground">Account</p>
-                </div>
-            </div>
-        </div>
+        <StatBar
+            :items="[
+                {
+                    label: 'Lifetime Value',
+                    value: formatCurrency(props.account.lifetime_value),
+                },
+                {
+                    label: 'Website',
+                    value: props.account.website
+                        ? props.account.website.replace(/^https?:\/\//, '')
+                        : 'Not provided',
+                },
+                {
+                    label: 'Contacts',
+                    value: props.account.contacts?.length || 0,
+                },
+                { label: 'Status', value: getLabel(props.account.status) },
+            ]"
+        />
 
         <div class="space-y-4 pt-4">
             <!-- Contacts Section -->
-            <div class="border-b p-5 space-y-4">
+            <div class="space-y-4 border-b p-5">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <UserRound class="h-4 w-4 text-muted-foreground" />
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Contacts</h3>
+                        <h3
+                            class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                        >
+                            Contacts
+                        </h3>
                         <span
                             class="rounded-md bg-muted px-1.5 py-0.5 text-xs font-medium text-muted-foreground"
                         >
                             {{ props.account.contacts?.length || 0 }}
                         </span>
                     </div>
-                    <Button size="sm" class="gap-2" @click="openNewContactDialog">
+                    <Button
+                        size="sm"
+                        class="gap-2"
+                        @click="openNewContactDialog"
+                    >
                         <Plus class="h-3.5 w-3.5" />
                         Add Contact
                     </Button>
@@ -166,8 +168,12 @@ defineOptions({
             </div>
 
             <!-- Activity Timeline -->
-            <div class="border-b p-5 space-y-4">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Activity</h3>
+            <div class="space-y-4 border-b p-5">
+                <h3
+                    class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                >
+                    Activity
+                </h3>
                 <ActivityTimeline :activities="props.activities" />
             </div>
         </div>

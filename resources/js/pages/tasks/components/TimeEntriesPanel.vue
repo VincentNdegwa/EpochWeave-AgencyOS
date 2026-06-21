@@ -39,21 +39,25 @@ const stopTimer = () => {
     const startedAt = new Date(Date.now() - elapsedSeconds.value * 1000);
     const endedAt = new Date();
 
-    router.post(`/tasks/${props.taskId}/time-entries`, {
-        project_id: props.projectId,
-        description: description.value || null,
-        started_at: startedAt.toISOString(),
-        ended_at: endedAt.toISOString(),
-        is_billable: isBillable.value,
-        hourly_rate: hourlyRate.value ? parseFloat(hourlyRate.value) : null,
-        date: endedAt.toISOString().split('T')[0],
-    }, {
-        preserveScroll: true,
-        onFinish: () => {
-            elapsedSeconds.value = 0;
-            description.value = '';
+    router.post(
+        `/tasks/${props.taskId}/time-entries`,
+        {
+            project_id: props.projectId,
+            description: description.value || null,
+            started_at: startedAt.toISOString(),
+            ended_at: endedAt.toISOString(),
+            is_billable: isBillable.value,
+            hourly_rate: hourlyRate.value ? parseFloat(hourlyRate.value) : null,
+            date: endedAt.toISOString().split('T')[0],
         },
-    });
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                elapsedSeconds.value = 0;
+                description.value = '';
+            },
+        },
+    );
 };
 
 const deleteTimeEntry = (entryId: number) => {
@@ -75,7 +79,10 @@ const formatDate = (dateString: string): string => {
 };
 
 const totalHours = computed(() => {
-    const totalSeconds = props.timeEntries.reduce((sum, entry) => sum + entry.duration_seconds, 0);
+    const totalSeconds = props.timeEntries.reduce(
+        (sum, entry) => sum + entry.duration_seconds,
+        0,
+    );
 
     return (totalSeconds / 3600).toFixed(2);
 });
@@ -87,9 +94,13 @@ const totalHours = computed(() => {
             <div class="flex items-center gap-2">
                 <Clock class="h-4 w-4 text-muted-foreground" />
                 <h3 class="text-sm font-semibold">Time Entries</h3>
-                <span class="text-xs text-muted-foreground">({{ timeEntries.length }})</span>
+                <span class="text-xs text-muted-foreground"
+                    >({{ timeEntries.length }})</span
+                >
             </div>
-            <span class="text-sm text-muted-foreground">Total: {{ totalHours }}h</span>
+            <span class="text-sm text-muted-foreground"
+                >Total: {{ totalHours }}h</span
+            >
         </div>
 
         <div class="rounded-lg border p-4">
@@ -106,7 +117,11 @@ const totalHours = computed(() => {
                                 type="checkbox"
                                 :checked="isBillable"
                                 class="h-4 w-4"
-                                @change="isBillable = ($event.target as HTMLInputElement).checked"
+                                @change="
+                                    isBillable = (
+                                        $event.target as HTMLInputElement
+                                    ).checked
+                                "
                             />
                             Billable
                         </Label>
@@ -119,7 +134,9 @@ const totalHours = computed(() => {
                     </div>
                 </div>
                 <div class="flex flex-col items-center gap-2">
-                    <span class="text-2xl font-mono font-semibold">{{ formatDuration(elapsedSeconds) }}</span>
+                    <span class="font-mono text-2xl font-semibold">{{
+                        formatDuration(elapsedSeconds)
+                    }}</span>
                     <Button
                         v-if="!isRunning"
                         size="sm"
@@ -150,11 +167,16 @@ const totalHours = computed(() => {
                 class="flex items-center justify-between rounded-lg border p-3"
             >
                 <div class="min-w-0">
-                    <p class="text-sm font-medium">{{ entry.description || 'No description' }}</p>
+                    <p class="text-sm font-medium">
+                        {{ entry.description || 'No description' }}
+                    </p>
                     <p class="text-xs text-muted-foreground">
-                        {{ formatDate(entry.date) }} &middot; {{ formatDuration(entry.duration_seconds) }}
+                        {{ formatDate(entry.date) }} &middot;
+                        {{ formatDuration(entry.duration_seconds) }}
                         <span v-if="entry.is_billable">&middot; Billable</span>
-                        <span v-if="entry.user">&middot; {{ entry.user.name }}</span>
+                        <span v-if="entry.user"
+                            >&middot; {{ entry.user.name }}</span
+                        >
                     </p>
                 </div>
                 <Button
@@ -167,7 +189,9 @@ const totalHours = computed(() => {
                 </Button>
             </div>
 
-            <p v-if="!timeEntries.length" class="text-sm text-muted-foreground">No time entries yet.</p>
+            <p v-if="!timeEntries.length" class="text-sm text-muted-foreground">
+                No time entries yet.
+            </p>
         </div>
     </div>
 </template>

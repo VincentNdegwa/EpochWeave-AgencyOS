@@ -41,9 +41,7 @@ const handleBulkDelete = async () => {
 
     if (confirmed) {
         try {
-            const invoiceIds = props.selectedRows.map(
-                (invoice) => invoice.id,
-            );
+            const invoiceIds = props.selectedRows.map((invoice) => invoice.id);
 
             await router.post(InvoiceController.index().url + '/bulk-delete', {
                 ids: invoiceIds,

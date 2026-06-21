@@ -36,7 +36,7 @@ const { isCurrentUrl } = useCurrentUrl();
             </SidebarMenuItem>
         </SidebarMenu>
     </SidebarGroup>
-    
+
     <SidebarMenu v-else>
         <SidebarMenuItem v-for="item in items" :key="item.title">
             <SidebarMenuButton

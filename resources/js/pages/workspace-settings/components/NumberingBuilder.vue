@@ -52,10 +52,7 @@ const formatTokens = ref<string[]>(
 const computedFormatString = computed(() => formatTokens.value.join(''));
 
 const numberPreview = computed(() => {
-    const padded = String(localNextSeq.value).padStart(
-        localPadding.value,
-        '0',
-    );
+    const padded = String(localNextSeq.value).padStart(localPadding.value, '0');
 
     return computedFormatString.value
         .replace('{PREFIX}', localPrefix.value || props.defaultPrefix)
@@ -169,7 +166,9 @@ function fieldError(key: string): string | undefined {
 <template>
     <div class="space-y-4">
         <div class="flex items-center gap-3">
-            <div class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10">
+            <div
+                class="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10"
+            >
                 <HashIcon class="h-3.5 w-3.5 text-primary" />
             </div>
             <div>
@@ -181,12 +180,18 @@ function fieldError(key: string): string | undefined {
         </div>
 
         <div class="space-y-4">
-            <div class="flex items-center justify-between rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3">
-                <span class="flex items-center gap-2 text-xs text-muted-foreground">
+            <div
+                class="flex items-center justify-between rounded-lg border border-dashed border-border bg-muted/30 px-4 py-3"
+            >
+                <span
+                    class="flex items-center gap-2 text-xs text-muted-foreground"
+                >
                     <EyeIcon class="h-3.5 w-3.5" />
                     {{ previewLabel }}
                 </span>
-                <code class="rounded border border-border bg-background px-2.5 py-1 font-mono text-sm font-semibold text-foreground">
+                <code
+                    class="rounded border border-border bg-background px-2.5 py-1 font-mono text-sm font-semibold text-foreground"
+                >
                     {{ numberPreview || '—' }}
                 </code>
             </div>
@@ -195,9 +200,16 @@ function fieldError(key: string): string | undefined {
                 <Label>Format</Label>
                 <div
                     class="min-h-14 rounded-lg border-2 border-dashed border-border bg-muted/20 px-3 py-3 transition-colors"
-                    :class="formatTokens.length === 0 ? 'flex items-center justify-center' : ''"
+                    :class="
+                        formatTokens.length === 0
+                            ? 'flex items-center justify-center'
+                            : ''
+                    "
                 >
-                    <p v-if="formatTokens.length === 0" class="text-xs text-muted-foreground select-none">
+                    <p
+                        v-if="formatTokens.length === 0"
+                        class="text-xs text-muted-foreground select-none"
+                    >
                         Click a token below to start building the format
                     </p>
                     <div v-else class="flex flex-wrap items-center gap-2">
@@ -207,8 +219,13 @@ function fieldError(key: string): string | undefined {
                             class="group flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-shadow"
                             :class="getTokenDef(token)?.pillClass"
                         >
-                            <span class="font-mono font-semibold tracking-tight">{{ getTokenPreview(token) }}</span>
-                            <span class="text-[9px] font-normal opacity-50">{{ getTokenDef(token)?.label }}</span>
+                            <span
+                                class="font-mono font-semibold tracking-tight"
+                                >{{ getTokenPreview(token) }}</span
+                            >
+                            <span class="text-[9px] font-normal opacity-50">{{
+                                getTokenDef(token)?.label
+                            }}</span>
                             <span class="ml-0.5 flex items-center gap-0.5">
                                 <button
                                     v-if="i > 0"
@@ -261,10 +278,16 @@ function fieldError(key: string): string | undefined {
                         <PlusIcon class="h-3 w-3" />
                         <span class="font-mono">{{ def.label }}</span>
                         <span class="opacity-50">·</span>
-                        <span class="font-normal opacity-60">{{ def.description }}</span>
+                        <span class="font-normal opacity-60">{{
+                            def.description
+                        }}</span>
                     </button>
                 </div>
-                <input type="hidden" :name="`${namePrefix}[format]`" :value="computedFormatString" />
+                <input
+                    type="hidden"
+                    :name="`${namePrefix}[format]`"
+                    :value="computedFormatString"
+                />
                 <InputError :message="fieldError('format')" />
             </div>
 
@@ -294,7 +317,9 @@ function fieldError(key: string): string | undefined {
                 </div>
 
                 <div class="grid gap-2">
-                    <Label :for="`${namePrefix}_sequence_padding`">Sequence padding</Label>
+                    <Label :for="`${namePrefix}_sequence_padding`"
+                        >Sequence padding</Label
+                    >
                     <Input
                         :id="`${namePrefix}_sequence_padding`"
                         :name="`${namePrefix}[sequence_padding]`"
@@ -308,7 +333,9 @@ function fieldError(key: string): string | undefined {
                 </div>
 
                 <div class="grid gap-2">
-                    <Label :for="`${namePrefix}_next_sequence_number`">Next sequence number</Label>
+                    <Label :for="`${namePrefix}_next_sequence_number`"
+                        >Next sequence number</Label
+                    >
                     <Input
                         :id="`${namePrefix}_next_sequence_number`"
                         :name="`${namePrefix}[next_sequence_number]`"

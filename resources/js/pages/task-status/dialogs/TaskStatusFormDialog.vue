@@ -73,20 +73,31 @@ watch(
     <Dialog :open="open" @update:open="emit('update:open', $event)">
         <DialogContent class="max-w-lg">
             <DialogHeader>
-                <DialogTitle>{{ status ? 'Edit Status' : 'New Status' }}</DialogTitle>
+                <DialogTitle>{{
+                    status ? 'Edit Status' : 'New Status'
+                }}</DialogTitle>
                 <DialogDescription>
-                    {{ status ? 'Update task status details.' : 'Create a new task status for your projects.' }}
+                    {{
+                        status
+                            ? 'Update task status details.'
+                            : 'Create a new task status for your projects.'
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
             <Form
                 v-bind="
                     (status
-                        ? TaskStatusController.update.form({ task_status: status.id })
+                        ? TaskStatusController.update.form({
+                              task_status: status.id,
+                          })
                         : TaskStatusController.store.form()) as any
                 "
                 :options="{ preserveScroll: true, preserveState: true }"
-                @success="emit('success'); emit('update:open', false);"
+                @success="
+                    emit('success');
+                    emit('update:open', false);
+                "
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-6 py-4">
@@ -112,7 +123,11 @@ watch(
                                     v-model="form.color"
                                     class="h-9 w-9 cursor-pointer rounded border"
                                 />
-                                <Input name="color" v-model="form.color" class="flex-1" />
+                                <Input
+                                    name="color"
+                                    v-model="form.color"
+                                    class="flex-1"
+                                />
                             </div>
                         </div>
 
@@ -127,12 +142,15 @@ watch(
                             />
                             <InputError :message="errors.position" />
                         </div>
-
                     </div>
                 </div>
 
                 <DialogFooter>
-                    <Button type="button" variant="outline" @click="emit('update:open', false)">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="emit('update:open', false)"
+                    >
                         Cancel
                     </Button>
                     <Button type="submit" :disabled="processing">

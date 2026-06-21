@@ -38,7 +38,11 @@ export function createColumns(
             cell: ({ row }) => {
                 const value = row.getValue('position') as number;
 
-                return h('span', { class: 'text-sm tabular-nums text-muted-foreground' }, String(value));
+                return h(
+                    'span',
+                    { class: 'text-sm tabular-nums text-muted-foreground' },
+                    String(value),
+                );
             },
         },
         {
@@ -47,16 +51,26 @@ export function createColumns(
             cell: ({ row }) => {
                 const value = row.getValue('is_system') as boolean;
 
-                return h(Badge, { variant: value ? 'default' : 'outline' }, () => (value ? 'System' : 'Custom'));
+                return h(
+                    Badge,
+                    { variant: value ? 'default' : 'outline' },
+                    () => (value ? 'System' : 'Custom'),
+                );
             },
         },
         {
             accessorKey: 'automation_trigger',
             header: 'Automation',
             cell: ({ row }) => {
-                const value = row.getValue('automation_trigger') as string | null;
+                const value = row.getValue('automation_trigger') as
+                    | string
+                    | null;
 
-                return h('span', { class: 'text-xs text-muted-foreground' }, value ?? '—');
+                return h(
+                    'span',
+                    { class: 'text-xs text-muted-foreground' },
+                    value ?? '—',
+                );
             },
         },
         {
@@ -68,25 +82,39 @@ export function createColumns(
                 return h('div', { class: 'relative' }, [
                     h(DropdownMenu, {}, () => [
                         h(DropdownMenuTrigger, { asChild: true }, () =>
-                            h(Button, { variant: 'ghost', class: 'w-8 h-8 p-0' }, () => [
-                                h('span', { class: 'sr-only' }, 'Open menu'),
-                                h(MoreHorizontal, { class: 'w-4 h-4' }),
-                            ]),
+                            h(
+                                Button,
+                                { variant: 'ghost', class: 'w-8 h-8 p-0' },
+                                () => [
+                                    h(
+                                        'span',
+                                        { class: 'sr-only' },
+                                        'Open menu',
+                                    ),
+                                    h(MoreHorizontal, { class: 'w-4 h-4' }),
+                                ],
+                            ),
                         ),
                         h(DropdownMenuContent, { align: 'end' }, () => [
-                            h(DropdownMenuItem, { onClick: () => onEdit?.(status) }, () => 'Edit'),
+                            h(
+                                DropdownMenuItem,
+                                { onClick: () => onEdit?.(status) },
+                                () => 'Edit',
+                            ),
                             h(DropdownMenuSeparator),
                             h(
                                 DropdownMenuItem,
                                 {
                                     class: 'text-destructive',
                                     onClick: async () => {
-                                        const { confirm } = await import('@/composables/useConfirmation');
+                                        const { confirm } =
+                                            await import('@/composables/useConfirmation');
 
                                         if (
                                             await confirm({
                                                 title: 'Delete Status',
-                                                description: 'Are you sure you want to delete this task status? This action cannot be undone.',
+                                                description:
+                                                    'Are you sure you want to delete this task status? This action cannot be undone.',
                                                 confirmText: 'Delete',
                                                 cancelText: 'Cancel',
                                                 variant: 'destructive',

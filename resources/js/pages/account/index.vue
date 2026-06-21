@@ -4,7 +4,7 @@ import { Plus } from '@lucide/vue';
 import { ref } from 'vue';
 import AccountController from '@/actions/App/Http/Controllers/AccountController';
 import { Button } from '@/components/ui/button';
-import { StatsCard } from '@/components/ui/stats-card';
+import { StatBar } from '@/components/ui/stat-bar';
 import { useCurrency } from '@/composables/useCurrency';
 import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
@@ -89,34 +89,36 @@ defineOptions({
             </Button>
         </div>
 
-        <!-- Overview Cards -->
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-            <StatsCard
-                title="Total Accounts"
-                :value="stats.total.value"
-                :change="stats.total.change"
-            />
-            <StatsCard
-                title="Leads"
-                :value="stats.lead.value"
-                :change="stats.lead.change"
-            />
-            <StatsCard
-                title="Opportunities"
-                :value="stats.opportunity.value"
-                :change="stats.opportunity.change"
-            />
-            <StatsCard
-                title="Clients"
-                :value="stats.client.value"
-                :change="stats.client.change"
-            />
-            <StatsCard
-                title="Archived"
-                :value="stats.archived.value"
-                :change="stats.archived.change"
-            />
-        </div>
+        <StatBar
+            :items="[
+                {
+                    label: 'Total Accounts',
+                    value: stats.total.value,
+                    change: stats.total.change,
+                },
+                {
+                    label: 'Leads',
+                    value: stats.lead.value,
+                    change: stats.lead.change,
+                },
+                {
+                    label: 'Opportunities',
+                    value: stats.opportunity.value,
+                    change: stats.opportunity.change,
+                },
+                {
+                    label: 'Clients',
+                    value: stats.client.value,
+                    change: stats.client.change,
+                },
+                {
+                    label: 'Archived',
+                    value: stats.archived.value,
+                    change: stats.archived.change,
+                },
+            ]"
+            :columns="5"
+        />
 
         <!-- Status Tabs -->
         <div class="flex gap-2 border-b">

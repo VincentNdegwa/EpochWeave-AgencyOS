@@ -1,11 +1,4 @@
 <script setup lang="ts">
-import {
-    PackageIcon,
-    TypeIcon,
-    CoinsIcon,
-    TagIcon,
-    ToggleLeftIcon,
-} from '@lucide/vue';
 import type { AcceptableValue } from 'reka-ui';
 import { reactive, computed, watch } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -26,7 +19,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { useBillingFrequencies } from '@/composables/useEnums';
 import type { PricingLineItem } from '@/types/proposal-builder';
 
@@ -144,9 +136,7 @@ const discountAmount = computed(() => {
     }
 
     if (form.discount_type === 'percentage') {
-        return Math.round(
-            (lineSubtotal.value * form.discount_value) / 100,
-        );
+        return Math.round((lineSubtotal.value * form.discount_value) / 100);
     }
 
     return form.discount_value;
@@ -217,17 +207,26 @@ const handleSave = () => {
                     <div class="grid gap-2">
                         <Label for="product">From catalog</Label>
                         <Select
-                            :model-value="form.product_id ? String(form.product_id) : 'custom'"
+                            :model-value="
+                                form.product_id
+                                    ? String(form.product_id)
+                                    : 'custom'
+                            "
                             @update:model-value="handleProductSelect"
                         >
                             <SelectTrigger class="w-full">
-                                <SelectValue placeholder="Select from catalog or add custom…" />
+                                <SelectValue
+                                    placeholder="Select from catalog or add custom…"
+                                />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="custom">
                                     Custom item (no catalog link)
                                 </SelectItem>
-                                <div v-if="products.length" class="my-1 border-t border-border" />
+                                <div
+                                    v-if="products.length"
+                                    class="my-1 border-t border-border"
+                                />
                                 <SelectItem
                                     v-for="product in products"
                                     :key="product.id"
@@ -252,7 +251,10 @@ const handleSave = () => {
                                     :value="unit.abbreviation"
                                 >
                                     {{ unit.abbreviation }}
-                                    <span v-if="unit.name" class="ml-1 text-muted-foreground">
+                                    <span
+                                        v-if="unit.name"
+                                        class="ml-1 text-muted-foreground"
+                                    >
                                         · {{ unit.name }}
                                     </span>
                                 </SelectItem>
@@ -274,7 +276,9 @@ const handleSave = () => {
                     <div class="grid gap-2">
                         <Label for="unit_price">Unit price</Label>
                         <div class="relative">
-                            <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground">
+                            <div
+                                class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground"
+                            >
                                 {{ currency }}
                             </div>
                             <Input
@@ -287,14 +291,19 @@ const handleSave = () => {
                         </div>
                     </div>
 
-                    
                     <div class="grid gap-2">
                         <Label>Billing type</Label>
-                        <div class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                        <div
+                            class="grid grid-cols-2 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
+                        >
                             <button
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.billing_type === 'one_time' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                :class="
+                                    form.billing_type === 'one_time'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                "
                                 @click="form.billing_type = 'one_time'"
                             >
                                 One-time
@@ -302,7 +311,11 @@ const handleSave = () => {
                             <button
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.billing_type === 'recurring' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
+                                :class="
+                                    form.billing_type === 'recurring'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                "
                                 @click="form.billing_type = 'recurring'"
                             >
                                 Recurring
@@ -312,7 +325,10 @@ const handleSave = () => {
 
                     <div class="grid gap-2">
                         <Label>Billing frequency</Label>
-                        <Select v-model="form.billing_frequency" :disabled="form.billing_type === 'one_time'">
+                        <Select
+                            v-model="form.billing_frequency"
+                            :disabled="form.billing_type === 'one_time'"
+                        >
                             <SelectTrigger class="w-full">
                                 <SelectValue placeholder="Select frequency" />
                             </SelectTrigger>
@@ -321,7 +337,10 @@ const handleSave = () => {
                                     v-for="option in billingFrequencyOptions"
                                     :key="option.value"
                                     :value="option.value"
-                                    :disabled="option.value !== 'none' && form.billing_type === 'one_time'"
+                                    :disabled="
+                                        option.value !== 'none' &&
+                                        form.billing_type === 'one_time'
+                                    "
                                 >
                                     {{ option.label }}
                                 </SelectItem>
@@ -331,18 +350,30 @@ const handleSave = () => {
 
                     <div class="grid gap-2">
                         <Label>Item discount</Label>
-                        <div class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                        <div
+                            class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
+                        >
                             <button
                                 v-for="opt in [
                                     { value: 'none', label: 'None' },
                                     { value: 'percentage', label: 'Percent %' },
-                                    { value: 'fixed', label: `Fixed ${currency}` },
+                                    {
+                                        value: 'fixed',
+                                        label: `Fixed ${currency}`,
+                                    },
                                 ]"
                                 :key="opt.value"
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.discount_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
-                                @click="form.discount_type = opt.value as typeof form.discount_type"
+                                :class="
+                                    form.discount_type === opt.value
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                "
+                                @click="
+                                    form.discount_type =
+                                        opt.value as typeof form.discount_type
+                                "
                             >
                                 {{ opt.label }}
                             </button>
@@ -356,17 +387,31 @@ const handleSave = () => {
                                     v-model.number="form.discount_value"
                                     type="number"
                                     min="0"
-                                    :max="form.discount_type === 'percentage' ? 100 : undefined"
+                                    :max="
+                                        form.discount_type === 'percentage'
+                                            ? 100
+                                            : undefined
+                                    "
                                     class="pr-10"
                                     placeholder="0"
                                 />
-                                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                                    {{ form.discount_type === 'percentage' ? '%' : currency }}
+                                <span
+                                    class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground"
+                                >
+                                    {{
+                                        form.discount_type === 'percentage'
+                                            ? '%'
+                                            : currency
+                                    }}
                                 </span>
                             </div>
                             <div class="text-right">
-                                <p class="text-[11px] text-muted-foreground">Discount</p>
-                                <p class="text-sm font-semibold text-red-500 dark:text-red-400">
+                                <p class="text-[11px] text-muted-foreground">
+                                    Discount
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-red-500 dark:text-red-400"
+                                >
                                     −{{ fmt(discountAmount) }}
                                 </p>
                             </div>
@@ -375,18 +420,30 @@ const handleSave = () => {
 
                     <div class="grid gap-2">
                         <Label>Item tax</Label>
-                        <div class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5">
+                        <div
+                            class="grid grid-cols-3 gap-1 rounded-md border border-border bg-muted/40 p-0.5"
+                        >
                             <button
                                 v-for="opt in [
                                     { value: 'none', label: 'None' },
                                     { value: 'percentage', label: 'Percent %' },
-                                    { value: 'fixed', label: `Fixed ${currency}` },
+                                    {
+                                        value: 'fixed',
+                                        label: `Fixed ${currency}`,
+                                    },
                                 ]"
                                 :key="opt.value"
                                 type="button"
                                 class="rounded py-1.5 text-xs font-medium transition"
-                                :class="form.tax_type === opt.value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'"
-                                @click="form.tax_type = opt.value as typeof form.tax_type"
+                                :class="
+                                    form.tax_type === opt.value
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                "
+                                @click="
+                                    form.tax_type =
+                                        opt.value as typeof form.tax_type
+                                "
                             >
                                 {{ opt.label }}
                             </button>
@@ -403,13 +460,23 @@ const handleSave = () => {
                                     class="pr-10"
                                     placeholder="0"
                                 />
-                                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                                    {{ form.tax_type === 'percentage' ? '%' : currency }}
+                                <span
+                                    class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground"
+                                >
+                                    {{
+                                        form.tax_type === 'percentage'
+                                            ? '%'
+                                            : currency
+                                    }}
                                 </span>
                             </div>
                             <div class="text-right">
-                                <p class="text-[11px] text-muted-foreground">Tax</p>
-                                <p class="text-sm font-semibold text-foreground">
+                                <p class="text-[11px] text-muted-foreground">
+                                    Tax
+                                </p>
+                                <p
+                                    class="text-sm font-semibold text-foreground"
+                                >
                                     +{{ fmt(taxAmount) }}
                                 </p>
                             </div>
@@ -428,9 +495,13 @@ const handleSave = () => {
 
                     <div class="grid gap-2 sm:col-span-2">
                         <Label>Line summary</Label>
-                        <div class="overflow-hidden rounded-lg border border-border">
+                        <div
+                            class="overflow-hidden rounded-lg border border-border"
+                        >
                             <div class="divide-y divide-border text-sm">
-                                <div class="flex justify-between px-4 py-2.5 text-muted-foreground">
+                                <div
+                                    class="flex justify-between px-4 py-2.5 text-muted-foreground"
+                                >
                                     <span>Subtotal</span>
                                     <span>{{ fmt(lineSubtotal) }}</span>
                                 </div>
@@ -439,7 +510,9 @@ const handleSave = () => {
                                     class="flex justify-between px-4 py-2.5 text-muted-foreground"
                                 >
                                     <span>Discount</span>
-                                    <span class="text-red-500 dark:text-red-400">−{{ fmt(discountAmount) }}</span>
+                                    <span class="text-red-500 dark:text-red-400"
+                                        >−{{ fmt(discountAmount) }}</span
+                                    >
                                 </div>
                                 <div
                                     v-if="form.tax_type !== 'none'"
@@ -448,7 +521,9 @@ const handleSave = () => {
                                     <span>Tax</span>
                                     <span>+{{ fmt(taxAmount) }}</span>
                                 </div>
-                                <div class="flex justify-between bg-muted/30 px-4 py-3 font-semibold text-foreground">
+                                <div
+                                    class="flex justify-between bg-muted/30 px-4 py-3 font-semibold text-foreground"
+                                >
                                     <span>Line total</span>
                                     <span>{{ fmt(lineTotal) }}</span>
                                 </div>
@@ -459,8 +534,13 @@ const handleSave = () => {
             </div>
 
             <DialogFooter>
-                <Button variant="outline" @click="emit('cancel')">Cancel</Button>
-                <Button :disabled="!form.description.trim()" @click="handleSave">
+                <Button variant="outline" @click="emit('cancel')"
+                    >Cancel</Button
+                >
+                <Button
+                    :disabled="!form.description.trim()"
+                    @click="handleSave"
+                >
                     {{ item.description ? 'Update' : 'Add' }} line item
                 </Button>
             </DialogFooter>

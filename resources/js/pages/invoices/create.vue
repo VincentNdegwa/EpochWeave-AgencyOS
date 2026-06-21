@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
 import { ref, computed, watch } from 'vue';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
@@ -23,12 +23,11 @@ import { dashboard } from '@/routes';
 import { useBuilderDataStore } from '@/stores/builderData';
 import InvoiceLineItemDialog from './components/InvoiceLineItemDialog.vue';
 
-const page = usePage();
-const workspace = computed(() => page.props.workspace as any);
 const { format: fmtCurrency } = useCurrency();
 const { formatDateInput } = useDateFormat();
 const builderDataStore = useBuilderDataStore();
-const { accounts, accountContacts, projects, products } = storeToRefs(builderDataStore);
+const { accounts, accountContacts, projects, products } =
+    storeToRefs(builderDataStore);
 
 builderDataStore.fetchAccounts();
 builderDataStore.fetchProducts();
@@ -147,8 +146,8 @@ const grandTotal = computed((): number =>
 
 const handleSave = async () => {
     if (isSaving.value) {
-return;
-}
+        return;
+    }
 
     isSaving.value = true;
     errors.value = {};
@@ -219,7 +218,9 @@ defineOptions({
                                 <Label for="account_id" required>Account</Label>
                                 <Select v-model="form.account_id">
                                     <SelectTrigger class="w-full">
-                                        <SelectValue placeholder="Select an account" />
+                                        <SelectValue
+                                            placeholder="Select an account"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem
@@ -227,7 +228,10 @@ defineOptions({
                                             :key="account.id"
                                             :value="account.id.toString()"
                                         >
-                                            {{ account.company_name || account.name }}
+                                            {{
+                                                account.company_name ||
+                                                account.name
+                                            }}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -238,7 +242,9 @@ defineOptions({
                                 <Label for="account_contact_id">Contact</Label>
                                 <Select v-model="form.account_contact_id">
                                     <SelectTrigger class="w-full">
-                                        <SelectValue placeholder="Select a contact" />
+                                        <SelectValue
+                                            placeholder="Select a contact"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem
@@ -246,18 +252,23 @@ defineOptions({
                                             :key="contact.id"
                                             :value="contact.id.toString()"
                                         >
-                                            {{ contact.first_name }} {{ contact.last_name }}
+                                            {{ contact.first_name }}
+                                            {{ contact.last_name }}
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <InputError :message="errors.account_contact_id" />
+                                <InputError
+                                    :message="errors.account_contact_id"
+                                />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="project_id">Project</Label>
                                 <Select v-model="form.project_id">
                                     <SelectTrigger class="w-full">
-                                        <SelectValue placeholder="Select a project" />
+                                        <SelectValue
+                                            placeholder="Select a project"
+                                        />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem
@@ -273,14 +284,24 @@ defineOptions({
                             </div>
 
                             <div class="grid gap-2">
-                                <Label for="issue_date" required>Issue Date</Label>
-                                <Input id="issue_date" type="date" v-model="form.issue_date" />
+                                <Label for="issue_date" required
+                                    >Issue Date</Label
+                                >
+                                <Input
+                                    id="issue_date"
+                                    type="date"
+                                    v-model="form.issue_date"
+                                />
                                 <InputError :message="errors.issue_date" />
                             </div>
 
                             <div class="grid gap-2">
                                 <Label for="due_date" required>Due Date</Label>
-                                <Input id="due_date" type="date" v-model="form.due_date" />
+                                <Input
+                                    id="due_date"
+                                    type="date"
+                                    v-model="form.due_date"
+                                />
                                 <InputError :message="errors.due_date" />
                             </div>
                         </div>
@@ -296,13 +317,21 @@ defineOptions({
                                     Products and services to invoice
                                 </p>
                             </div>
-                            <Button type="button" variant="outline" size="sm" @click="addLineItem">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                @click="addLineItem"
+                            >
                                 + Add Item
                             </Button>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div v-if="form.line_items.length === 0" class="py-8 text-center text-muted-foreground">
+                        <div
+                            v-if="form.line_items.length === 0"
+                            class="py-8 text-center text-muted-foreground"
+                        >
                             No line items yet. Click "Add Item" to start.
                         </div>
 
@@ -312,23 +341,43 @@ defineOptions({
                                 :key="item.id"
                                 class="flex items-center gap-4 rounded-lg border p-3"
                             >
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium truncate">{{ item.item_name }}</p>
+                                <div class="min-w-0 flex-1">
+                                    <p class="truncate text-sm font-medium">
+                                        {{ item.item_name }}
+                                    </p>
                                     <p class="text-xs text-muted-foreground">
-                                        {{ item.quantity }} {{ item.unit_label }} × {{ fmtCurrency(item.unit_price) }}
+                                        {{ item.quantity }}
+                                        {{ item.unit_label }} ×
+                                        {{ fmtCurrency(item.unit_price) }}
                                     </p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-sm font-semibold">{{ fmtCurrency(item.total) }}</p>
-                                    <p v-if="item.discount_type !== 'none'" class="text-xs text-red-500">
+                                    <p class="text-sm font-semibold">
+                                        {{ fmtCurrency(item.total) }}
+                                    </p>
+                                    <p
+                                        v-if="item.discount_type !== 'none'"
+                                        class="text-xs text-red-500"
+                                    >
                                         −{{ fmtCurrency(item.discount_amount) }}
                                     </p>
                                 </div>
                                 <div class="flex items-center gap-1">
-                                    <Button type="button" variant="ghost" size="sm" @click="editLineItem(index)">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        @click="editLineItem(index)"
+                                    >
                                         Edit
                                     </Button>
-                                    <Button type="button" variant="ghost" size="sm" class="text-destructive" @click="removeLineItem(index)">
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        class="text-destructive"
+                                        @click="removeLineItem(index)"
+                                    >
                                         Remove
                                     </Button>
                                 </div>
@@ -345,7 +394,11 @@ defineOptions({
                         </p>
                     </CardHeader>
                     <CardContent>
-                        <Textarea v-model="form.notes" placeholder="Additional notes for the invoice..." rows="4" />
+                        <Textarea
+                            v-model="form.notes"
+                            placeholder="Additional notes for the invoice..."
+                            rows="4"
+                        />
                     </CardContent>
                 </Card>
             </div>
@@ -361,19 +414,27 @@ defineOptions({
                     <CardContent>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground">Subtotal</span>
+                                <span class="text-muted-foreground"
+                                    >Subtotal</span
+                                >
                                 <span>{{ fmtCurrency(subtotal) }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-muted-foreground">Discount</span>
-                                <span class="text-red-500">−{{ fmtCurrency(discountTotal) }}</span>
+                                <span class="text-muted-foreground"
+                                    >Discount</span
+                                >
+                                <span class="text-red-500"
+                                    >−{{ fmtCurrency(discountTotal) }}</span
+                                >
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-muted-foreground">Tax</span>
                                 <span>{{ fmtCurrency(taxTotal) }}</span>
                             </div>
                             <Separator />
-                            <div class="flex justify-between text-base font-semibold">
+                            <div
+                                class="flex justify-between text-base font-semibold"
+                            >
                                 <span>Total</span>
                                 <span>{{ fmtCurrency(grandTotal) }}</span>
                             </div>

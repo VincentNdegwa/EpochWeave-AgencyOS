@@ -6,13 +6,12 @@ import type { Invoice } from '@/types/models/invoice';
 const props = defineProps<{
     invoice: Invoice;
 }>();
-
 </script>
 
 <template>
-        <Head :title="`Invoice · ${props.invoice.invoice_number}`" />
+    <Head :title="`Invoice · ${props.invoice.invoice_number}`" />
 
-        <div>
-            <InvoiceDocument :invoice="invoice" />
-        </div>
+    <div>
+        <InvoiceDocument :invoice="invoice" />
+    </div>
 </template>

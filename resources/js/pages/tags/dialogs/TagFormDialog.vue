@@ -71,7 +71,11 @@ watch(
             <DialogHeader>
                 <DialogTitle>{{ tag ? 'Edit Tag' : 'New Tag' }}</DialogTitle>
                 <DialogDescription>
-                    {{ tag ? 'Update tag details.' : 'Create a new tag for your tasks.' }}
+                    {{
+                        tag
+                            ? 'Update tag details.'
+                            : 'Create a new tag for your tasks.'
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -82,7 +86,10 @@ watch(
                         : TagController.store.form()) as any
                 "
                 :options="{ preserveScroll: true, preserveState: true }"
-                @success="emit('success'); emit('update:open', false);"
+                @success="
+                    emit('success');
+                    emit('update:open', false);
+                "
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-6 py-4">
@@ -108,14 +115,22 @@ watch(
                                     v-model="form.color"
                                     class="h-9 w-9 cursor-pointer rounded border"
                                 />
-                                <Input name="color" v-model="form.color" class="flex-1" />
+                                <Input
+                                    name="color"
+                                    v-model="form.color"
+                                    class="flex-1"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <DialogFooter>
-                    <Button type="button" variant="outline" @click="emit('update:open', false)">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        @click="emit('update:open', false)"
+                    >
                         Cancel
                     </Button>
                     <Button type="submit" :disabled="processing">

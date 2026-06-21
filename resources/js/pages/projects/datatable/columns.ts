@@ -8,7 +8,6 @@ import type { Project } from '@/types/models/project';
 import ProjectActions from '../components/ProjectActions.vue';
 
 export function createColumns(): ColumnDef<Project>[] {
-
     return [
         {
             id: 'select',
@@ -77,7 +76,10 @@ export function createColumns(): ColumnDef<Project>[] {
                 return h(
                     Badge,
                     {
-                        style: { backgroundColor: status.color, color: 'white' },
+                        style: {
+                            backgroundColor: status.color,
+                            color: 'white',
+                        },
                     },
                     () => status.title,
                 );
@@ -89,16 +91,27 @@ export function createColumns(): ColumnDef<Project>[] {
             cell: ({ row }) => {
                 const total = row.original.tasks_total || 0;
                 const completed = row.original.tasks_completed || 0;
-                const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+                const pct =
+                    total > 0 ? Math.round((completed / total) * 100) : 0;
 
                 return h('div', { class: 'flex items-center gap-2' }, [
-                    h('div', { class: 'h-1.5 w-16 overflow-hidden rounded-full bg-muted' }, [
-                        h('div', {
-                            class: 'h-full rounded-full bg-primary',
-                            style: { width: `${pct}%` },
-                        }),
-                    ]),
-                    h('span', { class: 'text-xs text-muted-foreground tabular-nums' }, `${completed}/${total}`),
+                    h(
+                        'div',
+                        {
+                            class: 'h-1.5 w-16 overflow-hidden rounded-full bg-muted',
+                        },
+                        [
+                            h('div', {
+                                class: 'h-full rounded-full bg-primary',
+                                style: { width: `${pct}%` },
+                            }),
+                        ],
+                    ),
+                    h(
+                        'span',
+                        { class: 'text-xs text-muted-foreground tabular-nums' },
+                        `${completed}/${total}`,
+                    ),
                 ]);
             },
         },

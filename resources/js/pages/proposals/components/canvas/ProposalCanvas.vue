@@ -30,9 +30,7 @@ const handleAddClick = (afterBlockId: string | null, blockType: string) => {
 </script>
 
 <template>
-    <div
-        class="custom-scrollbar flex h-full flex-col overflow-y-auto"
-    >
+    <div class="custom-scrollbar flex h-full flex-col overflow-y-auto">
         <div class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-0">
             <div class="rounded-sm border border-border p-6 shadow-sm">
                 <div v-if="hasBlocks" class="space-y-0">

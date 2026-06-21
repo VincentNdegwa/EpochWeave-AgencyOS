@@ -94,8 +94,8 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         const params = new URLSearchParams();
 
         if (filters?.account_id) {
-params.append('account_id', filters.account_id);
-}
+            params.append('account_id', filters.account_id);
+        }
 
         const url =
             accountContactsRoute.get().url +
@@ -111,8 +111,8 @@ params.append('account_id', filters.account_id);
         const params = new URLSearchParams();
 
         if (filters?.account_id) {
-params.append('account_id', filters.account_id);
-}
+            params.append('account_id', filters.account_id);
+        }
 
         const url = `/builder-data/projects${params.toString() ? '?' + params.toString() : ''}`;
         const response = await fetch(url);

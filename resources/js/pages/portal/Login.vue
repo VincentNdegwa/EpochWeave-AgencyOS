@@ -22,10 +22,14 @@ const submit = () => {
     <Head title="Client Portal Login" />
 
     <div class="flex min-h-screen items-center justify-center bg-muted/50">
-        <div class="w-full max-w-sm space-y-6 rounded-xl border bg-card p-8 shadow-sm">
+        <div
+            class="w-full max-w-sm space-y-6 rounded-xl border bg-card p-8 shadow-sm"
+        >
             <div class="text-center">
                 <h1 class="text-xl font-bold">Client Portal</h1>
-                <p class="mt-1 text-sm text-muted-foreground">Sign in to view your proposals and invoices</p>
+                <p class="mt-1 text-sm text-muted-foreground">
+                    Sign in to view your proposals and invoices
+                </p>
             </div>
 
             <form class="space-y-4" @submit.prevent="submit">
@@ -38,7 +42,12 @@ const submit = () => {
                         placeholder="you@company.com"
                         required
                     />
-                    <p v-if="form.errors.email" class="text-xs text-destructive">{{ form.errors.email }}</p>
+                    <p
+                        v-if="form.errors.email"
+                        class="text-xs text-destructive"
+                    >
+                        {{ form.errors.email }}
+                    </p>
                 </div>
 
                 <div class="space-y-1">
@@ -50,10 +59,19 @@ const submit = () => {
                         placeholder="••••••••"
                         required
                     />
-                    <p v-if="form.errors.password" class="text-xs text-destructive">{{ form.errors.password }}</p>
+                    <p
+                        v-if="form.errors.password"
+                        class="text-xs text-destructive"
+                    >
+                        {{ form.errors.password }}
+                    </p>
                 </div>
 
-                <Button type="submit" class="w-full" :disabled="form.processing">
+                <Button
+                    type="submit"
+                    class="w-full"
+                    :disabled="form.processing"
+                >
                     <LogIn class="mr-2 h-4 w-4" />
                     Sign In
                 </Button>

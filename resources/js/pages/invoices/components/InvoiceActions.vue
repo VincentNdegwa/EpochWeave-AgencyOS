@@ -79,7 +79,9 @@ const sizeClasses = computed(() => {
     }
 });
 
-const status = computed(() => props.invoice.invoice_status?.automation_trigger ?? 'draft');
+const status = computed(
+    () => props.invoice.invoice_status?.automation_trigger ?? 'draft',
+);
 
 const viewAction: ActionItem = {
     label: 'View',
@@ -127,11 +129,14 @@ const copyPublicLinkAction: ActionItem = {
     icon: LinkIcon,
     handler: () => {
         const url = `${window.location.origin}/invoices/${props.invoice.token}/public`;
-        navigator.clipboard.writeText(url).then(() => {
-            toast.success('Public link copied to clipboard');
-        }).catch(() => {
-            toast.error('Failed to copy public link');
-        });
+        navigator.clipboard
+            .writeText(url)
+            .then(() => {
+                toast.success('Public link copied to clipboard');
+            })
+            .catch(() => {
+                toast.error('Failed to copy public link');
+            });
     },
 };
 
@@ -152,7 +157,6 @@ const voidAction: ActionItem = {
                 variant: 'destructive',
             })
         ) {
-
             const voidStatus = props.invoice_statuses.find(
                 (s) => s.automation_trigger === 'voided',
             );
@@ -171,7 +175,10 @@ const downloadReceiptAction: ActionItem = {
     icon: Download,
     primary: true,
     handler: () => {
-        window.open(InvoiceController.downloadReceipt(props.invoice.id).url, '_blank');
+        window.open(
+            InvoiceController.downloadReceipt(props.invoice.id).url,
+            '_blank',
+        );
     },
 };
 
@@ -192,7 +199,8 @@ const duplicateAction: ActionItem = {
         if (
             await confirm({
                 title: 'Duplicate Invoice',
-                description: 'This will create a copy of this invoice as a new draft.',
+                description:
+                    'This will create a copy of this invoice as a new draft.',
                 confirmText: 'Duplicate',
                 cancelText: 'Cancel',
             })
@@ -233,7 +241,8 @@ const sendLateReminderAction: ActionItem = {
         if (
             await confirm({
                 title: 'Send Late Reminder',
-                description: 'This will send a late payment reminder email to the invoice contact.',
+                description:
+                    'This will send a late payment reminder email to the invoice contact.',
                 confirmText: 'Send',
                 cancelText: 'Cancel',
             })
@@ -253,7 +262,8 @@ const duplicateToDraftAction: ActionItem = {
         if (
             await confirm({
                 title: 'Duplicate to Draft',
-                description: 'This will create a copy of this invoice as a new draft.',
+                description:
+                    'This will create a copy of this invoice as a new draft.',
                 confirmText: 'Duplicate',
                 cancelText: 'Cancel',
             })
@@ -266,12 +276,7 @@ const duplicateToDraftAction: ActionItem = {
 const allActions = computed((): ActionItem[] => {
     switch (status.value) {
         case 'draft':
-            return [
-                viewAction,
-                editAction,
-                sendAction,
-                deleteAction,
-            ];
+            return [viewAction, editAction, sendAction, deleteAction];
         case 'sent':
             return [
                 viewAction,
@@ -296,10 +301,7 @@ const allActions = computed((): ActionItem[] => {
                 voidAction,
             ];
         case 'voided':
-            return [
-                viewAction,
-                duplicateToDraftAction,
-            ];
+            return [viewAction, duplicateToDraftAction];
         default:
             return [viewAction];
     }
@@ -317,8 +319,8 @@ const dropdownActions = computed((): ActionItem[] => {
 
 const primaryAction = computed((): ActionItem | null => {
     if (props.variant !== 'split') {
-return null;
-}
+        return null;
+    }
 
     const candidates = dropdownActions.value.filter(
         (a) => a.label !== 'View' && a.label !== 'Delete',
@@ -329,8 +331,8 @@ return null;
 
 const splitDropdownItems = computed((): ActionItem[] => {
     if (props.variant !== 'split') {
-return [];
-}
+        return [];
+    }
 
     const primary = primaryAction.value;
 
@@ -344,10 +346,7 @@ return [];
         <Button
             v-if="primaryAction"
             :size="size === 'icon' ? 'sm' : size"
-            :class="[
-                sizeClasses.button,
-                'rounded-r-none border-r-0',
-            ]"
+            :class="[sizeClasses.button, 'rounded-r-none border-r-0']"
             @mousedown.stop
             @mouseup.stop
             @click.stop="primaryAction.handler"
@@ -372,16 +371,24 @@ return [];
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" class="w-56">
-                <template v-for="(item, idx) in splitDropdownItems" :key="item.label">
+                <template
+                    v-for="(item, idx) in splitDropdownItems"
+                    :key="item.label"
+                >
                     <DropdownMenuSeparator v-if="idx > 0 && item.destructive" />
                     <DropdownMenuItem
                         :class="[
                             sizeClasses.menuItem,
-                            item.destructive ? 'text-destructive focus:text-destructive' : '',
+                            item.destructive
+                                ? 'text-destructive focus:text-destructive'
+                                : '',
                         ]"
                         @click="item.handler"
                     >
-                        <component :is="item.icon" :class="sizeClasses.iconSize" />
+                        <component
+                            :is="item.icon"
+                            :class="sizeClasses.iconSize"
+                        />
                         {{ item.label }}
                     </DropdownMenuItem>
                 </template>
@@ -404,7 +411,9 @@ return [];
         <DropdownMenuContent align="end" class="w-56">
             <template v-for="(item, idx) in dropdownActions" :key="item.label">
                 <DropdownMenuSeparator
-                    v-if="idx > 0 && (item.destructive || item.label === 'Delete')"
+                    v-if="
+                        idx > 0 && (item.destructive || item.label === 'Delete')
+                    "
                 />
                 <DropdownMenuItem
                     v-if="item.label === 'View'"
@@ -412,7 +421,10 @@ return [];
                     as-child
                 >
                     <Link :href="InvoiceController.show(invoice.id).url">
-                        <component :is="item.icon" :class="sizeClasses.iconSize" />
+                        <component
+                            :is="item.icon"
+                            :class="sizeClasses.iconSize"
+                        />
                         {{ item.label }}
                     </Link>
                 </DropdownMenuItem>
@@ -420,7 +432,9 @@ return [];
                     v-else
                     :class="[
                         sizeClasses.menuItem,
-                        item.destructive ? 'text-destructive focus:text-destructive' : '',
+                        item.destructive
+                            ? 'text-destructive focus:text-destructive'
+                            : '',
                     ]"
                     @click="item.handler"
                 >

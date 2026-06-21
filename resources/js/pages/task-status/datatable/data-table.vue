@@ -6,7 +6,7 @@ import DataTable from '@/components/DataTable.vue';
 import type { TaskStatus } from '@/types/models/task_status';
 import BulkActionsToolbar from './bulk-actions-toolbar.vue';
 
-const props = defineProps<{
+defineProps<{
     columns: ColumnDef<TaskStatus>[];
     data: TaskStatus[];
     filters?: Record<string, string | undefined>;
@@ -14,7 +14,11 @@ const props = defineProps<{
 }>();
 
 const filterConfigs = [
-    { key: 'search', type: 'search' as const, placeholder: 'Search statuses...' },
+    {
+        key: 'search',
+        type: 'search' as const,
+        placeholder: 'Search statuses...',
+    },
 ];
 </script>
 

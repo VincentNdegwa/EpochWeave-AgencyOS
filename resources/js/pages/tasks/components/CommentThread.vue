@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { MessageSquare, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
@@ -16,20 +16,24 @@ const processing = ref(false);
 
 const submitComment = () => {
     if (!body.value.trim()) {
-return;
-}
+        return;
+    }
 
     processing.value = true;
 
-    router.post(`/tasks/${props.taskId}/comments`, {
-        body: body.value,
-    }, {
-        preserveScroll: true,
-        onFinish: () => {
-            body.value = '';
-            processing.value = false;
+    router.post(
+        `/tasks/${props.taskId}/comments`,
+        {
+            body: body.value,
         },
-    });
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                body.value = '';
+                processing.value = false;
+            },
+        },
+    );
 };
 
 const deleteComment = (commentId: number) => {
@@ -44,7 +48,9 @@ const deleteComment = (commentId: number) => {
         <div class="flex items-center gap-2">
             <MessageSquare class="h-4 w-4 text-muted-foreground" />
             <h3 class="text-sm font-semibold">Comments</h3>
-            <span class="text-xs text-muted-foreground">({{ comments.length }})</span>
+            <span class="text-xs text-muted-foreground"
+                >({{ comments.length }})</span
+            >
         </div>
 
         <div class="space-y-3">
@@ -55,12 +61,22 @@ const deleteComment = (commentId: number) => {
             >
                 <div class="flex items-start justify-between">
                     <div class="flex items-center gap-2">
-                        <div class="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                        <div
+                            class="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary"
+                        >
                             {{ comment.user?.name?.charAt(0) || '?' }}
                         </div>
                         <div>
-                            <p class="text-sm font-medium">{{ comment.user?.name || 'Unknown' }}</p>
-                            <p class="text-xs text-muted-foreground">{{ new Date(comment.created_at).toLocaleDateString() }}</p>
+                            <p class="text-sm font-medium">
+                                {{ comment.user?.name || 'Unknown' }}
+                            </p>
+                            <p class="text-xs text-muted-foreground">
+                                {{
+                                    new Date(
+                                        comment.created_at,
+                                    ).toLocaleDateString()
+                                }}
+                            </p>
                         </div>
                     </div>
                     <Button
@@ -75,15 +91,13 @@ const deleteComment = (commentId: number) => {
                 <p class="mt-2 text-sm text-foreground">{{ comment.body }}</p>
             </div>
 
-            <p v-if="!comments.length" class="text-sm text-muted-foreground">No comments yet.</p>
+            <p v-if="!comments.length" class="text-sm text-muted-foreground">
+                No comments yet.
+            </p>
         </div>
 
         <div class="space-y-2">
-            <Textarea
-                v-model="body"
-                placeholder="Add a comment..."
-                rows="3"
-            />
+            <Textarea v-model="body" placeholder="Add a comment..." rows="3" />
             <div class="flex justify-end">
                 <Button
                     size="sm"

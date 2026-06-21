@@ -149,10 +149,14 @@ function updateFilter(key: string, value: string | undefined) {
                 />
                 <Input
                     v-if="hasSearchFilter"
-                    :placeholder="searchConfig?.placeholder || searchPlaceholder"
+                    :placeholder="
+                        searchConfig?.placeholder || searchPlaceholder
+                    "
                     :model-value="filters?.search"
                     class="h-9 max-w-xs pl-9 text-sm"
-                    @update:model-value="updateFilter('search', $event || undefined)"
+                    @update:model-value="
+                        updateFilter('search', $event || undefined)
+                    "
                 />
             </div>
 
@@ -165,7 +169,9 @@ function updateFilter(key: string, value: string | undefined) {
                         :placeholder="config.placeholder"
                         :model-value="filters?.[config.key]"
                         class="h-9 w-40 text-sm"
-                        @update:model-value="updateFilter(config.key, $event || undefined)"
+                        @update:model-value="
+                            updateFilter(config.key, $event || undefined)
+                        "
                     />
                 </template>
 
@@ -256,7 +262,10 @@ function updateFilter(key: string, value: string | undefined) {
                                         v-if="emptyIcon"
                                         class="flex h-10 w-10 items-center justify-center rounded-full bg-muted"
                                     >
-                                        <component :is="emptyIcon" class="h-5 w-5" />
+                                        <component
+                                            :is="emptyIcon"
+                                            class="h-5 w-5"
+                                        />
                                     </div>
                                     <p class="text-sm font-medium">
                                         {{ emptyTitle }}

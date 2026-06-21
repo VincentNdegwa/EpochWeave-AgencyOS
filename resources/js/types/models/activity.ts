@@ -1,4 +1,4 @@
-import type { User } from "../auth";
+import type { User } from '../auth';
 
 export interface Activity {
     id: number;

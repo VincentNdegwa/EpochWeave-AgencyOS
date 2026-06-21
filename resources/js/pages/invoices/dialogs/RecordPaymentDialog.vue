@@ -106,8 +106,13 @@ function handleSubmit() {
                 <DialogTitle>Record Payment</DialogTitle>
                 <DialogDescription>
                     Record a payment for invoice
-                    <span class="font-mono">#{{ invoice.invoice_number ?? invoice.id }}</span>
-                    <span v-if="remainingAmount > 0" class="ml-1 text-muted-foreground">
+                    <span class="font-mono"
+                        >#{{ invoice.invoice_number ?? invoice.id }}</span
+                    >
+                    <span
+                        v-if="remainingAmount > 0"
+                        class="ml-1 text-muted-foreground"
+                    >
                         · Remaining: {{ fmtCurrency(remainingAmount) }}
                     </span>
                 </DialogDescription>
@@ -134,8 +139,12 @@ function handleSubmit() {
                             <SelectValue placeholder="Select method" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                            <SelectItem value="credit_card">Credit Card</SelectItem>
+                            <SelectItem value="bank_transfer"
+                                >Bank Transfer</SelectItem
+                            >
+                            <SelectItem value="credit_card"
+                                >Credit Card</SelectItem
+                            >
                             <SelectItem value="cash">Cash</SelectItem>
                             <SelectItem value="check">Check</SelectItem>
                             <SelectItem value="other">Other</SelectItem>

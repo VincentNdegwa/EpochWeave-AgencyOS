@@ -17,14 +17,18 @@ const showSignatureModal = ref(false);
 
 const portalMode = computed(() => builderStore.portalMode);
 const alreadySigned = computed(() => !!builderStore.proposal.signed_at);
-const isRejected = computed(() => builderStore.proposal.proposal_status?.automation_trigger === 'declined');
+const isRejected = computed(
+    () =>
+        builderStore.proposal.proposal_status?.automation_trigger ===
+        'declined',
+);
 const signerName = computed(() => builderStore.proposal.signer_name || null);
 const signerDate = computed(() => {
     const signedAt = builderStore.proposal.signed_at;
 
     if (!signedAt) {
-return null;
-}
+        return null;
+    }
 
     const date = new Date(signedAt as string);
 
@@ -34,9 +38,9 @@ const signatureDataUrl = computed(() => {
     const signatureData = builderStore.proposal.signature_data;
 
     if (!signatureData) {
-return null;
-}
-    
+        return null;
+    }
+
     if (typeof signatureData === 'string') {
         try {
             const parsed = JSON.parse(signatureData);
@@ -46,11 +50,11 @@ return null;
             return signatureData;
         }
     }
-    
+
     if (typeof signatureData === 'object' && signatureData.data) {
         return signatureData.data;
     }
-    
+
     return signatureData;
 });
 </script>
@@ -70,7 +74,10 @@ return null;
                 {{ data.title || 'Signature' }}
             </h3>
             <p class="mt-1 text-xs text-muted-foreground">
-                {{ data.description || 'Client signs here to accept the proposal' }}
+                {{
+                    data.description ||
+                    'Client signs here to accept the proposal'
+                }}
             </p>
             <div class="mt-4 flex flex-wrap justify-center gap-2">
                 <span
@@ -135,7 +142,10 @@ return null;
             <p class="text-sm text-red-600">
                 This proposal has been declined and cannot be signed.
             </p>
-            <div v-if="builderStore.proposal.decline_reason" class="mt-2 text-xs text-red-500">
+            <div
+                v-if="builderStore.proposal.decline_reason"
+                class="mt-2 text-xs text-red-500"
+            >
                 <p class="font-medium">Reason:</p>
                 <p>{{ builderStore.proposal.decline_reason }}</p>
             </div>
@@ -154,11 +164,7 @@ return null;
                 </p>
             </div>
 
-            <Button
-                @click="showSignatureModal = true"
-                class="w-full"
-                size="lg"
-            >
+            <Button @click="showSignatureModal = true" class="w-full" size="lg">
                 Sign to Accept Proposal
             </Button>
         </div>
