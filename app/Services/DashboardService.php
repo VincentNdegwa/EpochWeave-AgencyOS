@@ -4,27 +4,15 @@ namespace App\Services;
 
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
+use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalStatus;
 use App\Models\Task;
-use App\Models\TaskStatus;
-use App\Models\TimeEntry;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardService
 {
-    public function getWorkspaceStats(int $workspaceId): array
-    {
-        return [
-            'open_proposals' => $this->openProposalsCount($workspaceId),
-            'outstanding_invoices' => $this->outstandingInvoicesCount($workspaceId),
-            'overdue_invoices' => $this->overdueInvoicesCount($workspaceId),
-            'open_tasks' => $this->openTasksCount($workspaceId),
-            'monthly_revenue' => $this->monthlyRevenue($workspaceId),
-            'unbilled_hours' => $this->unbilledHours($workspaceId),
-        ];
-    }
-
     public function getRecentActivity(int $workspaceId): array
     {
         $proposals = Proposal::query()
@@ -141,7 +129,7 @@ class DashboardService
 
     public function getRevenueChartData(int $workspaceId): array
     {
-        $months = collect(range(0, 5))->map(function (int $i) {
+        $months = collect(range(0, 11))->map(function (int $i) {
             return Carbon::now()->subMonths($i)->format('Y-m');
         })->reverse()->values();
 
@@ -158,7 +146,7 @@ class DashboardService
                 DB::raw('SUM(grand_total) as total')
             )
             ->whereNotNull('paid_at')
-            ->whereDate('paid_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->whereDate('paid_at', '>=', now()->subMonths(11)->startOfMonth())
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
@@ -170,7 +158,7 @@ class DashboardService
                 DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
                 DB::raw('SUM(grand_total) as total')
             )
-            ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->whereDate('created_at', '>=', now()->subMonths(11)->startOfMonth())
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
@@ -183,41 +171,11 @@ class DashboardService
         ];
     }
 
-    private function openProposalsCount(int $workspaceId): int
-    {
-        return Proposal::query()
-            ->where('workspace_id', $workspaceId)
-            ->whereHas('proposalStatus', fn ($q) => $q->where('automation_trigger', 'sent'))
-            ->count();
-    }
-
     private function outstandingInvoicesCount(int $workspaceId): int
     {
         return Invoice::query()
             ->where('workspace_id', $workspaceId)
             ->whereHas('invoiceStatus', fn ($q) => $q->whereIn('automation_trigger', ['sent', 'overdue']))
-            ->count();
-    }
-
-    private function overdueInvoicesCount(int $workspaceId): int
-    {
-        return Invoice::query()
-            ->where('workspace_id', $workspaceId)
-            ->whereHas('invoiceStatus', fn ($q) => $q->where('automation_trigger', 'overdue'))
-            ->count();
-    }
-
-    private function openTasksCount(int $workspaceId): int
-    {
-        $closedStatusIds = TaskStatus::query()
-            ->where('workspace_id', $workspaceId)
-            ->where('is_closed', true)
-            ->pluck('id');
-
-        return Task::query()
-            ->where('workspace_id', $workspaceId)
-            ->whereNull('parent_id')
-            ->whereNotIn('task_status_id', $closedStatusIds)
             ->count();
     }
 
@@ -236,15 +194,344 @@ class DashboardService
             ->sum('grand_total');
     }
 
-    private function unbilledHours(int $workspaceId): float
+    public function getKpiData(int $workspaceId): array
     {
-        $seconds = TimeEntry::query()
-            ->where('workspace_id', $workspaceId)
-            ->where('is_billable', true)
-            ->where('is_invoiced', false)
-            ->whereNotNull('duration_seconds')
-            ->sum('duration_seconds');
+        $months = collect(range(0, 5))->map(function (int $i) {
+            return Carbon::now()->subMonths($i)->format('Y-m');
+        })->reverse()->values();
 
-        return round($seconds / 3600, 2);
+        $paidStatusIds = InvoiceStatus::query()
+            ->where('workspace_id', $workspaceId)
+            ->where('automation_trigger', 'paid')
+            ->pluck('id');
+
+        $sentStatusIds = ProposalStatus::query()
+            ->where('workspace_id', $workspaceId)
+            ->where('automation_trigger', 'sent')
+            ->pluck('id');
+
+        $acceptedStatusIds = ProposalStatus::query()
+            ->where('workspace_id', $workspaceId)
+            ->where('automation_trigger', 'accepted')
+            ->pluck('id');
+
+        $revenueByMonth = Invoice::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereIn('invoice_status_id', $paidStatusIds)
+            ->whereNotNull('paid_at')
+            ->select(
+                DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
+                DB::raw('SUM(grand_total) as total')
+            )
+            ->whereDate('paid_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->all();
+
+        $pipelineByMonth = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw('SUM(grand_total) as total')
+            )
+            ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->all();
+
+        $sentProposalsByMonth = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereIn('proposal_status_id', $sentStatusIds)
+            ->select(
+                DB::raw("DATE_FORMAT(sent_at, '%Y-%m') as month"),
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereDate('sent_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->all();
+
+        $acceptedProposalsByMonth = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereIn('proposal_status_id', $acceptedStatusIds)
+            ->select(
+                DB::raw("DATE_FORMAT(accepted_at, '%Y-%m') as month"),
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereDate('accepted_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->all();
+
+        $activeProjectsByMonth = Project::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereNull('completed_at')
+            ->select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->all();
+
+        $avgDealByMonth = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw('AVG(grand_total) as avg')
+            )
+            ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('avg', 'month')
+            ->all();
+
+        $outstandingByMonth = Invoice::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereHas('invoiceStatus', fn ($q) => $q->whereIn('automation_trigger', ['sent', 'overdue']))
+            ->select(
+                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw('COUNT(*) as count')
+            )
+            ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->all();
+
+        return [
+            'revenue' => [
+                'value' => $this->monthlyRevenue($workspaceId),
+                'sparkline' => $months->map(fn ($m) => (float) ($revenueByMonth[$m] ?? 0))->all(),
+                'change' => $this->calculateChange(
+                    (float) ($revenueByMonth[$months->last()] ?? 0),
+                    (float) ($revenueByMonth[$months->get($months->count() - 2)] ?? 0),
+                ),
+            ],
+            'outstanding' => [
+                'value' => $this->outstandingInvoicesCount($workspaceId),
+                'sparkline' => $months->map(fn ($m) => (int) ($outstandingByMonth[$m] ?? 0))->all(),
+                'change' => $this->calculateChange(
+                    (int) ($outstandingByMonth[$months->last()] ?? 0),
+                    (int) ($outstandingByMonth[$months->get($months->count() - 2)] ?? 0),
+                    true,
+                ),
+            ],
+            'pipeline' => [
+                'value' => (float) Proposal::query()
+                    ->where('workspace_id', $workspaceId)
+                    ->whereHas('proposalStatus', fn ($q) => $q->where('automation_trigger', 'sent'))
+                    ->sum('grand_total'),
+                'sparkline' => $months->map(fn ($m) => (float) ($pipelineByMonth[$m] ?? 0))->all(),
+                'change' => $this->calculateChange(
+                    (float) ($pipelineByMonth[$months->last()] ?? 0),
+                    (float) ($pipelineByMonth[$months->get($months->count() - 2)] ?? 0),
+                ),
+            ],
+            'win_rate' => [
+                'value' => $this->winRate($workspaceId),
+                'sparkline' => $months->map(function ($m) use ($sentProposalsByMonth, $acceptedProposalsByMonth) {
+                    $sent = (int) ($sentProposalsByMonth[$m] ?? 0);
+                    $accepted = (int) ($acceptedProposalsByMonth[$m] ?? 0);
+
+                    return $sent > 0 ? round(($accepted / $sent) * 100, 1) : 0;
+                })->all(),
+                'change' => $this->calculateChange(
+                    $this->winRateForMonth($workspaceId, $months->last(), $sentStatusIds, $acceptedStatusIds),
+                    $this->winRateForMonth($workspaceId, $months->get($months->count() - 2), $sentStatusIds, $acceptedStatusIds),
+                ),
+            ],
+            'active_projects' => [
+                'value' => Project::query()
+                    ->where('workspace_id', $workspaceId)
+                    ->whereNull('completed_at')
+                    ->whereNull('archived_at')
+                    ->count(),
+                'sparkline' => $months->map(fn ($m) => (int) ($activeProjectsByMonth[$m] ?? 0))->all(),
+                'change' => $this->calculateChange(
+                    (int) ($activeProjectsByMonth[$months->last()] ?? 0),
+                    (int) ($activeProjectsByMonth[$months->get($months->count() - 2)] ?? 0),
+                ),
+            ],
+            'avg_deal_size' => [
+                'value' => (float) Proposal::query()
+                    ->where('workspace_id', $workspaceId)
+                    ->avg('grand_total') ?? 0,
+                'sparkline' => $months->map(fn ($m) => round((float) ($avgDealByMonth[$m] ?? 0), 2))->all(),
+                'change' => $this->calculateChange(
+                    (float) ($avgDealByMonth[$months->last()] ?? 0),
+                    (float) ($avgDealByMonth[$months->get($months->count() - 2)] ?? 0),
+                ),
+            ],
+        ];
+    }
+
+    public function getProposalFunnel(int $workspaceId): array
+    {
+        $statuses = ProposalStatus::query()
+            ->where('workspace_id', $workspaceId)
+            ->orderBy('position')
+            ->get(['id', 'title', 'color', 'automation_trigger']);
+
+        return $statuses->map(fn ($status) => [
+            'stage' => $status->title,
+            'count' => Proposal::query()
+                ->where('workspace_id', $workspaceId)
+                ->where('proposal_status_id', $status->id)
+                ->count(),
+            'color' => $status->color,
+        ])->all();
+    }
+
+    public function getArAging(int $workspaceId): array
+    {
+        $today = now()->startOfDay();
+
+        $invoices = Invoice::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereHas('invoiceStatus', fn ($q) => $q->whereIn('automation_trigger', ['sent', 'overdue']))
+            ->whereNotNull('due_date')
+            ->select('grand_total', 'due_date')
+            ->get();
+
+        $buckets = [
+            ['label' => 'Current', 'min' => null, 'max' => 0, 'color' => '#22c55e'],
+            ['label' => '1-30 days', 'min' => 1, 'max' => 30, 'color' => '#3b82f6'],
+            ['label' => '31-60 days', 'min' => 31, 'max' => 60, 'color' => '#f59e0b'],
+            ['label' => '61+ days', 'min' => 61, 'max' => null, 'color' => '#ef4444'],
+        ];
+
+        return collect($buckets)->map(function ($bucket) use ($invoices, $today) {
+            $filtered = $invoices->filter(function ($invoice) use ($bucket, $today) {
+                $daysOverdue = $today->diffInDays($invoice->due_date, false) * -1;
+
+                if ($bucket['min'] === null && $bucket['max'] === 0) {
+                    return $daysOverdue <= 0;
+                }
+
+                if ($bucket['max'] === null) {
+                    return $daysOverdue >= $bucket['min'];
+                }
+
+                return $daysOverdue >= $bucket['min'] && $daysOverdue <= $bucket['max'];
+            });
+
+            return [
+                'label' => $bucket['label'],
+                'amount' => (float) $filtered->sum('grand_total'),
+                'count' => $filtered->count(),
+                'color' => $bucket['color'],
+            ];
+        })->all();
+    }
+
+    public function getActiveProjects(int $workspaceId): array
+    {
+        return Project::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereNull('completed_at')
+            ->whereNull('archived_at')
+            ->orderByDesc('created_at')
+            ->limit(8)
+            ->get(['id', 'name', 'color', 'tasks_total', 'tasks_completed'])
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'name' => $p->name,
+                'completion' => $p->tasks_total > 0
+                    ? round(($p->tasks_completed / $p->tasks_total) * 100)
+                    : 0,
+                'color' => $p->color,
+            ])
+            ->all();
+    }
+
+    public function getTopAccounts(int $workspaceId): array
+    {
+        $paidStatusIds = InvoiceStatus::query()
+            ->where('workspace_id', $workspaceId)
+            ->where('automation_trigger', 'paid')
+            ->pluck('id');
+
+        return Invoice::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereIn('invoice_status_id', $paidStatusIds)
+            ->whereNotNull('paid_at')
+            ->whereDate('paid_at', '>=', now()->subYear()->startOfDay())
+            ->with('account:id,company_name')
+            ->select('account_id', DB::raw('SUM(grand_total) as total_revenue'))
+            ->groupBy('account_id')
+            ->orderByDesc('total_revenue')
+            ->limit(6)
+            ->get()
+            ->map(fn ($i) => [
+                'id' => $i->account_id,
+                'name' => $i->account?->company_name ?? 'Unknown',
+                'revenue' => (float) $i->total_revenue,
+            ])
+            ->all();
+    }
+
+    private function winRate(int $workspaceId): float
+    {
+        $sent = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereHas('proposalStatus', fn ($q) => $q->where('automation_trigger', 'sent'))
+            ->count();
+
+        $accepted = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereHas('proposalStatus', fn ($q) => $q->where('automation_trigger', 'accepted'))
+            ->count();
+
+        return $sent > 0 ? round(($accepted / $sent) * 100, 1) : 0;
+    }
+
+    private function winRateForMonth(
+        int $workspaceId,
+        string $month,
+        $sentStatusIds,
+        $acceptedStatusIds,
+    ): float {
+        $sent = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereIn('proposal_status_id', $sentStatusIds)
+            ->whereYear('sent_at', substr($month, 0, 4))
+            ->whereMonth('sent_at', substr($month, 5, 2))
+            ->count();
+
+        $accepted = Proposal::query()
+            ->where('workspace_id', $workspaceId)
+            ->whereIn('proposal_status_id', $acceptedStatusIds)
+            ->whereYear('accepted_at', substr($month, 0, 4))
+            ->whereMonth('accepted_at', substr($month, 5, 2))
+            ->count();
+
+        return $sent > 0 ? round(($accepted / $sent) * 100, 1) : 0;
+    }
+
+    private function calculateChange(float|int $current, float|int $previous, bool $invert = false): ?array
+    {
+        if ($previous == 0) {
+            return $current > 0
+                ? ['value' => 100, 'label' => 'vs prior period']
+                : null;
+        }
+
+        $change = round((($current - $previous) / $previous) * 100, 1);
+
+        if ($invert) {
+            $change = $change * -1;
+        }
+
+        return [
+            'value' => $change,
+            'label' => 'vs prior period',
+        ];
     }
 }

@@ -17,8 +17,12 @@ class DashboardController extends Controller
     {
         $workspace = $request->attributes->get('current_workspace');
 
-        return Inertia::render('Dashboard', [
-            'stats' => $this->dashboardService->getWorkspaceStats($workspace->id),
+        return Inertia::render('dashboard/index', [
+            'kpiData' => $this->dashboardService->getKpiData($workspace->id),
+            'proposalFunnel' => $this->dashboardService->getProposalFunnel($workspace->id),
+            'arAging' => $this->dashboardService->getArAging($workspace->id),
+            'activeProjects' => $this->dashboardService->getActiveProjects($workspace->id),
+            'topAccounts' => $this->dashboardService->getTopAccounts($workspace->id),
             'recentActivity' => $this->dashboardService->getRecentActivity($workspace->id),
             'upcomingDeadlines' => $this->dashboardService->getUpcomingDeadlines($workspace->id),
             'revenueChart' => $this->dashboardService->getRevenueChartData($workspace->id),
