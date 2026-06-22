@@ -14,11 +14,12 @@ import { show as accountShow } from '@/routes/accounts';
 import proposals from '@/routes/proposals';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
-import type { Proposal } from '@/types/models/proposal';
+import type { Proposal, ProposalStatusModel } from '@/types/models/proposal';
 import ProposalActions from './components/ProposalActions.vue';
 
 const props = defineProps<{
     proposal: Proposal;
+    proposal_statuses: ProposalStatusModel[];
     activities: {
         id: number;
         type: string;
@@ -174,6 +175,7 @@ function formatDate(value?: string | null): string {
                     </Button>
                     <ProposalActions
                         :proposal="props.proposal"
+                        :proposal_statuses="props.proposal_statuses"
                         variant="split"
                         size="sm"
                     />

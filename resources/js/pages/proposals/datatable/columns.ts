@@ -8,7 +8,9 @@ import proposals from '@/routes/proposals/index.js';
 import type { Proposal, ProposalStatusModel } from '@/types/models/proposal';
 import ProposalActions from '../components/ProposalActions.vue';
 
-export function createColumns(): ColumnDef<Proposal>[] {
+export function createColumns(
+    proposalStatuses: ProposalStatusModel[],
+): ColumnDef<Proposal>[] {
     const { format: formatCurrency } = useCurrency();
 
     return [
@@ -115,6 +117,7 @@ export function createColumns(): ColumnDef<Proposal>[] {
 
                 return h(ProposalActions, {
                     proposal,
+                    proposal_statuses: proposalStatuses,
                     variant: 'dropdown',
                     size: 'icon',
                 });

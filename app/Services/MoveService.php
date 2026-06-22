@@ -18,10 +18,9 @@ class MoveService
     {
         return DB::transaction(function () use ($proposal, $targetStatusId) {
             $proposalStatuses = ProposalStatus::where('workspace_id', $proposal->workspace_id)
-                ->get()
-                ->toArray();
+                ->get();
 
-            $targetStatus = collect($proposalStatuses)
+            $targetStatus = $proposalStatuses
                 ->firstWhere('id', $targetStatusId);
 
             if (!$targetStatus) {
@@ -34,7 +33,7 @@ class MoveService
             $currentTrigger = $proposal->proposalStatus?->automation_trigger;
             $targetTrigger = $targetStatus->automation_trigger;
 
-            $validation = $this->movementRulesService->canMove($currentTrigger, $targetTrigger, $proposalStatuses);
+            $validation = $this->movementRulesService->canMove($currentTrigger, $targetTrigger, $proposalStatuses->toArray());
             if (!$validation['allowed']) {
                 return [
                     'success' => false,

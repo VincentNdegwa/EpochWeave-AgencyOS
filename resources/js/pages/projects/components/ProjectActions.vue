@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import {
+    Archive,
+    CheckCircle2,
     ChevronDown,
     Edit,
     Link as LinkIcon,
     MoreHorizontal,
+    Pause,
+    Play,
     Trash2,
+    XCircle,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
@@ -18,10 +23,12 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Project } from '@/types/models/project';
+import type { ProjectStatus } from '@/types/models/project_status';
 import ProjectFormDialog from '../dialogs/ProjectFormDialog.vue';
 
 interface Props {
     project: Project;
+    project_statuses: ProjectStatus[];
     variant?: 'dropdown' | 'split';
     size?: 'sm' | 'default' | 'icon';
 }
@@ -67,6 +74,13 @@ const sizeClasses = computed(() => {
     }
 });
 
+const status = computed(
+    () => props.project.status?.automation_trigger ?? 'planning',
+);
+
+const getStatusId = (trigger: string): number | undefined =>
+    props.project_statuses.find((s) => s.automation_trigger === trigger)?.id;
+
 const viewAction: ActionItem = {
     label: 'View',
     icon: LinkIcon,
@@ -80,6 +94,121 @@ const editAction: ActionItem = {
     icon: Edit,
     handler: () => {
         isEditDialogOpen.value = true;
+    },
+};
+
+const activateAction: ActionItem = {
+    label: 'Activate Project',
+    icon: Play,
+    primary: true,
+    handler: () => {
+        const activeStatusId = getStatusId('active');
+
+        if (activeStatusId) {
+            router.patch(ProjectController.updateStatus(props.project.id).url, {
+                project_status_id: activeStatusId,
+            });
+        }
+    },
+};
+
+const pauseAction: ActionItem = {
+    label: 'Place on Hold',
+    icon: Pause,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Place on Hold',
+                description:
+                    'Are you sure you want to place this project on hold?',
+                confirmText: 'Place on Hold',
+                cancelText: 'Cancel',
+            })
+        ) {
+            const pausedStatusId = getStatusId('paused');
+
+            if (pausedStatusId) {
+                router.patch(ProjectController.updateStatus(props.project.id).url, {
+                    project_status_id: pausedStatusId,
+                });
+            }
+        }
+    },
+};
+
+const completeAction: ActionItem = {
+    label: 'Complete Project',
+    icon: CheckCircle2,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Complete Project',
+                description:
+                    'This will mark the project as completed and seal financials.',
+                confirmText: 'Complete',
+                cancelText: 'Cancel',
+            })
+        ) {
+            const completedStatusId = getStatusId('completed');
+
+            if (completedStatusId) {
+                router.patch(ProjectController.updateStatus(props.project.id).url, {
+                    project_status_id: completedStatusId,
+                });
+            }
+        }
+    },
+};
+
+const cancelAction: ActionItem = {
+    label: 'Cancel Project',
+    icon: XCircle,
+    destructive: true,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Cancel Project',
+                description:
+                    'Are you sure you want to cancel this project? This will cancel pending tasks.',
+                confirmText: 'Cancel Project',
+                cancelText: 'Keep Project',
+                variant: 'destructive',
+            })
+        ) {
+            const cancelledStatusId = getStatusId('cancelled');
+
+            if (cancelledStatusId) {
+                router.patch(ProjectController.updateStatus(props.project.id).url, {
+                    project_status_id: cancelledStatusId,
+                });
+            }
+        }
+    },
+};
+
+const archiveAction: ActionItem = {
+    label: 'Archive Project',
+    icon: Archive,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Archive Project',
+                description:
+                    'This will archive the project. It will no longer appear in active lists.',
+                confirmText: 'Archive',
+                cancelText: 'Cancel',
+            })
+        ) {
+            router.patch(ProjectController.archive(props.project.id).url);
+        }
     },
 };
 
@@ -106,7 +235,45 @@ const deleteAction: ActionItem = {
 };
 
 const allActions = computed((): ActionItem[] => {
-    return [viewAction, editAction, deleteAction];
+    switch (status.value) {
+        case 'planning':
+            return [
+                viewAction,
+                editAction,
+                activateAction,
+                cancelAction,
+                deleteAction,
+            ];
+        case 'active':
+            return [
+                viewAction,
+                editAction,
+                pauseAction,
+                completeAction,
+                cancelAction,
+            ];
+        case 'paused':
+            return [
+                viewAction,
+                editAction,
+                activateAction,
+                cancelAction,
+            ];
+        case 'completed':
+            if (!props.project.archived_at) {
+                return [viewAction, editAction, archiveAction];
+            }
+
+            return [viewAction, editAction];
+        case 'cancelled':
+            if (!props.project.archived_at) {
+                return [viewAction, editAction, archiveAction];
+            }
+
+            return [viewAction, editAction];
+        default:
+            return [viewAction, editAction, deleteAction];
+    }
 });
 
 const dropdownActions = computed((): ActionItem[] => {
@@ -143,7 +310,6 @@ const splitDropdownItems = computed((): ActionItem[] => {
 </script>
 
 <template>
-    <!-- Split variant: primary button + dropdown -->
     <div v-if="variant === 'split'" class="flex items-center">
         <Button
             v-if="primaryAction"
@@ -160,8 +326,8 @@ const splitDropdownItems = computed((): ActionItem[] => {
         <DropdownMenu>
             <DropdownMenuTrigger as-child>
                 <Button
-                    :size="size === 'icon' ? 'sm' : size"
                     variant="outline"
+                    :size="size === 'icon' ? 'sm' : size"
                     :class="[
                         sizeClasses.iconButton,
                         primaryAction ? 'rounded-l-none px-2' : '',
@@ -169,14 +335,10 @@ const splitDropdownItems = computed((): ActionItem[] => {
                     @mousedown.stop
                     @mouseup.stop
                 >
-                    <ChevronDown
-                        v-if="primaryAction"
-                        :class="sizeClasses.iconSize"
-                    />
-                    <MoreHorizontal v-else :class="sizeClasses.iconSize" />
+                    <ChevronDown :class="sizeClasses.iconSize" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" class="w-56">
                 <template
                     v-for="(item, idx) in splitDropdownItems"
                     :key="item.label"
@@ -202,22 +364,19 @@ const splitDropdownItems = computed((): ActionItem[] => {
         </DropdownMenu>
     </div>
 
-    <!-- Dropdown variant -->
     <DropdownMenu v-else>
         <DropdownMenuTrigger as-child>
             <Button
-                :size="size === 'icon' ? 'sm' : size"
                 variant="ghost"
-                :class="size === 'icon' ? 'h-8 w-8 p-0' : ''"
+                :class="sizeClasses.iconButton"
+                size="icon"
                 @mousedown.stop
                 @mouseup.stop
-                @click.stop
             >
                 <MoreHorizontal :class="sizeClasses.iconSize" />
-                <span v-if="size !== 'icon'" class="ml-2">Actions</span>
             </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" class="w-56">
             <template v-for="(item, idx) in dropdownActions" :key="item.label">
                 <DropdownMenuSeparator
                     v-if="
@@ -257,6 +416,7 @@ const splitDropdownItems = computed((): ActionItem[] => {
     <ProjectFormDialog
         :open="isEditDialogOpen"
         :project="props.project"
+        :project_statuses="props.project_statuses"
         @update:open="isEditDialogOpen = $event"
         @success="isEditDialogOpen = false"
     />

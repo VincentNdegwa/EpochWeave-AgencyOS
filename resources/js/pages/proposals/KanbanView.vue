@@ -2,19 +2,12 @@
 import { router } from '@inertiajs/vue3';
 import { Calendar, Building, AlertCircle } from '@lucide/vue';
 import { ref, computed } from 'vue';
-import type { Proposal } from '@/types/models/proposal';
+import type { Proposal, ProposalStatusModel } from '@/types/models/proposal';
 import ProposalActions from './components/ProposalActions.vue';
-
-interface ProposalStatus {
-    id: number;
-    title: string;
-    color: string;
-    automation_trigger: string | null;
-}
 
 interface Props {
     proposals: Proposal[];
-    proposal_statuses: ProposalStatus[];
+    proposal_statuses: ProposalStatusModel[];
     movement_rules: Record<string, number[]>;
 }
 
@@ -67,7 +60,7 @@ const isTerminal = (trigger: string | null): boolean => {
     return (movement_rules[trigger] ?? []).length === 0;
 };
 
-function onDragStart(e: DragEvent, proposal: Proposal, status: ProposalStatus) {
+function onDragStart(e: DragEvent, proposal: Proposal, status: ProposalStatusModel) {
     hoveredProposalId.value = null;
     isDragging.value = true;
     dragStartTime.value = Date.now();
@@ -112,7 +105,7 @@ function onProposalMouseUp(proposal: Proposal) {
     mouseDownTarget.value = null;
 }
 
-function onDragOver(e: DragEvent, status: ProposalStatus) {
+function onDragOver(e: DragEvent, status: ProposalStatusModel) {
     if (canDrop(status.id)) {
         e.preventDefault();
 
@@ -133,7 +126,7 @@ function onDragLeave(e: DragEvent) {
     }
 }
 
-async function onDrop(e: DragEvent, targetStatus: ProposalStatus) {
+async function onDrop(e: DragEvent, targetStatus: ProposalStatusModel) {
     e.preventDefault();
 
     if (!dragging.value || !canDrop(targetStatus.id)) {
@@ -171,7 +164,7 @@ const columns = computed(() =>
     }),
 );
 
-const getStatusFromId = (id: number): ProposalStatus | undefined =>
+const getStatusFromId = (id: number): ProposalStatusModel | undefined =>
     proposal_statuses.find((s) => s.id === id);
 
 const fmt = (n: number, currency = 'USD') =>
@@ -320,6 +313,7 @@ const fmtDate = (s: string) =>
                             </span>
                             <ProposalActions
                                 :proposal="proposal"
+                                :proposal_statuses="proposal_statuses"
                                 variant="dropdown"
                                 size="icon"
                             />

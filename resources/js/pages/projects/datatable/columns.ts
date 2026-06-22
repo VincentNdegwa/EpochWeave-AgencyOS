@@ -5,9 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { show as projectShow } from '@/routes/projects';
 import type { Project } from '@/types/models/project';
+import type { ProjectStatus } from '@/types/models/project_status';
 import ProjectActions from '../components/ProjectActions.vue';
 
-export function createColumns(): ColumnDef<Project>[] {
+export function createColumns(projectStatuses?: ProjectStatus[]): ColumnDef<Project>[] {
     return [
         {
             id: 'select',
@@ -123,6 +124,7 @@ export function createColumns(): ColumnDef<Project>[] {
 
                 return h(ProjectActions, {
                     project,
+                    project_statuses: projectStatuses ?? [],
                     variant: 'dropdown',
                     size: 'icon',
                 });

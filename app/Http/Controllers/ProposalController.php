@@ -12,6 +12,7 @@ use App\Http\Requests\StoreProposalRequest;
 use App\Http\Requests\UpdateProposalRequest;
 use App\Models\Activity;
 use App\Models\Proposal;
+use App\Models\ProposalStatus;
 use App\Models\WorkspaceSetting;
 use App\Services\MovementRulesService;
 use App\Services\MoveService;
@@ -44,14 +45,14 @@ class ProposalController extends Controller
     {
         $workspace = $request->attributes->get('current_workspace');
         $user = $request->user();
-        
+
         $result = $this->proposalService->getFilteredProposals(
             $workspace->id,
             $request->query('status'),
             $request->query('search')
         );
 
-        $proposalStatuses = \App\Models\ProposalStatus::where('workspace_id', $workspace->id)
+        $proposalStatuses = ProposalStatus::where('workspace_id', $workspace->id)
             ->orderBy('position')
             ->get();
 
@@ -71,7 +72,6 @@ class ProposalController extends Controller
         ]);
     }
 
-    
     public function create(Request $request)
     {
 
@@ -83,9 +83,9 @@ class ProposalController extends Controller
         try {
             $workspace = $request->attributes->get('current_workspace');
             $data = $request->validated();
-            
+
             $content = [];
-            if (!empty($data['template_id'])) {
+            if (! empty($data['template_id'])) {
                 $template = $this->proposalTemplateService->getTemplateById($data['template_id']);
                 if ($template && $template->content) {
                     $content = $template->content;
@@ -148,9 +148,14 @@ class ProposalController extends Controller
             ->limit(20)
             ->get();
 
+        $proposalStatuses = ProposalStatus::where('workspace_id', $proposal->workspace_id)
+            ->orderBy('position')
+            ->get();
+
         return Inertia::render('proposals/show', [
             'proposal' => $proposal,
             'activities' => $activities,
+            'proposal_statuses' => $proposalStatuses,
         ]);
     }
 
@@ -253,7 +258,7 @@ class ProposalController extends Controller
     public function publicShow(string $token)
     {
         $proposal = Proposal::where('token', $token)
-            ->with(['account','items' ,'accountContact', 'user', 'proposalStatus', 'workspace'])
+            ->with(['account', 'items', 'accountContact', 'user', 'proposalStatus', 'workspace'])
             ->firstOrFail();
 
         $proposal->update([
@@ -263,7 +268,7 @@ class ProposalController extends Controller
 
         $viewer = $proposal->accountContact;
 
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             $this->trackProposalView->execute($proposal, $viewer);
         }
 
@@ -277,11 +282,13 @@ class ProposalController extends Controller
     {
         try {
             $this->sendProposal->send($proposal);
-            
+
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal sent successfully!']);
+
             return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }
@@ -290,20 +297,23 @@ class ProposalController extends Controller
     {
         try {
             $request->validate([
-                'target_status_id' => 'required|exists:proposal_statuses,id'
+                'target_status_id' => 'required|exists:proposal_statuses,id',
             ]);
 
             $result = $this->moveService->moveProposal($proposal, $request->target_status_id);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 Inertia::flash('toast', ['type' => 'error', 'message' => $result['error']]);
+
                 return redirect()->back();
             }
 
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal moved successfully.']);
+
             return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }
@@ -312,11 +322,13 @@ class ProposalController extends Controller
     {
         try {
             $this->acceptProposal->accept($proposal, $request->validated());
-            
+
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal accepted successfully!']);
+
             return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }
@@ -325,11 +337,49 @@ class ProposalController extends Controller
     {
         try {
             $this->rejectProposal->reject($proposal, $request->validated()['reason'] ?? null);
-            
+
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal declined successfully.']);
+
             return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return redirect()->back();
+        }
+    }
+
+    public function duplicate(Request $request, Proposal $proposal): RedirectResponse
+    {
+        try {
+            $workspace = $request->attributes->get('current_workspace');
+
+            $settings = $this->workspaceSettingService->getOrCreate(
+                $workspace->id,
+                WorkspaceSetting::SUBMODULE_PROPOSALS
+            );
+
+            $numberingSettings = $settings->settings['numbering'] ?? [];
+            $nextSequenceNumber = (int) ($numberingSettings['next_sequence_number'] ?? 1);
+            $newProposalNumber = $this->generateProposalNumber($numberingSettings);
+
+            $draftStatus = ProposalStatus::where('workspace_id', $workspace->id)
+                ->where('automation_trigger', 'draft')
+                ->first();
+
+            $newProposal = $this->proposalService->duplicateProposal(
+                $proposal,
+                $draftStatus?->id ?? 0,
+                $newProposalNumber
+            );
+
+            $this->workspaceSettingService->incrementNumberingSequence($settings, $nextSequenceNumber);
+
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Proposal duplicated successfully.']);
+
+            return redirect()->route('proposals.edit', $newProposal->id);
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
             return redirect()->back();
         }
     }

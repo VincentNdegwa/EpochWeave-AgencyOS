@@ -4,6 +4,8 @@ namespace Tests\Feature\Proposal;
 
 use App\Models\Account;
 use App\Models\Proposal;
+use App\Models\ProposalItem;
+use App\Models\ProposalStatus;
 use App\Models\User;
 use App\Models\Workspace;
 use App\Models\WorkspaceSetting;
@@ -227,6 +229,199 @@ class ProposalControllerTest extends TestCase
             ->first();
 
         $this->assertEquals(43, $updatedSettings->settings['numbering']['next_sequence_number']);
+    }
+
+    public function test_duplicate_proposal_creates_draft_copy_with_items(): void
+    {
+        Carbon::setTestNow('2026-06-09 00:00:00');
+
+        $user = User::factory()->create();
+        $workspace = Workspace::factory()->create();
+        $account = Account::factory()->create(['workspace_id' => $workspace->id]);
+
+        WorkspaceSetting::create([
+            'workspace_id' => $workspace->id,
+            'submodule' => WorkspaceSetting::SUBMODULE_PROPOSALS,
+            'settings' => [
+                'numbering' => [
+                    'format' => '{PREFIX}{DELIMITER}{SEQUENCE}',
+                    'prefix' => 'PROP',
+                    'delimiter' => '-',
+                    'sequence_padding' => 4,
+                    'next_sequence_number' => 10,
+                ],
+            ],
+        ]);
+
+        $draftStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $sentStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'sent')
+            ->first();
+
+        $proposal = Proposal::factory()->create([
+            'workspace_id' => $workspace->id,
+            'account_id' => $account->id,
+            'proposal_status_id' => $sentStatus->id,
+            'proposal_number' => 'PROP-ORIG-001',
+            'title' => 'Original Proposal',
+            'currency' => 'USD',
+            'sent_at' => now()->subDay(),
+            'view_count' => 5,
+        ]);
+
+        ProposalItem::factory()->create([
+            'proposal_id' => $proposal->id,
+            'item_name' => 'Design Service',
+            'quantity' => 2,
+            'unit_price' => 500,
+            'subtotal' => 1000,
+            'total' => 1000,
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->post(route('proposals.duplicate', $proposal));
+
+        $response->assertRedirect();
+
+        $original = Proposal::where('proposal_number', 'PROP-ORIG-001')->first();
+        $this->assertNotNull($original);
+
+        $duplicate = Proposal::where('title', 'Original Proposal')
+            ->where('id', '!=', $original->id)
+            ->first();
+
+        $this->assertNotNull($duplicate);
+        $this->assertEquals($draftStatus->id, $duplicate->proposal_status_id);
+        $this->assertNotEquals($original->proposal_number, $duplicate->proposal_number);
+        $this->assertNull($duplicate->sent_at);
+        $this->assertNull($duplicate->viewed_at);
+        $this->assertNull($duplicate->accepted_at);
+        $this->assertNull($duplicate->signed_at);
+        $this->assertNull($duplicate->expired_at);
+        $this->assertEquals(0, $duplicate->view_count);
+        $this->assertNull($duplicate->project_id);
+
+        $this->assertCount(1, $duplicate->items);
+        $this->assertEquals('Design Service', $duplicate->items->first()->item_name);
+        $this->assertEquals(1000, $duplicate->items->first()->subtotal);
+    }
+
+    public function test_duplicate_proposal_increments_sequence_number(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::factory()->create();
+        $account = Account::factory()->create(['workspace_id' => $workspace->id]);
+
+        WorkspaceSetting::create([
+            'workspace_id' => $workspace->id,
+            'submodule' => WorkspaceSetting::SUBMODULE_PROPOSALS,
+            'settings' => [
+                'numbering' => [
+                    'format' => '{PREFIX}{DELIMITER}{SEQUENCE}',
+                    'prefix' => 'PROP',
+                    'delimiter' => '-',
+                    'sequence_padding' => 4,
+                    'next_sequence_number' => 7,
+                ],
+            ],
+        ]);
+
+        $sentStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'sent')
+            ->first();
+
+        $proposal = Proposal::factory()->create([
+            'workspace_id' => $workspace->id,
+            'account_id' => $account->id,
+            'proposal_status_id' => $sentStatus->id,
+            'title' => 'Sequence Test',
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->post(route('proposals.duplicate', $proposal));
+
+        $updatedSettings = WorkspaceSetting::where('workspace_id', $workspace->id)
+            ->where('submodule', WorkspaceSetting::SUBMODULE_PROPOSALS)
+            ->first();
+
+        $this->assertEquals(8, $updatedSettings->settings['numbering']['next_sequence_number']);
+    }
+
+    public function test_move_proposal_reverts_sent_to_draft(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::factory()->create();
+        $account = Account::factory()->create(['workspace_id' => $workspace->id]);
+
+        $draftStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $sentStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'sent')
+            ->first();
+
+        $proposal = Proposal::factory()->create([
+            'workspace_id' => $workspace->id,
+            'account_id' => $account->id,
+            'proposal_status_id' => $sentStatus->id,
+            'sent_at' => now()->subDay(),
+            'title' => 'Sent Proposal',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->patch(route('proposal.move', $proposal), [
+                'target_status_id' => $draftStatus->id,
+            ]);
+
+        $response->assertRedirect();
+
+        $proposal->refresh();
+        $this->assertEquals($draftStatus->id, $proposal->proposal_status_id);
+    }
+
+    public function test_move_proposal_blocks_expired_target(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::factory()->create();
+        $account = Account::factory()->create(['workspace_id' => $workspace->id]);
+
+        $expiredStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'expired')
+            ->first();
+
+        $sentStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'sent')
+            ->first();
+
+        $proposal = Proposal::factory()->create([
+            'workspace_id' => $workspace->id,
+            'account_id' => $account->id,
+            'proposal_status_id' => $sentStatus->id,
+            'sent_at' => now()->subDay(),
+            'title' => 'Sent Proposal',
+        ]);
+
+        $response = $this
+            ->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->patch(route('proposal.move', $proposal), [
+                'target_status_id' => $expiredStatus->id,
+            ]);
+
+        $response->assertRedirect();
+
+        $proposal->refresh();
+        $this->assertEquals($sentStatus->id, $proposal->proposal_status_id);
     }
 
     private function validBlocksPayload(): array

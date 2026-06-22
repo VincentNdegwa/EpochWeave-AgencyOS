@@ -23,15 +23,16 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useProjectStatuses } from '@/composables/useEnums';
 import { useBuilderDataStore } from '@/stores/builderData';
 import type { Account } from '@/types/models/account';
 import type { Project } from '@/types/models/project';
+import type { ProjectStatus } from '@/types/models/project_status';
 
 interface Props {
     open: boolean;
     project?: Project | null;
     account?: Account | null;
+    project_statuses: ProjectStatus[];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -45,7 +46,6 @@ const emit = defineEmits<{
 }>();
 
 const builderStore = useBuilderDataStore();
-const projectStatuses = useProjectStatuses();
 
 const PRESET_COLORS = [
     '#6366f1',
@@ -72,7 +72,7 @@ const form = ref({
     name: props.project?.name || '',
     description: props.project?.description || '',
     color: props.project?.color || randomColor(),
-    status: props.project?.status || 'active',
+    project_status_id: props.project?.project_status_id?.toString() || '',
     start_date: props.project?.start_date || '',
     due_date: props.project?.due_date || '',
     portal_visible: props.project?.portal_visible ?? true,
@@ -87,7 +87,7 @@ watch(
                 name: p.name,
                 description: p.description || '',
                 color: p.color || randomColor(),
-                status: p.status,
+                project_status_id: p.project_status_id?.toString() || '',
                 start_date: p.start_date || '',
                 due_date: p.due_date || '',
                 portal_visible: p.portal_visible ?? true,
@@ -98,7 +98,7 @@ watch(
                 name: '',
                 description: '',
                 color: randomColor(),
-                status: 'active',
+                project_status_id: '',
                 start_date: '',
                 due_date: '',
                 portal_visible: true,
@@ -119,7 +119,7 @@ watch(
                     name: '',
                     description: '',
                     color: randomColor(),
-                    status: 'active',
+                    project_status_id: '',
                     start_date: '',
                     due_date: '',
                     portal_visible: true,
@@ -205,21 +205,21 @@ watch(
 
                         <div class="grid gap-2">
                             <Label for="project-status">Status</Label>
-                            <Select name="status" v-model="form.status">
+                            <Select name="project_status_id" v-model="form.project_status_id">
                                 <SelectTrigger class="w-full">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
-                                        v-for="s in projectStatuses.values"
-                                        :key="s.value"
-                                        :value="s.value"
+                                        v-for="s in project_statuses"
+                                        :key="s.id"
+                                        :value="s.id.toString()"
                                     >
-                                        {{ s.label }}
+                                        {{ s.title }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
-                            <InputError :message="errors.status" />
+                            <InputError :message="errors.project_status_id" />
                         </div>
 
                         <input type="hidden" name="color" :value="form.color" />

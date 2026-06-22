@@ -91,8 +91,13 @@ class ProjectController extends Controller
             ->limit(20)
             ->get();
 
+        $projectStatuses = ProjectStatus::where('workspace_id', $workspace->id)
+            ->orderBy('position')
+            ->get();
+
         return Inertia::render('projects/show', [
             'project' => $project,
+            'project_statuses' => $projectStatuses,
             'task_statuses' => $taskStatuses,
             'activities' => $activities,
         ]);
@@ -134,6 +139,59 @@ class ProjectController extends Controller
             Inertia::flash('toast', ['type' => 'success', 'message' => 'Project deleted successfully.']);
 
             return redirect()->route('projects.index');
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return redirect()->back();
+        }
+    }
+
+    public function updateStatus(Request $request, Project $project): RedirectResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        if ($project->workspace_id !== $workspace->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'project_status_id' => 'required|exists:project_statuses,id',
+        ]);
+
+        try {
+            $status = ProjectStatus::find($validated['project_status_id']);
+            $data = ['project_status_id' => $validated['project_status_id']];
+
+            if ($status?->automation_trigger === 'completed') {
+                $data['completed_at'] = now();
+            } elseif ($status?->automation_trigger === 'active' && ! $project->start_date) {
+                $data['start_date'] = now();
+            }
+
+            $this->projectService->updateProject($project, $data);
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Project status updated successfully.']);
+
+            return redirect()->back();
+        } catch (Exception $e) {
+            Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
+
+            return redirect()->back();
+        }
+    }
+
+    public function archive(Request $request, Project $project): RedirectResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        if ($project->workspace_id !== $workspace->id) {
+            abort(404);
+        }
+
+        try {
+            $this->projectService->updateProject($project, ['archived_at' => now()]);
+            Inertia::flash('toast', ['type' => 'success', 'message' => 'Project archived successfully.']);
+
+            return redirect()->back();
         } catch (Exception $e) {
             Inertia::flash('toast', ['type' => 'error', 'message' => $e->getMessage()]);
 

@@ -96,6 +96,8 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
         ->name('products.bulk-delete');
 
     Route::resource('projects', ProjectController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::patch('/projects/{project}/status', [ProjectController::class, 'updateStatus'])->name('projects.status.update');
+    Route::patch('/projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
     Route::resource('tasks', TaskController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.status.update');
     Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('tasks.comments.store');
@@ -120,6 +122,7 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::resource('proposals', ProposalController::class);
     Route::patch('/proposals/{proposal}/move', [ProposalController::class, 'move'])->name('proposal.move');
     Route::post('/proposals/{proposal}/send', [ProposalController::class, 'send'])->name('proposals.send');
+    Route::post('/proposals/{proposal}/duplicate', [ProposalController::class, 'duplicate'])->name('proposals.duplicate');
 
     Route::resource('proposal-templates', ProposalTemplateController::class);
     Route::post('proposal-templates/{template}/duplicate', [ProposalTemplateController::class, 'duplicate'])->name('proposal-templates.duplicate');

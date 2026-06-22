@@ -36,7 +36,7 @@ const editingProposal = ref<Proposal | null>(null);
 const statusDialogOpen = ref(false);
 const editingStatus = ref<any>(null);
 
-const columns = createColumns();
+const columns = createColumns(proposal_statuses);
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },

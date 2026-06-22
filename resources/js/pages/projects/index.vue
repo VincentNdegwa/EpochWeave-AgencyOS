@@ -23,7 +23,7 @@ const { projects, project_statuses, filters } = defineProps<{
 const dialogOpen = ref(false);
 const editingProject = ref<Project | null>(null);
 
-const columns = createColumns();
+const columns = createColumns(project_statuses);
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },
@@ -118,6 +118,7 @@ defineOptions({
         <ProjectFormDialog
             v-model:open="dialogOpen"
             :project="editingProject"
+            :project_statuses="project_statuses"
             @success="handleSuccess"
         />
     </div>

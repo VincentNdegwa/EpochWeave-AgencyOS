@@ -5,10 +5,8 @@ namespace App\Services;
 use App\Models\Proposal;
 use App\Models\ProposalItem;
 use App\Models\ProposalStatus;
-use App\Services\ActivityService;
 use Exception;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Schema;
 
 class ProposalService
 {
@@ -17,18 +15,18 @@ class ProposalService
     public function createProposalWithItems(array $data, array $items = []): Proposal
     {
         try {
-            if (!isset($data['proposal_status_id'])) {
+            if (! isset($data['proposal_status_id'])) {
                 $data['proposal_status_id'] = $this->getDraftStatusId($data['workspace_id']);
             }
-            
+
             $proposal = Proposal::create($data);
             $this->activityService->created($proposal);
 
-            if (!empty($items)) {
+            if (! empty($items)) {
                 $this->createProposalItems($proposal, $items);
                 $this->updateProposalTotals($proposal);
             }
-            
+
             return $proposal->fresh(['items.product', 'proposalStatus', 'accountContact', 'user']);
         } catch (Exception $e) {
             throw new Exception('Failed to create proposal with items: '.$e->getMessage());
@@ -67,8 +65,8 @@ class ProposalService
                     'updated_at' => now(),
                 ];
             }
-            
-            if (!empty($proposalItems)) {
+
+            if (! empty($proposalItems)) {
                 ProposalItem::insert($proposalItems);
             }
         } catch (Exception $e) {
@@ -108,16 +106,16 @@ class ProposalService
             $items = $proposal->items()->get();
             $proposal->setRelation('items', $items);
 
-            \Log::info("Proposal Items", [
-                'data' => $items
+            \Log::info('Proposal Items', [
+                'data' => $items,
             ]);
-            
+
             $subtotal = $items->sum('subtotal');
             $discountTotal = $items->sum('discount_amount');
             $taxAmount = $items->sum('total_tax_amount');
             $grandTotal = $items->sum('total');
 
-            \Log::info("Proposal data", [
+            \Log::info('Proposal data', [
                 'subtotal' => $subtotal,
                 'discount_total' => $discountTotal,
                 'total_tax_amount' => $taxAmount,
@@ -186,7 +184,7 @@ class ProposalService
     {
         try {
             $proposal = $this->getProposalById($proposalId);
-            if (!$proposal) {
+            if (! $proposal) {
                 throw new Exception('Proposal not found');
             }
 
@@ -199,15 +197,15 @@ class ProposalService
     public function getProposalById(int $id): ?Proposal
     {
         return Proposal::with([
-            'account', 
+            'account',
             'accountContact',
             'user',
-            'workspace', 
-            'template', 
+            'workspace',
+            'template',
             'proposalStatus',
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
-            }
+            },
         ])->find($id);
     }
 
@@ -219,7 +217,7 @@ class ProposalService
                 'proposalStatus',
                 'items.product' => function ($query) {
                     $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
-                }
+                },
             ])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -244,10 +242,10 @@ class ProposalService
             'proposalStatus',
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
-            }
+            },
         ])
-        ->orderBy('created_at', 'desc')
-        ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return [
             'proposals' => $proposals,
@@ -260,7 +258,7 @@ class ProposalService
             ->where('is_system', true)
             ->where('title', 'Draft')
             ->first();
-        
+
         return $draftStatus?->id;
     }
 
@@ -270,7 +268,7 @@ class ProposalService
             ->with([
                 'items.product' => function ($query) {
                     $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
-                }
+                },
             ])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -350,6 +348,60 @@ class ProposalService
             return $this->updateBlocks($proposal, $reorderedBlocks);
         } catch (Exception $e) {
             throw new Exception('Failed to reorder blocks: '.$e->getMessage());
+        }
+    }
+
+    public function duplicateProposal(Proposal $proposal, int $draftStatusId, string $newProposalNumber): Proposal
+    {
+        try {
+            return \DB::transaction(function () use ($proposal, $draftStatusId, $newProposalNumber) {
+                $cloneData = $proposal->replicate([
+                    'proposal_number',
+                    'token',
+                    'sent_at',
+                    'viewed_at',
+                    'last_viewed_at',
+                    'view_count',
+                    'decided_at',
+                    'accepted_at',
+                    'signed_at',
+                    'expired_at',
+                    'decline_reason',
+                    'deposit_invoice_id',
+                    'project_id',
+                    'created_at',
+                    'updated_at',
+                ])->toArray();
+
+                $cloneData['proposal_number'] = $newProposalNumber;
+                $cloneData['proposal_status_id'] = $draftStatusId;
+                $cloneData['token'] = \Str::uuid();
+                $cloneData['sent_at'] = null;
+                $cloneData['viewed_at'] = null;
+                $cloneData['last_viewed_at'] = null;
+                $cloneData['view_count'] = 0;
+                $cloneData['decided_at'] = null;
+                $cloneData['accepted_at'] = null;
+                $cloneData['signed_at'] = null;
+                $cloneData['expired_at'] = null;
+                $cloneData['decline_reason'] = null;
+                $cloneData['deposit_invoice_id'] = null;
+                $cloneData['project_id'] = null;
+
+                $newProposal = Proposal::create($cloneData);
+
+                foreach ($proposal->items as $item) {
+                    $itemData = $item->replicate(['proposal_id', 'created_at', 'updated_at'])->toArray();
+                    $itemData['proposal_id'] = $newProposal->id;
+                    ProposalItem::create($itemData);
+                }
+
+                $this->activityService->record($newProposal, 'proposal.duplicated', 'Proposal duplicated from '.$proposal->proposal_number.'.');
+
+                return $newProposal->fresh(['items.product', 'proposalStatus', 'accountContact', 'user']);
+            });
+        } catch (\Throwable $e) {
+            throw new Exception('Failed to duplicate proposal: '.$e->getMessage());
         }
     }
 }

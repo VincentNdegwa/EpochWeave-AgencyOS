@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import {
+    CheckCircle2,
     ChevronDown,
+    Copy,
     Edit,
+    Eye,
     Link as LinkIcon,
     MoreHorizontal,
+    Send,
     Trash2,
+    Undo2,
+    XCircle,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,10 +25,12 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Proposal } from '@/types/models/proposal';
+import type { ProposalStatusModel } from '@/types/models/proposal';
 import ProposalFormDialog from '../dialogs/ProposalFormDialog.vue';
 
 interface Props {
     proposal: Proposal;
+    proposal_statuses: ProposalStatusModel[];
     variant?: 'dropdown' | 'split';
     size?: 'sm' | 'default' | 'icon';
 }
@@ -67,6 +76,14 @@ const sizeClasses = computed(() => {
     }
 });
 
+const status = computed(
+    () => props.proposal.proposal_status?.automation_trigger ?? 'draft',
+);
+
+const draftStatus = computed(() =>
+    props.proposal_statuses.find((s) => s.automation_trigger === 'draft'),
+);
+
 const viewAction: ActionItem = {
     label: 'View',
     icon: LinkIcon,
@@ -80,6 +97,138 @@ const editAction: ActionItem = {
     icon: Edit,
     handler: () => {
         isEditDialogOpen.value = true;
+    },
+};
+
+const clientViewAction: ActionItem = {
+    label: 'Preview Client View',
+    icon: Eye,
+    handler: () => {
+        window.open(
+            `${window.location.origin}/proposals/${props.proposal.token}/public`,
+            '_blank',
+        );
+    },
+};
+
+const copyLinkAction: ActionItem = {
+    label: 'Copy Secure Link',
+    icon: LinkIcon,
+    handler: () => {
+        const url = `${window.location.origin}/proposals/${props.proposal.token}/public`;
+        navigator.clipboard
+            .writeText(url)
+            .then(() => {
+                toast.success('Secure link copied to clipboard');
+            })
+            .catch(() => {
+                toast.error('Failed to copy link');
+            });
+    },
+};
+
+const sendAction: ActionItem = {
+    label: 'Send Proposal',
+    icon: Send,
+    primary: true,
+    handler: () => {
+        router.post(`/proposals/${props.proposal.id}/send`);
+    },
+};
+
+const resendAction: ActionItem = {
+    label: 'Resend Notification',
+    icon: Send,
+    handler: () => {
+        router.post(`/proposals/${props.proposal.id}/send`);
+    },
+};
+
+const markAcceptedAction: ActionItem = {
+    label: 'Mark as Accepted',
+    icon: CheckCircle2,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Mark as Accepted',
+                description:
+                    'This will mark the proposal as accepted and may trigger project creation.',
+                confirmText: 'Accept',
+                cancelText: 'Cancel',
+            })
+        ) {
+            router.post(ProposalController.accept(props.proposal.id).url);
+        }
+    },
+};
+
+const markDeclinedAction: ActionItem = {
+    label: 'Mark as Declined',
+    icon: XCircle,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Mark as Declined',
+                description:
+                    'Are you sure you want to mark this proposal as declined?',
+                confirmText: 'Decline',
+                cancelText: 'Cancel',
+                variant: 'destructive',
+            })
+        ) {
+            router.post(ProposalController.decline(props.proposal.id).url);
+        }
+    },
+};
+
+const revertToDraftAction: ActionItem = {
+    label: 'Revert to Draft',
+    icon: Undo2,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Revert to Draft',
+                description:
+                    'This will revert the proposal to draft status. The client will no longer be able to view it.',
+                confirmText: 'Revert',
+                cancelText: 'Cancel',
+            })
+        ) {
+
+            const draftStatusId = draftStatus.value?.id;
+
+            if (draftStatusId) {
+                router.patch(`/proposals/${props.proposal.id}/move`, {
+                    target_status_id: draftStatusId,
+                });
+            }
+        }
+    },
+};
+
+const duplicateToDraftAction: ActionItem = {
+    label: 'Duplicate to Draft',
+    icon: Copy,
+    handler: async () => {
+        const { confirm } = await import('@/composables/useConfirmation');
+
+        if (
+            await confirm({
+                title: 'Duplicate to Draft',
+                description:
+                    'This will create a copy of this proposal as a new draft.',
+                confirmText: 'Duplicate',
+                cancelText: 'Cancel',
+            })
+        ) {
+            router.post(`/proposals/${props.proposal.id}/duplicate`);
+        }
     },
 };
 
@@ -106,7 +255,54 @@ const deleteAction: ActionItem = {
 };
 
 const allActions = computed((): ActionItem[] => {
-    return [viewAction, editAction, deleteAction];
+    switch (status.value) {
+        case 'draft':
+            return [
+                viewAction,
+                editAction,
+                clientViewAction,
+                sendAction,
+                markAcceptedAction,
+                markDeclinedAction,
+                deleteAction,
+            ];
+        case 'sent':
+            return [
+                viewAction,
+                clientViewAction,
+                copyLinkAction,
+                resendAction,
+                markAcceptedAction,
+                markDeclinedAction,
+                revertToDraftAction,
+            ];
+        case 'accepted':
+            return [
+                viewAction,
+                clientViewAction,
+                copyLinkAction,
+                duplicateToDraftAction,
+            ];
+        case 'declined':
+            return [
+                viewAction,
+                clientViewAction,
+                copyLinkAction,
+                duplicateToDraftAction,
+                deleteAction,
+            ];
+        case 'expired':
+            return [
+                viewAction,
+                clientViewAction,
+                copyLinkAction,
+                duplicateToDraftAction,
+                revertToDraftAction,
+                deleteAction,
+            ];
+        default:
+            return [viewAction, editAction, deleteAction];
+    }
 });
 
 const dropdownActions = computed((): ActionItem[] => {
@@ -160,8 +356,8 @@ const splitDropdownItems = computed((): ActionItem[] => {
         <DropdownMenu>
             <DropdownMenuTrigger as-child>
                 <Button
-                    :size="size === 'icon' ? 'sm' : size"
                     variant="outline"
+                    :size="size === 'icon' ? 'sm' : size"
                     :class="[
                         sizeClasses.iconButton,
                         primaryAction ? 'rounded-l-none px-2' : '',
@@ -169,14 +365,10 @@ const splitDropdownItems = computed((): ActionItem[] => {
                     @mousedown.stop
                     @mouseup.stop
                 >
-                    <ChevronDown
-                        v-if="primaryAction"
-                        :class="sizeClasses.iconSize"
-                    />
-                    <MoreHorizontal v-else :class="sizeClasses.iconSize" />
+                    <ChevronDown :class="sizeClasses.iconSize" />
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" class="w-56">
                 <template
                     v-for="(item, idx) in splitDropdownItems"
                     :key="item.label"
@@ -202,22 +394,19 @@ const splitDropdownItems = computed((): ActionItem[] => {
         </DropdownMenu>
     </div>
 
-    <!-- Dropdown variant -->
     <DropdownMenu v-else>
         <DropdownMenuTrigger as-child>
             <Button
-                :size="size === 'icon' ? 'sm' : size"
                 variant="ghost"
-                :class="size === 'icon' ? 'h-8 w-8 p-0' : ''"
+                :class="sizeClasses.iconButton"
+                size="icon"
                 @mousedown.stop
                 @mouseup.stop
-                @click.stop
             >
                 <MoreHorizontal :class="sizeClasses.iconSize" />
-                <span v-if="size !== 'icon'" class="ml-2">Actions</span>
             </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" class="w-56">
             <template v-for="(item, idx) in dropdownActions" :key="item.label">
                 <DropdownMenuSeparator
                     v-if="

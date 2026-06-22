@@ -11,6 +11,7 @@ import { useDateFormat } from '@/composables/useDateFormat';
 import { dashboard } from '@/routes';
 import projects from '@/routes/projects';
 import type { Project } from '@/types/models/project';
+import type { ProjectStatus } from '@/types/models/project_status';
 import type { TaskStatus } from '@/types/models/task_status';
 import { createColumns as createTaskColumns } from '../tasks/datatable/columns';
 import TaskDataTable from '../tasks/datatable/data-table.vue';
@@ -19,8 +20,9 @@ import ProjectActions from './components/ProjectActions.vue';
 
 const { formatDate } = useDateFormat();
 
-const { project, task_statuses, activities } = defineProps<{
+const { project, project_statuses, task_statuses, activities } = defineProps<{
     project: Project;
+    project_statuses: ProjectStatus[];
     task_statuses: TaskStatus[];
     activities: {
         id: number;
@@ -95,7 +97,7 @@ setLayoutProps({
                         >
                     </h1>
                 </div>
-                <ProjectActions :project="project" variant="split" size="sm" />
+                <ProjectActions :project="project" :project_statuses="project_statuses" variant="split" size="sm" />
             </div>
         </div>
 
