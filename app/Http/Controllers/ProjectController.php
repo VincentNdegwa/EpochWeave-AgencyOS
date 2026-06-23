@@ -25,15 +25,9 @@ class ProjectController extends Controller
         $filters = $request->only(['status', 'search']);
         $projects = $this->projectService->listProjects($workspace->id, $filters);
 
-        // Get statuses for filter dropdown
         $projectStatuses = ProjectStatus::where('workspace_id', $workspace->id)
             ->orderBy('position')
-            ->get()
-            ->map(fn ($status) => [
-                'value' => $status->automation_trigger ?? $status->id,
-                'label' => $status->title,
-                'color' => $status->color,
-            ]);
+            ->get();
 
         return Inertia::render('projects/index', [
             'projects' => $projects,

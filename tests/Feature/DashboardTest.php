@@ -76,7 +76,11 @@ class DashboardTest extends TestCase
             ->get(route('dashboard'));
 
         $response->assertInertia(fn ($page) => $page
-            ->has('stats')
+            ->has('kpiData')
+            ->has('proposalFunnel')
+            ->has('arAging')
+            ->has('activeProjects')
+            ->has('topAccounts')
             ->has('recentActivity')
             ->has('upcomingDeadlines')
             ->has('revenueChart')

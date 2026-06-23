@@ -136,6 +136,7 @@ watch(
                           })
                         : ProposalController.store.form()) as any
                 "
+                :options="{ preserveScroll: true, preserveState: true }"
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-6 py-4">

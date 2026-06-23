@@ -121,6 +121,7 @@ watch(
                                     class="flex-1"
                                 />
                             </div>
+                            <InputError :message="errors.color" />
                         </div>
                     </div>
                 </div>

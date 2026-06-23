@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { Link, router } from '@inertiajs/vue3';
 import {
+    CheckCircle2,
     ChevronDown,
+    ClipboardCheck,
     Edit,
     Link as LinkIcon,
     MoreHorizontal,
+    Play,
+    RefreshCw,
     Trash2,
+    XCircle,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import TaskController from '@/actions/App/Http/Controllers/TaskController';
@@ -73,6 +78,31 @@ const sizeClasses = computed(() => {
     }
 });
 
+const currentTrigger = computed(() => {
+    const found = props.taskStatuses.find(
+        (s) => s.id === props.task.task_status_id,
+    );
+
+    return found?.automation_trigger ?? 'unstarted';
+});
+
+const getStatusId = (trigger: string): number | undefined =>
+    props.taskStatuses.find((s) => s.automation_trigger === trigger)?.id;
+
+const transitionTo = (trigger: string) => {
+    const statusId = getStatusId(trigger);
+
+    if (!statusId) {
+        return;
+    }
+
+    router.patch(
+        TaskController.updateStatus(props.task.id).url,
+        { task_status_id: statusId },
+        { preserveScroll: true },
+    );
+};
+
 const viewAction: ActionItem = {
     label: 'View',
     icon: LinkIcon,
@@ -87,6 +117,40 @@ const editAction: ActionItem = {
     handler: () => {
         isEditDialogOpen.value = true;
     },
+};
+
+const startWorkAction: ActionItem = {
+    label: 'Start Work',
+    icon: Play,
+    primary: true,
+    handler: () => transitionTo('active'),
+};
+
+const submitForReviewAction: ActionItem = {
+    label: 'Submit for Review',
+    icon: ClipboardCheck,
+    primary: true,
+    handler: () => transitionTo('review'),
+};
+
+const approveAction: ActionItem = {
+    label: 'Approve & Complete',
+    icon: CheckCircle2,
+    primary: true,
+    handler: () => transitionTo('completed'),
+};
+
+const sendBackAction: ActionItem = {
+    label: 'Send Back for Edits',
+    icon: RefreshCw,
+    handler: () => transitionTo('active'),
+};
+
+const cancelAction: ActionItem = {
+    label: 'Cancel Task',
+    icon: XCircle,
+    destructive: true,
+    handler: () => transitionTo('cancelled'),
 };
 
 const deleteAction: ActionItem = {
@@ -112,7 +176,38 @@ const deleteAction: ActionItem = {
 };
 
 const allActions = computed((): ActionItem[] => {
-    return [viewAction, editAction, deleteAction];
+    switch (currentTrigger.value) {
+        case 'backlog':
+        case 'unstarted':
+            return [
+                viewAction,
+                startWorkAction,
+                editAction,
+                deleteAction,
+            ];
+        case 'active':
+            return [
+                viewAction,
+                submitForReviewAction,
+                editAction,
+                cancelAction,
+                deleteAction,
+            ];
+        case 'review':
+            return [
+                viewAction,
+                approveAction,
+                sendBackAction,
+                editAction,
+                cancelAction,
+                deleteAction,
+            ];
+        case 'completed':
+        case 'cancelled':
+            return [viewAction, editAction, deleteAction];
+        default:
+            return [viewAction, editAction, deleteAction];
+    }
 });
 
 const dropdownActions = computed((): ActionItem[] => {

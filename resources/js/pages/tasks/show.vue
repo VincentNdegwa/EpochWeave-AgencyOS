@@ -4,17 +4,19 @@ import { ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import { Badge } from '@/components/ui/badge';
 import { StatBar } from '@/components/ui/stat-bar';
+import { useDateFormat } from '@/composables/useDateFormat';
 import { useTaskPriorities } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import tasks from '@/routes/tasks';
 import type { Task } from '@/types/models/task';
+import type { TaskStatus } from '@/types/models/task_status';
 import AttachmentList from './components/AttachmentList.vue';
 import CommentThread from './components/CommentThread.vue';
 import SubtaskList from './components/SubtaskList.vue';
 import TaskActions from './components/TaskActions.vue';
 import TimeEntriesPanel from './components/TimeEntriesPanel.vue';
 
-const { task, activities } = defineProps<{
+const { task, activities, task_statuses } = defineProps<{
     task: Task;
     activities: {
         id: number;
@@ -23,7 +25,9 @@ const { task, activities } = defineProps<{
         created_at: string;
         user?: { id: number; name: string } | null;
     }[];
+    task_statuses: TaskStatus[];
 }>();
+const { formatDate } = useDateFormat();
 const taskPriorities = useTaskPriorities();
 const priority = taskPriorities.getByValue(task.priority);
 
@@ -85,7 +89,7 @@ setLayoutProps({
                         >
                     </h1>
                 </div>
-                <TaskActions :task="task" variant="split" size="sm" />
+                <TaskActions :task="task" :task-statuses="task_statuses" variant="split" size="sm" />
             </div>
         </div>
 
@@ -100,7 +104,7 @@ setLayoutProps({
                     label: 'Assignee',
                     value: task.assignee?.name || 'Unassigned',
                 },
-                { label: 'Due Date', value: task.due_date || '—' },
+                { label: 'Due Date', value: formatDate(task.due_date) },
                 {
                     label: 'Estimated',
                     value: task.estimated_hours
@@ -275,7 +279,7 @@ setLayoutProps({
                     <TimeEntriesPanel
                         :task-id="task.id"
                         :project-id="task.project_id"
-                        :time-entries="task.timeEntries || []"
+                        :time-entries="task.time_entries || []"
                     />
                 </div>
             </div>

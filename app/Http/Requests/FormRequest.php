@@ -17,7 +17,7 @@ class FormRequest extends BaseFormRequest
                 'message' => $validator->errors()->first() ?: __('Please fix the highlighted errors and try again.'),
             ]);
 
-            throw new HttpResponseException(back()->withInput($this->input()));
+            throw new HttpResponseException(back()->withInput($this->input())->withErrors($validator));
         }
 
         if ($this->expectsJson() || $this->ajax() || $this->wantsJson()) {

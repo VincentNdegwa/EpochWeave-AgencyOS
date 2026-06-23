@@ -118,7 +118,7 @@ class DashboardService
                 'account' => $i->account?->company_name,
             ]);
 
-        return $proposals
+        return collect($proposals)
             ->merge($tasks)
             ->merge($invoices)
             ->sortBy('date')

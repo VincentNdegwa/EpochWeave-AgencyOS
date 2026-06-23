@@ -291,13 +291,14 @@ const handleSuccess = async (): Promise<void> => {
                             </p>
                         </div>
 
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-col items-end gap-1">
                             <input
                                 type="hidden"
                                 name="white_label"
                                 :value="whiteLabel ? '1' : '0'"
                             />
                             <Switch id="white_label" v-model="whiteLabel" />
+                            <InputError :message="errors.white_label" />
                         </div>
                     </div>
                 </div>

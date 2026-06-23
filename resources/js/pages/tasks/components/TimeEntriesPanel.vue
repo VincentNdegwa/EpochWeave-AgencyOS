@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Clock, Play, Square, Trash2 } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import {
+    Clock,
+    Pause,
+    Trash2,
+} from '@lucide/vue';
+import { computed, onUnmounted, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import type { TimeEntry } from '@/types/models/time_entry';
 
 const props = defineProps<{
@@ -14,51 +15,74 @@ const props = defineProps<{
     timeEntries: TimeEntry[];
 }>();
 
-const isRunning = ref(false);
-const elapsedSeconds = ref(0);
+const now = ref(new Date());
 const timerInterval = ref<ReturnType<typeof setInterval> | null>(null);
-const description = ref('');
-const hourlyRate = ref('');
-const isBillable = ref(true);
 
-const startTimer = () => {
-    isRunning.value = true;
+const runningEntry = computed(() => {
+    return props.timeEntries.find((e) => e.ended_at === null) ?? null;
+});
+
+const runningSeconds = computed(() => {
+    if (!runningEntry.value) {
+        return 0;
+    }
+
+    return Math.floor(
+        (now.value.getTime() - new Date(runningEntry.value.started_at).getTime()) / 1000,
+    );
+});
+
+const closedEntries = computed(() => {
+    return props.timeEntries
+        .filter((e) => e.ended_at !== null)
+        .sort(
+            (a, b) =>
+                new Date(b.started_at).getTime() -
+                new Date(a.started_at).getTime(),
+        );
+});
+
+const totalSeconds = computed(() => {
+    const closed = closedEntries.value.reduce(
+        (sum, e) => sum + e.duration_seconds,
+        0,
+    );
+
+    return closed + runningSeconds.value;
+});
+
+const startLiveTimer = () => {
+    if (timerInterval.value) {
+        return;
+    }
+
     timerInterval.value = setInterval(() => {
-        elapsedSeconds.value++;
+        now.value = new Date();
     }, 1000);
 };
 
-const stopTimer = () => {
+const stopLiveTimer = () => {
     if (timerInterval.value) {
         clearInterval(timerInterval.value);
         timerInterval.value = null;
     }
-
-    isRunning.value = false;
-
-    const startedAt = new Date(Date.now() - elapsedSeconds.value * 1000);
-    const endedAt = new Date();
-
-    router.post(
-        `/tasks/${props.taskId}/time-entries`,
-        {
-            project_id: props.projectId,
-            description: description.value || null,
-            started_at: startedAt.toISOString(),
-            ended_at: endedAt.toISOString(),
-            is_billable: isBillable.value,
-            hourly_rate: hourlyRate.value ? parseFloat(hourlyRate.value) : null,
-            date: endedAt.toISOString().split('T')[0],
-        },
-        {
-            preserveScroll: true,
-            onFinish: () => {
-                elapsedSeconds.value = 0;
-                description.value = '';
-            },
-        },
-    );
 };
+
+watch(
+    runningEntry,
+    (entry) => {
+        if (entry) {
+            startLiveTimer();
+        } else {
+            stopLiveTimer();
+        }
+    },
+    { immediate: true },
+);
+
+onUnmounted(() => {
+    stopLiveTimer();
+});
 
 const deleteTimeEntry = (entryId: number) => {
     router.delete(`/tasks/${props.taskId}/time-entries/${entryId}`, {
@@ -74,109 +98,90 @@ const formatDuration = (seconds: number): string => {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 };
 
-const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString();
+const formatDateTime = (dateString: string): string => {
+    const d = new Date(dateString);
+
+    return d.toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
 };
-
-const totalHours = computed(() => {
-    const totalSeconds = props.timeEntries.reduce(
-        (sum, entry) => sum + entry.duration_seconds,
-        0,
-    );
-
-    return (totalSeconds / 3600).toFixed(2);
-});
 </script>
 
 <template>
     <div class="space-y-4">
+        <!-- Header -->
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <Clock class="h-4 w-4 text-muted-foreground" />
                 <h3 class="text-sm font-semibold">Time Entries</h3>
-                <span class="text-xs text-muted-foreground"
-                    >({{ timeEntries.length }})</span
+                <span class="text-xs text-muted-foreground">
+                    ({{ timeEntries.length }})
+                </span>
+            </div>
+            <span class="text-sm font-medium text-muted-foreground">
+                Total {{ formatDuration(totalSeconds) }}
+            </span>
+        </div>
+
+        <!-- Running timer banner -->
+        <div
+            v-if="runningEntry"
+            class="flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-900/50 dark:bg-blue-950/20"
+        >
+            <div class="flex items-center gap-3">
+                <span
+                    class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40"
                 >
-            </div>
-            <span class="text-sm text-muted-foreground"
-                >Total: {{ totalHours }}h</span
-            >
-        </div>
-
-        <div class="rounded-lg border p-4">
-            <div class="flex items-center gap-4">
-                <div class="flex-1 space-y-2">
-                    <Textarea
-                        v-model="description"
-                        placeholder="What are you working on?"
-                        rows="2"
-                    />
-                    <div class="flex items-center gap-3">
-                        <Label class="flex items-center gap-1.5 text-sm">
-                            <Input
-                                type="checkbox"
-                                :checked="isBillable"
-                                class="h-4 w-4"
-                                @change="
-                                    isBillable = (
-                                        $event.target as HTMLInputElement
-                                    ).checked
-                                "
-                            />
-                            Billable
-                        </Label>
-                        <Input
-                            v-model="hourlyRate"
-                            type="number"
-                            placeholder="Hourly rate"
-                            class="w-32"
-                        />
-                    </div>
-                </div>
-                <div class="flex flex-col items-center gap-2">
-                    <span class="font-mono text-2xl font-semibold">{{
-                        formatDuration(elapsedSeconds)
-                    }}</span>
-                    <Button
-                        v-if="!isRunning"
-                        size="sm"
-                        class="gap-1"
-                        @click="startTimer"
-                    >
-                        <Play class="h-4 w-4" />
-                        Start
-                    </Button>
-                    <Button
-                        v-else
-                        size="sm"
-                        variant="destructive"
-                        class="gap-1"
-                        @click="stopTimer"
-                    >
-                        <Square class="h-4 w-4" />
-                        Stop
-                    </Button>
+                    <Pause class="h-4 w-4 animate-pulse text-blue-600 dark:text-blue-400" />
+                </span>
+                <div>
+                    <p class="text-sm font-semibold text-foreground">
+                        Tracking active
+                    </p>
+                    <p class="text-xs text-muted-foreground">
+                        Started {{ formatDateTime(runningEntry.started_at) }}
+                        <span v-if="runningEntry.user">
+                            &middot; {{ runningEntry.user.name }}
+                        </span>
+                    </p>
                 </div>
             </div>
+            <span class="font-mono text-xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
+                {{ formatDuration(runningSeconds) }}
+            </span>
         </div>
 
+        <!-- Closed entries list -->
         <div class="space-y-2">
             <div
-                v-for="entry in timeEntries"
+                v-for="entry in closedEntries"
                 :key="entry.id"
                 class="flex items-center justify-between rounded-lg border p-3"
             >
                 <div class="min-w-0">
                     <p class="text-sm font-medium">
-                        {{ entry.description || 'No description' }}
+                        {{ entry.description || 'Auto-logged work session' }}
                     </p>
                     <p class="text-xs text-muted-foreground">
-                        {{ formatDate(entry.date) }} &middot;
-                        {{ formatDuration(entry.duration_seconds) }}
-                        <span v-if="entry.is_billable">&middot; Billable</span>
-                        <span v-if="entry.user"
-                            >&middot; {{ entry.user.name }}</span
-                        >
+                        {{ formatDateTime(entry.started_at) }}
+                        &mdash;
+                        {{ formatDateTime(entry.ended_at!) }}
+                        &middot;
+                        <span class="font-medium tabular-nums text-foreground">
+                            {{ formatDuration(entry.duration_seconds) }}
+                        </span>
+                        <span v-if="entry.is_billable" class="text-emerald-600">
+                            &middot; Billable
+                        </span>
+                        <span v-if="entry.hourly_rate">
+                            &middot; ${{ entry.hourly_rate }}/h
+                        </span>
+                        <span v-if="entry.user">
+                            &middot; {{ entry.user.name }}
+                        </span>
                     </p>
                 </div>
                 <Button
@@ -189,8 +194,12 @@ const totalHours = computed(() => {
                 </Button>
             </div>
 
-            <p v-if="!timeEntries.length" class="text-sm text-muted-foreground">
-                No time entries yet.
+            <p
+                v-if="!timeEntries.length"
+                class="py-8 text-center text-sm text-muted-foreground"
+            >
+                No time entries yet. Time is tracked automatically when you
+                move a task to "In Progress".
             </p>
         </div>
     </div>

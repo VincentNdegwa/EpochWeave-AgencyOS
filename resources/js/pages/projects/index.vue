@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import { dashboard } from '@/routes';
 import type { Project } from '@/types/models/project';
+import type { ProjectStatus } from '@/types/models/project_status';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
 import ProjectFormDialog from './dialogs/ProjectFormDialog.vue';
 
 const { projects, project_statuses, filters } = defineProps<{
     projects: Project[];
-    project_statuses: any[];
+    project_statuses: ProjectStatus[];
     filters?: {
         status?: string;
         search?: string;
@@ -27,9 +28,9 @@ const columns = createColumns(project_statuses);
 
 const statusTabs = computed(() => [
     { value: 'all', label: 'All' },
-    ...project_statuses.map((status: any) => ({
-        value: String(status.value),
-        label: status.label,
+    ...project_statuses.map((status) => ({
+        value: String(status.id),
+        label: status.title,
     })),
 ]);
 

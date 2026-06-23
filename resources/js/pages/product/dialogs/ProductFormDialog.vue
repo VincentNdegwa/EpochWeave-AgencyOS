@@ -126,6 +126,7 @@ watch(
                         ? ProductController.update.form({ product: product.id })
                         : ProductController.store.form()) as any
                 "
+                :options="{ preserveScroll: true, preserveState: true }"
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-6 py-4">
@@ -337,6 +338,7 @@ watch(
                                 :value="form.is_active ? '1' : '0'"
                             />
                             <Switch id="is_active" v-model="form.is_active" />
+                            <InputError :message="errors.is_active" />
                         </div>
                     </div>
                 </div>

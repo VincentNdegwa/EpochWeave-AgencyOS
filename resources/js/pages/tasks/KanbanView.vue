@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Calendar, Clock, DollarSign, Hash } from '@lucide/vue';
 import { ref, computed, watch } from 'vue';
-import { useDateFormat } from '@/composables/useDateFormat';
-import { getInitials } from '@/composables/useInitials';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
-import TaskActions from './components/TaskActions.vue';
+import TaskCard from './components/TaskCard.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -17,8 +14,6 @@ const props = withDefaults(
         task_statuses: () => [],
     },
 );
-
-const { formatDate } = useDateFormat();
 
 const localTasks = ref<Task[]>([...props.tasks]);
 
@@ -167,14 +162,12 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                 class="flex flex-1 flex-col gap-2 overflow-y-auto px-2 pb-3"
                 style="max-height: 72vh; min-height: 120px"
             >
-                <div
+                <TaskCard
                     v-for="task in col.tasks"
                     :key="task.id"
-                    class="group relative rounded-lg border bg-background p-3 shadow-sm transition-all select-none"
-                    :class="[
-                        'cursor-grab hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing',
-                        dragging?.id === task.id ? 'scale-95 opacity-40' : '',
-                    ]"
+                    :task="task"
+                    :task-statuses="props.task_statuses"
+                    :is-dragging="dragging?.id === task.id"
                     draggable="true"
                     @mouseenter="hoveredTaskId = task.id"
                     @mouseleave="hoveredTaskId = null"
@@ -182,110 +175,7 @@ function onDrop(e: DragEvent, targetStatusId: number) {
                     @dragend="onDragEnd"
                     @mousedown="onTaskMouseDown(task)"
                     @mouseup="onTaskMouseUp(task)"
-                >
-                    <div class="mb-1.5 flex items-start justify-between gap-1">
-                        <span
-                            v-if="task.project"
-                            class="flex items-center gap-1 truncate text-[11px] font-medium text-muted-foreground"
-                        >
-                            <span
-                                class="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
-                                :style="{
-                                    backgroundColor:
-                                        task.project.color || '#94a3b8',
-                                }"
-                            />
-                            {{ task.project.name }}
-                        </span>
-                        <TaskActions
-                            :task="task"
-                            :task-statuses="props.task_statuses"
-                            variant="dropdown"
-                            size="icon"
-                        />
-                    </div>
-
-                    <!-- Title -->
-                    <p class="text-sm leading-snug font-medium text-foreground">
-                        {{ task.title }}
-                    </p>
-
-                    <!-- Tags -->
-                    <div
-                        v-if="task.tags?.length"
-                        class="mt-2 flex flex-wrap gap-1"
-                    >
-                        <span
-                            v-for="tag in task.tags"
-                            :key="tag.id"
-                            class="inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium"
-                            :style="{
-                                backgroundColor: tag.color
-                                    ? tag.color + '26'
-                                    : '#f1f5f9',
-                                color: tag.color || '#475569',
-                            }"
-                        >
-                            <Hash class="h-2.5 w-2.5" />
-                            {{ tag.name }}
-                        </span>
-                    </div>
-
-                    <!-- Footer: Assignee | Due Date | Est Hours -->
-                    <div class="mt-2.5 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-1.5">
-                            <!-- Assignee Avatar -->
-                            <span
-                                v-if="task.assignee"
-                                class="flex h-5 w-5 items-center justify-center rounded-full bg-muted text-[9px] font-semibold text-muted-foreground ring-1 ring-border"
-                                :title="task.assignee.name"
-                            >
-                                {{ getInitials(task.assignee.name) }}
-                            </span>
-                            <span
-                                v-else
-                                class="flex h-5 w-5 items-center justify-center rounded-full bg-muted/50 text-[9px] text-muted-foreground ring-1 ring-border"
-                                title="Unassigned"
-                            >
-                                —
-                            </span>
-                        </div>
-
-                        <div
-                            class="flex items-center gap-2.5 text-[10px] text-muted-foreground"
-                        >
-                            <!-- Due Date -->
-                            <span
-                                v-if="task.due_date"
-                                class="flex items-center gap-0.5"
-                                :class="{
-                                    'font-medium text-orange-500':
-                                        new Date(task.due_date) < new Date(),
-                                }"
-                            >
-                                <Calendar class="h-3 w-3" />
-                                {{ formatDate(task.due_date) }}
-                            </span>
-
-                            <!-- Estimated Hours -->
-                            <span
-                                v-if="task.estimated_hours"
-                                class="flex items-center gap-0.5"
-                            >
-                                <Clock class="h-3 w-3" />
-                                {{ task.estimated_hours }}h
-                            </span>
-
-                            <!-- Billable -->
-                            <span
-                                v-if="task.is_billable"
-                                class="flex items-center gap-0.5 text-emerald-600"
-                            >
-                                <DollarSign class="h-3 w-3" />
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                />
 
                 <div
                     v-if="col.tasks.length === 0"

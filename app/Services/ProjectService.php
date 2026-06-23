@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Project;
 use App\Models\ProjectMember;
 use App\Models\ProjectStatus;
-use App\Services\ActivityService;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -22,9 +21,13 @@ class ProjectService
             ->where('workspace_id', $workspaceId);
 
         if (! empty($filters['status'])) {
-            // Filter by status automation trigger via relationship
-            $query->whereHas('status', function ($q) use ($filters) {
-                $q->where('automation_trigger', $filters['status']);
+            $statusValue = $filters['status'];
+            $query->whereHas('status', function ($q) use ($statusValue) {
+                if (is_numeric($statusValue)) {
+                    $q->where('id', $statusValue);
+                } else {
+                    $q->where('automation_trigger', $statusValue);
+                }
             });
         }
 

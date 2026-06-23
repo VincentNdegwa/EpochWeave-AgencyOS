@@ -232,6 +232,7 @@ watch(
                                 v-model="form.start_date"
                                 type="date"
                             />
+                            <InputError :message="errors.start_date" />
                         </div>
 
                         <div class="grid gap-2">
@@ -242,6 +243,7 @@ watch(
                                 v-model="form.due_date"
                                 type="date"
                             />
+                            <InputError :message="errors.due_date" />
                         </div>
 
                         <div class="grid gap-2 sm:col-span-2">
@@ -253,17 +255,20 @@ watch(
                                 placeholder="Enter project description..."
                                 rows="3"
                             />
+                            <InputError :message="errors.description" />
                         </div>
 
                         <div class="flex items-center gap-2 sm:col-span-2">
                             <Checkbox
                                 id="project-portal"
                                 name="portal_visible"
-                                v-model:checked="form.portal_visible"
+                                v-model="form.portal_visible"
+                                value="1"
                             />
                             <Label for="project-portal" class="font-normal">
                                 Visible in client portal
                             </Label>
+                            <InputError :message="errors.portal_visible" />
                         </div>
                     </div>
                 </div>

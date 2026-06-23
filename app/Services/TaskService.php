@@ -6,8 +6,9 @@ use App\Models\Project;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\TaskStatus;
-use App\Services\ActivityService;
+use App\Models\TimeEntry;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
@@ -57,12 +58,13 @@ class TaskService
         try {
             return DB::transaction(function () use ($task, $data) {
                 $project = $task->project;
+                $oldStatus = $task->status;
 
                 if (isset($data['task_status_id'])) {
                     $status = $this->getStatusForProject($project, (int) $data['task_status_id']);
                     $data['task_status_id'] = $status->id;
                 } else {
-                    $status = $task->status;
+                    $status = $oldStatus;
                 }
 
                 $task->update($data);
@@ -74,6 +76,10 @@ class TaskService
 
                 if (isset($status)) {
                     $this->updateCompletionState($task, $status);
+                }
+
+                if (isset($oldStatus) && isset($status) && $oldStatus->id !== $status->id) {
+                    $this->handleTimeTracking($task, $oldStatus, $status);
                 }
 
                 $this->updateProjectCounters($project);
@@ -152,5 +158,81 @@ class TaskService
     private function nextPosition(Project $project): int
     {
         return (int) ($project->tasks()->max('position') ?? 0) + 1;
+    }
+
+    private function handleTimeTracking(Task $task, TaskStatus $oldStatus, TaskStatus $newStatus): void
+    {
+        $userId = Auth::id();
+
+        if (! $userId) {
+            return;
+        }
+
+        $movingIntoActive = $newStatus->automation_trigger === 'active' && $oldStatus->automation_trigger !== 'active';
+        $movingOutOfActive = $oldStatus->automation_trigger === 'active' && $newStatus->automation_trigger !== 'active';
+
+        if ($movingIntoActive) {
+            $this->sealOrphanedTimers($userId);
+            $this->startTimeEntry($task, $userId);
+        }
+
+        if ($movingOutOfActive) {
+            $this->sealTaskTimer($task, $userId, $newStatus);
+        }
+    }
+
+    private function sealOrphanedTimers(int $userId): void
+    {
+        TimeEntry::where('user_id', $userId)
+            ->whereNull('ended_at')
+            ->each(function (TimeEntry $entry) {
+                $this->sealTimeEntry($entry, 'System closed: User shifted focus to a separate assignment.');
+            });
+    }
+
+    private function startTimeEntry(Task $task, int $userId): void
+    {
+        $rate = $task->is_billable && $task->project->hourly_rate
+            ? $task->project->hourly_rate
+            : 0.00;
+
+        TimeEntry::create([
+            'workspace_id' => $task->workspace_id,
+            'project_id' => $task->project_id,
+            'task_id' => $task->id,
+            'user_id' => $userId,
+            'started_at' => now(),
+            'date' => now()->toDateString(),
+            'is_billable' => $task->is_billable,
+            'hourly_rate' => $rate,
+        ]);
+    }
+
+    private function sealTaskTimer(Task $task, int $userId, TaskStatus $targetStatus): void
+    {
+        $runningTimer = TimeEntry::where('task_id', $task->id)
+            ->where('user_id', $userId)
+            ->whereNull('ended_at')
+            ->first();
+
+        if (! $runningTimer) {
+            return;
+        }
+
+        $note = $targetStatus->automation_trigger === 'completed'
+            ? 'Work completed via dashboard execution pipeline.'
+            : 'System logged: Task returned to pending status.';
+
+        $this->sealTimeEntry($runningTimer, $note);
+    }
+
+    private function sealTimeEntry(TimeEntry $entry, string $systemNote): void
+    {
+        $endedAt = now();
+        $entry->update([
+            'ended_at' => $endedAt,
+            'duration_seconds' => $entry->started_at->diffInSeconds($endedAt),
+            'description' => $entry->description ?? $systemNote,
+        ]);
     }
 }

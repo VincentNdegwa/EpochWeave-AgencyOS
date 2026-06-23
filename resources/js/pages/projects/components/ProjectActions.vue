@@ -74,9 +74,13 @@ const sizeClasses = computed(() => {
     }
 });
 
-const status = computed(
-    () => props.project.status?.automation_trigger ?? 'planning',
-);
+const status = computed(() => {
+    const found = props.project_statuses.find(
+        (s) => s.id === props.project.project_status_id,
+    );
+
+    return found?.automation_trigger ?? 'planning';
+});
 
 const getStatusId = (trigger: string): number | undefined =>
     props.project_statuses.find((s) => s.automation_trigger === trigger)?.id;

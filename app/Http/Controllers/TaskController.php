@@ -56,7 +56,7 @@ class TaskController extends Controller
         $taskStatuses = TaskStatus::query()
             ->where('workspace_id', $workspace->id)
             ->orderBy('position')
-            ->get(['id', 'title', 'color']);
+            ->get(['id', 'title', 'color', 'automation_trigger']);
 
         $tags = Tag::query()
             ->where('workspace_id', $workspace->id)
@@ -132,9 +132,14 @@ class TaskController extends Controller
             ->limit(20)
             ->get();
 
+        $taskStatuses = TaskStatus::where('workspace_id', $workspace->id)
+            ->orderBy('position')
+            ->get();
+
         return Inertia::render('tasks/show', [
             'task' => $task,
             'activities' => $activities,
+            'task_statuses' => $taskStatuses,
         ]);
     }
 

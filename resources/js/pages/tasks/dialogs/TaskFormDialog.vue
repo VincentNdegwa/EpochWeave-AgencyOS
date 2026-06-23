@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form } from '@inertiajs/vue3';
+import { Form, usePage } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import TaskController from '@/actions/App/Http/Controllers/TaskController';
@@ -55,9 +55,12 @@ const emit = defineEmits<{
 }>();
 
 const builderData = useBuilderDataStore();
-const { projects, projectsLoaded } = storeToRefs(builderData);
+const { projects, projectsLoaded, users, usersLoaded } = storeToRefs(builderData);
 const taskStatuses = computed(() => props.task_statuses || []);
 const taskPriorities = useTaskPriorities();
+
+const page = usePage();
+const currentUser = computed(() => page.props.auth?.user as { id: number; name: string } | undefined);
 
 function toggleTag(tagId: number) {
     const idStr = tagId.toString();
@@ -80,6 +83,10 @@ watch(
         if (isOpen && !projectsLoaded.value) {
             builderData.fetchProjects();
         }
+
+        if (isOpen && !usersLoaded.value) {
+            builderData.fetchUsers();
+        }
     },
 );
 
@@ -88,7 +95,7 @@ const form = ref({
     task_status_id: props.task?.task_status_id?.toString() || '',
     title: props.task?.title || '',
     description: props.task?.description || '',
-    assignee_id: props.task?.assignee_id?.toString() || '',
+    assignee_id: props.task?.assignee_id?.toString() || 'none',
     priority: props.task?.priority || 'medium',
     due_date: props.task?.due_date || '',
     estimated_hours: props.task?.estimated_hours?.toString() || '',
@@ -105,7 +112,7 @@ watch(
                 task_status_id: t.task_status_id?.toString() || '',
                 title: t.title,
                 description: t.description || '',
-                assignee_id: t.assignee_id?.toString() || '',
+                assignee_id: t.assignee_id?.toString() || 'none',
                 priority: t.priority,
                 due_date: t.due_date || '',
                 estimated_hours: t.estimated_hours?.toString() || '',
@@ -118,7 +125,7 @@ watch(
                 task_status_id: '',
                 title: '',
                 description: '',
-                assignee_id: '',
+                assignee_id: 'none',
                 priority: 'medium',
                 due_date: '',
                 estimated_hours: '',
@@ -138,7 +145,7 @@ watch(
                 task_status_id: '',
                 title: '',
                 description: '',
-                assignee_id: '',
+                assignee_id: currentUser.value?.id?.toString() || 'none',
                 priority: 'medium',
                 due_date: '',
                 estimated_hours: '',
@@ -237,6 +244,33 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
+                            <Label for="task-assignee">Assignee</Label>
+                            <Select v-model="form.assignee_id">
+                                <SelectTrigger class="w-full">
+                                    <SelectValue placeholder="Unassigned" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">
+                                        Unassigned
+                                    </SelectItem>
+                                    <SelectItem
+                                        v-for="user in users"
+                                        :key="user.id"
+                                        :value="user.id.toString()"
+                                    >
+                                        {{ user.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <input
+                                type="hidden"
+                                name="assignee_id"
+                                :value="form.assignee_id === 'none' ? '' : form.assignee_id"
+                            />
+                            <InputError :message="errors.assignee_id" />
+                        </div>
+
+                        <div class="grid gap-2">
                             <Label for="task-priority">Priority</Label>
                             <Select name="priority" v-model="form.priority">
                                 <SelectTrigger class="w-full">
@@ -263,6 +297,7 @@ watch(
                                 v-model="form.due_date"
                                 type="date"
                             />
+                            <InputError :message="errors.due_date" />
                         </div>
 
                         <div class="grid gap-2">
@@ -276,6 +311,7 @@ watch(
                                 step="0.5"
                                 placeholder="e.g. 8"
                             />
+                            <InputError :message="errors.estimated_hours" />
                         </div>
 
                         <div class="grid gap-2 sm:col-span-2">
@@ -287,6 +323,7 @@ watch(
                                 placeholder="Describe the task..."
                                 rows="3"
                             />
+                            <InputError :message="errors.description" />
                         </div>
 
                         <div class="grid gap-2 sm:col-span-2">
@@ -298,6 +335,7 @@ watch(
                                 name="tag_ids[]"
                                 :value="id"
                             />
+                            <InputError :message="errors.tag_ids" />
                             <Popover>
                                 <PopoverTrigger as-child>
                                     <Button
@@ -378,11 +416,13 @@ watch(
                             <Checkbox
                                 id="task-billable"
                                 name="is_billable"
-                                v-model:checked="form.is_billable"
+                                v-model="form.is_billable"
+                                value="1"
                             />
                             <Label for="task-billable" class="font-normal">
                                 Billable
                             </Label>
+                            <InputError :message="errors.is_billable" />
                         </div>
                     </div>
                 </div>

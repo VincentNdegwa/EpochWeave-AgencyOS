@@ -97,6 +97,7 @@ watch(
                               account: accountId,
                           })) as any
                 "
+                :options="{ preserveScroll: true, preserveState: true }"
                 v-slot="{ errors, processing }"
             >
                 <div class="grid gap-4 py-4">
@@ -160,30 +161,36 @@ watch(
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <div class="flex items-center gap-2">
-                            <input
-                                type="hidden"
-                                name="is_primary"
-                                :value="form.is_primary ? '1' : '0'"
-                            />
-                            <Switch id="is_primary" v-model="form.is_primary" />
-                            <Label for="is_primary" class="cursor-pointer"
-                                >Primary Contact</Label
-                            >
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="hidden"
+                                    name="is_primary"
+                                    :value="form.is_primary ? '1' : '0'"
+                                />
+                                <Switch id="is_primary" v-model="form.is_primary" />
+                                <Label for="is_primary" class="cursor-pointer"
+                                    >Primary Contact</Label
+                                >
+                            </div>
+                            <InputError :message="errors.is_primary" />
                         </div>
-                        <div class="flex items-center gap-2">
-                            <input
-                                type="hidden"
-                                name="receives_billing"
-                                :value="form.receives_billing ? '1' : '0'"
-                            />
-                            <Switch
-                                id="receives_billing"
-                                v-model="form.receives_billing"
-                            />
-                            <Label for="receives_billing" class="cursor-pointer"
-                                >Receives Billing</Label
-                            >
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="hidden"
+                                    name="receives_billing"
+                                    :value="form.receives_billing ? '1' : '0'"
+                                />
+                                <Switch
+                                    id="receives_billing"
+                                    v-model="form.receives_billing"
+                                />
+                                <Label for="receives_billing" class="cursor-pointer"
+                                    >Receives Billing</Label
+                                >
+                            </div>
+                            <InputError :message="errors.receives_billing" />
                         </div>
                     </div>
                 </div>

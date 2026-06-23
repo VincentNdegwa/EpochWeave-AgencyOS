@@ -38,5 +38,6 @@ export interface Task {
     children?: Task[];
     comments?: Comment[];
     attachments?: Attachment[];
+    time_entries?: TimeEntry[];
     timeEntries?: TimeEntry[];
 }

@@ -129,6 +129,7 @@ watch(
                                     class="flex-1"
                                 />
                             </div>
+                            <InputError :message="errors.color" />
                         </div>
 
                         <div class="grid gap-2">
