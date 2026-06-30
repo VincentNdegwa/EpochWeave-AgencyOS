@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\AccountStatus;
 use App\Models\Proposal;
 use App\Models\ProposalStatus;
 use App\Notifications\ProposalSent;
@@ -32,6 +33,15 @@ class SendProposal
         }
 
         $proposal->update($data);
+
+        if ($proposal->account_id) {
+            $account = $proposal->account;
+
+            if ($account->status === AccountStatus::Lead) {
+                $account->update(['status' => AccountStatus::Opportunity->value]);
+            }
+        }
+
         $this->activityService->sent($proposal);
         $proposal->accountContact->notify(new ProposalSent($proposal));
 

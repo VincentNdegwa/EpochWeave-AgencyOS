@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Invoice;
 
+use App\Enums\AccountStatus;
+use App\Models\Account;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Payment;
@@ -117,5 +119,60 @@ class PaymentTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors('amount');
+    }
+
+    public function test_recording_payment_promotes_lead_account_to_client()
+    {
+        $account = Account::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'status' => AccountStatus::Lead->value,
+            'lifetime_value' => 0,
+        ]);
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $account->id,
+            'invoice_status_id' => $this->invoice->invoice_status_id,
+            'grand_total' => 50000,
+            'amount_paid' => 0,
+        ]);
+
+        $this->withHeaders(['X-Workspace-Id' => $this->workspace->id])
+            ->post(route('invoices.payments.store', $invoice), [
+                'amount' => 25000,
+                'method' => 'bank_transfer',
+                'paid_at' => now()->toDateString(),
+            ]);
+
+        $account->refresh();
+        $this->assertEquals(AccountStatus::Client, $account->status);
+        $this->assertEquals(25000, $account->lifetime_value);
+    }
+
+    public function test_recording_payment_does_not_change_opportunity_account_status()
+    {
+        $account = Account::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'status' => AccountStatus::Opportunity->value,
+            'lifetime_value' => 0,
+        ]);
+
+        $invoice = Invoice::factory()->create([
+            'workspace_id' => $this->workspace->id,
+            'account_id' => $account->id,
+            'invoice_status_id' => $this->invoice->invoice_status_id,
+            'grand_total' => 50000,
+            'amount_paid' => 0,
+        ]);
+
+        $this->withHeaders(['X-Workspace-Id' => $this->workspace->id])
+            ->post(route('invoices.payments.store', $invoice), [
+                'amount' => 25000,
+                'method' => 'bank_transfer',
+                'paid_at' => now()->toDateString(),
+            ]);
+
+        $account->refresh();
+        $this->assertEquals(AccountStatus::Opportunity, $account->status);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AccountStatus;
 use App\Models\Invoice;
 use App\Models\InvoiceStatus;
 use App\Models\Payment;
@@ -33,6 +34,12 @@ class PaymentService
 
                 if ($invoice->account_id) {
                     $invoice->account()->increment('lifetime_value', $data['amount']);
+
+                    $account = $invoice->account;
+
+                    if ($account->status === AccountStatus::Lead) {
+                        $account->update(['status' => AccountStatus::Client->value]);
+                    }
                 }
 
                 return $payment->load('user');

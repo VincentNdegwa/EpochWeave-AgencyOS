@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Proposal;
 
+use App\Enums\AccountStatus;
 use App\Models\Account;
+use App\Models\AccountContact;
 use App\Models\Proposal;
 use App\Models\ProposalItem;
 use App\Models\ProposalStatus;
@@ -11,6 +13,7 @@ use App\Models\Workspace;
 use App\Models\WorkspaceSetting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ProposalControllerTest extends TestCase
@@ -422,6 +425,102 @@ class ProposalControllerTest extends TestCase
 
         $proposal->refresh();
         $this->assertEquals($sentStatus->id, $proposal->proposal_status_id);
+    }
+
+    public function test_sending_proposal_promotes_lead_account_to_opportunity(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::factory()->create();
+        $account = Account::factory()->create([
+            'workspace_id' => $workspace->id,
+            'status' => AccountStatus::Lead->value,
+        ]);
+        $contact = AccountContact::factory()->create([
+            'account_id' => $account->id,
+        ]);
+
+        $draftStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $proposal = Proposal::factory()->create([
+            'workspace_id' => $workspace->id,
+            'account_id' => $account->id,
+            'account_contact_id' => $contact->id,
+            'proposal_status_id' => $draftStatus->id,
+            'token' => Str::uuid(),
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->post(route('proposals.send', $proposal));
+
+        $account->refresh();
+        $this->assertEquals(AccountStatus::Opportunity, $account->status);
+    }
+
+    public function test_sending_proposal_does_not_change_opportunity_account_status(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::factory()->create();
+        $account = Account::factory()->create([
+            'workspace_id' => $workspace->id,
+            'status' => AccountStatus::Opportunity->value,
+        ]);
+        $contact = AccountContact::factory()->create([
+            'account_id' => $account->id,
+        ]);
+
+        $draftStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $proposal = Proposal::factory()->create([
+            'workspace_id' => $workspace->id,
+            'account_id' => $account->id,
+            'account_contact_id' => $contact->id,
+            'proposal_status_id' => $draftStatus->id,
+            'token' => Str::uuid(),
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->post(route('proposals.send', $proposal));
+
+        $account->refresh();
+        $this->assertEquals(AccountStatus::Opportunity, $account->status);
+    }
+
+    public function test_sending_proposal_does_not_change_client_account_status(): void
+    {
+        $user = User::factory()->create();
+        $workspace = Workspace::factory()->create();
+        $account = Account::factory()->create([
+            'workspace_id' => $workspace->id,
+            'status' => AccountStatus::Client->value,
+        ]);
+        $contact = AccountContact::factory()->create([
+            'account_id' => $account->id,
+        ]);
+
+        $draftStatus = ProposalStatus::where('workspace_id', $workspace->id)
+            ->where('automation_trigger', 'draft')
+            ->first();
+
+        $proposal = Proposal::factory()->create([
+            'workspace_id' => $workspace->id,
+            'account_id' => $account->id,
+            'account_contact_id' => $contact->id,
+            'proposal_status_id' => $draftStatus->id,
+            'token' => Str::uuid(),
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['current_workspace_id' => $workspace->id])
+            ->post(route('proposals.send', $proposal));
+
+        $account->refresh();
+        $this->assertEquals(AccountStatus::Client, $account->status);
     }
 
     private function validBlocksPayload(): array
