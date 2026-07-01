@@ -142,7 +142,7 @@ class DashboardService
             ->where('workspace_id', $workspaceId)
             ->whereIn('invoice_status_id', $paidStatusIds)
             ->select(
-                DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('paid_at').' as month'),
                 DB::raw('SUM(grand_total) as total')
             )
             ->whereNotNull('paid_at')
@@ -155,7 +155,7 @@ class DashboardService
         $pipeline = Proposal::query()
             ->where('workspace_id', $workspaceId)
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('created_at').' as month'),
                 DB::raw('SUM(grand_total) as total')
             )
             ->whereDate('created_at', '>=', now()->subMonths(11)->startOfMonth())
@@ -220,7 +220,7 @@ class DashboardService
             ->whereIn('invoice_status_id', $paidStatusIds)
             ->whereNotNull('paid_at')
             ->select(
-                DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('paid_at').' as month'),
                 DB::raw('SUM(grand_total) as total')
             )
             ->whereDate('paid_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -232,7 +232,7 @@ class DashboardService
         $pipelineByMonth = Proposal::query()
             ->where('workspace_id', $workspaceId)
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('created_at').' as month'),
                 DB::raw('SUM(grand_total) as total')
             )
             ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -245,7 +245,7 @@ class DashboardService
             ->where('workspace_id', $workspaceId)
             ->whereIn('proposal_status_id', $sentStatusIds)
             ->select(
-                DB::raw("DATE_FORMAT(sent_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('sent_at').' as month'),
                 DB::raw('COUNT(*) as count')
             )
             ->whereDate('sent_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -258,7 +258,7 @@ class DashboardService
             ->where('workspace_id', $workspaceId)
             ->whereIn('proposal_status_id', $acceptedStatusIds)
             ->select(
-                DB::raw("DATE_FORMAT(accepted_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('accepted_at').' as month'),
                 DB::raw('COUNT(*) as count')
             )
             ->whereDate('accepted_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -271,7 +271,7 @@ class DashboardService
             ->where('workspace_id', $workspaceId)
             ->whereNull('completed_at')
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('created_at').' as month'),
                 DB::raw('COUNT(*) as count')
             )
             ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -283,7 +283,7 @@ class DashboardService
         $avgDealByMonth = Proposal::query()
             ->where('workspace_id', $workspaceId)
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('created_at').' as month'),
                 DB::raw('AVG(grand_total) as avg')
             )
             ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -296,7 +296,7 @@ class DashboardService
             ->where('workspace_id', $workspaceId)
             ->whereHas('invoiceStatus', fn ($q) => $q->whereIn('automation_trigger', ['sent', 'overdue']))
             ->select(
-                DB::raw("DATE_FORMAT(created_at, '%Y-%m') as month"),
+                DB::raw($this->monthExpression('created_at').' as month'),
                 DB::raw('COUNT(*) as count')
             )
             ->whereDate('created_at', '>=', now()->subMonths(5)->startOfMonth())
@@ -513,6 +513,16 @@ class DashboardService
             ->count();
 
         return $sent > 0 ? round(($accepted / $sent) * 100, 1) : 0;
+    }
+
+    private function monthExpression(string $column): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'sqlite' => "strftime('%Y-%m', {$column})",
+            'pgsql' => "to_char({$column}, 'YYYY-MM')",
+            'sqlsrv' => "format({$column}, 'yyyy-MM')",
+            default => "DATE_FORMAT({$column}, '%Y-%m')",
+        };
     }
 
     private function calculateChange(float|int $current, float|int $previous, bool $invert = false): ?array

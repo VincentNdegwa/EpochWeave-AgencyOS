@@ -21,10 +21,10 @@ class ReportController extends Controller
             ->whereYear('issue_date', $year)
             ->whereNotNull('issue_date')
             ->select(
-                DB::raw('MONTH(issue_date) as month'),
+                DB::raw($this->monthExpression('issue_date').' as month'),
                 DB::raw('SUM(grand_total) as total')
             )
-            ->groupBy(DB::raw('MONTH(issue_date)'))
+            ->groupBy(DB::raw($this->monthExpression('issue_date')))
             ->pluck('total', 'month')
             ->mapWithKeys(fn ($total, $month) => [$month => (float) $total])
             ->toArray();
@@ -61,10 +61,10 @@ class ReportController extends Controller
             ->whereYear('started_at', $year)
             ->whereNotNull('started_at')
             ->select(
-                DB::raw('MONTH(started_at) as month'),
+                DB::raw($this->monthExpression('started_at').' as month'),
                 DB::raw('SUM(duration_seconds) as seconds')
             )
-            ->groupBy(DB::raw('MONTH(started_at)'))
+            ->groupBy(DB::raw($this->monthExpression('started_at')))
             ->pluck('seconds', 'month')
             ->mapWithKeys(fn ($seconds, $month) => [$month => (int) $seconds])
             ->toArray();
@@ -81,5 +81,15 @@ class ReportController extends Controller
             'topClients' => $topClients,
             'hoursByMonth' => $timeData,
         ]);
+    }
+
+    private function monthExpression(string $column): string
+    {
+        return match (DB::connection()->getDriverName()) {
+            'sqlite' => "cast(strftime('%m', {$column}) as integer)",
+            'pgsql' => "extract(month from {$column})",
+            'sqlsrv' => "month({$column})",
+            default => "MONTH({$column})",
+        };
     }
 }
