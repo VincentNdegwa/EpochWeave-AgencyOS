@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
-import { Plus } from '@lucide/vue';
+import { Plus, Upload } from '@lucide/vue';
 import { ref } from 'vue';
 import AccountController from '@/actions/App/Http/Controllers/AccountController';
 import { Button } from '@/components/ui/button';
@@ -83,10 +83,18 @@ defineOptions({
                     Manage your client accounts and their contacts.
                 </p>
             </div>
-            <Button type="button" @click="isCreateDialogOpen = true">
-                <Plus class="mr-2 h-4 w-4" />
-                New Account
-            </Button>
+            <div class="flex items-center gap-2">
+                <Button type="button" variant="outline" as-child>
+                    <a :href="AccountController.importPage().url">
+                        <Upload class="mr-2 h-4 w-4" />
+                        Import
+                    </a>
+                </Button>
+                <Button type="button" @click="isCreateDialogOpen = true">
+                    <Plus class="mr-2 h-4 w-4" />
+                    New Account
+                </Button>
+            </div>
         </div>
 
         <StatBar
@@ -156,5 +164,6 @@ defineOptions({
             :open="isCreateDialogOpen"
             @update:open="isCreateDialogOpen = $event"
         />
+
     </div>
 </template>

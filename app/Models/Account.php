@@ -19,7 +19,6 @@ class Account extends Model
         parent::boot();
 
         static::deleting(function ($account) {
-            // Delete related portal invitations when account is deleted (including soft delete)
             $account->portalInvitations()->delete();
         });
     }
@@ -34,6 +33,8 @@ class Account extends Model
         'status',
         'token',
         'lifetime_value',
+        'annual_revenue',
+        'employee_count',
         'industry_id',
         'lead_source_id',
         'company_size_id',

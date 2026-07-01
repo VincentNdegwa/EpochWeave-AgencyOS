@@ -8,15 +8,24 @@ use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use App\Models\Account;
 use App\Models\Activity;
+use App\Models\CompanySize;
+use App\Models\Industry;
+use App\Models\LeadSource;
+use App\Services\AccountImportService;
 use App\Services\AccountService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Inertia\Inertia;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 class AccountController extends Controller
 {
     public function __construct(
         private AccountService $accountService,
+        private AccountImportService $importService,
     ) {}
 
     public function index(Request $request)
@@ -160,5 +169,116 @@ class AccountController extends Controller
 
             return redirect()->back();
         }
+    }
+
+    public function importPage(Request $request)
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        return Inertia::render('account/import', [
+            'industries' => Industry::where('workspace_id', $workspace->id)->orderBy('name')->get(['id', 'name']),
+            'lead_sources' => LeadSource::where('workspace_id', $workspace->id)->orderBy('name')->get(['id', 'name']),
+            'company_sizes' => CompanySize::where('workspace_id', $workspace->id)->orderBy('sort_order')->get(['id', 'label']),
+        ]);
+    }
+
+    public function previewImport(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:2048'],
+        ]);
+
+        $path = $request->file('file')->getRealPath();
+        $preview = $this->importService->parsePreview($path);
+
+        return response()->json($preview);
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:2048'],
+            'mapping' => ['required', 'array'],
+            'bulk' => ['sometimes', 'array'],
+        ]);
+
+        $workspace = $request->attributes->get('current_workspace');
+        $path = $request->file('file')->getRealPath();
+
+        try {
+            $result = $this->importService->import(
+                $workspace->id,
+                $path,
+                $request->input('mapping', []),
+                $request->input('bulk', []),
+            );
+
+            $message = "Successfully imported {$result['created']} accounts.";
+            if ($result['errors'] !== []) {
+                $message .= ' '.count($result['errors']).' rows failed.';
+            }
+
+            Inertia::flash('toast', [
+                'type' => $result['errors'] === [] ? 'success' : 'warning',
+                'message' => $message,
+                'errors' => $result['errors'],
+            ]);
+        } catch (\Exception $e) {
+            Inertia::flash('toast', [
+                'type' => 'error',
+                'message' => 'Import failed: '.$e->getMessage(),
+            ]);
+        }
+
+        return redirect()->back();
+    }
+
+    public function downloadImportTemplate(): Response
+    {
+        $headers = [
+            'company_name',
+            'phone',
+            'website',
+            'description',
+            'founded_at',
+            'annual_revenue',
+            'employee_count',
+            'first_name',
+            'last_name',
+            'email',
+            'contact_phone',
+        ];
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        foreach ($headers as $index => $header) {
+            $sheet->setCellValue([$index + 1, 1], $header);
+        }
+
+        $sheet->fromArray([
+            'Acme Corp',
+            '+1 555 1234',
+            'https://acme.example.com',
+            'Example description',
+            '2020-01-15',
+            '1000000',
+            '50',
+            'John',
+            'Doe',
+            'john@acme.example.com',
+            '+1 555 5678',
+        ], null, 'A2', true);
+
+        $writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
+        $tmpPath = tempnam(sys_get_temp_dir(), 'accounts_import_template_');
+        $writer->save($tmpPath);
+        $content = file_get_contents($tmpPath);
+        unlink($tmpPath);
+
+        return response($content, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="accounts_import_template.xlsx"',
+        ]);
     }
 }
