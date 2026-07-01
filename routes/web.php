@@ -75,6 +75,14 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
     Route::post('/workspaces/{workspace}/switch', [WorkspaceController::class, 'switch'])->name('workspaces.switch');
 
+    Route::get('/accounts/import', [AccountController::class, 'importPage'])
+        ->name('accounts.import');
+    Route::post('/accounts/import-preview', [AccountController::class, 'previewImport'])
+        ->name('accounts.import-preview');
+    Route::post('/accounts/import', [AccountController::class, 'import'])
+        ->name('accounts.import.store');
+    Route::get('/accounts/import-template', [AccountController::class, 'downloadImportTemplate'])
+        ->name('accounts.import-template');
     Route::resource('accounts', AccountController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::post('/accounts/bulk-status', [AccountController::class, 'bulkUpdateStatus'])
         ->name('accounts.bulk-status');

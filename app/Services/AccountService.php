@@ -24,10 +24,18 @@ class AccountService
                 $account = Account::create([
                     'workspace_id' => $data['workspace_id'],
                     'company_name' => $data['company_name'],
+                    'phone' => $data['phone'] ?? null,
                     'website' => $data['website'] ?? null,
+                    'description' => $data['description'] ?? null,
+                    'founded_at' => $data['founded_at'] ?? null,
                     'status' => $data['status'] ?? AccountStatus::Lead->value,
                     'token' => Str::random(32),
                     'lifetime_value' => $data['lifetime_value'] ?? 0,
+                    'annual_revenue' => $data['annual_revenue'] ?? null,
+                    'employee_count' => $data['employee_count'] ?? null,
+                    'industry_id' => $data['industry_id'] ?? null,
+                    'lead_source_id' => $data['lead_source_id'] ?? null,
+                    'company_size_id' => $data['company_size_id'] ?? null,
                 ]);
                 $this->activityService->created($account);
 
@@ -49,9 +57,17 @@ class AccountService
         try {
             $account->update([
                 'company_name' => $data['company_name'] ?? $account->company_name,
+                'phone' => $data['phone'] ?? $account->phone,
                 'website' => $data['website'] ?? $account->website,
+                'description' => $data['description'] ?? $account->description,
+                'founded_at' => $data['founded_at'] ?? $account->founded_at,
                 'status' => $data['status'] ?? $account->status,
                 'lifetime_value' => $data['lifetime_value'] ?? $account->lifetime_value,
+                'annual_revenue' => $data['annual_revenue'] ?? $account->annual_revenue,
+                'employee_count' => $data['employee_count'] ?? $account->employee_count,
+                'industry_id' => $data['industry_id'] ?? $account->industry_id,
+                'lead_source_id' => $data['lead_source_id'] ?? $account->lead_source_id,
+                'company_size_id' => $data['company_size_id'] ?? $account->company_size_id,
             ]);
             $this->activityService->updated($account);
 
