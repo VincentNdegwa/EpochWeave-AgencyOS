@@ -4,10 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Enums\AccountStatus;
 use App\Models\AccountContact;
+use App\Models\Invoice;
 use App\Models\Project;
+use App\Models\Proposal;
 use App\Models\ProposalTemplate;
 use App\Models\User;
 use App\Services\AccountService;
+use App\Services\CompanySizeService;
+use App\Services\IndustryService;
+use App\Services\LeadSourceService;
 use App\Services\ProductService;
 use App\Services\ProductUnitService;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +23,10 @@ class BuilderDataController extends Controller
     public function __construct(
         private ProductService $productService,
         private ProductUnitService $productUnitService,
-        private AccountService $accountService
+        private AccountService $accountService,
+        private IndustryService $industryService,
+        private LeadSourceService $leadSourceService,
+        private CompanySizeService $companySizeService,
     ) {}
 
     public function products(Request $request): JsonResponse
@@ -112,5 +120,56 @@ class BuilderDataController extends Controller
         }
 
         return response()->json($query->get());
+    }
+
+    public function proposals(Request $request): JsonResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        $query = Proposal::where('workspace_id', $workspace->id)
+            ->select(['id', 'account_id', 'title', 'proposal_number', 'proposal_status_id'])
+            ->orderBy('title');
+
+        if ($request->has('account_id')) {
+            $query->where('account_id', $request->query('account_id'));
+        }
+
+        return response()->json($query->get());
+    }
+
+    public function invoices(Request $request): JsonResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        $query = Invoice::where('workspace_id', $workspace->id)
+            ->select(['id', 'account_id', 'invoice_number', 'grand_total', 'invoice_status_id'])
+            ->orderBy('invoice_number');
+
+        if ($request->has('account_id')) {
+            $query->where('account_id', $request->query('account_id'));
+        }
+
+        return response()->json($query->get());
+    }
+
+    public function industries(Request $request): JsonResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        return response()->json($this->industryService->listForWorkspace($workspace->id));
+    }
+
+    public function leadSources(Request $request): JsonResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        return response()->json($this->leadSourceService->listForWorkspace($workspace->id));
+    }
+
+    public function companySizes(Request $request): JsonResponse
+    {
+        $workspace = $request->attributes->get('current_workspace');
+
+        return response()->json($this->companySizeService->listForWorkspace($workspace->id));
     }
 }

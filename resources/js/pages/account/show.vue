@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { Plus, UserRound, Users } from '@lucide/vue';
 import { ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
@@ -10,11 +10,12 @@ import { useCurrency } from '@/composables/useCurrency';
 import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import { index as accountIndex } from '@/routes/accounts';
-import type { Account, AccountContact } from '@/types/models/account';
+import type { Account, AccountContact, Address } from '@/types/models/account';
 import AccountActions from './components/AccountActions.vue';
 import { createContactColumns } from './contacts-datatable/columns';
 import ContactsDataTable from './contacts-datatable/data-table.vue';
 import ContactFormDialog from './dialogs/ContactFormDialog.vue';
+import AddressFormDialog from './dialogs/AddressFormDialog.vue';
 
 const props = defineProps<{
     account: Account;
@@ -33,7 +34,26 @@ const { format: formatCurrency } = useCurrency();
 const contactDialogOpen = ref(false);
 const editingContact = ref<AccountContact | null>(null);
 
+const addressDialogOpen = ref(false);
+const editingAddress = ref<Address | null>(null);
+
 const contactColumns = createContactColumns(props.account.id);
+
+const openNewAddressDialog = () => {
+    editingAddress.value = null;
+    addressDialogOpen.value = true;
+};
+
+const openEditAddressDialog = (address: Address) => {
+    editingAddress.value = address;
+    addressDialogOpen.value = true;
+};
+
+const deleteAddress = (addressId: number) => {
+    if (confirm('Delete this address?')) {
+        router.delete(`/addresses/${addressId}`);
+    }
+};
 
 const openNewContactDialog = () => {
     editingContact.value = null;
@@ -167,6 +187,100 @@ defineOptions({
                 </div>
             </div>
 
+            <!-- Addresses Section -->
+            <div class="space-y-4 border-b p-5">
+                <div class="flex items-center justify-between">
+                    <h3
+                        class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Addresses
+                    </h3>
+                    <Button size="sm" class="gap-2" @click="openNewAddressDialog">
+                        <Plus class="h-3.5 w-3.5" />
+                        Add Address
+                    </Button>
+                </div>
+                <div
+                    v-if="props.account.addresses && props.account.addresses.length > 0"
+                    class="space-y-2"
+                >
+                    <div
+                        v-for="address in props.account.addresses"
+                        :key="address.id"
+                        class="rounded-lg border border-border bg-muted/30 p-3 text-sm"
+                    >
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-medium capitalize">{{ address.type }}</span>
+                                <span
+                                    v-if="address.is_primary"
+                                    class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                                >Primary</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    @click="openEditAddressDialog(address)"
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    class="text-destructive"
+                                    @click="deleteAddress(address.id)"
+                                >
+                                    Delete
+                                </Button>
+                            </div>
+                        </div>
+                        <div class="mt-1 text-muted-foreground">
+                            {{ address.street_1 }}
+                            <span v-if="address.street_2">, {{ address.street_2 }}</span><br />
+                            {{ address.city }}<span v-if="address.state">, {{ address.state }}</span>
+                            <span v-if="address.postal_code"> {{ address.postal_code }}</span><br />
+                            {{ address.country }}
+                        </div>
+                    </div>
+                </div>
+                <div v-else class="text-sm text-muted-foreground">
+                    No addresses on file.
+                </div>
+            </div>
+
+            <!-- Social Profiles Section -->
+            <div class="space-y-4 border-b p-5">
+                <div class="flex items-center justify-between">
+                    <h3
+                        class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Social Profiles
+                    </h3>
+                </div>
+                <div
+                    v-if="props.account.socialProfiles && props.account.socialProfiles.length > 0"
+                    class="flex flex-wrap gap-2"
+                >
+                    <a
+                        v-for="profile in props.account.socialProfiles"
+                        :key="profile.id"
+                        :href="profile.url"
+                        target="_blank"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/30 px-3 py-1.5 text-sm hover:bg-muted/50"
+                    >
+                        {{ profile.platform }}
+                        <span
+                            v-if="profile.is_verified"
+                            class="rounded bg-primary/10 px-1 py-0.5 text-[10px] font-medium text-primary"
+                        >Verified</span>
+                    </a>
+                </div>
+                <div v-else class="text-sm text-muted-foreground">
+                    No social profiles linked.
+                </div>
+            </div>
+
             <!-- Activity Timeline -->
             <div class="space-y-4 border-b p-5">
                 <h3
@@ -182,6 +296,13 @@ defineOptions({
             v-model:open="contactDialogOpen"
             :account-id="props.account.id"
             :contact="editingContact"
+        />
+
+        <AddressFormDialog
+            v-model:open="addressDialogOpen"
+            addressable-type="App\Models\Account"
+            :addressable-id="props.account.id"
+            :address="editingAddress"
         />
     </div>
 </template>

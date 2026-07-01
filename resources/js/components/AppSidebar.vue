@@ -10,6 +10,7 @@ import {
     FolderKanban,
     CheckSquare,
     Settings2,
+    Wrench,
     BarChart3,
 } from '@lucide/vue';
 import ProjectController from '@/actions/App/Http/Controllers/ProjectController';
@@ -102,6 +103,11 @@ const reportsNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
+    {
+        title: 'Setup',
+        href: '/setup/industries',
+        icon: Wrench,
+    },
     {
         title: 'Business settings',
         href: workspaceSettings(),

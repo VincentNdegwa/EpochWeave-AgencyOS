@@ -21,7 +21,7 @@ class TaskStatusController extends Controller
         $workspace = $request->attributes->get('current_workspace');
         $statuses = $this->taskStatusService->listForWorkspace($workspace->id);
 
-        return Inertia::render('task-status/index', [
+        return Inertia::render('setup/task-status/index', [
             'task_statuses' => $statuses,
         ]);
     }

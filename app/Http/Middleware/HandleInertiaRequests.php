@@ -5,6 +5,10 @@ namespace App\Http\Middleware;
 use App\Enums\AccountStatus;
 use App\Enums\BillingFrequency;
 use App\Enums\BillingType;
+use App\Enums\EngagementDirection;
+use App\Enums\EngagementOutcome;
+use App\Enums\EngagementStatus;
+use App\Enums\EngagementType;
 use App\Enums\ProjectStatus;
 use App\Enums\TaskPriority;
 use Illuminate\Http\Request;
@@ -54,6 +58,10 @@ class HandleInertiaRequests extends Middleware
                 'accountStatuses' => collect(AccountStatus::cases())->keyBy(fn (AccountStatus $status) => $status->value),
                 'billingTypes' => collect(BillingType::cases())->keyBy(fn (BillingType $type) => $type->value),
                 'billingFrequencies' => collect(BillingFrequency::cases())->keyBy(fn (BillingFrequency $frequency) => $frequency->value),
+                'engagementDirections' => collect(EngagementDirection::cases())->keyBy(fn (EngagementDirection $direction) => $direction->value),
+                'engagementOutcomes' => collect(EngagementOutcome::cases())->keyBy(fn (EngagementOutcome $outcome) => $outcome->value),
+                'engagementStatuses' => collect(EngagementStatus::cases())->keyBy(fn (EngagementStatus $status) => $status->value),
+                'engagementTypes' => collect(EngagementType::cases())->keyBy(fn (EngagementType $type) => $type->value),
                 'projectStatuses' => collect(ProjectStatus::cases())->keyBy(fn (ProjectStatus $status) => $status->value),
                 'taskPriorities' => collect(TaskPriority::cases())->keyBy(fn (TaskPriority $priority) => $priority->value),
             ],

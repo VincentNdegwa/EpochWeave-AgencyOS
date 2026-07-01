@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workspace;
-use App\Services\WorkspaceSettingService;
 use Illuminate\Support\Facades\DB;
 
 class WorkspaceService

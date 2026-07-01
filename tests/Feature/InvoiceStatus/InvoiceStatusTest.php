@@ -29,11 +29,11 @@ class InvoiceStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->get('/invoice-status');
+            ->get('/setup/invoice-status');
 
         $response->assertStatus(200)
             ->assertInertia(fn (Assert $page) => $page
-                ->component('invoice-status/index')
+                ->component('setup/invoice-status/index')
                 ->has('invoice_statuses')
             );
     }
@@ -47,7 +47,7 @@ class InvoiceStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/invoice-status', [
+            ->post('/setup/invoice-status', [
                 'title' => 'Partially Paid',
                 'color' => '#f59e0b',
                 'position' => 5,
@@ -71,7 +71,7 @@ class InvoiceStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/invoice-status', [
+            ->post('/setup/invoice-status', [
                 'color' => '#f59e0b',
             ]);
 
@@ -92,7 +92,7 @@ class InvoiceStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/invoice-status/{$status->id}", [
+            ->put("/setup/invoice-status/{$status->id}", [
                 'title' => 'Updated Title',
                 'color' => '#22c55e',
             ]);
@@ -119,7 +119,7 @@ class InvoiceStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->delete("/invoice-status/{$status->id}");
+            ->delete("/setup/invoice-status/{$status->id}");
 
         $response->assertRedirect();
         $this->assertDatabaseMissing('invoice_statuses', [
@@ -143,7 +143,7 @@ class InvoiceStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->delete("/invoice-status/{$status->id}");
+            ->delete("/setup/invoice-status/{$status->id}");
 
         $response->assertRedirect();
         $this->assertDatabaseHas('invoice_statuses', [
@@ -165,7 +165,7 @@ class InvoiceStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/invoice-status/{$status->id}", [
+            ->put("/setup/invoice-status/{$status->id}", [
                 'title' => 'Hacked Title',
             ]);
 
@@ -174,7 +174,7 @@ class InvoiceStatusTest extends TestCase
 
     public function test_guest_cannot_access_invoice_statuses(): void
     {
-        $response = $this->get('/invoice-status');
+        $response = $this->get('/setup/invoice-status');
         $response->assertRedirect('/login');
     }
 

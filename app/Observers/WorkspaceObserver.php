@@ -2,7 +2,10 @@
 
 namespace App\Observers;
 
+use App\Models\CompanySize;
+use App\Models\Industry;
 use App\Models\InvoiceStatus;
+use App\Models\LeadSource;
 use App\Models\ProjectStatus;
 use App\Models\ProposalStatus;
 use App\Models\TaskStatus;
@@ -41,6 +44,33 @@ class WorkspaceObserver
             InvoiceStatus::create([
                 'workspace_id' => $workspace->id,
                 ...$statusData,
+            ]);
+        }
+
+        // Create Industries
+        foreach (Industry::getDefaultRecords() as $recordData) {
+            Industry::create([
+                'workspace_id' => $workspace->id,
+                'is_default' => true,
+                ...$recordData,
+            ]);
+        }
+
+        // Create Lead Sources
+        foreach (LeadSource::getDefaultRecords() as $recordData) {
+            LeadSource::create([
+                'workspace_id' => $workspace->id,
+                'is_default' => true,
+                ...$recordData,
+            ]);
+        }
+
+        // Create Company Sizes
+        foreach (CompanySize::getDefaultRecords() as $recordData) {
+            CompanySize::create([
+                'workspace_id' => $workspace->id,
+                'is_default' => true,
+                ...$recordData,
             ]);
         }
     }

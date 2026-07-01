@@ -23,11 +23,11 @@ class ProposalStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->get('/proposal-status');
+            ->get('/setup/proposal-status');
 
         $response->assertStatus(200)
             ->assertInertia(fn (Assert $page) => $page
-                ->component('proposal-status/index')
+                ->component('setup/proposal-status/index')
                 ->has('proposal_statuses')
             );
     }
@@ -41,7 +41,7 @@ class ProposalStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/proposal-status', [
+            ->post('/setup/proposal-status', [
                 'title' => 'Negotiating',
                 'color' => '#f59e0b',
             ]);
@@ -67,7 +67,7 @@ class ProposalStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/proposal-status/{$status->id}", [
+            ->put("/setup/proposal-status/{$status->id}", [
                 'title' => 'Updated Title',
                 'color' => '#22c55e',
             ]);
@@ -93,7 +93,7 @@ class ProposalStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->delete("/proposal-status/{$status->id}");
+            ->delete("/setup/proposal-status/{$status->id}");
 
         $response->assertRedirect();
         $this->assertDatabaseMissing('proposal_statuses', [
@@ -103,7 +103,7 @@ class ProposalStatusTest extends TestCase
 
     public function test_guest_cannot_access_proposal_statuses(): void
     {
-        $response = $this->get('/proposal-status');
+        $response = $this->get('/setup/proposal-status');
         $response->assertRedirect('/login');
     }
 }

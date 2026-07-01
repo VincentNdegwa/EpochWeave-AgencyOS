@@ -5,6 +5,13 @@ import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { dashboard } from '@/routes';
 
 defineOptions({
@@ -90,18 +97,20 @@ const removeMember = (userId: number) => {
                 </div>
                 <div>
                     <Label class="text-xs">Role</Label>
-                    <select
-                        v-model="inviteForm.role_id"
-                        class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-                    >
-                        <option
-                            v-for="role in roles"
-                            :key="role.id"
-                            :value="role.id"
-                        >
-                            {{ role.display_name ?? role.name }}
-                        </option>
-                    </select>
+                    <Select v-model="inviteForm.role_id">
+                        <SelectTrigger class="w-full">
+                            <SelectValue placeholder="Select role..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem
+                                v-for="role in roles"
+                                :key="role.id"
+                                :value="role.id.toString()"
+                            >
+                                {{ role.display_name ?? role.name }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div class="flex justify-end gap-2">
                     <Button

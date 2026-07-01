@@ -18,10 +18,15 @@ class AccountFactory extends Factory
         return [
             'workspace_id' => Workspace::factory(),
             'company_name' => fake()->company(),
+            'phone' => fake()->optional()->phoneNumber(),
             'website' => fake()->optional()->url(),
+            'description' => fake()->optional()->paragraph(),
+            'founded_at' => fake()->optional()->date(),
             'status' => fake()->randomElement(AccountStatus::cases())->value,
             'token' => Str::random(32),
             'lifetime_value' => fake()->randomNumber(6),
+            'annual_revenue' => fake()->optional()->randomNumber(8),
+            'employee_count' => fake()->optional()->numberBetween(1, 10000),
         ];
     }
 }

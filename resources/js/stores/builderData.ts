@@ -17,6 +17,11 @@ export const useBuilderDataStore = defineStore('builderData', () => {
     const users = ref<any[]>([]);
     const accountContacts = ref<any[]>([]);
     const projects = ref<any[]>([]);
+    const proposals = ref<any[]>([]);
+    const invoices = ref<any[]>([]);
+    const industries = ref<any[]>([]);
+    const leadSources = ref<any[]>([]);
+    const companySizes = ref<any[]>([]);
 
     const productsLoaded = ref(false);
     const unitsLoaded = ref(false);
@@ -25,6 +30,11 @@ export const useBuilderDataStore = defineStore('builderData', () => {
     const usersLoaded = ref(false);
     const accountContactsLoaded = ref(false);
     const projectsLoaded = ref(false);
+    const proposalsLoaded = ref(false);
+    const invoicesLoaded = ref(false);
+    const industriesLoaded = ref(false);
+    const leadSourcesLoaded = ref(false);
+    const companySizesLoaded = ref(false);
 
     const fetchProducts = async () => {
         if (productsLoaded.value) {
@@ -122,6 +132,72 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         return projects.value;
     };
 
+    const fetchProposals = async (filters?: { account_id?: string }) => {
+        const params = new URLSearchParams();
+
+        if (filters?.account_id) {
+            params.append('account_id', filters.account_id);
+        }
+
+        const url = `/builder-data/proposals${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await fetch(url);
+        proposals.value = await response.json();
+        proposalsLoaded.value = true;
+
+        return proposals.value;
+    };
+
+    const fetchInvoices = async (filters?: { account_id?: string }) => {
+        const params = new URLSearchParams();
+
+        if (filters?.account_id) {
+            params.append('account_id', filters.account_id);
+        }
+
+        const url = `/builder-data/invoices${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await fetch(url);
+        invoices.value = await response.json();
+        invoicesLoaded.value = true;
+
+        return invoices.value;
+    };
+
+    const fetchIndustries = async () => {
+        if (industriesLoaded.value) {
+            return industries.value;
+        }
+
+        const response = await fetch('/builder-data/industries');
+        industries.value = await response.json();
+        industriesLoaded.value = true;
+
+        return industries.value;
+    };
+
+    const fetchLeadSources = async () => {
+        if (leadSourcesLoaded.value) {
+            return leadSources.value;
+        }
+
+        const response = await fetch('/builder-data/lead-sources');
+        leadSources.value = await response.json();
+        leadSourcesLoaded.value = true;
+
+        return leadSources.value;
+    };
+
+    const fetchCompanySizes = async () => {
+        if (companySizesLoaded.value) {
+            return companySizes.value;
+        }
+
+        const response = await fetch('/builder-data/company-sizes');
+        companySizes.value = await response.json();
+        companySizesLoaded.value = true;
+
+        return companySizes.value;
+    };
+
     const fetchTemplate = async (templateId: number) => {
         const response = await fetch(`/builder-data/templates/${templateId}`);
 
@@ -140,6 +216,11 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         users.value = [];
         accountContacts.value = [];
         projects.value = [];
+        proposals.value = [];
+        invoices.value = [];
+        industries.value = [];
+        leadSources.value = [];
+        companySizes.value = [];
         productsLoaded.value = false;
         unitsLoaded.value = false;
         templatesLoaded.value = false;
@@ -147,6 +228,11 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         usersLoaded.value = false;
         accountContactsLoaded.value = false;
         projectsLoaded.value = false;
+        proposalsLoaded.value = false;
+        invoicesLoaded.value = false;
+        industriesLoaded.value = false;
+        leadSourcesLoaded.value = false;
+        companySizesLoaded.value = false;
     };
 
     return {
@@ -157,6 +243,11 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         users,
         accountContacts,
         projects,
+        proposals,
+        invoices,
+        industries,
+        leadSources,
+        companySizes,
         productsLoaded,
         unitsLoaded,
         templatesLoaded,
@@ -164,6 +255,11 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         usersLoaded,
         accountContactsLoaded,
         projectsLoaded,
+        proposalsLoaded,
+        invoicesLoaded,
+        industriesLoaded,
+        leadSourcesLoaded,
+        companySizesLoaded,
         fetchProducts,
         fetchUnits,
         fetchTemplates,
@@ -171,6 +267,11 @@ export const useBuilderDataStore = defineStore('builderData', () => {
         fetchUsers,
         fetchAccountContacts,
         fetchProjects,
+        fetchProposals,
+        fetchInvoices,
+        fetchIndustries,
+        fetchLeadSources,
+        fetchCompanySizes,
         fetchTemplate,
         reset,
     };

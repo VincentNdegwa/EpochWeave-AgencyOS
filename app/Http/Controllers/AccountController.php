@@ -6,8 +6,9 @@ use App\Enums\AccountStatus;
 use App\Exceptions\AccountException;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
+use App\Models\Account;
+use App\Models\Activity;
 use App\Services\AccountService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -15,7 +16,7 @@ use Inertia\Inertia;
 class AccountController extends Controller
 {
     public function __construct(
-        private AccountService $accountService
+        private AccountService $accountService,
     ) {}
 
     public function index(Request $request)
@@ -53,15 +54,18 @@ class AccountController extends Controller
         return redirect()->route('accounts.show', $account);
     }
 
-    public function show(int $id)
+    public function show(Request $request, int $id)
     {
+        $workspace = $request->attributes->get('current_workspace');
         $account = $this->accountService->getAccountById($id);
 
         if (! $account) {
             abort(404);
         }
 
-        $activities = \App\Models\Activity::where('subject_type', \App\Models\Account::class)
+        $account->load(['contacts', 'addresses', 'socialProfiles', 'industry', 'leadSource', 'companySize']);
+
+        $activities = Activity::where('subject_type', Account::class)
             ->where('subject_id', $account->id)
             ->with('user:id,name')
             ->orderByDesc('created_at')
@@ -121,7 +125,7 @@ class AccountController extends Controller
         $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'integer|exists:accounts,id',
-            'status' => 'required|string|in:' . implode(',', array_column(AccountStatus::cases(), 'value')),
+            'status' => 'required|string|in:'.implode(',', array_column(AccountStatus::cases(), 'value')),
         ]);
 
         try {

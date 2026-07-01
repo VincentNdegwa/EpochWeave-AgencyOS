@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Key, Lock, MoreHorizontal, Pencil, Star, Trash2 } from '@lucide/vue';
+import { Key, Lock, MapPin, MoreHorizontal, Pencil, Star, Trash2 } from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,8 +10,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import type { AccountContact } from '@/types/models/account';
+import type { AccountContact, Address } from '@/types/models/account';
 import ContactFormDialog from '../dialogs/ContactFormDialog.vue';
+import AddressFormDialog from '../dialogs/AddressFormDialog.vue';
 
 interface Props {
     contact: AccountContact;
@@ -21,9 +22,16 @@ interface Props {
 const props = defineProps<Props>();
 
 const isEditDialogOpen = ref(false);
+const isAddressDialogOpen = ref(false);
+const editingAddress = ref<Address | null>(null);
 
 const handleEdit = () => {
     isEditDialogOpen.value = true;
+};
+
+const handleManageAddresses = () => {
+    editingAddress.value = null;
+    isAddressDialogOpen.value = true;
 };
 
 const handleSetPrimary = () => {
@@ -90,6 +98,10 @@ const handleDelete = async () => {
                 <Pencil class="mr-2 h-4 w-4" />
                 Edit
             </DropdownMenuItem>
+            <DropdownMenuItem @click="handleManageAddresses">
+                <MapPin class="mr-2 h-4 w-4" />
+                Manage Addresses
+            </DropdownMenuItem>
             <DropdownMenuItem
                 v-if="!contact.is_primary"
                 @click="handleSetPrimary"
@@ -126,5 +138,12 @@ const handleDelete = async () => {
         :account-id="props.accountId"
         :contact="props.contact"
         @update:open="isEditDialogOpen = $event"
+    />
+
+    <AddressFormDialog
+        v-model:open="isAddressDialogOpen"
+        addressable-type="App\Models\AccountContact"
+        :addressable-id="props.contact.id"
+        :address="editingAddress"
     />
 </template>

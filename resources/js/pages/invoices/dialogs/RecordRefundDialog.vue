@@ -14,6 +14,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCurrency } from '@/composables/useCurrency';
 import { useDateFormat } from '@/composables/useDateFormat';
@@ -131,27 +138,27 @@ function handleSubmit() {
 
                 <div v-if="payments.length > 0" class="grid gap-2">
                     <Label for="refund-payment">Related Payment</Label>
-                    <select
-                        id="refund-payment"
-                        v-model="form.payment_id"
-                        class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        <option value="">None</option>
-                        <option
-                            v-for="payment in payments"
-                            :key="payment.id"
-                            :value="payment.id"
-                        >
-                            {{
-                                payment.paid_at
-                                    ? new Date(
-                                          payment.paid_at,
-                                      ).toLocaleDateString()
-                                    : 'N/A'
-                            }}
-                            — {{ fmtCurrency(payment.amount) }}
-                        </option>
-                    </select>
+                    <Select v-model="form.payment_id">
+                        <SelectTrigger id="refund-payment" class="w-full">
+                            <SelectValue placeholder="None" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem
+                                v-for="payment in payments"
+                                :key="payment.id"
+                                :value="payment.id.toString()"
+                            >
+                                {{
+                                    payment.paid_at
+                                        ? new Date(
+                                              payment.paid_at,
+                                          ).toLocaleDateString()
+                                        : 'N/A'
+                                }}
+                                — {{ fmtCurrency(payment.amount) }}
+                            </SelectItem>
+                        </SelectContent>
+                    </Select>
                     <InputError :message="errors.payment_id" />
                 </div>
 

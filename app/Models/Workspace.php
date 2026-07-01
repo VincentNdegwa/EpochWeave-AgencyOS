@@ -49,4 +49,24 @@ class Workspace extends LaratrustTeam
     {
         return $this->hasMany(InvoiceStatus::class);
     }
+
+    public function industries(): HasMany
+    {
+        return $this->hasMany(Industry::class);
+    }
+
+    public function leadSources(): HasMany
+    {
+        return $this->hasMany(LeadSource::class);
+    }
+
+    public function companySizes(): HasMany
+    {
+        return $this->hasMany(CompanySize::class);
+    }
+
+    public function customFieldGroups(): HasMany
+    {
+        return $this->hasMany(CustomFieldGroup::class);
+    }
 }

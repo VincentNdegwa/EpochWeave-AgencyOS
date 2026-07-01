@@ -22,7 +22,7 @@ class ProposalStatusController extends Controller
         $workspace = $request->attributes->get('current_workspace');
         $proposalStatuses = $this->proposalStatusService->getStatusesForWorkspace($workspace);
 
-        return Inertia::render('proposal-status/index', [
+        return Inertia::render('setup/proposal-status/index', [
             'proposal_statuses' => $proposalStatuses,
         ]);
     }

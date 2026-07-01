@@ -29,11 +29,11 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->get('/task-status');
+            ->get('/setup/task-status');
 
         $response->assertStatus(200)
             ->assertInertia(fn (Assert $page) => $page
-                ->component('task-status/index')
+                ->component('setup/task-status/index')
                 ->has('task_statuses')
             );
     }
@@ -47,7 +47,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/task-status', [
+            ->post('/setup/task-status', [
                 'title' => 'In Review',
                 'color' => '#a855f7',
                 'position' => 3,
@@ -71,7 +71,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/task-status', [
+            ->post('/setup/task-status', [
                 'color' => '#a855f7',
             ]);
 
@@ -92,7 +92,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/task-status/{$status->id}", [
+            ->put("/setup/task-status/{$status->id}", [
                 'title' => 'Updated Title',
                 'color' => '#22c55e',
             ]);
@@ -121,7 +121,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/task-status/{$status->id}", [
+            ->put("/setup/task-status/{$status->id}", [
                 'title' => 'Updated Title',
                 'color' => '#22c55e',
             ]);
@@ -148,7 +148,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->delete("/task-status/{$status->id}");
+            ->delete("/setup/task-status/{$status->id}");
 
         $response->assertRedirect();
         $this->assertDatabaseMissing('task_statuses', [
@@ -172,7 +172,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->delete("/task-status/{$status->id}");
+            ->delete("/setup/task-status/{$status->id}");
 
         $response->assertRedirect();
         $this->assertDatabaseHas('task_statuses', [
@@ -194,7 +194,7 @@ class TaskStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/task-status/{$status->id}", [
+            ->put("/setup/task-status/{$status->id}", [
                 'title' => 'Hacked Title',
             ]);
 
@@ -203,7 +203,7 @@ class TaskStatusTest extends TestCase
 
     public function test_guest_cannot_access_task_statuses(): void
     {
-        $response = $this->get('/task-status');
+        $response = $this->get('/setup/task-status');
         $response->assertRedirect('/login');
     }
 

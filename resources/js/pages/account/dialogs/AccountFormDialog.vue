@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form } from '@inertiajs/vue3';
 import { Plus, X } from '@lucide/vue';
+import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
 import {
     store as accountStore,
@@ -19,6 +20,14 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { useBuilderDataStore } from '@/stores/builderData';
 import type { Account } from '@/types/models/account';
 
 interface ContactForm {
@@ -27,6 +36,10 @@ interface ContactForm {
     email: string;
     phone: string;
     job_title: string;
+    date_of_birth: string;
+    department: string;
+    preferred_contact_method: string;
+    notes: string;
     is_primary: boolean;
     receives_billing: boolean;
 }
@@ -43,6 +56,9 @@ const emit = defineEmits<{
     success: [];
 }>();
 
+const builderData = useBuilderDataStore();
+const { industries, leadSources, companySizes } = storeToRefs(builderData);
+
 const isEditMode = computed(() => !!props.account);
 
 function blankContact(): ContactForm {
@@ -52,6 +68,10 @@ function blankContact(): ContactForm {
         email: '',
         phone: '',
         job_title: '',
+        date_of_birth: '',
+        department: '',
+        preferred_contact_method: '',
+        notes: '',
         is_primary: false,
         receives_billing: false,
     };
@@ -59,7 +79,15 @@ function blankContact(): ContactForm {
 
 const contacts = ref<ContactForm[]>([blankContact()]);
 const companyName = ref(props.account?.company_name ?? '');
+const phone = ref(props.account?.phone ?? '');
 const website = ref(props.account?.website ?? '');
+const description = ref(props.account?.description ?? '');
+const foundedAt = ref(props.account?.founded_at ?? '');
+const industryId = ref<string>((props.account?.industry_id ?? '').toString());
+const leadSourceId = ref<string>((props.account?.lead_source_id ?? '').toString());
+const companySizeId = ref<string>((props.account?.company_size_id ?? '').toString());
+const annualRevenue = ref(props.account?.annual_revenue ?? '');
+const employeeCount = ref(props.account?.employee_count ?? '');
 
 const addContact = () => {
     contacts.value.push(blankContact());
@@ -80,13 +108,29 @@ const formAction = computed(() => {
 const resetPrimaryFields = () => {
     if (props.account) {
         companyName.value = props.account.company_name ?? '';
+        phone.value = props.account.phone ?? '';
         website.value = props.account.website ?? '';
+        description.value = props.account.description ?? '';
+        foundedAt.value = props.account.founded_at ?? '';
+        industryId.value = (props.account.industry_id ?? '').toString();
+        leadSourceId.value = (props.account.lead_source_id ?? '').toString();
+        companySizeId.value = (props.account.company_size_id ?? '').toString();
+        annualRevenue.value = props.account.annual_revenue ?? '';
+        employeeCount.value = props.account.employee_count ?? '';
 
         return;
     }
 
     companyName.value = '';
+    phone.value = '';
     website.value = '';
+    description.value = '';
+    foundedAt.value = '';
+    industryId.value = '';
+    leadSourceId.value = '';
+    companySizeId.value = '';
+    annualRevenue.value = '';
+    employeeCount.value = '';
 };
 
 watch(
@@ -103,6 +147,10 @@ watch(
         if (!isOpen) {
             return;
         }
+
+        builderData.fetchIndustries();
+        builderData.fetchLeadSources();
+        builderData.fetchCompanySizes();
 
         resetPrimaryFields();
 
@@ -169,6 +217,123 @@ watch(
                             />
                             <InputError :message="errors.website" />
                         </div>
+
+                        <div class="grid gap-2">
+                            <Label for="phone">Phone</Label>
+                            <Input
+                                id="phone"
+                                name="phone"
+                                v-model="phone"
+                                placeholder="+1 (555) 123-4567"
+                            />
+                            <InputError :message="errors.phone" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="founded_at">Founded</Label>
+                            <Input
+                                id="founded_at"
+                                name="founded_at"
+                                type="date"
+                                v-model="foundedAt"
+                            />
+                            <InputError :message="errors.founded_at" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="industry_id">Industry</Label>
+                            <Select name="industry_id" v-model="industryId">
+                                <SelectTrigger id="industry_id" class="w-full">
+                                    <SelectValue placeholder="Select industry..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="industry in industries"
+                                        :key="industry.id"
+                                        :value="industry.id.toString()"
+                                    >
+                                        {{ industry.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.industry_id" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="lead_source_id">Lead Source</Label>
+                            <Select name="lead_source_id" v-model="leadSourceId">
+                                <SelectTrigger id="lead_source_id" class="w-full">
+                                    <SelectValue placeholder="Select source..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="source in leadSources"
+                                        :key="source.id"
+                                        :value="source.id.toString()"
+                                    >
+                                        {{ source.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.lead_source_id" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="company_size_id">Company Size</Label>
+                            <Select name="company_size_id" v-model="companySizeId">
+                                <SelectTrigger id="company_size_id" class="w-full">
+                                    <SelectValue placeholder="Select size..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem
+                                        v-for="size in companySizes"
+                                        :key="size.id"
+                                        :value="size.id.toString()"
+                                    >
+                                        {{ size.label }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.company_size_id" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="annual_revenue">Annual Revenue</Label>
+                            <Input
+                                id="annual_revenue"
+                                name="annual_revenue"
+                                type="number"
+                                v-model="annualRevenue"
+                                placeholder="0"
+                            />
+                            <InputError :message="errors.annual_revenue" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="employee_count">Employees</Label>
+                            <Input
+                                id="employee_count"
+                                name="employee_count"
+                                type="number"
+                                v-model="employeeCount"
+                                placeholder="0"
+                            />
+                            <InputError :message="errors.employee_count" />
+                        </div>
+
+                        <div class="grid gap-2 sm:col-span-2">
+                            <Label for="description">Description</Label>
+                            <textarea
+                                id="description"
+                                name="description"
+                                v-model="description"
+                                rows="3"
+                                class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors"
+                                placeholder="Brief company description..."
+                            ></textarea>
+                            <InputError :message="errors.description" />
+                        </div>
+
                     </div>
 
                     <div v-if="!isEditMode" class="space-y-4">

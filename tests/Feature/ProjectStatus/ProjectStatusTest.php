@@ -29,11 +29,11 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->get('/project-status');
+            ->get('/setup/project-status');
 
         $response->assertStatus(200)
             ->assertInertia(fn (Assert $page) => $page
-                ->component('project-status/index')
+                ->component('setup/project-status/index')
                 ->has('project_statuses')
             );
     }
@@ -47,7 +47,7 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/project-status', [
+            ->post('/setup/project-status', [
                 'title' => 'Review',
                 'color' => '#a855f7',
                 'position' => 5,
@@ -71,7 +71,7 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/project-status', [
+            ->post('/setup/project-status', [
                 'color' => '#a855f7',
             ]);
 
@@ -92,7 +92,7 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/project-status/{$status->id}", [
+            ->put("/setup/project-status/{$status->id}", [
                 'title' => 'Updated Title',
                 'color' => '#22c55e',
             ]);
@@ -119,7 +119,7 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->delete("/project-status/{$status->id}");
+            ->delete("/setup/project-status/{$status->id}");
 
         $response->assertRedirect();
         $this->assertDatabaseMissing('project_statuses', [
@@ -142,7 +142,7 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->delete("/project-status/{$status->id}");
+            ->delete("/setup/project-status/{$status->id}");
 
         $response->assertRedirect();
         $this->assertDatabaseHas('project_statuses', [
@@ -164,7 +164,7 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->put("/project-status/{$status->id}", [
+            ->put("/setup/project-status/{$status->id}", [
                 'title' => 'Hacked Title',
             ]);
 
@@ -173,7 +173,7 @@ class ProjectStatusTest extends TestCase
 
     public function test_guest_cannot_access_project_statuses(): void
     {
-        $response = $this->get('/project-status');
+        $response = $this->get('/setup/project-status');
         $response->assertRedirect('/login');
     }
 
@@ -230,7 +230,7 @@ class ProjectStatusTest extends TestCase
 
         $response = $this->actingAs($user)
             ->withSession(['current_workspace_id' => $workspace->id])
-            ->post('/project-status', [
+            ->post('/setup/project-status', [
                 'title' => 'Invalid Color',
                 'color' => 'not-a-color',
             ]);

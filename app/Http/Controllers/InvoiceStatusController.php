@@ -21,7 +21,7 @@ class InvoiceStatusController extends Controller
         $workspace = $request->attributes->get('current_workspace');
         $statuses = $this->invoiceStatusService->listForWorkspace($workspace->id);
 
-        return Inertia::render('invoice-status/index', [
+        return Inertia::render('setup/invoice-status/index', [
             'invoice_statuses' => $statuses,
         ]);
     }

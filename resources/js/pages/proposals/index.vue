@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { dashboard } from '@/routes';
 import type { Proposal } from '@/types/models/proposal';
-import ProposalStatusFormDialog from '../proposal-status/dialogs/ProposalStatusFormDialog.vue';
+import ProposalStatusFormDialog from '../setup/proposal-status/dialogs/ProposalStatusFormDialog.vue';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
 import ProposalFormDialog from './dialogs/ProposalFormDialog.vue';
@@ -57,7 +57,7 @@ const handleCreateStatus = () => {
 };
 
 const handleViewStatuses = () => {
-    router.visit('/proposal-status');
+    router.visit('/setup/proposal-status');
 };
 
 const handleSuccess = () => {

@@ -21,7 +21,7 @@ class ProjectStatusController extends Controller
         $workspace = $request->attributes->get('current_workspace');
         $statuses = $this->projectStatusService->listForWorkspace($workspace->id);
 
-        return Inertia::render('project-status/index', [
+        return Inertia::render('setup/project-status/index', [
             'project_statuses' => $statuses,
         ]);
     }

@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import PublicLayout from '@/layouts/public/Layout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
+import SetupLayout from '@/layouts/setup/Layout.vue';
 import WorkspaceSettingsLayout from '@/layouts/workspace-settings/Layout.vue';
 import { initializeFlashToast } from '@/lib/flashToast';
 
@@ -25,6 +26,8 @@ createInertiaApp({
                 return [AppLayout, SettingsLayout];
             case name.startsWith('workspace-settings/'):
                 return [AppLayout, WorkspaceSettingsLayout];
+            case name.startsWith('setup/'):
+                return [AppLayout, SetupLayout];
             default:
                 return AppLayout;
         }

@@ -29,6 +29,10 @@ export interface Enums {
     accountStatuses: Record<string, EnumOption>;
     billingTypes: Record<string, EnumOption>;
     billingFrequencies: Record<string, EnumOption>;
+    engagementDirections: Record<string, EnumOption>;
+    engagementOutcomes: Record<string, EnumOption>;
+    engagementStatuses: Record<string, EnumOption>;
+    engagementTypes: Record<string, EnumOption>;
     projectStatuses: Record<string, EnumOption & { hexColor: string }>;
     taskPriorities: Record<string, EnumOption & { hexColor: string }>;
 }
@@ -41,6 +45,10 @@ export function useEnums() {
         accountStatuses: enums?.accountStatuses || {},
         billingTypes: enums?.billingTypes || {},
         billingFrequencies: enums?.billingFrequencies || {},
+        engagementDirections: enums?.engagementDirections || {},
+        engagementOutcomes: enums?.engagementOutcomes || {},
+        engagementStatuses: enums?.engagementStatuses || {},
+        engagementTypes: enums?.engagementTypes || {},
         projectStatuses: enums?.projectStatuses || {},
         taskPriorities: enums?.taskPriorities || {},
     };
@@ -118,4 +126,32 @@ export function useTaskPriorities() {
             taskPriorities[value]?.hexColor || '#6b7280',
         values: Object.values(taskPriorities),
     };
+}
+
+function createEnumHelpers(enumRecord: Record<string, EnumOption>) {
+    return {
+        all: enumRecord,
+        getByValue: (value: string): EnumOption | undefined => enumRecord[value],
+        getLabel: (value: string): string => enumRecord[value]?.label || value,
+        getVariant: (value: string): BadgeVariants['variant'] =>
+            enumRecord[value]?.variant || 'default',
+        getColor: (value: string): string => enumRecord[value]?.color || '',
+        values: Object.values(enumRecord),
+    };
+}
+
+export function useEngagementDirections() {
+    return createEnumHelpers(useEnums().engagementDirections);
+}
+
+export function useEngagementOutcomes() {
+    return createEnumHelpers(useEnums().engagementOutcomes);
+}
+
+export function useEngagementStatuses() {
+    return createEnumHelpers(useEnums().engagementStatuses);
+}
+
+export function useEngagementTypes() {
+    return createEnumHelpers(useEnums().engagementTypes);
 }

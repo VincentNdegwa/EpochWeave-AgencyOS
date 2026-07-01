@@ -7,6 +7,7 @@ import {
     FolderKanban,
     Link as LinkIcon,
     MoreHorizontal,
+    Phone,
     Trash2,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
@@ -18,6 +19,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import EngagementFormDialog from '@/pages/account/dialogs/EngagementFormDialog.vue';
 import ProjectFormDialog from '@/pages/projects/dialogs/ProjectFormDialog.vue';
 import ProposalFormDialog from '@/pages/proposals/dialogs/ProposalFormDialog.vue';
 import type { Account } from '@/types/models/account';
@@ -37,6 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
 const isEditDialogOpen = ref(false);
 const isProposalDialogOpen = ref(false);
 const isProjectDialogOpen = ref(false);
+const isEngagementDialogOpen = ref(false);
 
 interface ActionItem {
     label: string;
@@ -104,6 +107,14 @@ const createProjectAction: ActionItem = {
     },
 };
 
+const logEngagementAction: ActionItem = {
+    label: 'Log Engagement',
+    icon: Phone,
+    handler: () => {
+        isEngagementDialogOpen.value = true;
+    },
+};
+
 const deleteAction: ActionItem = {
     label: 'Delete',
     icon: Trash2,
@@ -130,6 +141,7 @@ const allActions = computed((): ActionItem[] => {
     return [
         viewAction,
         editAction,
+        logEngagementAction,
         createProposalAction,
         createProjectAction,
         deleteAction,
@@ -271,5 +283,11 @@ const splitDropdownItems = computed((): ActionItem[] => {
         :account="props.account"
         @update:open="isProjectDialogOpen = $event"
         @success="isProjectDialogOpen = false"
+    />
+    <EngagementFormDialog
+        :open="isEngagementDialogOpen"
+        :account="props.account"
+        @update:open="isEngagementDialogOpen = $event"
+        @success="isEngagementDialogOpen = false"
     />
 </template>

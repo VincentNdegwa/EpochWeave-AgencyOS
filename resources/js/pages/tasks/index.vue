@@ -16,8 +16,8 @@ import { dashboard } from '@/routes';
 import type { Tag as TagType } from '@/types/models/tag';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
+import TaskStatusFormDialog from '../setup/task-status/dialogs/TaskStatusFormDialog.vue';
 import TagFormDialog from '../tags/dialogs/TagFormDialog.vue';
-import TaskStatusFormDialog from '../task-status/dialogs/TaskStatusFormDialog.vue';
 import { createColumns } from './datatable/columns';
 import DataTable from './datatable/data-table.vue';
 import TaskFormDialog from './dialogs/TaskFormDialog.vue';
@@ -66,7 +66,7 @@ const handleCreateStatus = () => {
 };
 
 const handleViewStatuses = () => {
-    router.visit('/task-status');
+    router.visit('/setup/task-status');
 };
 
 const handleCreateTag = () => {

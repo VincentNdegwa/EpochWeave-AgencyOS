@@ -14,6 +14,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import type { AccountContact } from '@/types/models/account';
 
@@ -38,6 +45,10 @@ const form = ref({
     email: props.contact?.email || '',
     phone: props.contact?.phone || '',
     job_title: props.contact?.job_title || '',
+    date_of_birth: props.contact?.date_of_birth || '',
+    department: props.contact?.department || '',
+    preferred_contact_method: props.contact?.preferred_contact_method || '',
+    notes: props.contact?.notes || '',
     is_primary: props.contact?.is_primary || false,
     receives_billing: props.contact?.receives_billing || false,
 });
@@ -52,6 +63,10 @@ watch(
                 email: newContact.email,
                 phone: newContact.phone || '',
                 job_title: newContact.job_title || '',
+                date_of_birth: newContact.date_of_birth || '',
+                department: newContact.department || '',
+                preferred_contact_method: newContact.preferred_contact_method || '',
+                notes: newContact.notes || '',
                 is_primary: newContact.is_primary,
                 receives_billing: newContact.receives_billing,
             };
@@ -62,6 +77,10 @@ watch(
                 email: '',
                 phone: '',
                 job_title: '',
+                date_of_birth: '',
+                department: '',
+                preferred_contact_method: '',
+                notes: '',
                 is_primary: false,
                 receives_billing: false,
             };
@@ -158,6 +177,55 @@ watch(
                             placeholder="Enter job title..."
                         />
                         <InputError :message="errors.job_title" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="department">Department</Label>
+                        <Input
+                            id="department"
+                            name="department"
+                            v-model="form.department"
+                            placeholder="e.g. Engineering"
+                        />
+                        <InputError :message="errors.department" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="date_of_birth">Date of Birth</Label>
+                        <Input
+                            id="date_of_birth"
+                            name="date_of_birth"
+                            type="date"
+                            v-model="form.date_of_birth"
+                        />
+                        <InputError :message="errors.date_of_birth" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="preferred_contact_method">Preferred Contact</Label>
+                        <Select name="preferred_contact_method" v-model="form.preferred_contact_method">
+                            <SelectTrigger id="preferred_contact_method" class="w-full">
+                                <SelectValue placeholder="Select..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="email">Email</SelectItem>
+                                <SelectItem value="phone">Phone</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <InputError :message="errors.preferred_contact_method" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="notes">Notes</Label>
+                        <textarea
+                            id="notes"
+                            name="notes"
+                            v-model="form.notes"
+                            rows="3"
+                            class="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors"
+                            placeholder="Additional notes..."
+                        ></textarea>
+                        <InputError :message="errors.notes" />
                     </div>
 
                     <div class="flex items-center gap-4">
