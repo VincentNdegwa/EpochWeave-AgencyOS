@@ -56,7 +56,7 @@ watch(
 
 <template>
     <Dialog class="" :open="open" @update:open="emit('update:open', $event)">
-        <DialogContent class="sm:max-w-xl">
+        <DialogContent class="max-h-[90vh] overflow-hidden sm:max-w-xl">
             <DialogHeader>
                 <DialogTitle>{{
                     status ? 'Edit Proposal Status' : 'New Proposal Status'
@@ -85,7 +85,7 @@ watch(
                 "
                 v-slot="{ errors, processing }"
             >
-                <div class="grid gap-6 py-4">
+                <div class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2">
                     <div class="grid gap-4">
                         <div class="grid gap-2">
                             <Label for="title" required>Status Name</Label>

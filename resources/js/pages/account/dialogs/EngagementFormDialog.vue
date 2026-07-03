@@ -2,7 +2,7 @@
 import { Form } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
-import EngagementController from '@/actions/App/Http/Controllers/EngagementController';
+import { store as engagementStore } from '@/actions/App/Http/Controllers/EngagementController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,14 +23,14 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useBuilderDataStore } from '@/stores/builderData';
-import type { Account } from '@/types/models/account';
 import {
     useEngagementDirections,
     useEngagementOutcomes,
     useEngagementStatuses,
     useEngagementTypes,
 } from '@/composables/useEnums';
+import { useBuilderDataStore } from '@/stores/builderData';
+import type { Account } from '@/types/models/account';
 
 interface Props {
     open: boolean;
@@ -45,8 +45,7 @@ const emit = defineEmits<{
 }>();
 
 const builderData = useBuilderDataStore();
-const { projects, projectsLoaded, proposals, proposalsLoaded, invoices, invoicesLoaded } =
-    storeToRefs(builderData);
+const { projects, proposals, invoices } = storeToRefs(builderData);
 
 const accountProjects = computed(() =>
     (projects.value || []).filter((p) => p.account_id === props.account.id),
@@ -81,13 +80,13 @@ const form = ref({
     status: 'completed',
     subject: '',
     content: '',
-    proposal_id: '',
-    invoice_id: '',
-    project_id: '',
+    proposal_id: 'none',
+    invoice_id: 'none',
+    project_id: 'none',
     scheduled_at: '',
     completed_at: '',
     follow_up_at: '',
-    outcome: '',
+    outcome: 'none',
 });
 
 watch(
@@ -101,13 +100,13 @@ watch(
                 status: 'completed',
                 subject: '',
                 content: '',
-                proposal_id: '',
-                invoice_id: '',
-                project_id: '',
+                proposal_id: 'none',
+                invoice_id: 'none',
+                project_id: 'none',
                 scheduled_at: '',
                 completed_at: new Date().toISOString().slice(0, 16),
                 follow_up_at: '',
-                outcome: '',
+                outcome: 'none',
             };
         }
     },
@@ -116,7 +115,7 @@ watch(
 
 <template>
     <Dialog :open="open" @update:open="emit('update:open', $event)">
-        <DialogContent class="max-w-2xl">
+        <DialogContent class="max-h-[90vh] overflow-hidden sm:max-w-3xl">
             <DialogHeader>
                 <DialogTitle>Log Engagement</DialogTitle>
                 <DialogDescription>
@@ -125,7 +124,7 @@ watch(
             </DialogHeader>
 
             <Form
-                v-bind="EngagementController.store.form() as any"
+                v-bind="engagementStore.form() as any"
                 :options="{ preserveScroll: true, preserveState: true }"
                 @success="
                     emit('success');
@@ -135,16 +134,16 @@ watch(
             >
                 <input type="hidden" name="account_id" :value="form.account_id" />
 
-                <div class="grid gap-6 py-4">
+                <div class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div class="grid gap-2">
                             <Label for="engagement-type" required>Type</Label>
                             <Select
                                 name="type"
                                 :model-value="form.type"
-                                @update:model-value="form.type = $event"
+                                @update:model-value="form.type = $event as string"
                             >
-                                <SelectTrigger id="engagement-type">
+                                <SelectTrigger id="engagement-type" class="w-full">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -165,9 +164,9 @@ watch(
                             <Select
                                 name="direction"
                                 :model-value="form.direction"
-                                @update:model-value="form.direction = $event"
+                                @update:model-value="form.direction = $event as string"
                             >
-                                <SelectTrigger id="engagement-direction">
+                                <SelectTrigger id="engagement-direction" class="w-full">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -188,9 +187,9 @@ watch(
                             <Select
                                 name="status"
                                 :model-value="form.status"
-                                @update:model-value="form.status = $event"
+                                @update:model-value="form.status = $event as string"
                             >
-                                <SelectTrigger id="engagement-status">
+                                <SelectTrigger id="engagement-status" class="w-full">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -232,80 +231,6 @@ watch(
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div class="grid gap-2">
-                            <Label for="engagement-proposal">Related Proposal</Label>
-                            <Select
-                                name="proposal_id"
-                                :model-value="form.proposal_id"
-                                @update:model-value="form.proposal_id = $event"
-                            >
-                                <SelectTrigger id="engagement-proposal">
-                                    <SelectValue placeholder="None" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">None</SelectItem>
-                                    <SelectItem
-                                        v-for="p in accountProposals"
-                                        :key="p.id"
-                                        :value="p.id.toString()"
-                                    >
-                                        {{ p.proposal_number }} - {{ p.title }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <InputError :message="errors.proposal_id" />
-                        </div>
-
-                        <div class="grid gap-2">
-                            <Label for="engagement-invoice">Related Invoice</Label>
-                            <Select
-                                name="invoice_id"
-                                :model-value="form.invoice_id"
-                                @update:model-value="form.invoice_id = $event"
-                            >
-                                <SelectTrigger id="engagement-invoice">
-                                    <SelectValue placeholder="None" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">None</SelectItem>
-                                    <SelectItem
-                                        v-for="i in accountInvoices"
-                                        :key="i.id"
-                                        :value="i.id.toString()"
-                                    >
-                                        {{ i.invoice_number }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <InputError :message="errors.invoice_id" />
-                        </div>
-
-                        <div class="grid gap-2">
-                            <Label for="engagement-project">Related Project</Label>
-                            <Select
-                                name="project_id"
-                                :model-value="form.project_id"
-                                @update:model-value="form.project_id = $event"
-                            >
-                                <SelectTrigger id="engagement-project">
-                                    <SelectValue placeholder="None" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="">None</SelectItem>
-                                    <SelectItem
-                                        v-for="p in accountProjects"
-                                        :key="p.id"
-                                        :value="p.id.toString()"
-                                    >
-                                        {{ p.name }}
-                                    </SelectItem>
-                                </SelectContent>
-                            </Select>
-                            <InputError :message="errors.project_id" />
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="grid gap-2">
                             <Label for="engagement-scheduled">Scheduled At</Label>
                             <Input
                                 id="engagement-scheduled"
@@ -339,19 +264,93 @@ watch(
                         </div>
                     </div>
 
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="grid gap-2">
+                            <Label for="engagement-proposal">Related Proposal</Label>
+                            <Select
+                                name="proposal_id"
+                                :model-value="form.proposal_id"
+                                @update:model-value="form.proposal_id = $event as string"
+                            >
+                                <SelectTrigger id="engagement-proposal" class="w-full">
+                                    <SelectValue placeholder="None" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    <SelectItem
+                                        v-for="p in accountProposals"
+                                        :key="p.id"
+                                        :value="p.id.toString()"
+                                    >
+                                        {{ p.proposal_number }} - {{ p.title }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.proposal_id" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="engagement-invoice">Related Invoice</Label>
+                            <Select
+                                name="invoice_id"
+                                :model-value="form.invoice_id"
+                                @update:model-value="form.invoice_id = $event as string"
+                            >
+                                <SelectTrigger id="engagement-invoice" class="w-full">
+                                    <SelectValue placeholder="None" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    <SelectItem
+                                        v-for="i in accountInvoices"
+                                        :key="i.id"
+                                        :value="i.id.toString()"
+                                    >
+                                        {{ i.invoice_number }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.invoice_id" />
+                        </div>
+
+                        <div class="grid gap-2">
+                            <Label for="engagement-project">Related Project</Label>
+                            <Select
+                                name="project_id"
+                                :model-value="form.project_id"
+                                @update:model-value="form.project_id = $event as string"
+                            >
+                                <SelectTrigger id="engagement-project" class="w-full">
+                                    <SelectValue placeholder="None" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="none">None</SelectItem>
+                                    <SelectItem
+                                        v-for="p in accountProjects"
+                                        :key="p.id"
+                                        :value="p.id.toString()"
+                                    >
+                                        {{ p.name }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.project_id" />
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="grid gap-2">
                             <Label for="engagement-outcome">Outcome</Label>
                             <Select
                                 name="outcome"
                                 :model-value="form.outcome"
-                                @update:model-value="form.outcome = $event"
+                                @update:model-value="form.outcome = $event as string"
                             >
-                                <SelectTrigger id="engagement-outcome">
+                                <SelectTrigger id="engagement-outcome" class="w-full">
                                     <SelectValue placeholder="Select outcome" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">None</SelectItem>
+                                    <SelectItem value="none">None</SelectItem>
                                     <SelectItem
                                         v-for="opt in engagementOutcomes.values"
                                         :key="opt.value"

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\AccountStatus;
 use App\Exceptions\AccountException;
+use App\Http\Requests\Imports\ImportAccountsRequest;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use App\Models\Account;
@@ -194,23 +195,14 @@ class AccountController extends Controller
         return response()->json($preview);
     }
 
-    public function import(Request $request): RedirectResponse
+    public function import(ImportAccountsRequest $request): RedirectResponse
     {
-        $request->validate([
-            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:2048'],
-            'mapping' => ['required', 'array'],
-            'bulk' => ['sometimes', 'array'],
-        ]);
-
         $workspace = $request->attributes->get('current_workspace');
-        $path = $request->file('file')->getRealPath();
 
         try {
-            $result = $this->importService->import(
+            $result = $this->importService->importFromData(
                 $workspace->id,
-                $path,
-                $request->input('mapping', []),
-                $request->input('bulk', []),
+                $request->validated('accounts'),
             );
 
             $message = "Successfully imported {$result['created']} accounts.";
@@ -230,7 +222,7 @@ class AccountController extends Controller
             ]);
         }
 
-        return redirect()->back();
+        return redirect()->route('accounts.index');
     }
 
     public function downloadImportTemplate(): Response
@@ -239,17 +231,13 @@ class AccountController extends Controller
             'company_name',
             'phone',
             'website',
-            'description',
-            'founded_at',
-            'annual_revenue',
-            'employee_count',
-            'first_name',
-            'last_name',
-            'email',
+            'contact_first_name',
+            'contact_last_name',
+            'contact_email',
             'contact_phone',
         ];
 
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         foreach ($headers as $index => $header) {
@@ -260,10 +248,6 @@ class AccountController extends Controller
             'Acme Corp',
             '+1 555 1234',
             'https://acme.example.com',
-            'Example description',
-            '2020-01-15',
-            '1000000',
-            '50',
             'John',
             'Doe',
             'john@acme.example.com',

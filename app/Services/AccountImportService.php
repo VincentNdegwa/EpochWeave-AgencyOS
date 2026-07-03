@@ -2,10 +2,6 @@
 
 namespace App\Services;
 
-use App\Enums\AccountStatus;
-use App\Models\CompanySize;
-use App\Models\Industry;
-use App\Models\LeadSource;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
@@ -18,7 +14,7 @@ class AccountImportService
     public function __construct(private AccountService $accountService) {}
 
     /**
-     * Parse a spreadsheet file and return its headers and first preview rows.
+     * Parse a spreadsheet file and return its headers and preview rows.
      *
      * @return array{headers: array<int, string>, rows: array<int, array<int, string>>}
      */
@@ -31,42 +27,30 @@ class AccountImportService
         }
 
         $headers = array_shift($rows);
-        $preview = array_slice($rows, 0, 10);
 
         return [
             'headers' => $headers,
-            'rows' => $preview,
+            'rows' => $rows,
         ];
     }
 
     /**
-     * Import accounts from a spreadsheet file using field mapping and bulk options.
+     * Import accounts from the edited frontend data.
      *
-     * @param array<string, string|null> $mapping
-     * @param array<string, mixed> $bulk
-     *
+     * @param  array<int, array<string, mixed>>  $accounts
      * @return array{created: int, errors: array<int, string>}
      */
-    public function import(int $workspaceId, string $path, array $mapping, array $bulk): array
+    public function importFromData(int $workspaceId, array $accounts): array
     {
-        $rows = $this->readSpreadsheet($path);
-
-        if ($rows === []) {
-            throw new InvalidArgumentException('Import file is empty.');
-        }
-
-        $headers = array_shift($rows);
-        $headerMap = $this->buildHeaderMap($headers);
-
         $created = 0;
         $errors = [];
-        $line = 1;
+        $line = 0;
 
-        foreach ($rows as $row) {
+        foreach ($accounts as $account) {
             $line++;
 
             try {
-                $this->importRow($workspaceId, $row, $headerMap, $mapping, $bulk);
+                $this->accountService->createAccount($this->buildAccountData($workspaceId, $account));
                 $created++;
             } catch (Throwable $e) {
                 $errors[$line] = $e->getMessage();
@@ -105,11 +89,13 @@ class AccountImportService
 
                 if ($value === null) {
                     $rowData[] = '';
+
                     continue;
                 }
 
                 if ($cell->getDataType() === DataType::TYPE_NUMERIC && SpreadsheetDate::isDateTime($cell)) {
                     $rowData[] = date('Y-m-d', SpreadsheetDate::excelToTimestamp($value));
+
                     continue;
                 }
 
@@ -125,8 +111,7 @@ class AccountImportService
     }
 
     /**
-     * @param array<int, string> $headers
-     *
+     * @param  array<int, string>  $headers
      * @return array<string, int>
      */
     private function buildHeaderMap(array $headers): array
@@ -140,175 +125,88 @@ class AccountImportService
     }
 
     /**
-     * @param array<int, string> $row
-     * @param array<string, int> $headerMap
-     * @param array<string, string|null> $mapping
-     * @param array<string, mixed> $bulk
+     * @param  array<string, mixed>  $account
      *
      * @throws InvalidArgumentException
      */
-    private function importRow(int $workspaceId, array $row, array $headerMap, array $mapping, array $bulk): void
+    private function buildAccountData(int $workspaceId, array $account): array
     {
-        $companyName = $this->value($row, $headerMap, $mapping, 'company_name');
+        $companyName = $this->trimToNull($account['company_name'] ?? null);
 
-        if ($companyName === null || $companyName === '') {
+        if ($companyName === null) {
             throw new InvalidArgumentException('Company name is required.');
         }
 
-        $industryId = $this->bulkLookup($workspaceId, $bulk, 'industry_id', Industry::class);
-        $leadSourceId = $this->bulkLookup($workspaceId, $bulk, 'lead_source_id', LeadSource::class);
-        $companySizeId = $this->bulkLookup($workspaceId, $bulk, 'company_size_id', CompanySize::class);
-
-        $status = $this->bulkStatus($bulk);
-        $foundedAt = $this->value($row, $headerMap, $mapping, 'founded_at');
-        $annualRevenue = $this->value($row, $headerMap, $mapping, 'annual_revenue');
-        $employeeCount = $this->value($row, $headerMap, $mapping, 'employee_count');
-
-        $accountData = [
+        $data = [
             'workspace_id' => $workspaceId,
             'company_name' => $companyName,
-            'phone' => $this->value($row, $headerMap, $mapping, 'phone'),
-            'website' => $this->value($row, $headerMap, $mapping, 'website'),
-            'description' => $this->value($row, $headerMap, $mapping, 'description'),
-            'founded_at' => $this->date($foundedAt),
-            'status' => $status,
-            'annual_revenue' => $this->numeric($annualRevenue, 'annual_revenue'),
-            'employee_count' => $this->integer($employeeCount, 'employee_count'),
-            'industry_id' => $industryId,
-            'lead_source_id' => $leadSourceId,
-            'company_size_id' => $companySizeId,
+            'phone' => $this->trimToNull($account['phone'] ?? null),
+            'website' => $this->trimToNull($account['website'] ?? null),
+            'status' => $account['status'] ?? 'lead',
+            'industry_id' => $this->castInteger($account['industry_id'] ?? null),
+            'lead_source_id' => $this->castInteger($account['lead_source_id'] ?? null),
+            'company_size_id' => $this->castInteger($account['company_size_id'] ?? null),
         ];
 
-        $contacts = [];
-        $contactEmail = $this->value($row, $headerMap, $mapping, 'contact_email');
-        $contactFirstName = $this->value($row, $headerMap, $mapping, 'contact_first_name');
-        $contactLastName = $this->value($row, $headerMap, $mapping, 'contact_last_name');
-
-        if ($contactEmail !== null && $contactEmail !== '') {
-            if ($contactFirstName === null || $contactFirstName === '' || $contactLastName === null || $contactLastName === '') {
-                throw new InvalidArgumentException('Contact first and last name are required when email is provided.');
-            }
-
-            if (! filter_var($contactEmail, FILTER_VALIDATE_EMAIL)) {
-                throw new InvalidArgumentException('Contact email is invalid.');
-            }
-
-            $contacts[] = [
-                'first_name' => $contactFirstName,
-                'last_name' => $contactLastName,
-                'email' => $contactEmail,
-                'phone' => $this->value($row, $headerMap, $mapping, 'contact_phone'),
-                'is_primary' => true,
-            ];
-        }
+        $contacts = $this->buildContacts($account);
 
         if ($contacts !== []) {
-            $accountData['contacts'] = $contacts;
+            $data['contacts'] = $contacts;
         }
 
-        $this->accountService->createAccount($accountData);
+        return $data;
     }
 
     /**
-     * @param array<int, string> $row
-     * @param array<string, int> $headerMap
-     * @param array<string, string|null> $mapping
+     * @param  array<string, mixed>  $account
+     * @return array<int, array<string, mixed>>
      */
-    private function value(array $row, array $headerMap, array $mapping, string $field): ?string
+    private function buildContacts(array $account): array
     {
-        $csvColumn = $mapping[$field] ?? null;
+        $email = $this->trimToNull($account['contact_email'] ?? null);
+        $firstName = $this->trimToNull($account['contact_first_name'] ?? null);
+        $lastName = $this->trimToNull($account['contact_last_name'] ?? null);
 
-        if ($csvColumn === null || $csvColumn === '') {
+        if ($email === null) {
+            return [];
+        }
+
+        if ($firstName === null || $lastName === null) {
+            throw new InvalidArgumentException('Contact first and last name are required when email is provided.');
+        }
+
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Contact email is invalid.');
+        }
+
+        return [
+            [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'phone' => $this->trimToNull($account['contact_phone'] ?? null),
+                'is_primary' => true,
+            ],
+        ];
+    }
+
+    private function trimToNull(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
             return null;
         }
 
-        $index = $headerMap[strtolower(trim($csvColumn))] ?? null;
-
-        if ($index === null || ! isset($row[$index])) {
-            return null;
-        }
-
-        $value = trim($row[$index]);
+        $value = trim((string) $value);
 
         return $value === '' ? null : $value;
     }
 
-    /**
-     * @param array<string, mixed> $bulk
-     * @param class-string<\Illuminate\Database\Eloquent\Model> $model
-     */
-    private function bulkLookup(int $workspaceId, array $bulk, string $key, string $model): ?int
-    {
-        $id = $bulk[$key] ?? null;
-
-        if ($id === null || $id === '' || $id === 0) {
-            return null;
-        }
-
-        $id = (int) $id;
-
-        if (! $model::where('id', $id)->where('workspace_id', $workspaceId)->exists()) {
-            throw new InvalidArgumentException(ucfirst(str_replace('_', ' ', $key)).' not found in workspace.');
-        }
-
-        return $id;
-    }
-
-    /**
-     * @param array<string, mixed> $bulk
-     */
-    private function bulkStatus(array $bulk): string
-    {
-        $value = $bulk['status'] ?? null;
-
-        if ($value === null || $value === '') {
-            return AccountStatus::Lead->value;
-        }
-
-        try {
-            return AccountStatus::from((string) $value)->value;
-        } catch (Throwable) {
-            throw new InvalidArgumentException('Status must be one of: lead, opportunity, client, archived.');
-        }
-    }
-
-    private function date(?string $value): ?string
+    private function castInteger(mixed $value): ?int
     {
         if ($value === null || $value === '') {
             return null;
-        }
-
-        $date = date_parse($value);
-        if ($date['error_count'] > 0 || $date['warning_count'] > 0 || $date['year'] === false) {
-            throw new InvalidArgumentException('Founded date must be a valid date (YYYY-MM-DD).');
-        }
-
-        return sprintf('%04d-%02d-%02d', $date['year'], $date['month'], $date['day']);
-    }
-
-    private function integer(?string $value, string $key): ?int
-    {
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        if (! ctype_digit($value)) {
-            throw new InvalidArgumentException("{$key} must be an integer.");
         }
 
         return (int) $value;
-    }
-
-    private function numeric(?string $value, string $key): ?float
-    {
-        if ($value === null || $value === '') {
-            return null;
-        }
-
-        if (! is_numeric($value)) {
-            throw new InvalidArgumentException("{$key} must be numeric.");
-        }
-
-        return (float) $value;
     }
 }

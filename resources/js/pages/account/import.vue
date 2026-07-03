@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
-import { Check, Circle, Dot, Download, Upload } from '@lucide/vue';
-import { computed, ref } from 'vue';
-import AccountController from '@/actions/App/Http/Controllers/AccountController';
-import { dashboard } from '@/routes';
-import { index as accountIndex } from '@/routes/accounts';
+import { Form, Head } from '@inertiajs/vue3';
+import { Check, Download, Upload } from '@lucide/vue';
+import { computed, ref, watch } from 'vue';
+import {
+    downloadImportTemplate,
+    importMethod as accountImport,
+    index as accountIndexRoute,
+} from '@/actions/App/Http/Controllers/AccountController';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,6 +22,7 @@ import {
 import {
     Stepper,
     StepperDescription,
+    StepperIndicator,
     StepperItem,
     StepperSeparator,
     StepperTitle,
@@ -32,6 +36,8 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { dashboard } from '@/routes';
+import { index as accountIndex } from '@/routes/accounts';
 import type { AccountStatus } from '@/types/enums';
 
 type LookupOption = {
@@ -40,7 +46,21 @@ type LookupOption = {
     label?: string;
 };
 
-const props = defineProps<{
+type AccountImportRow = {
+    company_name: string;
+    phone: string;
+    website: string;
+    contact_first_name: string;
+    contact_last_name: string;
+    contact_email: string;
+    contact_phone: string;
+    status: AccountStatus;
+    industry_id: string;
+    lead_source_id: string;
+    company_size_id: string;
+};
+
+defineProps<{
     industries: LookupOption[];
     lead_sources: LookupOption[];
     company_sizes: LookupOption[];
@@ -52,6 +72,7 @@ const previewHeaders = ref<string[]>([]);
 const previewRows = ref<string[][]>([]);
 const previewLoading = ref(false);
 const previewError = ref('');
+const accounts = ref<AccountImportRow[]>([]);
 
 const statusOptions: { value: AccountStatus; label: string }[] = [
     { value: 'lead', label: 'Lead' },
@@ -60,14 +81,10 @@ const statusOptions: { value: AccountStatus; label: string }[] = [
     { value: 'archived', label: 'Archived' },
 ];
 
-const fields = [
+const fields: { key: keyof AccountImportRow; label: string; required?: boolean }[] = [
     { key: 'company_name', label: 'Company Name', required: true },
     { key: 'phone', label: 'Phone' },
     { key: 'website', label: 'Website' },
-    { key: 'description', label: 'Description' },
-    { key: 'founded_at', label: 'Founded Date' },
-    { key: 'annual_revenue', label: 'Annual Revenue' },
-    { key: 'employee_count', label: 'Employee Count' },
     { key: 'contact_first_name', label: 'Contact First Name' },
     { key: 'contact_last_name', label: 'Contact Last Name' },
     { key: 'contact_email', label: 'Contact Email' },
@@ -79,20 +96,22 @@ const steps = [
         step: 1,
         title: 'Download template',
         description: 'Get the spreadsheet format',
+        icon: Download,
     },
     {
         step: 2,
         title: 'Upload file',
         description: 'Select your CSV or Excel file',
+        icon: Upload,
     },
     {
         step: 3,
         title: 'Preview & map',
         description: 'Match columns and import',
+        icon: Check,
     },
 ];
 
-const mapping = ref<Record<string, string>>({});
 const bulk = ref({
     status: 'lead' as AccountStatus,
     industry_id: '',
@@ -100,44 +119,69 @@ const bulk = ref({
     company_size_id: '',
 });
 
-const mappingForm = useForm<{
-    file: File | null;
-    mapping: Record<string, string>;
-    bulk: {
-        status: AccountStatus;
-        industry_id: string;
-        lead_source_id: string;
-        company_size_id: string;
-    };
-}>({
-    file: null,
-    mapping: {},
-    bulk: {
-        status: 'lead',
-        industry_id: '',
-        lead_source_id: '',
-        company_size_id: '',
-    },
-});
-
 const currentStepMeta = computed(() => steps[currentStep.value - 1]);
 
-const applySuggestedMapping = () => {
-    const suggested: Record<string, string> = {};
+const formAction = computed(() => accountImport.form());
 
-    for (const field of fields) {
-        const match = previewHeaders.value.find((header) => {
-            const normalized = header.toLowerCase().replace(/\s+/g, '_');
-            return normalized === field.key || header.toLowerCase() === field.label.toLowerCase();
-        });
+const defaultAccount = (): AccountImportRow => ({
+    company_name: '',
+    phone: '',
+    website: '',
+    contact_first_name: '',
+    contact_last_name: '',
+    contact_email: '',
+    contact_phone: '',
+    status: 'lead',
+    industry_id: '',
+    lead_source_id: '',
+    company_size_id: '',
+});
 
-        if (match) {
-            suggested[field.key] = match;
+const buildAccounts = (headers: string[], rows: string[][]): AccountImportRow[] => {
+    const headerIndex = headers.reduce<Record<string, number>>((acc, header, index) => {
+        acc[header.toLowerCase().trim()] = index;
+
+        return acc;
+    }, {});
+
+    return rows.map((row) => {
+        const account = defaultAccount();
+
+        for (const field of fields) {
+            const index = headerIndex[field.key];
+
+            if (index !== undefined) {
+                (account[field.key as keyof AccountImportRow] as string) = row[index] ?? '';
+            }
         }
-    }
 
-    mapping.value = suggested;
+        return account;
+    });
 };
+
+watch(() => bulk.value.status, (value) => {
+    accounts.value.forEach((account) => {
+        account.status = value;
+    });
+});
+
+watch(() => bulk.value.industry_id, (value) => {
+    accounts.value.forEach((account) => {
+        account.industry_id = value;
+    });
+});
+
+watch(() => bulk.value.lead_source_id, (value) => {
+    accounts.value.forEach((account) => {
+        account.lead_source_id = value;
+    });
+});
+
+watch(() => bulk.value.company_size_id, (value) => {
+    accounts.value.forEach((account) => {
+        account.company_size_id = value;
+    });
+});
 
 const handleFileChange = (event: Event) => {
     const input = event.target as HTMLInputElement;
@@ -149,6 +193,7 @@ const handleFileChange = (event: Event) => {
 
 const csrfToken = () => {
     const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+
     return match ? decodeURIComponent(match[1]) : '';
 };
 
@@ -176,42 +221,28 @@ const loadPreview = async () => {
         if (! response.ok) {
             const error = await response.json();
             previewError.value = error.message || 'Failed to preview file.';
+
             return;
         }
 
         const data = await response.json();
         previewHeaders.value = data.headers;
         previewRows.value = data.rows;
-        applySuggestedMapping();
+        accounts.value = buildAccounts(data.headers, data.rows);
         currentStep.value = 3;
-    } catch (e) {
+    } catch {
         previewError.value = 'Failed to preview file.';
     } finally {
         previewLoading.value = false;
     }
 };
 
-const submitImport = () => {
-    if (! file.value) {
-        return;
-    }
-
-    mappingForm.file = file.value;
-    mappingForm.mapping = Object.fromEntries(
-        Object.entries(mapping.value).map(([key, value]) => [key, value === 'none' ? '' : value]),
-    );
-    mappingForm.bulk.status = bulk.value.status;
-    mappingForm.bulk.industry_id = bulk.value.industry_id === 'none' ? '' : bulk.value.industry_id;
-    mappingForm.bulk.lead_source_id = bulk.value.lead_source_id === 'none' ? '' : bulk.value.lead_source_id;
-    mappingForm.bulk.company_size_id = bulk.value.company_size_id === 'none' ? '' : bulk.value.company_size_id;
-
-    mappingForm.post(AccountController.importMethod().url, {
-        forceFormData: true,
-    });
-};
+const anyAccountMissingCompanyName = computed(
+    () => accounts.value.length === 0 || accounts.value.some((a) => !a.company_name.trim()),
+);
 
 const downloadTemplate = () => {
-    window.location.href = '/accounts/import-template';
+    window.location.href = downloadImportTemplate().url;
 };
 
 defineOptions({
@@ -239,49 +270,34 @@ defineOptions({
     <Head title="Import Accounts" />
 
     <div class="space-y-6">
-        <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
-            <Stepper
-                v-model="currentStep"
-                orientation="vertical"
-                class="mx-auto flex w-full max-w-md flex-col justify-start gap-10"
-            >
+        <div class="space-y-6">
+            <Stepper v-model="currentStep" class="flex items-start gap-2">
                 <StepperItem
-                    v-for="step in steps"
-                    :key="step.step"
-                    v-slot="{ state }"
-                    class="relative flex w-full items-start gap-6"
-                    :step="step.step"
+                    v-for="item in steps"
+                    :key="item.step"
+                    :step="item.step"
+                    class="relative flex w-full flex-col items-center justify-center"
                 >
-                    <StepperSeparator
-                        v-if="step.step !== steps[steps.length - 1]?.step"
-                        class="absolute left-[18px] top-[38px] block h-[105%] w-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
-                    />
-
-                    <StepperTrigger as-child>
-                        <Button
-                            :variant="state === 'completed' || state === 'active' ? 'default' : 'outline'"
-                            size="icon"
-                            class="z-10 shrink-0 rounded-full"
-                            :class="[state === 'active' && 'ring-2 ring-ring ring-offset-2 ring-offset-background']"
-                        >
-                            <Check v-if="state === 'completed'" class="size-5" />
-                            <Circle v-if="state === 'active'" />
-                            <Dot v-if="state === 'inactive'" />
-                        </Button>
+                    <StepperTrigger>
+                        <StepperIndicator v-slot="{ step }" class="bg-muted">
+                            <template v-if="item.icon">
+                                <component :is="item.icon" class="h-4 w-4" />
+                            </template>
+                            <span v-else>{{ step }}</span>
+                        </StepperIndicator>
                     </StepperTrigger>
 
-                    <div class="flex flex-col gap-1">
-                        <StepperTitle
-                            :class="[state === 'active' && 'text-primary']"
-                            class="text-sm font-semibold transition lg:text-base"
-                        >
-                            {{ step.title }}
+                    <StepperSeparator
+                        v-if="item.step !== steps[steps.length - 1]?.step"
+                        class="absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-5 block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
+                    />
+
+                    <div class="flex flex-col items-center">
+                        <StepperTitle>
+                            {{ item.title }}
                         </StepperTitle>
-                        <StepperDescription
-                            :class="[state === 'active' && 'text-primary']"
-                            class="sr-only text-xs text-muted-foreground transition md:not-sr-only lg:text-sm"
-                        >
-                            {{ step.description }}
+                        <StepperDescription>
+                            {{ item.description }}
                         </StepperDescription>
                     </div>
                 </StepperItem>
@@ -304,9 +320,8 @@ defineOptions({
                         <div class="rounded-md bg-muted p-4">
                             <p class="mb-2 text-sm font-medium">Expected columns</p>
                             <p class="text-sm text-muted-foreground">
-                                company_name, phone, website, description, founded_at,
-                                annual_revenue, employee_count, first_name, last_name,
-                                email, contact_phone
+                                company_name, phone, website, contact_first_name,
+                                contact_last_name, contact_email, contact_phone
                             </p>
                             <p class="mt-2 text-xs text-muted-foreground">
                                 The downloaded template is an XLSX file.
@@ -334,150 +349,215 @@ defineOptions({
                     </div>
 
                     <div v-if="currentStep === 3" class="space-y-6">
-                        <div class="grid gap-6 lg:grid-cols-2">
-                            <div class="space-y-4">
-                                <h4 class="font-medium">Column mapping</h4>
-                                <div
-                                    v-for="field in fields"
-                                    :key="field.key"
-                                    class="grid grid-cols-2 items-center gap-4"
-                                >
-                                    <Label :for="`map-${field.key}`">
-                                        {{ field.label }}
-                                        <span v-if="field.required" class="text-destructive">*</span>
-                                    </Label>
-                                    <Select
-                                        :id="`map-${field.key}`"
-                                        v-model="mapping[field.key]"
-                                    >
+                        <div class="rounded-md border p-4">
+                            <h4 class="mb-4 font-medium">Apply all</h4>
+                            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                <div class="grid gap-2">
+                                    <Label for="bulk-status">Status</Label>
+                                    <Select id="bulk-status" v-model="bulk.status">
                                         <SelectTrigger class="w-full">
-                                            <SelectValue placeholder="— Ignore —" />
+                                            <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">— Ignore —</SelectItem>
                                             <SelectItem
-                                                v-for="header in previewHeaders"
-                                                :key="header"
-                                                :value="header"
+                                                v-for="option in statusOptions"
+                                                :key="option.value"
+                                                :value="option.value"
                                             >
-                                                {{ header }}
+                                                {{ option.label }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div class="grid gap-2">
+                                    <Label for="bulk-industry">Industry</Label>
+                                    <Select id="bulk-industry" v-model="bulk.industry_id">
+                                        <SelectTrigger class="w-full">
+                                            <SelectValue placeholder="— None —" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">— None —</SelectItem>
+                                            <SelectItem
+                                                v-for="option in industries"
+                                                :key="option.id"
+                                                :value="option.id.toString()"
+                                            >
+                                                {{ option.name }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div class="grid gap-2">
+                                    <Label for="bulk-lead-source">Lead Source</Label>
+                                    <Select id="bulk-lead-source" v-model="bulk.lead_source_id">
+                                        <SelectTrigger class="w-full">
+                                            <SelectValue placeholder="— None —" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">— None —</SelectItem>
+                                            <SelectItem
+                                                v-for="option in lead_sources"
+                                                :key="option.id"
+                                                :value="option.id.toString()"
+                                            >
+                                                {{ option.name }}
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div class="grid gap-2">
+                                    <Label for="bulk-company-size">Company Size</Label>
+                                    <Select id="bulk-company-size" v-model="bulk.company_size_id">
+                                        <SelectTrigger class="w-full">
+                                            <SelectValue placeholder="— None —" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="none">— None —</SelectItem>
+                                            <SelectItem
+                                                v-for="option in company_sizes"
+                                                :key="option.id"
+                                                :value="option.id.toString()"
+                                            >
+                                                {{ option.label }}
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="space-y-4">
-                                <h4 class="font-medium">Apply all</h4>
-                                <div class="grid gap-4">
-                                    <div class="grid gap-2">
-                                        <Label for="bulk-status">Status</Label>
-                                        <Select id="bulk-status" v-model="bulk.status">
-                                            <SelectTrigger class="w-full">
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem
-                                                    v-for="option in statusOptions"
-                                                    :key="option.value"
-                                                    :value="option.value"
-                                                >
-                                                    {{ option.label }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div class="grid gap-2">
-                                        <Label for="bulk-industry">Industry</Label>
-                                        <Select id="bulk-industry" v-model="bulk.industry_id">
-                                            <SelectTrigger class="w-full">
-                                                <SelectValue placeholder="— None —" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">— None —</SelectItem>
-                                                <SelectItem
-                                                    v-for="option in industries"
-                                                    :key="option.id"
-                                                    :value="option.id.toString()"
-                                                >
-                                                    {{ option.name }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div class="grid gap-2">
-                                        <Label for="bulk-lead-source">Lead Source</Label>
-                                        <Select id="bulk-lead-source" v-model="bulk.lead_source_id">
-                                            <SelectTrigger class="w-full">
-                                                <SelectValue placeholder="— None —" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">— None —</SelectItem>
-                                                <SelectItem
-                                                    v-for="option in lead_sources"
-                                                    :key="option.id"
-                                                    :value="option.id.toString()"
-                                                >
-                                                    {{ option.name }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div class="grid gap-2">
-                                        <Label for="bulk-company-size">Company Size</Label>
-                                        <Select id="bulk-company-size" v-model="bulk.company_size_id">
-                                            <SelectTrigger class="w-full">
-                                                <SelectValue placeholder="— None —" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">— None —</SelectItem>
-                                                <SelectItem
-                                                    v-for="option in company_sizes"
-                                                    :key="option.id"
-                                                    :value="option.id.toString()"
-                                                >
-                                                    {{ option.label }}
-                                                </SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                        <Form
+                            id="import-accounts-form"
+                            v-bind="formAction as any"
+                            :options="{ preserveScroll: true, preserveState: true }"
+                            v-slot="{ errors, processing }"
+                        >
+                            <div v-if="accounts.length > 0" class="space-y-2">
+                                <h4 class="font-medium">Preview & edit</h4>
+                                <div class="overflow-x-auto rounded-md border">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead v-for="field in fields" :key="field.key">
+                                                    <Label :required="!!field.required">{{ field.label }}</Label>
+                                                </TableHead>
+                                                <TableHead>
+                                                    <Label required>Status</Label>
+                                                </TableHead>
+                                                <TableHead>
+                                                    <Label>Industry</Label>
+                                                </TableHead>
+                                                <TableHead>
+                                                    <Label>Lead Source</Label>
+                                                </TableHead>
+                                                <TableHead>
+                                                    <Label>Company Size</Label>
+                                                </TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            <TableRow v-for="(account, rowIndex) in accounts" :key="rowIndex">
+                                                <TableCell v-for="field in fields" :key="field.key">
+                                                    <Input
+                                                        :name="`accounts[${rowIndex}][${field.key}]`"
+                                                        v-model="account[field.key]"
+                                                        type="text"
+                                                        class="min-w-[140px]"
+                                                        :placeholder="field.label"
+                                                        :required="!!field.required"
+                                                    />
+                                                    <InputError :message="errors[`accounts.${rowIndex}.${field.key}`]" />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Select :name="`accounts[${rowIndex}][status]`" v-model="account.status">
+                                                        <SelectTrigger class="w-[130px]">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem
+                                                                v-for="option in statusOptions"
+                                                                :key="option.value"
+                                                                :value="option.value"
+                                                            >
+                                                                {{ option.label }}
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <InputError :message="errors[`accounts.${rowIndex}.status`]" />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Select :name="`accounts[${rowIndex}][industry_id]`" v-model="account.industry_id">
+                                                        <SelectTrigger class="w-[130px]">
+                                                            <SelectValue placeholder="— None —" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">— None —</SelectItem>
+                                                            <SelectItem
+                                                                v-for="option in industries"
+                                                                :key="option.id"
+                                                                :value="option.id.toString()"
+                                                            >
+                                                                {{ option.name }}
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <InputError :message="errors[`accounts.${rowIndex}.industry_id`]" />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Select :name="`accounts[${rowIndex}][lead_source_id]`" v-model="account.lead_source_id">
+                                                        <SelectTrigger class="w-[130px]">
+                                                            <SelectValue placeholder="— None —" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">— None —</SelectItem>
+                                                            <SelectItem
+                                                                v-for="option in lead_sources"
+                                                                :key="option.id"
+                                                                :value="option.id.toString()"
+                                                            >
+                                                                {{ option.name }}
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <InputError :message="errors[`accounts.${rowIndex}.lead_source_id`]" />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Select :name="`accounts[${rowIndex}][company_size_id]`" v-model="account.company_size_id">
+                                                        <SelectTrigger class="w-[130px]">
+                                                            <SelectValue placeholder="— None —" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="none">— None —</SelectItem>
+                                                            <SelectItem
+                                                                v-for="option in company_sizes"
+                                                                :key="option.id"
+                                                                :value="option.id.toString()"
+                                                            >
+                                                                {{ option.label }}
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <InputError :message="errors[`accounts.${rowIndex}.company_size_id`]" />
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
                                 </div>
+                                <p class="text-xs text-muted-foreground">
+                                    Showing first {{ accounts.length }} rows.
+                                </p>
                             </div>
-                        </div>
 
-                        <div v-if="previewRows.length > 0" class="space-y-2">
-                            <h4 class="font-medium">Preview</h4>
-                            <div class="rounded-md border">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead
-                                                v-for="header in previewHeaders"
-                                                :key="header"
-                                            >
-                                                {{ header }}
-                                            </TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        <TableRow
-                                            v-for="(row, rowIndex) in previewRows"
-                                            :key="rowIndex"
-                                        >
-                                            <TableCell
-                                                v-for="(cell, cellIndex) in row"
-                                                :key="cellIndex"
-                                            >
-                                                {{ cell }}
-                                            </TableCell>
-                                        </TableRow>
-                                    </TableBody>
-                                </Table>
+                            <div class="flex justify-end pt-4">
+                                <Button
+                                    type="submit"
+                                    :disabled="anyAccountMissingCompanyName || processing"
+                                >
+                                    <Check class="mr-2 h-4 w-4" />
+                                    {{ processing ? 'Importing...' : 'Import accounts' }}
+                                </Button>
                             </div>
-                            <p class="text-xs text-muted-foreground">
-                                Showing first {{ previewRows.length }} rows.
-                            </p>
-                        </div>
+                        </Form>
                     </div>
                 </CardContent>
 
@@ -487,7 +567,7 @@ defineOptions({
                         variant="outline"
                         as-child
                     >
-                        <a :href="AccountController.index().url">Cancel</a>
+                        <a :href="accountIndexRoute().url">Cancel</a>
                     </Button>
                     <Button
                         v-if="currentStep > 1"
@@ -519,22 +599,7 @@ defineOptions({
                         <Upload class="mr-2 h-4 w-4" />
                         {{ previewLoading ? 'Previewing...' : 'Preview & map' }}
                     </Button>
-                    <Button
-                        v-if="currentStep === 3"
-                        :disabled="!mapping.company_name || mapping.company_name === 'none' || mappingForm.processing"
-                        @click="submitImport"
-                    >
-                        <Check class="mr-2 h-4 w-4" />
-                        {{ mappingForm.processing ? 'Importing...' : 'Import accounts' }}
-                    </Button>
                 </CardFooter>
-
-                <p
-                    v-if="currentStep === 3 && mappingForm.errors.file"
-                    class="px-6 pb-6 text-sm text-destructive"
-                >
-                    {{ mappingForm.errors.file }}
-                </p>
             </Card>
         </div>
     </div>

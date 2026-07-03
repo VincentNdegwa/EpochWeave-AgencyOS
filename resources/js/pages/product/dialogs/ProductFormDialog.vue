@@ -106,7 +106,7 @@ watch(
 
 <template>
     <Dialog class="" :open="open" @update:open="emit('update:open', $event)">
-        <DialogContent class="sm:max-w-xl md:max-w-2xl">
+        <DialogContent class="max-h-[90vh] overflow-hidden sm:max-w-xl md:max-w-2xl">
             <DialogHeader>
                 <DialogTitle>{{
                     product ? 'Edit Product' : 'New Product'
@@ -129,7 +129,7 @@ watch(
                 :options="{ preserveScroll: true, preserveState: true }"
                 v-slot="{ errors, processing }"
             >
-                <div class="grid gap-6 py-4">
+                <div class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="grid gap-2 sm:col-span-2">
                             <Label for="name" required>Name</Label>

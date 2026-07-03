@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\EngagementDirection;
-use App\Enums\EngagementOutcome;
-use App\Enums\EngagementStatus;
-use App\Enums\EngagementType;
+use App\Http\Requests\StoreEngagementRequest;
+use App\Http\Requests\UpdateEngagementRequest;
 use App\Models\Engagement;
+use App\Services\EngagementService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class EngagementController extends Controller
 {
+    public function __construct(private EngagementService $engagementService) {}
+
     public function index(Request $request)
     {
         $workspace = $request->attributes->get('current_workspace');
@@ -29,55 +30,20 @@ class EngagementController extends Controller
         ]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreEngagementRequest $request): RedirectResponse
     {
         $workspace = $request->attributes->get('current_workspace');
 
-        $data = $request->validate([
-            'account_id' => 'required|exists:accounts,id',
-            'user_id' => 'nullable|exists:users,id',
-            'type' => 'required|in:'.implode(',', array_column(EngagementType::cases(), 'value')),
-            'direction' => 'required|in:'.implode(',', array_column(EngagementDirection::cases(), 'value')),
-            'status' => 'required|in:'.implode(',', array_column(EngagementStatus::cases(), 'value')),
-            'subject' => 'nullable|string|max:255',
-            'content' => 'nullable|string',
-            'proposal_id' => 'nullable|exists:proposals,id',
-            'invoice_id' => 'nullable|exists:invoices,id',
-            'project_id' => 'nullable|exists:projects,id',
-            'scheduled_at' => 'nullable|date',
-            'completed_at' => 'nullable|date',
-            'follow_up_at' => 'nullable|date',
-            'outcome' => 'nullable|in:'.implode(',', array_column(EngagementOutcome::cases(), 'value')),
-        ]);
-
-        $data['workspace_id'] = $workspace->id;
-
-        Engagement::create($data);
+        $this->engagementService->createEngagement($workspace->id, $request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Engagement logged successfully.']);
 
-        return redirect()->back();
+        return redirect()->route('accounts.index');
     }
 
-    public function update(Request $request, Engagement $engagement): RedirectResponse
+    public function update(UpdateEngagementRequest $request, Engagement $engagement): RedirectResponse
     {
-        $data = $request->validate([
-            'user_id' => 'nullable|exists:users,id',
-            'type' => 'required|in:'.implode(',', array_column(EngagementType::cases(), 'value')),
-            'direction' => 'required|in:'.implode(',', array_column(EngagementDirection::cases(), 'value')),
-            'status' => 'required|in:'.implode(',', array_column(EngagementStatus::cases(), 'value')),
-            'subject' => 'nullable|string|max:255',
-            'content' => 'nullable|string',
-            'proposal_id' => 'nullable|exists:proposals,id',
-            'invoice_id' => 'nullable|exists:invoices,id',
-            'project_id' => 'nullable|exists:projects,id',
-            'scheduled_at' => 'nullable|date',
-            'completed_at' => 'nullable|date',
-            'follow_up_at' => 'nullable|date',
-            'outcome' => 'nullable|in:'.implode(',', array_column(EngagementOutcome::cases(), 'value')),
-        ]);
-
-        $engagement->update($data);
+        $this->engagementService->updateEngagement($engagement, $request->validated());
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Engagement updated successfully.']);
 
@@ -86,7 +52,7 @@ class EngagementController extends Controller
 
     public function destroy(Engagement $engagement): RedirectResponse
     {
-        $engagement->delete();
+        $this->engagementService->deleteEngagement($engagement);
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Engagement deleted successfully.']);
 
