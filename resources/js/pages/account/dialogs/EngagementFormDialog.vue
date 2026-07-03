@@ -61,9 +61,15 @@ watch(
     () => props.open,
     (isOpen) => {
         if (isOpen) {
-            builderData.fetchProjects({ account_id: props.account.id.toString() });
-            builderData.fetchProposals({ account_id: props.account.id.toString() });
-            builderData.fetchInvoices({ account_id: props.account.id.toString() });
+            builderData.fetchProjects({
+                account_id: props.account.id.toString(),
+            });
+            builderData.fetchProposals({
+                account_id: props.account.id.toString(),
+            });
+            builderData.fetchInvoices({
+                account_id: props.account.id.toString(),
+            });
         }
     },
 );
@@ -132,18 +138,29 @@ watch(
                 "
                 v-slot="{ errors, processing }"
             >
-                <input type="hidden" name="account_id" :value="form.account_id" />
+                <input
+                    type="hidden"
+                    name="account_id"
+                    :value="form.account_id"
+                />
 
-                <div class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2">
+                <div
+                    class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2"
+                >
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div class="grid gap-2">
                             <Label for="engagement-type" required>Type</Label>
                             <Select
                                 name="type"
                                 :model-value="form.type"
-                                @update:model-value="form.type = $event as string"
+                                @update:model-value="
+                                    form.type = $event as string
+                                "
                             >
-                                <SelectTrigger id="engagement-type" class="w-full">
+                                <SelectTrigger
+                                    id="engagement-type"
+                                    class="w-full"
+                                >
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -160,13 +177,20 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="engagement-direction" required>Direction</Label>
+                            <Label for="engagement-direction" required
+                                >Direction</Label
+                            >
                             <Select
                                 name="direction"
                                 :model-value="form.direction"
-                                @update:model-value="form.direction = $event as string"
+                                @update:model-value="
+                                    form.direction = $event as string
+                                "
                             >
-                                <SelectTrigger id="engagement-direction" class="w-full">
+                                <SelectTrigger
+                                    id="engagement-direction"
+                                    class="w-full"
+                                >
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -183,13 +207,20 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="engagement-status" required>Status</Label>
+                            <Label for="engagement-status" required
+                                >Status</Label
+                            >
                             <Select
                                 name="status"
                                 :model-value="form.status"
-                                @update:model-value="form.status = $event as string"
+                                @update:model-value="
+                                    form.status = $event as string
+                                "
                             >
-                                <SelectTrigger id="engagement-status" class="w-full">
+                                <SelectTrigger
+                                    id="engagement-status"
+                                    class="w-full"
+                                >
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -231,7 +262,9 @@ watch(
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div class="grid gap-2">
-                            <Label for="engagement-scheduled">Scheduled At</Label>
+                            <Label for="engagement-scheduled"
+                                >Scheduled At</Label
+                            >
                             <Input
                                 id="engagement-scheduled"
                                 name="scheduled_at"
@@ -242,7 +275,9 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="engagement-completed">Completed At</Label>
+                            <Label for="engagement-completed"
+                                >Completed At</Label
+                            >
                             <Input
                                 id="engagement-completed"
                                 name="completed_at"
@@ -253,7 +288,9 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="engagement-follow-up">Follow Up At</Label>
+                            <Label for="engagement-follow-up"
+                                >Follow Up At</Label
+                            >
                             <Input
                                 id="engagement-follow-up"
                                 name="follow_up_at"
@@ -266,13 +303,20 @@ watch(
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div class="grid gap-2">
-                            <Label for="engagement-proposal">Related Proposal</Label>
+                            <Label for="engagement-proposal"
+                                >Related Proposal</Label
+                            >
                             <Select
                                 name="proposal_id"
                                 :model-value="form.proposal_id"
-                                @update:model-value="form.proposal_id = $event as string"
+                                @update:model-value="
+                                    form.proposal_id = $event as string
+                                "
                             >
-                                <SelectTrigger id="engagement-proposal" class="w-full">
+                                <SelectTrigger
+                                    id="engagement-proposal"
+                                    class="w-full"
+                                >
                                     <SelectValue placeholder="None" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -290,13 +334,20 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="engagement-invoice">Related Invoice</Label>
+                            <Label for="engagement-invoice"
+                                >Related Invoice</Label
+                            >
                             <Select
                                 name="invoice_id"
                                 :model-value="form.invoice_id"
-                                @update:model-value="form.invoice_id = $event as string"
+                                @update:model-value="
+                                    form.invoice_id = $event as string
+                                "
                             >
-                                <SelectTrigger id="engagement-invoice" class="w-full">
+                                <SelectTrigger
+                                    id="engagement-invoice"
+                                    class="w-full"
+                                >
                                     <SelectValue placeholder="None" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -314,13 +365,20 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="engagement-project">Related Project</Label>
+                            <Label for="engagement-project"
+                                >Related Project</Label
+                            >
                             <Select
                                 name="project_id"
                                 :model-value="form.project_id"
-                                @update:model-value="form.project_id = $event as string"
+                                @update:model-value="
+                                    form.project_id = $event as string
+                                "
                             >
-                                <SelectTrigger id="engagement-project" class="w-full">
+                                <SelectTrigger
+                                    id="engagement-project"
+                                    class="w-full"
+                                >
                                     <SelectValue placeholder="None" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -344,9 +402,14 @@ watch(
                             <Select
                                 name="outcome"
                                 :model-value="form.outcome"
-                                @update:model-value="form.outcome = $event as string"
+                                @update:model-value="
+                                    form.outcome = $event as string
+                                "
                             >
-                                <SelectTrigger id="engagement-outcome" class="w-full">
+                                <SelectTrigger
+                                    id="engagement-outcome"
+                                    class="w-full"
+                                >
                                     <SelectValue placeholder="Select outcome" />
                                 </SelectTrigger>
                                 <SelectContent>

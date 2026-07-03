@@ -89,7 +89,12 @@ setLayoutProps({
                         >
                     </h1>
                 </div>
-                <TaskActions :task="task" :task-statuses="task_statuses" variant="split" size="sm" />
+                <TaskActions
+                    :task="task"
+                    :task-statuses="task_statuses"
+                    variant="split"
+                    size="sm"
+                />
             </div>
         </div>
 

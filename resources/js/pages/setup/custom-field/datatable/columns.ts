@@ -56,27 +56,33 @@ export function createColumns(
                     );
                 }
 
-                return h('div', { class: 'flex flex-wrap items-center gap-1' }, [
-                    h(
-                        Badge,
-                        { variant: 'outline' },
-                        () => `${count} field${count === 1 ? '' : 's'}`,
-                    ),
-                    ...group.definitions.slice(0, 3).map((definition) =>
+                return h(
+                    'div',
+                    { class: 'flex flex-wrap items-center gap-1' },
+                    [
                         h(
                             Badge,
-                            { variant: 'secondary', class: 'text-xs' },
-                            () => definition.label,
+                            { variant: 'outline' },
+                            () => `${count} field${count === 1 ? '' : 's'}`,
                         ),
-                    ),
-                    group.definitions.length > 3
-                        ? h(
-                              Badge,
-                              { variant: 'secondary', class: 'text-xs' },
-                              () => `+${group.definitions.length - 3} more`,
-                          )
-                        : null,
-                ]);
+                        ...group.definitions
+                            .slice(0, 3)
+                            .map((definition) =>
+                                h(
+                                    Badge,
+                                    { variant: 'secondary', class: 'text-xs' },
+                                    () => definition.label,
+                                ),
+                            ),
+                        group.definitions.length > 3
+                            ? h(
+                                  Badge,
+                                  { variant: 'secondary', class: 'text-xs' },
+                                  () => `+${group.definitions.length - 3} more`,
+                              )
+                            : null,
+                    ],
+                );
             },
         },
         {

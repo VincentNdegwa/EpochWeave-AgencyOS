@@ -8,7 +8,9 @@ import type { Project } from '@/types/models/project';
 import type { ProjectStatus } from '@/types/models/project_status';
 import ProjectActions from '../components/ProjectActions.vue';
 
-export function createColumns(projectStatuses?: ProjectStatus[]): ColumnDef<Project>[] {
+export function createColumns(
+    projectStatuses?: ProjectStatus[],
+): ColumnDef<Project>[] {
     return [
         {
             id: 'select',

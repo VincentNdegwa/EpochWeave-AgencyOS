@@ -9,7 +9,14 @@ import {
 } from '@/actions/App/Http/Controllers/AccountController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -81,7 +88,11 @@ const statusOptions: { value: AccountStatus; label: string }[] = [
     { value: 'archived', label: 'Archived' },
 ];
 
-const fields: { key: keyof AccountImportRow; label: string; required?: boolean }[] = [
+const fields: {
+    key: keyof AccountImportRow;
+    label: string;
+    required?: boolean;
+}[] = [
     { key: 'company_name', label: 'Company Name', required: true },
     { key: 'phone', label: 'Phone' },
     { key: 'website', label: 'Website' },
@@ -137,12 +148,18 @@ const defaultAccount = (): AccountImportRow => ({
     company_size_id: '',
 });
 
-const buildAccounts = (headers: string[], rows: string[][]): AccountImportRow[] => {
-    const headerIndex = headers.reduce<Record<string, number>>((acc, header, index) => {
-        acc[header.toLowerCase().trim()] = index;
+const buildAccounts = (
+    headers: string[],
+    rows: string[][],
+): AccountImportRow[] => {
+    const headerIndex = headers.reduce<Record<string, number>>(
+        (acc, header, index) => {
+            acc[header.toLowerCase().trim()] = index;
 
-        return acc;
-    }, {});
+            return acc;
+        },
+        {},
+    );
 
     return rows.map((row) => {
         const account = defaultAccount();
@@ -151,7 +168,8 @@ const buildAccounts = (headers: string[], rows: string[][]): AccountImportRow[] 
             const index = headerIndex[field.key];
 
             if (index !== undefined) {
-                (account[field.key as keyof AccountImportRow] as string) = row[index] ?? '';
+                (account[field.key as keyof AccountImportRow] as string) =
+                    row[index] ?? '';
             }
         }
 
@@ -159,29 +177,41 @@ const buildAccounts = (headers: string[], rows: string[][]): AccountImportRow[] 
     });
 };
 
-watch(() => bulk.value.status, (value) => {
-    accounts.value.forEach((account) => {
-        account.status = value;
-    });
-});
+watch(
+    () => bulk.value.status,
+    (value) => {
+        accounts.value.forEach((account) => {
+            account.status = value;
+        });
+    },
+);
 
-watch(() => bulk.value.industry_id, (value) => {
-    accounts.value.forEach((account) => {
-        account.industry_id = value;
-    });
-});
+watch(
+    () => bulk.value.industry_id,
+    (value) => {
+        accounts.value.forEach((account) => {
+            account.industry_id = value;
+        });
+    },
+);
 
-watch(() => bulk.value.lead_source_id, (value) => {
-    accounts.value.forEach((account) => {
-        account.lead_source_id = value;
-    });
-});
+watch(
+    () => bulk.value.lead_source_id,
+    (value) => {
+        accounts.value.forEach((account) => {
+            account.lead_source_id = value;
+        });
+    },
+);
 
-watch(() => bulk.value.company_size_id, (value) => {
-    accounts.value.forEach((account) => {
-        account.company_size_id = value;
-    });
-});
+watch(
+    () => bulk.value.company_size_id,
+    (value) => {
+        accounts.value.forEach((account) => {
+            account.company_size_id = value;
+        });
+    },
+);
 
 const handleFileChange = (event: Event) => {
     const input = event.target as HTMLInputElement;
@@ -198,7 +228,7 @@ const csrfToken = () => {
 };
 
 const loadPreview = async () => {
-    if (! file.value) {
+    if (!file.value) {
         return;
     }
 
@@ -218,7 +248,7 @@ const loadPreview = async () => {
             },
         });
 
-        if (! response.ok) {
+        if (!response.ok) {
             const error = await response.json();
             previewError.value = error.message || 'Failed to preview file.';
 
@@ -238,7 +268,9 @@ const loadPreview = async () => {
 };
 
 const anyAccountMissingCompanyName = computed(
-    () => accounts.value.length === 0 || accounts.value.some((a) => !a.company_name.trim()),
+    () =>
+        accounts.value.length === 0 ||
+        accounts.value.some((a) => !a.company_name.trim()),
 );
 
 const downloadTemplate = () => {
@@ -289,7 +321,7 @@ defineOptions({
 
                     <StepperSeparator
                         v-if="item.step !== steps[steps.length - 1]?.step"
-                        class="absolute left-[calc(50%+20px)] right-[calc(-50%+10px)] top-5 block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
+                        class="absolute top-5 right-[calc(-50%+10px)] left-[calc(50%+20px)] block h-0.5 shrink-0 rounded-full bg-muted group-data-[state=completed]:bg-primary"
                     />
 
                     <div class="flex flex-col items-center">
@@ -306,22 +338,28 @@ defineOptions({
             <Card>
                 <CardHeader>
                     <CardTitle>{{ currentStepMeta.title }}</CardTitle>
-                    <CardDescription>{{ currentStepMeta.description }}</CardDescription>
+                    <CardDescription>{{
+                        currentStepMeta.description
+                    }}</CardDescription>
                 </CardHeader>
 
                 <CardContent class="space-y-6">
                     <div v-if="currentStep === 1" class="space-y-4">
                         <p class="text-sm text-muted-foreground">
-                            The spreadsheet must contain account details and contact details.
-                            Optional values like industry, lead source, and company size are
-                            applied in the next step instead of being imported from the file.
+                            The spreadsheet must contain account details and
+                            contact details. Optional values like industry, lead
+                            source, and company size are applied in the next
+                            step instead of being imported from the file.
                         </p>
 
                         <div class="rounded-md bg-muted p-4">
-                            <p class="mb-2 text-sm font-medium">Expected columns</p>
+                            <p class="mb-2 text-sm font-medium">
+                                Expected columns
+                            </p>
                             <p class="text-sm text-muted-foreground">
-                                company_name, phone, website, contact_first_name,
-                                contact_last_name, contact_email, contact_phone
+                                company_name, phone, website,
+                                contact_first_name, contact_last_name,
+                                contact_email, contact_phone
                             </p>
                             <p class="mt-2 text-xs text-muted-foreground">
                                 The downloaded template is an XLSX file.
@@ -351,10 +389,15 @@ defineOptions({
                     <div v-if="currentStep === 3" class="space-y-6">
                         <div class="rounded-md border p-4">
                             <h4 class="mb-4 font-medium">Apply all</h4>
-                            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            <div
+                                class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+                            >
                                 <div class="grid gap-2">
                                     <Label for="bulk-status">Status</Label>
-                                    <Select id="bulk-status" v-model="bulk.status">
+                                    <Select
+                                        id="bulk-status"
+                                        v-model="bulk.status"
+                                    >
                                         <SelectTrigger class="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
@@ -371,12 +414,19 @@ defineOptions({
                                 </div>
                                 <div class="grid gap-2">
                                     <Label for="bulk-industry">Industry</Label>
-                                    <Select id="bulk-industry" v-model="bulk.industry_id">
+                                    <Select
+                                        id="bulk-industry"
+                                        v-model="bulk.industry_id"
+                                    >
                                         <SelectTrigger class="w-full">
-                                            <SelectValue placeholder="— None —" />
+                                            <SelectValue
+                                                placeholder="— None —"
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">— None —</SelectItem>
+                                            <SelectItem value="none"
+                                                >— None —</SelectItem
+                                            >
                                             <SelectItem
                                                 v-for="option in industries"
                                                 :key="option.id"
@@ -388,13 +438,22 @@ defineOptions({
                                     </Select>
                                 </div>
                                 <div class="grid gap-2">
-                                    <Label for="bulk-lead-source">Lead Source</Label>
-                                    <Select id="bulk-lead-source" v-model="bulk.lead_source_id">
+                                    <Label for="bulk-lead-source"
+                                        >Lead Source</Label
+                                    >
+                                    <Select
+                                        id="bulk-lead-source"
+                                        v-model="bulk.lead_source_id"
+                                    >
                                         <SelectTrigger class="w-full">
-                                            <SelectValue placeholder="— None —" />
+                                            <SelectValue
+                                                placeholder="— None —"
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">— None —</SelectItem>
+                                            <SelectItem value="none"
+                                                >— None —</SelectItem
+                                            >
                                             <SelectItem
                                                 v-for="option in lead_sources"
                                                 :key="option.id"
@@ -406,13 +465,22 @@ defineOptions({
                                     </Select>
                                 </div>
                                 <div class="grid gap-2">
-                                    <Label for="bulk-company-size">Company Size</Label>
-                                    <Select id="bulk-company-size" v-model="bulk.company_size_id">
+                                    <Label for="bulk-company-size"
+                                        >Company Size</Label
+                                    >
+                                    <Select
+                                        id="bulk-company-size"
+                                        v-model="bulk.company_size_id"
+                                    >
                                         <SelectTrigger class="w-full">
-                                            <SelectValue placeholder="— None —" />
+                                            <SelectValue
+                                                placeholder="— None —"
+                                            />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="none">— None —</SelectItem>
+                                            <SelectItem value="none"
+                                                >— None —</SelectItem
+                                            >
                                             <SelectItem
                                                 v-for="option in company_sizes"
                                                 :key="option.id"
@@ -429,7 +497,10 @@ defineOptions({
                         <Form
                             id="import-accounts-form"
                             v-bind="formAction as any"
-                            :options="{ preserveScroll: true, preserveState: true }"
+                            :options="{
+                                preserveScroll: true,
+                                preserveState: true,
+                            }"
                             v-slot="{ errors, processing }"
                         >
                             <div v-if="accounts.length > 0" class="space-y-2">
@@ -438,11 +509,23 @@ defineOptions({
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead v-for="field in fields" :key="field.key">
-                                                    <Label :required="!!field.required">{{ field.label }}</Label>
+                                                <TableHead
+                                                    v-for="field in fields"
+                                                    :key="field.key"
+                                                >
+                                                    <Label
+                                                        :required="
+                                                            !!field.required
+                                                        "
+                                                        >{{
+                                                            field.label
+                                                        }}</Label
+                                                    >
                                                 </TableHead>
                                                 <TableHead>
-                                                    <Label required>Status</Label>
+                                                    <Label required
+                                                        >Status</Label
+                                                    >
                                                 </TableHead>
                                                 <TableHead>
                                                     <Label>Industry</Label>
@@ -456,88 +539,194 @@ defineOptions({
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            <TableRow v-for="(account, rowIndex) in accounts" :key="rowIndex">
-                                                <TableCell v-for="field in fields" :key="field.key">
+                                            <TableRow
+                                                v-for="(
+                                                    account, rowIndex
+                                                ) in accounts"
+                                                :key="rowIndex"
+                                            >
+                                                <TableCell
+                                                    v-for="field in fields"
+                                                    :key="field.key"
+                                                >
                                                     <Input
                                                         :name="`accounts[${rowIndex}][${field.key}]`"
-                                                        v-model="account[field.key]"
+                                                        v-model="
+                                                            account[field.key]
+                                                        "
                                                         type="text"
                                                         class="min-w-[140px]"
-                                                        :placeholder="field.label"
-                                                        :required="!!field.required"
+                                                        :placeholder="
+                                                            field.label
+                                                        "
+                                                        :required="
+                                                            !!field.required
+                                                        "
                                                     />
-                                                    <InputError :message="errors[`accounts.${rowIndex}.${field.key}`]" />
+                                                    <InputError
+                                                        :message="
+                                                            errors[
+                                                                `accounts.${rowIndex}.${field.key}`
+                                                            ]
+                                                        "
+                                                    />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Select :name="`accounts[${rowIndex}][status]`" v-model="account.status">
-                                                        <SelectTrigger class="w-[130px]">
+                                                    <Select
+                                                        :name="`accounts[${rowIndex}][status]`"
+                                                        v-model="account.status"
+                                                    >
+                                                        <SelectTrigger
+                                                            class="w-[130px]"
+                                                        >
                                                             <SelectValue />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             <SelectItem
                                                                 v-for="option in statusOptions"
-                                                                :key="option.value"
-                                                                :value="option.value"
+                                                                :key="
+                                                                    option.value
+                                                                "
+                                                                :value="
+                                                                    option.value
+                                                                "
                                                             >
-                                                                {{ option.label }}
+                                                                {{
+                                                                    option.label
+                                                                }}
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <InputError :message="errors[`accounts.${rowIndex}.status`]" />
+                                                    <InputError
+                                                        :message="
+                                                            errors[
+                                                                `accounts.${rowIndex}.status`
+                                                            ]
+                                                        "
+                                                    />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Select :name="`accounts[${rowIndex}][industry_id]`" v-model="account.industry_id">
-                                                        <SelectTrigger class="w-[130px]">
-                                                            <SelectValue placeholder="— None —" />
+                                                    <Select
+                                                        :name="`accounts[${rowIndex}][industry_id]`"
+                                                        v-model="
+                                                            account.industry_id
+                                                        "
+                                                    >
+                                                        <SelectTrigger
+                                                            class="w-[130px]"
+                                                        >
+                                                            <SelectValue
+                                                                placeholder="— None —"
+                                                            />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="none">— None —</SelectItem>
+                                                            <SelectItem
+                                                                value="none"
+                                                                >— None
+                                                                —</SelectItem
+                                                            >
                                                             <SelectItem
                                                                 v-for="option in industries"
                                                                 :key="option.id"
-                                                                :value="option.id.toString()"
+                                                                :value="
+                                                                    option.id.toString()
+                                                                "
                                                             >
-                                                                {{ option.name }}
+                                                                {{
+                                                                    option.name
+                                                                }}
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <InputError :message="errors[`accounts.${rowIndex}.industry_id`]" />
+                                                    <InputError
+                                                        :message="
+                                                            errors[
+                                                                `accounts.${rowIndex}.industry_id`
+                                                            ]
+                                                        "
+                                                    />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Select :name="`accounts[${rowIndex}][lead_source_id]`" v-model="account.lead_source_id">
-                                                        <SelectTrigger class="w-[130px]">
-                                                            <SelectValue placeholder="— None —" />
+                                                    <Select
+                                                        :name="`accounts[${rowIndex}][lead_source_id]`"
+                                                        v-model="
+                                                            account.lead_source_id
+                                                        "
+                                                    >
+                                                        <SelectTrigger
+                                                            class="w-[130px]"
+                                                        >
+                                                            <SelectValue
+                                                                placeholder="— None —"
+                                                            />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="none">— None —</SelectItem>
+                                                            <SelectItem
+                                                                value="none"
+                                                                >— None
+                                                                —</SelectItem
+                                                            >
                                                             <SelectItem
                                                                 v-for="option in lead_sources"
                                                                 :key="option.id"
-                                                                :value="option.id.toString()"
+                                                                :value="
+                                                                    option.id.toString()
+                                                                "
                                                             >
-                                                                {{ option.name }}
+                                                                {{
+                                                                    option.name
+                                                                }}
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <InputError :message="errors[`accounts.${rowIndex}.lead_source_id`]" />
+                                                    <InputError
+                                                        :message="
+                                                            errors[
+                                                                `accounts.${rowIndex}.lead_source_id`
+                                                            ]
+                                                        "
+                                                    />
                                                 </TableCell>
                                                 <TableCell>
-                                                    <Select :name="`accounts[${rowIndex}][company_size_id]`" v-model="account.company_size_id">
-                                                        <SelectTrigger class="w-[130px]">
-                                                            <SelectValue placeholder="— None —" />
+                                                    <Select
+                                                        :name="`accounts[${rowIndex}][company_size_id]`"
+                                                        v-model="
+                                                            account.company_size_id
+                                                        "
+                                                    >
+                                                        <SelectTrigger
+                                                            class="w-[130px]"
+                                                        >
+                                                            <SelectValue
+                                                                placeholder="— None —"
+                                                            />
                                                         </SelectTrigger>
                                                         <SelectContent>
-                                                            <SelectItem value="none">— None —</SelectItem>
+                                                            <SelectItem
+                                                                value="none"
+                                                                >— None
+                                                                —</SelectItem
+                                                            >
                                                             <SelectItem
                                                                 v-for="option in company_sizes"
                                                                 :key="option.id"
-                                                                :value="option.id.toString()"
+                                                                :value="
+                                                                    option.id.toString()
+                                                                "
                                                             >
-                                                                {{ option.label }}
+                                                                {{
+                                                                    option.label
+                                                                }}
                                                             </SelectItem>
                                                         </SelectContent>
                                                     </Select>
-                                                    <InputError :message="errors[`accounts.${rowIndex}.company_size_id`]" />
+                                                    <InputError
+                                                        :message="
+                                                            errors[
+                                                                `accounts.${rowIndex}.company_size_id`
+                                                            ]
+                                                        "
+                                                    />
                                                 </TableCell>
                                             </TableRow>
                                         </TableBody>
@@ -551,10 +740,17 @@ defineOptions({
                             <div class="flex justify-end pt-4">
                                 <Button
                                     type="submit"
-                                    :disabled="anyAccountMissingCompanyName || processing"
+                                    :disabled="
+                                        anyAccountMissingCompanyName ||
+                                        processing
+                                    "
                                 >
                                     <Check class="mr-2 h-4 w-4" />
-                                    {{ processing ? 'Importing...' : 'Import accounts' }}
+                                    {{
+                                        processing
+                                            ? 'Importing...'
+                                            : 'Import accounts'
+                                    }}
                                 </Button>
                             </div>
                         </Form>
@@ -562,11 +758,7 @@ defineOptions({
                 </CardContent>
 
                 <CardFooter class="flex justify-end gap-2">
-                    <Button
-                        v-if="currentStep === 1"
-                        variant="outline"
-                        as-child
-                    >
+                    <Button v-if="currentStep === 1" variant="outline" as-child>
                         <a :href="accountIndexRoute().url">Cancel</a>
                     </Button>
                     <Button
@@ -585,10 +777,7 @@ defineOptions({
                         <Download class="mr-2 h-4 w-4" />
                         Download template
                     </Button>
-                    <Button
-                        v-if="currentStep === 1"
-                        @click="currentStep = 2"
-                    >
+                    <Button v-if="currentStep === 1" @click="currentStep = 2">
                         I already have a spreadsheet
                     </Button>
                     <Button

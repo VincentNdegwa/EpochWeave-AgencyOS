@@ -81,7 +81,8 @@ function updateFilters(newFilters: Record<string, string | undefined>) {
 defineOptions({
     layout: {
         title: 'Custom Fields',
-        description: 'Manage custom field groups and definitions for your records.',
+        description:
+            'Manage custom field groups and definitions for your records.',
         breadcrumbs: [
             {
                 title: 'Dashboard',

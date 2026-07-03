@@ -61,7 +61,7 @@ const arAgingSeries = computed(() => props.buckets.map((b) => b.amount));
 </script>
 
 <template>
-    <div class="border border-border rounded-sm bg-background p-5">
+    <div class="rounded-sm border border-border bg-background p-5">
         <h3 class="mb-4 text-lg font-semibold">AR Aging</h3>
         <VueApexCharts
             type="donut"
@@ -80,7 +80,9 @@ const arAgingSeries = computed(() => props.buckets.map((b) => b.amount));
                     :style="{ backgroundColor: bucket.color }"
                 />
                 <span class="text-muted-foreground">{{ bucket.label }}:</span>
-                <span class="font-medium">{{ formatCurrency(bucket.amount) }}</span>
+                <span class="font-medium">{{
+                    formatCurrency(bucket.amount)
+                }}</span>
             </div>
         </div>
     </div>

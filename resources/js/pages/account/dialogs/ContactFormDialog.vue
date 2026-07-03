@@ -65,7 +65,8 @@ watch(
                 job_title: newContact.job_title || '',
                 date_of_birth: newContact.date_of_birth || '',
                 department: newContact.department || '',
-                preferred_contact_method: newContact.preferred_contact_method || '',
+                preferred_contact_method:
+                    newContact.preferred_contact_method || '',
                 notes: newContact.notes || '',
                 is_primary: newContact.is_primary,
                 receives_billing: newContact.receives_billing,
@@ -202,9 +203,17 @@ watch(
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="preferred_contact_method">Preferred Contact</Label>
-                        <Select name="preferred_contact_method" v-model="form.preferred_contact_method">
-                            <SelectTrigger id="preferred_contact_method" class="w-full">
+                        <Label for="preferred_contact_method"
+                            >Preferred Contact</Label
+                        >
+                        <Select
+                            name="preferred_contact_method"
+                            v-model="form.preferred_contact_method"
+                        >
+                            <SelectTrigger
+                                id="preferred_contact_method"
+                                class="w-full"
+                            >
                                 <SelectValue placeholder="Select..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -212,7 +221,9 @@ watch(
                                 <SelectItem value="phone">Phone</SelectItem>
                             </SelectContent>
                         </Select>
-                        <InputError :message="errors.preferred_contact_method" />
+                        <InputError
+                            :message="errors.preferred_contact_method"
+                        />
                     </div>
 
                     <div class="grid gap-2">
@@ -236,7 +247,10 @@ watch(
                                     name="is_primary"
                                     :value="form.is_primary ? '1' : '0'"
                                 />
-                                <Switch id="is_primary" v-model="form.is_primary" />
+                                <Switch
+                                    id="is_primary"
+                                    v-model="form.is_primary"
+                                />
                                 <Label for="is_primary" class="cursor-pointer"
                                     >Primary Contact</Label
                                 >
@@ -254,7 +268,9 @@ watch(
                                     id="receives_billing"
                                     v-model="form.receives_billing"
                                 />
-                                <Label for="receives_billing" class="cursor-pointer"
+                                <Label
+                                    for="receives_billing"
+                                    class="cursor-pointer"
                                     >Receives Billing</Label
                                 >
                             </div>

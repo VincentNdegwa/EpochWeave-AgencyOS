@@ -131,7 +131,8 @@ export function useTaskPriorities() {
 function createEnumHelpers(enumRecord: Record<string, EnumOption>) {
     return {
         all: enumRecord,
-        getByValue: (value: string): EnumOption | undefined => enumRecord[value],
+        getByValue: (value: string): EnumOption | undefined =>
+            enumRecord[value],
         getLabel: (value: string): string => enumRecord[value]?.label || value,
         getVariant: (value: string): BadgeVariants['variant'] =>
             enumRecord[value]?.variant || 'default',

@@ -60,7 +60,11 @@ const isTerminal = (trigger: string | null): boolean => {
     return (movement_rules[trigger] ?? []).length === 0;
 };
 
-function onDragStart(e: DragEvent, proposal: Proposal, status: ProposalStatusModel) {
+function onDragStart(
+    e: DragEvent,
+    proposal: Proposal,
+    status: ProposalStatusModel,
+) {
     hoveredProposalId.value = null;
     isDragging.value = true;
     dragStartTime.value = Date.now();

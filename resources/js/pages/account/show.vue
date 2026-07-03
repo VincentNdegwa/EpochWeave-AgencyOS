@@ -14,8 +14,8 @@ import type { Account, AccountContact, Address } from '@/types/models/account';
 import AccountActions from './components/AccountActions.vue';
 import { createContactColumns } from './contacts-datatable/columns';
 import ContactsDataTable from './contacts-datatable/data-table.vue';
-import ContactFormDialog from './dialogs/ContactFormDialog.vue';
 import AddressFormDialog from './dialogs/AddressFormDialog.vue';
+import ContactFormDialog from './dialogs/ContactFormDialog.vue';
 
 const props = defineProps<{
     account: Account;
@@ -195,13 +195,20 @@ defineOptions({
                     >
                         Addresses
                     </h3>
-                    <Button size="sm" class="gap-2" @click="openNewAddressDialog">
+                    <Button
+                        size="sm"
+                        class="gap-2"
+                        @click="openNewAddressDialog"
+                    >
                         <Plus class="h-3.5 w-3.5" />
                         Add Address
                     </Button>
                 </div>
                 <div
-                    v-if="props.account.addresses && props.account.addresses.length > 0"
+                    v-if="
+                        props.account.addresses &&
+                        props.account.addresses.length > 0
+                    "
                     class="space-y-2"
                 >
                     <div
@@ -211,11 +218,14 @@ defineOptions({
                     >
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <span class="font-medium capitalize">{{ address.type }}</span>
+                                <span class="font-medium capitalize">{{
+                                    address.type
+                                }}</span>
                                 <span
                                     v-if="address.is_primary"
                                     class="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
-                                >Primary</span>
+                                    >Primary</span
+                                >
                             </div>
                             <div class="flex items-center gap-2">
                                 <Button
@@ -237,9 +247,16 @@ defineOptions({
                         </div>
                         <div class="mt-1 text-muted-foreground">
                             {{ address.street_1 }}
-                            <span v-if="address.street_2">, {{ address.street_2 }}</span><br />
-                            {{ address.city }}<span v-if="address.state">, {{ address.state }}</span>
-                            <span v-if="address.postal_code"> {{ address.postal_code }}</span><br />
+                            <span v-if="address.street_2"
+                                >, {{ address.street_2 }}</span
+                            ><br />
+                            {{ address.city
+                            }}<span v-if="address.state"
+                                >, {{ address.state }}</span
+                            >
+                            <span v-if="address.postal_code">
+                                {{ address.postal_code }}</span
+                            ><br />
                             {{ address.country }}
                         </div>
                     </div>
@@ -259,7 +276,10 @@ defineOptions({
                     </h3>
                 </div>
                 <div
-                    v-if="props.account.socialProfiles && props.account.socialProfiles.length > 0"
+                    v-if="
+                        props.account.socialProfiles &&
+                        props.account.socialProfiles.length > 0
+                    "
                     class="flex flex-wrap gap-2"
                 >
                     <a
@@ -273,7 +293,8 @@ defineOptions({
                         <span
                             v-if="profile.is_verified"
                             class="rounded bg-primary/10 px-1 py-0.5 text-[10px] font-medium text-primary"
-                        >Verified</span>
+                            >Verified</span
+                        >
                     </a>
                 </div>
                 <div v-else class="text-sm text-muted-foreground">

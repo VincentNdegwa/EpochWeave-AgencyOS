@@ -71,7 +71,7 @@ watch(
 
 <template>
     <Dialog :open="open" @update:open="emit('update:open', $event)">
-        <DialogContent class="max-h-[90vh] overflow-hidden max-w-lg">
+        <DialogContent class="max-h-[90vh] max-w-lg overflow-hidden">
             <DialogHeader>
                 <DialogTitle>{{
                     status ? 'Edit Status' : 'New Status'
@@ -100,7 +100,9 @@ watch(
                 "
                 v-slot="{ errors, processing }"
             >
-                <div class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2">
+                <div
+                    class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2"
+                >
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="grid gap-2 sm:col-span-2">
                             <Label for="is-title" required>Title</Label>

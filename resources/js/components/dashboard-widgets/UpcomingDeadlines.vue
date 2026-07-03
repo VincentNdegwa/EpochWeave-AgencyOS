@@ -32,7 +32,7 @@ const deadlineColor = (type: string) => {
 </script>
 
 <template>
-    <div class="border border-border rounded-sm bg-background p-5">
+    <div class="rounded-sm border border-border bg-background p-5">
         <h3 class="mb-4 text-lg font-semibold">Upcoming Deadlines</h3>
         <div class="space-y-3">
             <div
@@ -46,10 +46,7 @@ const deadlineColor = (type: string) => {
                         deadlineColor(item.type),
                     ]"
                 >
-                    <component
-                        :is="deadlineIcon(item.type)"
-                        class="h-4 w-4"
-                    />
+                    <component :is="deadlineIcon(item.type)" class="h-4 w-4" />
                 </div>
                 <div class="min-w-0">
                     <p class="truncate text-sm font-medium text-foreground">
@@ -57,8 +54,12 @@ const deadlineColor = (type: string) => {
                     </p>
                     <p class="text-xs text-muted-foreground">
                         {{ item.date }}
-                        <span v-if="item.account">&middot; {{ item.account }}</span>
-                        <span v-if="item.project">&middot; {{ item.project }}</span>
+                        <span v-if="item.account"
+                            >&middot; {{ item.account }}</span
+                        >
+                        <span v-if="item.project"
+                            >&middot; {{ item.project }}</span
+                        >
                     </p>
                 </div>
             </div>

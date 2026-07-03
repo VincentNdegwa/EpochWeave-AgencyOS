@@ -85,7 +85,9 @@ watch(
                 "
                 v-slot="{ errors, processing }"
             >
-                <div class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2">
+                <div
+                    class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2"
+                >
                     <div class="grid gap-4">
                         <div class="grid gap-2">
                             <Label for="title" required>Status Name</Label>

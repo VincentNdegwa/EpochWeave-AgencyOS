@@ -109,19 +109,17 @@ function sparklineOptions(series: number[]) {
 
 <template>
     <div class="border-t border-b border-border bg-background">
-        <div class="grid divide-x divide-border grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
-            <div
-                v-for="card in cards"
-                :key="card.key"
-                class="px-6 py-4"
-            >
+        <div
+            class="grid grid-cols-2 divide-x divide-border sm:grid-cols-3 lg:grid-cols-6"
+        >
+            <div v-for="card in cards" :key="card.key" class="px-6 py-4">
                 <div class="flex items-center gap-2">
                     <component
                         :is="card.icon"
                         class="h-4 w-4 text-muted-foreground"
                     />
                     <span
-                        class="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground"
+                        class="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase"
                     >
                         {{ card.label }}
                     </span>
@@ -135,7 +133,9 @@ function sparklineOptions(series: number[]) {
                         v-if="card.change"
                         :class="[
                             'inline-flex items-center gap-0.5 text-xs font-medium',
-                            card.isPositive ? 'text-emerald-600' : 'text-rose-600',
+                            card.isPositive
+                                ? 'text-emerald-600'
+                                : 'text-rose-600',
                         ]"
                     >
                         <component

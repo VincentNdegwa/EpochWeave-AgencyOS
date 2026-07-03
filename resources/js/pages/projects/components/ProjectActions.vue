@@ -134,9 +134,12 @@ const pauseAction: ActionItem = {
             const pausedStatusId = getStatusId('paused');
 
             if (pausedStatusId) {
-                router.patch(ProjectController.updateStatus(props.project.id).url, {
-                    project_status_id: pausedStatusId,
-                });
+                router.patch(
+                    ProjectController.updateStatus(props.project.id).url,
+                    {
+                        project_status_id: pausedStatusId,
+                    },
+                );
             }
         }
     },
@@ -160,9 +163,12 @@ const completeAction: ActionItem = {
             const completedStatusId = getStatusId('completed');
 
             if (completedStatusId) {
-                router.patch(ProjectController.updateStatus(props.project.id).url, {
-                    project_status_id: completedStatusId,
-                });
+                router.patch(
+                    ProjectController.updateStatus(props.project.id).url,
+                    {
+                        project_status_id: completedStatusId,
+                    },
+                );
             }
         }
     },
@@ -188,9 +194,12 @@ const cancelAction: ActionItem = {
             const cancelledStatusId = getStatusId('cancelled');
 
             if (cancelledStatusId) {
-                router.patch(ProjectController.updateStatus(props.project.id).url, {
-                    project_status_id: cancelledStatusId,
-                });
+                router.patch(
+                    ProjectController.updateStatus(props.project.id).url,
+                    {
+                        project_status_id: cancelledStatusId,
+                    },
+                );
             }
         }
     },
@@ -257,12 +266,7 @@ const allActions = computed((): ActionItem[] => {
                 cancelAction,
             ];
         case 'paused':
-            return [
-                viewAction,
-                editAction,
-                activateAction,
-                cancelAction,
-            ];
+            return [viewAction, editAction, activateAction, cancelAction];
         case 'completed':
             if (!props.project.archived_at) {
                 return [viewAction, editAction, archiveAction];

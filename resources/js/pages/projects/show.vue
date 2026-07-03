@@ -97,7 +97,12 @@ setLayoutProps({
                         >
                     </h1>
                 </div>
-                <ProjectActions :project="project" :project_statuses="project_statuses" variant="split" size="sm" />
+                <ProjectActions
+                    :project="project"
+                    :project_statuses="project_statuses"
+                    variant="split"
+                    size="sm"
+                />
             </div>
         </div>
 

@@ -179,12 +179,7 @@ const allActions = computed((): ActionItem[] => {
     switch (currentTrigger.value) {
         case 'backlog':
         case 'unstarted':
-            return [
-                viewAction,
-                startWorkAction,
-                editAction,
-                deleteAction,
-            ];
+            return [viewAction, startWorkAction, editAction, deleteAction];
         case 'active':
             return [
                 viewAction,

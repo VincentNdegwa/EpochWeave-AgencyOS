@@ -100,7 +100,11 @@ watch(
                     {{ isEditMode ? 'Edit Address' : 'Add Address' }}
                 </DialogTitle>
                 <DialogDescription>
-                    {{ isEditMode ? 'Update the address details.' : 'Add a new address.' }}
+                    {{
+                        isEditMode
+                            ? 'Update the address details.'
+                            : 'Add a new address.'
+                    }}
                 </DialogDescription>
             </DialogHeader>
 
@@ -137,7 +141,9 @@ watch(
                             <SelectContent>
                                 <SelectItem value="primary">Primary</SelectItem>
                                 <SelectItem value="billing">Billing</SelectItem>
-                                <SelectItem value="shipping">Shipping</SelectItem>
+                                <SelectItem value="shipping"
+                                    >Shipping</SelectItem
+                                >
                                 <SelectItem value="office">Office</SelectItem>
                             </SelectContent>
                         </Select>
@@ -156,7 +162,9 @@ watch(
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="address-street_1" required>Street Address</Label>
+                        <Label for="address-street_1" required
+                            >Street Address</Label
+                        >
                         <Input
                             id="address-street_1"
                             name="street_1"
@@ -168,7 +176,9 @@ watch(
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="address-street_2">Apartment, suite, etc.</Label>
+                        <Label for="address-street_2"
+                            >Apartment, suite, etc.</Label
+                        >
                         <Input
                             id="address-street_2"
                             name="street_2"
@@ -216,7 +226,9 @@ watch(
                         </div>
 
                         <div class="grid gap-2">
-                            <Label for="address-country" required>Country</Label>
+                            <Label for="address-country" required
+                                >Country</Label
+                            >
                             <Input
                                 id="address-country"
                                 name="country"
@@ -231,10 +243,7 @@ watch(
                     <div
                         class="flex items-center justify-between gap-4 rounded-lg border border-border bg-background px-3 py-2"
                     >
-                        <Label
-                            for="address-is_primary"
-                            class="cursor-pointer"
-                        >
+                        <Label for="address-is_primary" class="cursor-pointer">
                             Primary Address
                         </Label>
                         <div class="flex items-center gap-3">

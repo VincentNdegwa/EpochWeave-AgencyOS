@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { Key, Lock, MapPin, MoreHorizontal, Pencil, Star, Trash2 } from '@lucide/vue';
+import {
+    Key,
+    Lock,
+    MapPin,
+    MoreHorizontal,
+    Pencil,
+    Star,
+    Trash2,
+} from '@lucide/vue';
 import { ref } from 'vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,8 +19,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { AccountContact, Address } from '@/types/models/account';
-import ContactFormDialog from '../dialogs/ContactFormDialog.vue';
 import AddressFormDialog from '../dialogs/AddressFormDialog.vue';
+import ContactFormDialog from '../dialogs/ContactFormDialog.vue';
 
 interface Props {
     contact: AccountContact;

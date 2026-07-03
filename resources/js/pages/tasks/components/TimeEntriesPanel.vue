@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import {
-    Clock,
-    Pause,
-    Trash2,
-} from '@lucide/vue';
+import { Clock, Pause, Trash2 } from '@lucide/vue';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import type { TimeEntry } from '@/types/models/time_entry';
@@ -28,7 +24,9 @@ const runningSeconds = computed(() => {
     }
 
     return Math.floor(
-        (now.value.getTime() - new Date(runningEntry.value.started_at).getTime()) / 1000,
+        (now.value.getTime() -
+            new Date(runningEntry.value.started_at).getTime()) /
+            1000,
     );
 });
 
@@ -135,7 +133,9 @@ const formatDateTime = (dateString: string): string => {
                 <span
                     class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/40"
                 >
-                    <Pause class="h-4 w-4 animate-pulse text-blue-600 dark:text-blue-400" />
+                    <Pause
+                        class="h-4 w-4 animate-pulse text-blue-600 dark:text-blue-400"
+                    />
                 </span>
                 <div>
                     <p class="text-sm font-semibold text-foreground">
@@ -149,7 +149,9 @@ const formatDateTime = (dateString: string): string => {
                     </p>
                 </div>
             </div>
-            <span class="font-mono text-xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
+            <span
+                class="font-mono text-xl font-bold text-blue-600 tabular-nums dark:text-blue-400"
+            >
                 {{ formatDuration(runningSeconds) }}
             </span>
         </div>
@@ -170,7 +172,7 @@ const formatDateTime = (dateString: string): string => {
                         &mdash;
                         {{ formatDateTime(entry.ended_at!) }}
                         &middot;
-                        <span class="font-medium tabular-nums text-foreground">
+                        <span class="font-medium text-foreground tabular-nums">
                             {{ formatDuration(entry.duration_seconds) }}
                         </span>
                         <span v-if="entry.is_billable" class="text-emerald-600">
@@ -198,8 +200,8 @@ const formatDateTime = (dateString: string): string => {
                 v-if="!timeEntries.length"
                 class="py-8 text-center text-sm text-muted-foreground"
             >
-                No time entries yet. Time is tracked automatically when you
-                move a task to "In Progress".
+                No time entries yet. Time is tracked automatically when you move
+                a task to "In Progress".
             </p>
         </div>
     </div>

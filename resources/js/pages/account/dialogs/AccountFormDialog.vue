@@ -84,8 +84,12 @@ const website = ref(props.account?.website ?? '');
 const description = ref(props.account?.description ?? '');
 const foundedAt = ref(props.account?.founded_at ?? '');
 const industryId = ref<string>((props.account?.industry_id ?? '').toString());
-const leadSourceId = ref<string>((props.account?.lead_source_id ?? '').toString());
-const companySizeId = ref<string>((props.account?.company_size_id ?? '').toString());
+const leadSourceId = ref<string>(
+    (props.account?.lead_source_id ?? '').toString(),
+);
+const companySizeId = ref<string>(
+    (props.account?.company_size_id ?? '').toString(),
+);
 const annualRevenue = ref(props.account?.annual_revenue ?? '');
 const employeeCount = ref(props.account?.employee_count ?? '');
 
@@ -244,7 +248,9 @@ watch(
                             <Label for="industry_id">Industry</Label>
                             <Select name="industry_id" v-model="industryId">
                                 <SelectTrigger id="industry_id" class="w-full">
-                                    <SelectValue placeholder="Select industry..." />
+                                    <SelectValue
+                                        placeholder="Select industry..."
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
@@ -261,9 +267,17 @@ watch(
 
                         <div class="grid gap-2">
                             <Label for="lead_source_id">Lead Source</Label>
-                            <Select name="lead_source_id" v-model="leadSourceId">
-                                <SelectTrigger id="lead_source_id" class="w-full">
-                                    <SelectValue placeholder="Select source..." />
+                            <Select
+                                name="lead_source_id"
+                                v-model="leadSourceId"
+                            >
+                                <SelectTrigger
+                                    id="lead_source_id"
+                                    class="w-full"
+                                >
+                                    <SelectValue
+                                        placeholder="Select source..."
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
@@ -280,8 +294,14 @@ watch(
 
                         <div class="grid gap-2">
                             <Label for="company_size_id">Company Size</Label>
-                            <Select name="company_size_id" v-model="companySizeId">
-                                <SelectTrigger id="company_size_id" class="w-full">
+                            <Select
+                                name="company_size_id"
+                                v-model="companySizeId"
+                            >
+                                <SelectTrigger
+                                    id="company_size_id"
+                                    class="w-full"
+                                >
                                     <SelectValue placeholder="Select size..." />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -333,7 +353,6 @@ watch(
                             ></textarea>
                             <InputError :message="errors.description" />
                         </div>
-
                     </div>
 
                     <div v-if="!isEditMode" class="space-y-4">

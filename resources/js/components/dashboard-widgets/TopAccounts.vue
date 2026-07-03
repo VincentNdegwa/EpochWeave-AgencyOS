@@ -15,7 +15,7 @@ const maxAccountRevenue = computed(() =>
 </script>
 
 <template>
-    <div class="border border-border rounded-sm bg-background p-5">
+    <div class="rounded-sm border border-border bg-background p-5">
         <h3 class="mb-4 text-lg font-semibold">Top Accounts (Revenue)</h3>
         <div class="space-y-3">
             <div
@@ -30,7 +30,9 @@ const maxAccountRevenue = computed(() =>
                 </span>
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center justify-between text-sm">
-                        <span class="truncate font-medium">{{ account.name }}</span>
+                        <span class="truncate font-medium">{{
+                            account.name
+                        }}</span>
                         <span class="shrink-0 text-muted-foreground">
                             {{ formatCurrency(account.revenue) }}
                         </span>

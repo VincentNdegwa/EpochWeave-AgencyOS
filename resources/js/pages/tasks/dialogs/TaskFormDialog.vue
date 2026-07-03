@@ -55,12 +55,15 @@ const emit = defineEmits<{
 }>();
 
 const builderData = useBuilderDataStore();
-const { projects, projectsLoaded, users, usersLoaded } = storeToRefs(builderData);
+const { projects, projectsLoaded, users, usersLoaded } =
+    storeToRefs(builderData);
 const taskStatuses = computed(() => props.task_statuses || []);
 const taskPriorities = useTaskPriorities();
 
 const page = usePage();
-const currentUser = computed(() => page.props.auth?.user as { id: number; name: string } | undefined);
+const currentUser = computed(
+    () => page.props.auth?.user as { id: number; name: string } | undefined,
+);
 
 function toggleTag(tagId: number) {
     const idStr = tagId.toString();
@@ -184,7 +187,9 @@ watch(
                 "
                 v-slot="{ errors, processing }"
             >
-                <div class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2">
+                <div
+                    class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2"
+                >
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <div class="grid gap-2 sm:col-span-2">
                             <Label for="task-title" required>Title</Label>
@@ -265,7 +270,11 @@ watch(
                             <input
                                 type="hidden"
                                 name="assignee_id"
-                                :value="form.assignee_id === 'none' ? '' : form.assignee_id"
+                                :value="
+                                    form.assignee_id === 'none'
+                                        ? ''
+                                        : form.assignee_id
+                                "
                             />
                             <InputError :message="errors.assignee_id" />
                         </div>

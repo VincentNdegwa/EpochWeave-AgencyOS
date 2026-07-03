@@ -68,7 +68,7 @@ const revenueChartSeries = computed(() => [
 </script>
 
 <template>
-    <div class="border border-border rounded-sm bg-background p-5">
+    <div class="rounded-sm border border-border bg-background p-5">
         <div class="mb-4 flex items-center justify-between">
             <h3 class="text-lg font-semibold">Revenue vs Pipeline</h3>
             <div class="inline-flex border bg-background p-0.5">

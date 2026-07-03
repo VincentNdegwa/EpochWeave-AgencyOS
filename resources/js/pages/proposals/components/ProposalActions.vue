@@ -200,7 +200,6 @@ const revertToDraftAction: ActionItem = {
                 cancelText: 'Cancel',
             })
         ) {
-
             const draftStatusId = draftStatus.value?.id;
 
             if (draftStatusId) {

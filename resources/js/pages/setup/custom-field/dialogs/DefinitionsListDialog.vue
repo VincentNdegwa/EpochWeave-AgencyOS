@@ -45,7 +45,8 @@ async function handleDelete(definition: CustomFieldDefinition) {
     if (
         await confirm({
             title: 'Delete Field',
-            description: 'Are you sure you want to delete this field definition?',
+            description:
+                'Are you sure you want to delete this field definition?',
             confirmText: 'Delete',
             cancelText: 'Cancel',
             variant: 'destructive',
@@ -62,9 +63,7 @@ async function handleDelete(definition: CustomFieldDefinition) {
     <Dialog :open="open" @update:open="emit('update:open', $event)">
         <DialogContent class="max-w-md">
             <DialogHeader>
-                <DialogTitle>
-                    {{ group?.name }} Fields
-                </DialogTitle>
+                <DialogTitle> {{ group?.name }} Fields </DialogTitle>
                 <DialogDescription>
                     Manage the fields in this group.
                 </DialogDescription>
@@ -77,9 +76,11 @@ async function handleDelete(definition: CustomFieldDefinition) {
                     class="flex items-center justify-between rounded-md border border-border bg-muted/30 px-3 py-2"
                 >
                     <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium">{{ definition.label }}</span>
+                        <span class="text-sm font-medium">{{
+                            definition.label
+                        }}</span>
                         <span
-                            class="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground"
+                            class="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground uppercase"
                         >
                             {{ definition.field_type }}
                         </span>

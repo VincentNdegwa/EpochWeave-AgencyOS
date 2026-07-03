@@ -140,7 +140,9 @@ watch(
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="definition-field-type" required>Field Type</Label>
+                        <Label for="definition-field-type" required
+                            >Field Type</Label
+                        >
                         <Select v-model="form.field_type" name="field_type">
                             <SelectTrigger class="w-full">
                                 <SelectValue placeholder="Select field type" />
@@ -151,7 +153,9 @@ watch(
                                 <SelectItem value="boolean">Boolean</SelectItem>
                                 <SelectItem value="date">Date</SelectItem>
                                 <SelectItem value="select">Select</SelectItem>
-                                <SelectItem value="multiselect">Multiselect</SelectItem>
+                                <SelectItem value="multiselect"
+                                    >Multiselect</SelectItem
+                                >
                             </SelectContent>
                         </Select>
                         <InputError :message="errors.field_type" />
@@ -189,10 +193,16 @@ watch(
                             :checked="form.is_required"
                             class="h-4 w-4 rounded border-input"
                         />
-                        <Label for="definition-is-required" class="font-normal">Required</Label>
+                        <Label for="definition-is-required" class="font-normal"
+                            >Required</Label
+                        >
                     </div>
 
-                    <input type="hidden" name="sort_order" :value="form.sort_order" />
+                    <input
+                        type="hidden"
+                        name="sort_order"
+                        :value="form.sort_order"
+                    />
                 </div>
 
                 <DialogFooter>

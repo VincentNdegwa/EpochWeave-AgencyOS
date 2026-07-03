@@ -114,7 +114,9 @@ watch(
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="group-applies-to" required>Applies To</Label>
+                        <Label for="group-applies-to" required
+                            >Applies To</Label
+                        >
                         <Input
                             id="group-applies-to"
                             name="applies_to"
@@ -125,7 +127,11 @@ watch(
                         <InputError :message="errors.applies_to" />
                     </div>
 
-                    <input type="hidden" name="sort_order" :value="form.sort_order" />
+                    <input
+                        type="hidden"
+                        name="sort_order"
+                        :value="form.sort_order"
+                    />
                 </div>
 
                 <DialogFooter>

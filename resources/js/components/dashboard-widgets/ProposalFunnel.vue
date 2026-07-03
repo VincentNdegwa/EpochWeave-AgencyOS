@@ -51,7 +51,7 @@ const funnelChartSeries = computed(() => [
 </script>
 
 <template>
-    <div class="border border-border rounded-sm bg-background p-5">
+    <div class="rounded-sm border border-border bg-background p-5">
         <h3 class="mb-4 text-lg font-semibold">Proposal Funnel</h3>
         <VueApexCharts
             type="bar"

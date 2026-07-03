@@ -49,11 +49,17 @@ const dueState = computed(() => {
     );
 
     if (isCompleted.value) {
-        return { cls: 'text-muted-foreground', label: formatDate(props.task.due_date) };
+        return {
+            cls: 'text-muted-foreground',
+            label: formatDate(props.task.due_date),
+        };
     }
 
     if (diff < 0) {
-        return { cls: 'text-destructive font-medium', label: `${Math.abs(diff)}d overdue` };
+        return {
+            cls: 'text-destructive font-medium',
+            label: `${Math.abs(diff)}d overdue`,
+        };
     }
 
     if (diff === 0) {
@@ -64,13 +70,16 @@ const dueState = computed(() => {
         return { cls: 'text-amber-500', label: 'Tomorrow' };
     }
 
-    return { cls: 'text-muted-foreground', label: formatDate(props.task.due_date) };
+    return {
+        cls: 'text-muted-foreground',
+        label: formatDate(props.task.due_date),
+    };
 });
 </script>
 
 <template>
     <div
-        class="group relative flex flex-col gap-2 rounded-lg border border-border bg-background p-3 shadow-sm transition-all select-none cursor-grab hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing"
+        class="group relative flex cursor-grab flex-col gap-2 rounded-lg border border-border bg-background p-3 shadow-sm transition-all select-none hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing"
         :class="isDragging ? 'scale-95 opacity-40' : ''"
     >
         <!-- Row 1: Project pill + priority + actions -->
@@ -82,7 +91,9 @@ const dueState = computed(() => {
                 >
                     <span
                         class="h-1.5 w-1.5 shrink-0 rounded-full"
-                        :style="{ backgroundColor: task.project.color ?? '#94a3b8' }"
+                        :style="{
+                            backgroundColor: task.project.color ?? '#94a3b8',
+                        }"
                     />
                     {{ task.project.name }}
                 </span>
@@ -114,7 +125,7 @@ const dueState = computed(() => {
                 v-if="isCompleted"
                 class="mt-0.5 h-3.5 w-3.5 shrink-0 text-green-500"
             />
-            <p class="text-[13px] font-medium leading-snug text-foreground">
+            <p class="text-[13px] leading-snug font-medium text-foreground">
                 {{ task.title }}
             </p>
         </div>
@@ -156,7 +167,9 @@ const dueState = computed(() => {
             </div>
 
             <!-- Right: metadata chips -->
-            <div class="flex items-center gap-2 text-[10px] text-muted-foreground">
+            <div
+                class="flex items-center gap-2 text-[10px] text-muted-foreground"
+            >
                 <span
                     v-if="task.estimated_hours"
                     class="flex items-center gap-0.5"
