@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Proposal;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -25,18 +26,18 @@ class ProposalRevisited extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $viewerName = $this->getViewerName();
-        $url = $notifiable instanceof \App\Models\User 
+        $url = $notifiable instanceof User
             ? route('proposals.show', $this->proposal)
             : route('proposals.public.show', $this->proposal->token);
-        $timeSinceLastView = $this->lastViewedAt 
-            ? $this->lastViewedAt->diffForHumans(now()) 
+        $timeSinceLastView = $this->lastViewedAt
+            ? $this->lastViewedAt->diffForHumans(now())
             : 'recently';
 
         return (new MailMessage)
-            ->subject('Proposal Revisited: ' . $this->proposal->title)
-            ->greeting('Hello ' . $notifiable->first_name . ',')
+            ->subject('Proposal Revisited: '.$this->proposal->title)
+            ->greeting('Hello '.$notifiable->first_name.',')
             ->line("{$viewerName} has returned to review your proposal again!")
-            ->line('Proposal: ' . $this->proposal->title)
+            ->line('Proposal: '.$this->proposal->title)
             ->line("They previously viewed it {$timeSinceLastView}, and now they're back.")
             ->line('This signals renewed interest or internal client deliberation.')
             ->action('View Proposal', $url)
@@ -64,7 +65,7 @@ class ProposalRevisited extends Notification
 
     private function getViewerName(): string
     {
-        if (!$this->viewer) {
+        if (! $this->viewer) {
             return 'A client';
         }
 

@@ -1,4 +1,6 @@
 import type { BaseBlock } from '../proposal-builder';
+import type { Comment } from './comment';
+import type { Note } from './note';
 import type { Workspace } from './workspace';
 
 export type DepositType = 'percentage' | 'fixed';
@@ -70,6 +72,8 @@ export interface Proposal extends Record<string, unknown> {
     template?: ProposalTemplate;
     items?: ProposalItem[];
     proposal_status?: ProposalStatusModel;
+    comments?: Comment[] | null;
+    notes?: Note[] | null;
 }
 
 export interface Account {

@@ -5,10 +5,11 @@ namespace App\Services;
 use App\Models\ProposalStatus;
 use App\Models\Workspace;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProposalStatusService
 {
-    public function getStatusesForWorkspace(Workspace $workspace): \Illuminate\Database\Eloquent\Collection
+    public function getStatusesForWorkspace(Workspace $workspace): Collection
     {
         return $workspace->proposalStatuses()->orderBy('position')->get();
     }
@@ -16,14 +17,14 @@ class ProposalStatusService
     public function createStatus(Workspace $workspace, array $data): ProposalStatus
     {
         try {
-            if (!isset($data['position'])) {
+            if (! isset($data['position'])) {
                 $maxPosition = $workspace->proposalStatuses()->max('position') ?? 0;
                 $data['position'] = $maxPosition + 1;
             }
-            
+
             return $workspace->proposalStatuses()->create($data);
         } catch (Exception $e) {
-            throw new Exception('Failed to create proposal status: ' . $e->getMessage());
+            throw new Exception('Failed to create proposal status: '.$e->getMessage());
         }
     }
 
@@ -31,9 +32,10 @@ class ProposalStatusService
     {
         try {
             $status->update($data);
+
             return $status->fresh();
         } catch (Exception $e) {
-            throw new Exception('Failed to update proposal status: ' . $e->getMessage());
+            throw new Exception('Failed to update proposal status: '.$e->getMessage());
         }
     }
 
@@ -44,6 +46,7 @@ class ProposalStatusService
         }
 
         $status->delete();
+
         return true;
     }
 
@@ -76,7 +79,7 @@ class ProposalStatusService
     public function initializeDefaultStatuses(Workspace $workspace): void
     {
         $defaultStatuses = ProposalStatus::getDefaultStatuses();
-        
+
         foreach ($defaultStatuses as $statusData) {
             $workspace->proposalStatuses()->create($statusData);
         }

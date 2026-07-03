@@ -33,7 +33,7 @@ class WorkspaceSettingService
     public function updateSettings(int $workspaceId, string $submodule, array $settings): WorkspaceSetting
     {
         $setting = $this->getOrCreate($workspaceId, $submodule);
-        
+
         $setting->settings = $settings;
         $setting->save();
 

@@ -109,4 +109,14 @@ class Invoice extends Model
     {
         return $this->morphMany(Address::class, 'addressable');
     }
+
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function notes(): MorphMany
+    {
+        return $this->morphMany(Note::class, 'noteable');
+    }
 }

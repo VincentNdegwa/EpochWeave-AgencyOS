@@ -206,6 +206,10 @@ class ProposalService
             'items.product' => function ($query) {
                 $query->select(['id', 'name', 'unit_price', 'billing_type', 'billing_frequency']);
             },
+            'comments' => fn ($query) => $query->latest()->limit(50),
+            'comments.user:id,name',
+            'notes' => fn ($query) => $query->latest()->limit(50),
+            'notes.user:id,name',
         ])->find($id);
     }
 

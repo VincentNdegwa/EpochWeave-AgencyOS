@@ -23,7 +23,7 @@ class MoveService
             $targetStatus = $proposalStatuses
                 ->firstWhere('id', $targetStatusId);
 
-            if (!$targetStatus) {
+            if (! $targetStatus) {
                 return [
                     'success' => false,
                     'error' => 'Target status not found.',
@@ -34,7 +34,7 @@ class MoveService
             $targetTrigger = $targetStatus->automation_trigger;
 
             $validation = $this->movementRulesService->canMove($currentTrigger, $targetTrigger, $proposalStatuses->toArray());
-            if (!$validation['allowed']) {
+            if (! $validation['allowed']) {
                 return [
                     'success' => false,
                     'error' => $validation['error'],
@@ -43,9 +43,9 @@ class MoveService
 
             $proposal->proposal_status_id = $targetStatus->id;
 
-            if ($targetTrigger === 'sent' && !$proposal->sent_at) {
+            if ($targetTrigger === 'sent' && ! $proposal->sent_at) {
                 $this->sendProposal->send($proposal);
-            } elseif ($targetTrigger === 'accepted' && !$proposal->accepted_at) {
+            } elseif ($targetTrigger === 'accepted' && ! $proposal->accepted_at) {
                 $proposal->accepted_at = now();
                 $proposal->save();
             } else {

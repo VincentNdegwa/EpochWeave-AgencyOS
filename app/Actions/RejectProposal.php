@@ -5,10 +5,10 @@ namespace App\Actions;
 use App\Models\Proposal;
 use App\Models\ProposalStatus;
 use App\Models\User;
+use App\Models\WorkspaceSetting;
 use App\Notifications\ProposalDeclined;
 use App\Services\ActivityService;
 use App\Services\WorkspaceSettingService;
-use App\Models\WorkspaceSetting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -46,7 +46,7 @@ class RejectProposal
                 'proposal_id' => $proposal->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             throw $e;
         }
     }

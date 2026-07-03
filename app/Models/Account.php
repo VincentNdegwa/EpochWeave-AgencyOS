@@ -112,4 +112,14 @@ class Account extends Model
     {
         return $this->morphMany(CustomFieldValue::class, 'valueable');
     }
+
+    public function comments(): MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable');
+    }
+
+    public function notes(): MorphMany
+    {
+        return $this->morphMany(Note::class, 'noteable');
+    }
 }

@@ -27,7 +27,7 @@ enum BlockType: string
      */
     public static function values(): array
     {
-        return array_map(fn($case) => $case->value, self::cases());
+        return array_map(fn ($case) => $case->value, self::cases());
     }
 
     /**
@@ -35,7 +35,7 @@ enum BlockType: string
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::COVER => 'Cover',
             self::RICH_TEXT => 'Rich Text',
             self::IMAGE => 'Image',

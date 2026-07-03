@@ -5,10 +5,10 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Activity;
+use App\Models\Product;
 use App\Services\ProductService;
 use App\Services\ProductUnitService;
 use Exception;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -67,7 +67,7 @@ class ProductController extends Controller
             abort(404);
         }
 
-        $activities = Activity::where('subject_type', \App\Models\Product::class)
+        $activities = Activity::where('subject_type', Product::class)
             ->where('subject_id', $product->id)
             ->with('user:id,name')
             ->orderByDesc('created_at')

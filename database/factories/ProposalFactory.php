@@ -27,7 +27,7 @@ class ProposalFactory extends Factory
             'created_by' => User::factory(),
             'user_id' => null,
             'title' => fake()->sentence(4),
-            'proposal_number' => 'PROP-' . fake()->unique()->numberBetween(1000, 9999),
+            'proposal_number' => 'PROP-'.fake()->unique()->numberBetween(1000, 9999),
             'proposal_status_id' => null,
             'valid_until' => fake()->date(),
             'currency' => fake()->randomElement(['USD', 'KES', 'NGN', 'GHS']),

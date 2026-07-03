@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Proposal;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -24,22 +25,22 @@ class ProposalDeclined extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $declinerName = $this->getDeclinerName();
-        $url = $notifiable instanceof \App\Models\User 
+        $url = $notifiable instanceof User
             ? route('proposals.show', $this->proposal)
             : route('proposals.public.show', $this->proposal->token);
         $declineReason = $this->proposal->decline_reason;
 
         return (new MailMessage)
-            ->subject('Proposal Declined: ' . $this->proposal->title)
-            ->greeting('Hello ' . $notifiable->first_name . ',')
+            ->subject('Proposal Declined: '.$this->proposal->title)
+            ->greeting('Hello '.$notifiable->first_name.',')
             ->line("{$declinerName} has declined your proposal.")
-            ->line('Proposal: ' . $this->proposal->title)
-            
+            ->line('Proposal: '.$this->proposal->title)
+
             ->when($declineReason, function ($message) use ($declineReason) {
                 $message->line('Reason provided:')
-                    ->line('"' . $declineReason . '"');
+                    ->line('"'.$declineReason.'"');
             })
-            
+
             ->line('This feedback can help you improve future proposals.')
             ->action('View Declined Proposal', $url)
             ->line('Consider reaching out to understand their needs better or offer alternative solutions.')
@@ -66,7 +67,7 @@ class ProposalDeclined extends Notification
 
     private function getDeclinerName(): string
     {
-        if (!$this->decliner) {
+        if (! $this->decliner) {
             return 'A client';
         }
 

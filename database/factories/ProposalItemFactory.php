@@ -40,8 +40,8 @@ class ProposalItemFactory extends Factory
             'is_selected' => true,
             'position' => 0,
             'tax_type' => $taxType,
-            'tax_value' => $taxType === 'percentage' 
-                ? fake()->randomFloat(2, 5, 25) 
+            'tax_value' => $taxType === 'percentage'
+                ? fake()->randomFloat(2, 5, 25)
                 : fake()->randomFloat(2, 10, 500),
         ];
     }

@@ -3,6 +3,8 @@ import { Head, Link, router, setLayoutProps, usePage } from '@inertiajs/vue3';
 import { Building2, HashIcon, Send } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
+import CommentThread from '@/components/CommentThread.vue';
+import NoteThread from '@/components/NoteThread.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import ConfirmationDialog from '@/components/ui/confirmation-dialog/ConfirmationDialog.vue';
@@ -342,28 +344,38 @@ function formatDate(value?: string | null): string {
             <!-- Comments Tab -->
             <div
                 v-else-if="activeTab === 'comments'"
-                class="flex h-full items-center justify-center"
+                class="h-full space-y-4 overflow-y-auto"
             >
-                <div class="text-center">
-                    <div class="mb-4 text-6xl">🚧</div>
-                    <h2 class="mb-2 text-xl font-semibold">Coming Soon</h2>
-                    <p class="text-muted-foreground">
-                        Comments feature is under development
-                    </p>
+                <div class="space-y-4 border-b p-5">
+                    <h3
+                        class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Comments
+                    </h3>
+                    <CommentThread
+                        commentable-type="proposal"
+                        :commentable-id="props.proposal.id"
+                        :comments="props.proposal.comments ?? []"
+                    />
                 </div>
             </div>
 
             <!-- Notes Tab -->
             <div
                 v-else-if="activeTab === 'notes'"
-                class="flex h-full items-center justify-center"
+                class="h-full space-y-4 overflow-y-auto"
             >
-                <div class="text-center">
-                    <div class="mb-4 text-6xl">🚧</div>
-                    <h2 class="mb-2 text-xl font-semibold">Coming Soon</h2>
-                    <p class="text-muted-foreground">
-                        Notes feature is under development
-                    </p>
+                <div class="space-y-4 border-b p-5">
+                    <h3
+                        class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Notes
+                    </h3>
+                    <NoteThread
+                        noteable-type="proposal"
+                        :noteable-id="props.proposal.id"
+                        :notes="props.proposal.notes ?? []"
+                    />
                 </div>
             </div>
 

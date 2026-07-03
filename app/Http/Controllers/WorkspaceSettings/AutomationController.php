@@ -65,6 +65,7 @@ class AutomationController extends Controller
                 $settings[$key] = isset($value);
             }
         }
+
         return $settings;
     }
 }

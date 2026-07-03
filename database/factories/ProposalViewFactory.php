@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Client;
+use App\Models\Proposal;
 use App\Models\ProposalView;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,9 +20,9 @@ class ProposalViewFactory extends Factory
     public function definition(): array
     {
         return [
-            'proposal_id' => \App\Models\Proposal::factory(),
+            'proposal_id' => Proposal::factory(),
             'viewer_id' => $this->faker->randomNumber(),
-            'viewer_type' => \App\Models\Client::class,
+            'viewer_type' => Client::class,
             'viewed_at' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'ip_address' => $this->faker->ipv4(),
             'user_agent' => $this->faker->userAgent(),

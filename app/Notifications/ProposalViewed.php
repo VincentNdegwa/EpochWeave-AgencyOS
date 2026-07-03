@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Proposal;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -24,15 +25,15 @@ class ProposalViewed extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $viewerName = $this->getViewerName();
-        $url = $notifiable instanceof \App\Models\User 
+        $url = $notifiable instanceof User
             ? route('proposals.show', $this->proposal)
             : route('proposals.public.show', $this->proposal->token);
 
         return (new MailMessage)
-            ->subject('Proposal Viewed: ' . $this->proposal->title)
-            ->greeting('Hello ' . $notifiable->first_name . ',')
+            ->subject('Proposal Viewed: '.$this->proposal->title)
+            ->greeting('Hello '.$notifiable->first_name.',')
             ->line("Great news! {$viewerName} has just viewed your proposal for the first time.")
-            ->line('Proposal: ' . $this->proposal->title)
+            ->line('Proposal: '.$this->proposal->title)
             ->line('This is the perfect time to follow up while they actively considering your offer.')
             ->action('View Proposal', $url)
             ->line('The client can return to review the proposal at any time using their unique link.')
@@ -58,7 +59,7 @@ class ProposalViewed extends Notification
 
     private function getViewerName(): string
     {
-        if (!$this->viewer) {
+        if (! $this->viewer) {
             return 'A client';
         }
 

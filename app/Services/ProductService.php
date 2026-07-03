@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Enums\BillingFrequency;
 use App\Enums\BillingType;
 use App\Models\Product;
-use App\Services\ActivityService;
 use Exception;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -50,6 +49,7 @@ class ProductService
             ]);
 
             $this->activityService->updated($product);
+
             return $product;
         } catch (Exception $e) {
             throw new Exception('Failed to update product: '.$e->getMessage());

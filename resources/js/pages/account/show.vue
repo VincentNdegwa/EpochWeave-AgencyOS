@@ -16,6 +16,8 @@ import {
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
+import CommentThread from '@/components/CommentThread.vue';
+import NoteThread from '@/components/NoteThread.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -75,6 +77,8 @@ const tabs = [
     { key: 'projects', label: 'Projects' },
     { key: 'invoices', label: 'Invoices' },
     { key: 'engagements', label: 'Engagements' },
+    { key: 'comments', label: 'Comments' },
+    { key: 'notes', label: 'Notes' },
 ];
 
 const outstandingBalance = computed(() => {
@@ -94,8 +98,16 @@ const openEditAddressDialog = (address: Address) => {
     addressDialogOpen.value = true;
 };
 
-const deleteAddress = (addressId: number) => {
-    if (confirm('Delete this address?')) {
+const deleteAddress = async (addressId: number) => {
+    const confirmed = await confirm({
+        title: 'Delete Address',
+        description: 'Are you sure you want to delete this address? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'destructive',
+    });
+
+    if (confirmed) {
         router.delete(`/addresses/${addressId}`);
     }
 };
@@ -610,6 +622,38 @@ defineOptions({
                         :engagements="props.account.engagements ?? []"
                         @edit="openEditEngagementDialog"
                         @delete="deleteEngagement"
+                    />
+                </div>
+            </div>
+
+            <!-- Comments Tab -->
+            <div v-else-if="activeTab === 'comments'" class="space-y-4">
+                <div class="space-y-4 border-b p-5">
+                    <h3
+                        class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Comments
+                    </h3>
+                    <CommentThread
+                        commentable-type="account"
+                        :commentable-id="props.account.id"
+                        :comments="props.account.comments ?? []"
+                    />
+                </div>
+            </div>
+
+            <!-- Notes Tab -->
+            <div v-else-if="activeTab === 'notes'" class="space-y-4">
+                <div class="space-y-4 border-b p-5">
+                    <h3
+                        class="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+                    >
+                        Notes
+                    </h3>
+                    <NoteThread
+                        noteable-type="account"
+                        :noteable-id="props.account.id"
+                        :notes="props.account.notes ?? []"
                     />
                 </div>
             </div>

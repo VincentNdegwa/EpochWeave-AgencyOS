@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Enums\BlockType;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
 class UpdateProposalTemplateRequest extends FormRequest

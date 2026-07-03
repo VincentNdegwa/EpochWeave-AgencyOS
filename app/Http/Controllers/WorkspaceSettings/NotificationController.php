@@ -5,8 +5,8 @@ namespace App\Http\Controllers\WorkspaceSettings;
 use App\Http\Controllers\Controller;
 use App\Models\WorkspaceSetting;
 use App\Services\WorkspaceSettingService;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +19,7 @@ class NotificationController extends Controller
     public function edit(Request $request): Response
     {
         $workspace = $request->attributes->get('current_workspace');
-        
+
         $settings = $this->workspaceSettingService->getOrCreate(
             $workspace->id,
             WorkspaceSetting::SUBMODULE_NOTIFICATIONS
@@ -34,7 +34,7 @@ class NotificationController extends Controller
     {
         try {
             $workspace = $request->attributes->get('current_workspace');
-            
+
             $validated = $request->validate([
                 'notification_settings' => 'required|array',
             ]);

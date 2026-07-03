@@ -83,6 +83,11 @@ class Project extends Model
         return $this->morphMany(Comment::class, 'commentable');
     }
 
+    public function notes(): MorphMany
+    {
+        return $this->morphMany(Note::class, 'noteable');
+    }
+
     public function status(): BelongsTo
     {
         return $this->belongsTo(ProjectStatus::class, 'project_status_id');

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Proposal;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -24,15 +25,15 @@ class ProposalSigned extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $signerName = $this->getSignerName();
-        $url = $notifiable instanceof \App\Models\User 
+        $url = $notifiable instanceof User
             ? route('proposals.show', $this->proposal)
             : route('proposals.public.show', $this->proposal->token);
 
         return (new MailMessage)
-            ->subject('Proposal SIGNED: ' . $this->proposal->title)
-            ->greeting('Hello ' . $notifiable->first_name . ',')
+            ->subject('Proposal SIGNED: '.$this->proposal->title)
+            ->greeting('Hello '.$notifiable->first_name.',')
             ->line("🎉 Excellent news! {$signerName} has digitally signed your proposal!")
-            ->line('Proposal: ' . $this->proposal->title)
+            ->line('Proposal: '.$this->proposal->title)
             ->line('The proposal has been accepted and is now legally binding.')
             ->line('This is the perfect time to set up the project and send any initial invoices.')
             ->action('View Signed Proposal', $url)
@@ -59,7 +60,7 @@ class ProposalSigned extends Notification
 
     private function getSignerName(): string
     {
-        if (!$this->signer) {
+        if (! $this->signer) {
             return 'A client';
         }
 

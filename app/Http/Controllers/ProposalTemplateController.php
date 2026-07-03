@@ -156,7 +156,7 @@ class ProposalTemplateController extends Controller
                 abort(404);
             }
 
-            $newName = $request->input('name', $template->name . ' (Copy)');
+            $newName = $request->input('name', $template->name.' (Copy)');
 
             $newTemplate = $this->templateService->duplicateTemplate($template, $newName);
 

@@ -12,9 +12,10 @@ class ProfessionalFreelanceTemplateSeeder extends Seeder
     public function run(): void
     {
         $workspace = Workspace::find(1);
-        
-        if (!$workspace) {
+
+        if (! $workspace) {
             $this->command->error('Workspace with ID 1 not found');
+
             return;
         }
 

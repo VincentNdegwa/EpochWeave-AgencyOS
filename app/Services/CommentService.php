@@ -3,20 +3,19 @@
 namespace App\Services;
 
 use App\Models\Comment;
-use App\Models\Task;
 use Exception;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class CommentService
 {
-    public function addTaskComment(Task $task, array $data): Comment
+    public function createComment(Model $commentable, array $data): Comment
     {
         try {
-            return DB::transaction(function () use ($task, $data) {
-                return $task->comments()->create([
-                    'workspace_id' => $task->workspace_id,
-                    'project_id' => $task->project_id,
+            return DB::transaction(function () use ($commentable, $data) {
+                return $commentable->comments()->create([
+                    'workspace_id' => $data['workspace_id'],
                     'user_id' => $data['user_id'],
                     'body' => $data['body'],
                     'is_internal' => $data['is_internal'] ?? false,
@@ -24,7 +23,24 @@ class CommentService
                 ])->load('user');
             });
         } catch (Throwable $e) {
-            throw new Exception('Failed to add comment: '.$e->getMessage(), 0, $e);
+            throw new Exception('Failed to create comment: '.$e->getMessage(), 0, $e);
+        }
+    }
+
+    public function updateComment(Comment $comment, array $data): Comment
+    {
+        try {
+            return DB::transaction(function () use ($comment, $data) {
+                $comment->update([
+                    'body' => $data['body'],
+                    'is_internal' => $data['is_internal'] ?? $comment->is_internal,
+                    'pinned_at' => $data['pinned_at'] ?? $comment->pinned_at,
+                ]);
+
+                return $comment->fresh(['user']);
+            });
+        } catch (Throwable $e) {
+            throw new Exception('Failed to update comment: '.$e->getMessage(), 0, $e);
         }
     }
 

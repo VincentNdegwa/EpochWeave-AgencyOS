@@ -4,11 +4,11 @@ namespace App\Actions;
 
 use App\Models\Proposal;
 use App\Models\ProposalView;
-use App\Notifications\ProposalViewed;
+use App\Models\WorkspaceSetting;
 use App\Notifications\ProposalRevisited;
+use App\Notifications\ProposalViewed;
 use App\Services\ActivityService;
 use App\Services\WorkspaceSettingService;
-use App\Models\WorkspaceSetting;
 use Exception;
 use Illuminate\Support\Facades\Log;
 
@@ -34,13 +34,13 @@ class TrackProposalView
             $revisitedEnabled = $proposalNotifications['revisited'] ?? false;
 
             $existingView = ProposalView::where('proposal_id', $proposal->id)
-                ->when($viewer, fn($query) => $query->where('viewer_id', $viewer->id)->where('viewer_type', get_class($viewer)))
+                ->when($viewer, fn ($query) => $query->where('viewer_id', $viewer->id)->where('viewer_type', get_class($viewer)))
                 ->orderBy('created_at', 'desc')
                 ->first();
 
             $now = now();
 
-            if (!$existingView) {
+            if (! $existingView) {
                 ProposalView::create([
                     'proposal_id' => $proposal->id,
                     'viewer_id' => $viewer?->id,
@@ -58,7 +58,7 @@ class TrackProposalView
                 }
             } else {
                 $hoursSinceLastView = $existingView->viewed_at->diffInHours($now);
-                
+
                 if ($hoursSinceLastView >= 48) {
                     ProposalView::create([
                         'proposal_id' => $proposal->id,
@@ -72,8 +72,8 @@ class TrackProposalView
 
                     if ($revisitedEnabled && $proposal->user_id) {
                         $proposal->user->notify(new ProposalRevisited(
-                            $proposal, 
-                            $viewer, 
+                            $proposal,
+                            $viewer,
                             $existingView->viewed_at
                         ));
                     }

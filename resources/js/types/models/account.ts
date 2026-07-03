@@ -1,4 +1,6 @@
+import type { Comment } from './comment';
 import type { Invoice } from './invoice';
+import type { Note } from './note';
 import type { Project } from './project';
 import type { Proposal } from './proposal';
 
@@ -177,6 +179,8 @@ export interface Account {
     projects?: Project[] | null;
     invoices?: Invoice[] | null;
     engagements?: Engagement[] | null;
+    comments?: Comment[] | null;
+    notes?: Note[] | null;
     customFieldValues?: CustomFieldValue[] | null;
     portalInvitations?: PortalInvitation[] | null;
 }

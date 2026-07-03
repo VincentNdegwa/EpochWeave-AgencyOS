@@ -46,7 +46,9 @@ class TaskCommentsAttachmentsTest extends TestCase
     public function test_user_can_add_comment_to_task()
     {
         $response = $this->withHeaders(['X-Workspace-Id' => $this->workspace->id])
-            ->post(route('tasks.comments.store', $this->task), [
+            ->post(route('comments.store'), [
+                'commentable_type' => 'task',
+                'commentable_id' => $this->task->id,
                 'body' => 'This is a test comment.',
             ]);
 
@@ -62,7 +64,9 @@ class TaskCommentsAttachmentsTest extends TestCase
     public function test_comment_body_is_required()
     {
         $response = $this->withHeaders(['X-Workspace-Id' => $this->workspace->id])
-            ->post(route('tasks.comments.store', $this->task), [
+            ->post(route('comments.store'), [
+                'commentable_type' => 'task',
+                'commentable_id' => $this->task->id,
                 'body' => '',
             ]);
 
@@ -79,7 +83,7 @@ class TaskCommentsAttachmentsTest extends TestCase
         ]);
 
         $response = $this->withHeaders(['X-Workspace-Id' => $this->workspace->id])
-            ->delete(route('tasks.comments.destroy', [$this->task, $comment]));
+            ->delete(route('comments.destroy', $comment));
 
         $response->assertRedirect();
         $this->assertDatabaseMissing('comments', ['id' => $comment->id]);

@@ -7,7 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import type { Comment } from '@/types/models/comment';
 
 const props = defineProps<{
-    taskId: number;
+    commentableType: string;
+    commentableId: number;
     comments: Comment[];
 }>();
 
@@ -22,8 +23,10 @@ const submitComment = () => {
     processing.value = true;
 
     router.post(
-        `/tasks/${props.taskId}/comments`,
+        '/comments',
         {
+            commentable_type: props.commentableType,
+            commentable_id: props.commentableId,
             body: body.value,
         },
         {
@@ -37,7 +40,7 @@ const submitComment = () => {
 };
 
 const deleteComment = (commentId: number) => {
-    router.delete(`/tasks/${props.taskId}/comments/${commentId}`, {
+    router.delete(`/comments/${commentId}`, {
         preserveScroll: true,
     });
 };

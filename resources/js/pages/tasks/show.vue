@@ -11,7 +11,7 @@ import tasks from '@/routes/tasks';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
 import AttachmentList from './components/AttachmentList.vue';
-import CommentThread from './components/CommentThread.vue';
+import CommentThread from '@/components/CommentThread.vue';
 import SubtaskList from './components/SubtaskList.vue';
 import TaskActions from './components/TaskActions.vue';
 import TimeEntriesPanel from './components/TimeEntriesPanel.vue';
@@ -240,7 +240,8 @@ setLayoutProps({
                         Comments
                     </h3>
                     <CommentThread
-                        :task-id="task.id"
+                        commentable-type="task"
+                        :commentable-id="task.id"
                         :comments="task.comments || []"
                     />
                 </div>

@@ -341,6 +341,10 @@ class AccountService
             'engagements.proposal:id,title',
             'engagements.invoice:id,invoice_number',
             'engagements.project:id,name',
+            'comments' => fn ($query) => $query->latest()->limit(50),
+            'comments.user:id,name',
+            'notes' => fn ($query) => $query->latest()->limit(50),
+            'notes.user:id,name',
             'customFieldValues.definition',
             'portalInvitations.accountContact',
         ])->find($id);

@@ -17,6 +17,7 @@ use App\Http\Controllers\IndustryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceStatusController;
 use App\Http\Controllers\LeadSourceController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\NotificationController as InAppNotificationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PortalDashboardController;
@@ -133,8 +134,13 @@ Route::middleware(['auth', 'verified', 'set.current.workspace'])->group(function
     Route::patch('/projects/{project}/archive', [ProjectController::class, 'archive'])->name('projects.archive');
     Route::resource('tasks', TaskController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.status.update');
-    Route::post('/tasks/{task}/comments', [CommentController::class, 'store'])->name('tasks.comments.store');
-    Route::delete('/tasks/{task}/comments/{comment}', [CommentController::class, 'destroy'])->name('tasks.comments.destroy');
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+    Route::post('/notes', [NoteController::class, 'store'])->name('notes.store');
+    Route::put('/notes/{note}', [NoteController::class, 'update'])->name('notes.update');
+    Route::delete('/notes/{note}', [NoteController::class, 'destroy'])->name('notes.destroy');
     Route::post('/tasks/{task}/attachments', [AttachmentController::class, 'store'])->name('tasks.attachments.store');
     Route::delete('/tasks/{task}/attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('tasks.attachments.destroy');
     Route::post('/tasks/{task}/time-entries', [TimeEntryController::class, 'store'])->name('tasks.time-entries.store');

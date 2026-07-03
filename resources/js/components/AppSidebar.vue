@@ -104,7 +104,7 @@ const reportsNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
     {
-        title: 'Setup',
+        title: 'Business Setup',
         href: '/setup/industries',
         icon: Wrench,
     },

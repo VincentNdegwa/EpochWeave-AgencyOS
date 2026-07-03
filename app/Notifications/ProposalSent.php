@@ -25,10 +25,10 @@ class ProposalSent extends Notification
         $publicUrl = route('proposals.public.show', $this->proposal->token);
 
         return (new MailMessage)
-            ->subject('Proposal: ' . $this->proposal->title)
-            ->greeting('Hello ' . $notifiable->first_name . ',')
+            ->subject('Proposal: '.$this->proposal->title)
+            ->greeting('Hello '.$notifiable->first_name.',')
             ->line('You have been sent a proposal to review.')
-            ->line('Proposal: ' . $this->proposal->title)
+            ->line('Proposal: '.$this->proposal->title)
             ->line('You can view the proposal by clicking the link below:')
             ->action('View Proposal', $publicUrl)
             ->line('This link will remain active and you can return to review the proposal at any time.')

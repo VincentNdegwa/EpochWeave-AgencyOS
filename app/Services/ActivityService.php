@@ -106,7 +106,6 @@ class ActivityService
             ?? $subject->company_name
             ?? $subject->invoice_number
             ?? $subject->proposal_number
-            ?? ('#' . $subject->getKey());
+            ?? ('#'.$subject->getKey());
     }
 }
-
