@@ -1,4 +1,75 @@
+import type { Invoice } from './invoice';
+import type { Project } from './project';
+import type { Proposal } from './proposal';
+
 export type AccountStatus = 'lead' | 'opportunity' | 'client' | 'archived';
+
+export type EngagementType = 'call' | 'email' | 'meeting' | 'note' | 'task';
+
+export type EngagementDirection = 'inbound' | 'outbound';
+
+export type EngagementStatus = 'pending' | 'completed' | 'cancelled';
+
+export type EngagementOutcome = 'successful' | 'unsuccessful' | 'neutral';
+
+export interface Engagement {
+    id: number;
+    workspace_id: number;
+    account_id: number;
+    user_id: number | null;
+    type: EngagementType;
+    direction: EngagementDirection;
+    status: EngagementStatus;
+    subject: string | null;
+    content: string | null;
+    scheduled_at: string | null;
+    completed_at: string | null;
+    follow_up_at: string | null;
+    outcome: EngagementOutcome | null;
+    created_at: string;
+    updated_at: string;
+    user?: { id: number; name: string } | null;
+    proposal?: { id: number; title: string } | null;
+    invoice?: { id: number; invoice_number: string | null } | null;
+    project?: { id: number; name: string } | null;
+}
+
+export interface CustomFieldValue {
+    id: number;
+    custom_field_definition_id: number;
+    valueable_type: string;
+    valueable_id: number;
+    value_text: string | null;
+    value_number: number | null;
+    value_boolean: boolean | null;
+    value_date: string | null;
+    value_json: unknown;
+    created_at: string;
+    updated_at: string;
+    definition?: {
+        id: number;
+        name: string;
+        field_type: string;
+    } | null;
+    value?: string | number | boolean | unknown | null;
+}
+
+export interface PortalInvitation {
+    id: number;
+    account_id: number;
+    account_contact_id: number;
+    invitation_token: string;
+    is_used: boolean;
+    expires_at: string;
+    created_at: string;
+    updated_at: string;
+    accountContact?: {
+        id: number;
+        first_name: string;
+        last_name: string;
+        email: string;
+    } | null;
+}
 
 export interface Address {
     id: number;
@@ -102,6 +173,12 @@ export interface Account {
     industry?: LookupOption | null;
     leadSource?: LookupOption | null;
     companySize?: { id: number; label: string } | null;
+    proposals?: Proposal[] | null;
+    projects?: Project[] | null;
+    invoices?: Invoice[] | null;
+    engagements?: Engagement[] | null;
+    customFieldValues?: CustomFieldValue[] | null;
+    portalInvitations?: PortalInvitation[] | null;
 }
 
 export interface CreateAccountForm {

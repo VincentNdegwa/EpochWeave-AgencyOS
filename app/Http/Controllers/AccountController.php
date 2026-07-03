@@ -67,13 +67,11 @@ class AccountController extends Controller
     public function show(Request $request, int $id)
     {
         $workspace = $request->attributes->get('current_workspace');
-        $account = $this->accountService->getAccountById($id);
+        $account = $this->accountService->getAccountForShow($id);
 
         if (! $account) {
             abort(404);
         }
-
-        $account->load(['contacts', 'addresses', 'socialProfiles', 'industry', 'leadSource', 'companySize']);
 
         $activities = Activity::where('subject_type', Account::class)
             ->where('subject_id', $account->id)

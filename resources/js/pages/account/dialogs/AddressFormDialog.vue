@@ -94,7 +94,9 @@ watch(
 
 <template>
     <Dialog :open="open" @update:open="emit('update:open', $event)">
-        <DialogContent class="max-w-md">
+        <DialogContent
+            class="max-h-[90vh] overflow-hidden sm:max-w-xl md:max-w-2xl"
+        >
             <DialogHeader>
                 <DialogTitle>
                     {{ isEditMode ? 'Edit Address' : 'Add Address' }}
@@ -103,7 +105,7 @@ watch(
                     {{
                         isEditMode
                             ? 'Update the address details.'
-                            : 'Add a new address.'
+                            : 'Add a new address to this account.'
                     }}
                 </DialogDescription>
             </DialogHeader>
@@ -131,64 +133,64 @@ watch(
                     />
                 </template>
 
-                <div class="grid gap-4 py-4">
-                    <div class="grid gap-2">
-                        <Label for="address-type" required>Type</Label>
-                        <Select name="type" v-model="type">
-                            <SelectTrigger id="address-type" class="w-full">
-                                <SelectValue placeholder="Select type..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="primary">Primary</SelectItem>
-                                <SelectItem value="billing">Billing</SelectItem>
-                                <SelectItem value="shipping"
-                                    >Shipping</SelectItem
-                                >
-                                <SelectItem value="office">Office</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <InputError :message="errors.type" />
-                    </div>
+                <div
+                    class="grid max-h-[calc(90vh-180px)] gap-6 overflow-y-auto py-4 pr-2"
+                >
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div class="grid gap-2">
+                            <Label for="address-type" required>Type</Label>
+                            <Select name="type" v-model="type">
+                                <SelectTrigger id="address-type" class="w-full">
+                                    <SelectValue placeholder="Select type..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="primary">Primary</SelectItem>
+                                    <SelectItem value="billing">Billing</SelectItem>
+                                    <SelectItem value="shipping">Shipping</SelectItem>
+                                    <SelectItem value="office">Office</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <InputError :message="errors.type" />
+                        </div>
 
-                    <div class="grid gap-2">
-                        <Label for="address-label">Label</Label>
-                        <Input
-                            id="address-label"
-                            name="label"
-                            v-model="label"
-                            placeholder="e.g. Headquarters"
-                        />
-                        <InputError :message="errors.label" />
-                    </div>
+                        <div class="grid gap-2">
+                            <Label for="address-label">Label</Label>
+                            <Input
+                                id="address-label"
+                                name="label"
+                                v-model="label"
+                                placeholder="e.g. Headquarters"
+                            />
+                            <InputError :message="errors.label" />
+                        </div>
 
-                    <div class="grid gap-2">
-                        <Label for="address-street_1" required
-                            >Street Address</Label
-                        >
-                        <Input
-                            id="address-street_1"
-                            name="street_1"
-                            v-model="street1"
-                            placeholder="123 Main St"
-                            required
-                        />
-                        <InputError :message="errors.street_1" />
-                    </div>
+                        <div class="grid gap-2 sm:col-span-2">
+                            <Label for="address-street_1" required
+                                >Street Address</Label
+                            >
+                            <Input
+                                id="address-street_1"
+                                name="street_1"
+                                v-model="street1"
+                                placeholder="123 Main St"
+                                required
+                            />
+                            <InputError :message="errors.street_1" />
+                        </div>
 
-                    <div class="grid gap-2">
-                        <Label for="address-street_2"
-                            >Apartment, suite, etc.</Label
-                        >
-                        <Input
-                            id="address-street_2"
-                            name="street_2"
-                            v-model="street2"
-                            placeholder="Suite 100"
-                        />
-                        <InputError :message="errors.street_2" />
-                    </div>
+                        <div class="grid gap-2 sm:col-span-2">
+                            <Label for="address-street_2"
+                                >Apartment, suite, etc.</Label
+                            >
+                            <Input
+                                id="address-street_2"
+                                name="street_2"
+                                v-model="street2"
+                                placeholder="Suite 100"
+                            />
+                            <InputError :message="errors.street_2" />
+                        </div>
 
-                    <div class="grid grid-cols-2 gap-4">
                         <div class="grid gap-2">
                             <Label for="address-city" required>City</Label>
                             <Input
@@ -211,9 +213,7 @@ watch(
                             />
                             <InputError :message="errors.state" />
                         </div>
-                    </div>
 
-                    <div class="grid grid-cols-2 gap-4">
                         <div class="grid gap-2">
                             <Label for="address-postal_code">Postal Code</Label>
                             <Input

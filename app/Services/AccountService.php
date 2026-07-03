@@ -7,7 +7,6 @@ use App\Exceptions\AccountException;
 use App\Models\Account;
 use App\Models\AccountContact;
 use App\Models\PortalInvitation;
-use App\Services\ActivityService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -317,6 +316,34 @@ class AccountService
     public function getAccountById(int $id): ?Account
     {
         return Account::with('contacts')->find($id);
+    }
+
+    public function getAccountForShow(int $id): ?Account
+    {
+        return Account::with([
+            'contacts',
+            'contacts.addresses',
+            'contacts.socialProfiles',
+            'contacts.portalInvitation',
+            'addresses',
+            'socialProfiles',
+            'industry',
+            'leadSource',
+            'companySize',
+            'proposals' => fn ($query) => $query->latest()->limit(10),
+            'proposals.proposalStatus',
+            'projects' => fn ($query) => $query->latest()->limit(10),
+            'projects.status',
+            'invoices' => fn ($query) => $query->latest()->limit(10),
+            'invoices.invoiceStatus',
+            'engagements' => fn ($query) => $query->latest()->limit(10),
+            'engagements.user:id,name',
+            'engagements.proposal:id,title',
+            'engagements.invoice:id,invoice_number',
+            'engagements.project:id,name',
+            'customFieldValues.definition',
+            'portalInvitations.accountContact',
+        ])->find($id);
     }
 
     public function setPrimaryContact(AccountContact $contact): void

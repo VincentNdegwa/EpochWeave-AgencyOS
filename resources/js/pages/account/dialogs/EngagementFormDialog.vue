@@ -2,7 +2,7 @@
 import { Form } from '@inertiajs/vue3';
 import { storeToRefs } from 'pinia';
 import { computed, ref, watch } from 'vue';
-import { store as engagementStore } from '@/actions/App/Http/Controllers/EngagementController';
+import engagementStore from '@/actions/App/Http/Controllers/EngagementController';
 import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,14 +30,17 @@ import {
     useEngagementTypes,
 } from '@/composables/useEnums';
 import { useBuilderDataStore } from '@/stores/builderData';
-import type { Account } from '@/types/models/account';
+import type { Account, Engagement } from '@/types/models/account';
 
 interface Props {
     open: boolean;
     account: Account;
+    engagement?: Engagement | null;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    engagement: null,
+});
 
 const emit = defineEmits<{
     'update:open': [value: boolean];
@@ -46,6 +49,8 @@ const emit = defineEmits<{
 
 const builderData = useBuilderDataStore();
 const { projects, proposals, invoices } = storeToRefs(builderData);
+
+const isEditing = computed(() => props.engagement !== null);
 
 const accountProjects = computed(() =>
     (projects.value || []).filter((p) => p.account_id === props.account.id),
@@ -79,6 +84,14 @@ const engagementDirections = useEngagementDirections();
 const engagementStatuses = useEngagementStatuses();
 const engagementOutcomes = useEngagementOutcomes();
 
+const toDateTimeLocal = (value?: string | null): string => {
+    if (!value) {
+return '';
+}
+
+    return new Date(value).toISOString().slice(0, 16);
+};
+
 const form = ref({
     account_id: props.account.id.toString(),
     type: 'call',
@@ -96,9 +109,31 @@ const form = ref({
 });
 
 watch(
-    () => props.open,
-    (isOpen) => {
-        if (isOpen) {
+    () => [props.open, props.engagement],
+    () => {
+        if (!props.open) {
+            return;
+        }
+
+        const engagement = props.engagement;
+
+        if (engagement) {
+            form.value = {
+                account_id: engagement.account_id?.toString() ?? props.account.id.toString(),
+                type: engagement.type,
+                direction: engagement.direction,
+                status: engagement.status,
+                subject: engagement.subject ?? '',
+                content: engagement.content ?? '',
+                proposal_id: engagement.proposal?.id?.toString() ?? 'none',
+                invoice_id: engagement.invoice?.id?.toString() ?? 'none',
+                project_id: engagement.project?.id?.toString() ?? 'none',
+                scheduled_at: toDateTimeLocal(engagement.scheduled_at),
+                completed_at: toDateTimeLocal(engagement.completed_at),
+                follow_up_at: toDateTimeLocal(engagement.follow_up_at),
+                outcome: engagement.outcome ?? 'none',
+            };
+        } else {
             form.value = {
                 account_id: props.account.id.toString(),
                 type: 'call',
@@ -116,21 +151,32 @@ watch(
             };
         }
     },
+    { immediate: true },
 );
+
+const formAction = computed(() => {
+    if (props.engagement) {
+        return engagementStore.update.form(props.engagement) as any;
+    }
+
+    return engagementStore.store.form() as any;
+});
 </script>
 
 <template>
     <Dialog :open="open" @update:open="emit('update:open', $event)">
         <DialogContent class="max-h-[90vh] overflow-hidden sm:max-w-3xl">
             <DialogHeader>
-                <DialogTitle>Log Engagement</DialogTitle>
+                <DialogTitle>
+                    {{ isEditing ? 'Edit Engagement' : 'Log Engagement' }}
+                </DialogTitle>
                 <DialogDescription>
-                    Record a touchpoint with {{ account.company_name }}.
+                    {{ isEditing ? 'Update the engagement details.' : 'Record a touchpoint with ' + account.company_name + '.' }}
                 </DialogDescription>
             </DialogHeader>
 
             <Form
-                v-bind="engagementStore.form() as any"
+                v-bind="formAction"
                 :options="{ preserveScroll: true, preserveState: true }"
                 @success="
                     emit('success');
@@ -437,7 +483,7 @@ watch(
                         Cancel
                     </Button>
                     <Button type="submit" :disabled="processing">
-                        Log Engagement
+                        {{ isEditing ? 'Update Engagement' : 'Log Engagement' }}
                     </Button>
                 </DialogFooter>
             </Form>
