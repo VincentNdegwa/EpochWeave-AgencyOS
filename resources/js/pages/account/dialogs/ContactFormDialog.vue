@@ -269,10 +269,7 @@ watch(
                                 name="is_primary"
                                 :value="form.is_primary ? '1' : '0'"
                             />
-                            <Switch
-                                id="is_primary"
-                                v-model="form.is_primary"
-                            />
+                            <Switch id="is_primary" v-model="form.is_primary" />
                         </div>
                     </div>
 

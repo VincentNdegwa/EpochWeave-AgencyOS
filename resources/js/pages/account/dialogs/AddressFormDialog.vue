@@ -144,10 +144,18 @@ watch(
                                     <SelectValue placeholder="Select type..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="primary">Primary</SelectItem>
-                                    <SelectItem value="billing">Billing</SelectItem>
-                                    <SelectItem value="shipping">Shipping</SelectItem>
-                                    <SelectItem value="office">Office</SelectItem>
+                                    <SelectItem value="primary"
+                                        >Primary</SelectItem
+                                    >
+                                    <SelectItem value="billing"
+                                        >Billing</SelectItem
+                                    >
+                                    <SelectItem value="shipping"
+                                        >Shipping</SelectItem
+                                    >
+                                    <SelectItem value="office"
+                                        >Office</SelectItem
+                                    >
                                 </SelectContent>
                             </Select>
                             <InputError :message="errors.type" />

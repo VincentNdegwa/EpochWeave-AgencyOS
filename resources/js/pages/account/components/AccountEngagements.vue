@@ -17,13 +17,13 @@ const props = defineProps<{
 
 const emit = defineEmits<{
     edit: [engagement: Engagement];
-    'delete': [engagement: Engagement];
+    delete: [engagement: Engagement];
 }>();
 
 const formatDate = (value: string | null): string => {
     if (!value) {
-return '—';
-}
+        return '—';
+    }
 
     return new Date(value).toLocaleDateString();
 };
@@ -37,7 +37,10 @@ const { getLabel: outcomeLabel, getVariant: outcomeVariant } =
 </script>
 
 <template>
-    <div v-if="props.engagements.length === 0" class="py-8 text-center text-sm text-muted-foreground">
+    <div
+        v-if="props.engagements.length === 0"
+        class="py-8 text-center text-sm text-muted-foreground"
+    >
         No engagements yet.
     </div>
     <div v-else class="space-y-3">
@@ -54,7 +57,10 @@ const { getLabel: outcomeLabel, getVariant: outcomeVariant } =
                     <Badge variant="outline" class="text-[11px] capitalize">
                         {{ directionLabel(engagement.direction) }}
                     </Badge>
-                    <Badge :variant="statusVariant(engagement.status)" class="text-[11px] capitalize">
+                    <Badge
+                        :variant="statusVariant(engagement.status)"
+                        class="text-[11px] capitalize"
+                    >
                         {{ statusLabel(engagement.status) }}
                     </Badge>
                     <Badge
@@ -99,20 +105,29 @@ const { getLabel: outcomeLabel, getVariant: outcomeVariant } =
                 {{ engagement.content }}
             </p>
 
-            <div class="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
+            <div
+                class="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground"
+            >
                 <span v-if="engagement.scheduled_at">
-                    <span class="font-medium">Scheduled:</span> {{ formatDate(engagement.scheduled_at) }}
+                    <span class="font-medium">Scheduled:</span>
+                    {{ formatDate(engagement.scheduled_at) }}
                 </span>
                 <span v-if="engagement.completed_at">
-                    <span class="font-medium">Completed:</span> {{ formatDate(engagement.completed_at) }}
+                    <span class="font-medium">Completed:</span>
+                    {{ formatDate(engagement.completed_at) }}
                 </span>
                 <span v-if="engagement.follow_up_at">
-                    <span class="font-medium">Follow up:</span> {{ formatDate(engagement.follow_up_at) }}
+                    <span class="font-medium">Follow up:</span>
+                    {{ formatDate(engagement.follow_up_at) }}
                 </span>
             </div>
 
             <div
-                v-if="engagement.proposal || engagement.invoice || engagement.project"
+                v-if="
+                    engagement.proposal ||
+                    engagement.invoice ||
+                    engagement.project
+                "
                 class="mt-3 flex flex-wrap gap-3 border-t pt-3"
             >
                 <Link
@@ -129,7 +144,10 @@ const { getLabel: outcomeLabel, getVariant: outcomeVariant } =
                     class="inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors hover:bg-muted"
                 >
                     <Receipt class="h-3.5 w-3.5 text-muted-foreground" />
-                    {{ engagement.invoice.invoice_number ?? `#${engagement.invoice.id}` }}
+                    {{
+                        engagement.invoice.invoice_number ??
+                        `#${engagement.invoice.id}`
+                    }}
                 </Link>
                 <Link
                     v-if="engagement.project"

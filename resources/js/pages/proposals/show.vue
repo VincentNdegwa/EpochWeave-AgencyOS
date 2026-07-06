@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { Head, Link, router, setLayoutProps, usePage } from '@inertiajs/vue3';
-import { Building2, HashIcon, Send } from '@lucide/vue';
+import { Link, setLayoutProps, usePage } from '@inertiajs/vue3';
+import { Building2, HashIcon } from '@lucide/vue';
 import { computed, onMounted, ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
 import CommentThread from '@/components/CommentThread.vue';
 import NoteThread from '@/components/NoteThread.vue';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import ConfirmationDialog from '@/components/ui/confirmation-dialog/ConfirmationDialog.vue';
 import { StatBar } from '@/components/ui/stat-bar';
 import { useCurrency } from '@/composables/useCurrency';
 import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.vue';
 import { dashboard } from '@/routes';
 import { show as accountShow } from '@/routes/accounts';
-import proposals from '@/routes/proposals';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { Proposal, ProposalStatusModel } from '@/types/models/proposal';
@@ -83,7 +80,6 @@ const accountHref = computed(() =>
 );
 
 const activeTab = ref('overview');
-const showSendDialog = ref(false);
 
 const tabs = [
     { key: 'overview', label: 'Overview' },
@@ -92,18 +88,6 @@ const tabs = [
     { key: 'activity', label: 'Activity' },
     { key: 'notes', label: 'Notes' },
 ];
-
-const sendProposal = () => {
-    router.post(
-        proposals.send(props.proposal).url,
-        {},
-        {
-            onSuccess: () => {
-                showSendDialog.value = false;
-            },
-        },
-    );
-};
 
 setLayoutProps({
     title: 'Proposal Preview',
@@ -166,15 +150,6 @@ function formatDate(value?: string | null): string {
                     </h1>
                 </div>
                 <div class="flex gap-2">
-                    <Button
-                        variant="outline"
-                        class="gap-2"
-                        @click="showSendDialog = true"
-                        :disabled="!props.proposal.account_contact"
-                    >
-                        <Send class="h-4 w-4" />
-                        {{ props.proposal.sent_at ? 'Resend' : 'Send' }}
-                    </Button>
                     <ProposalActions
                         :proposal="props.proposal"
                         :proposal_statuses="props.proposal_statuses"
@@ -395,22 +370,4 @@ function formatDate(value?: string | null): string {
             </div>
         </div>
     </div>
-
-    <!-- Send Confirmation Dialog -->
-    <ConfirmationDialog
-        v-model:open="showSendDialog"
-        :title="props.proposal.sent_at ? 'Resend Proposal' : 'Send Proposal'"
-        :description="
-            props.proposal.sent_at
-                ? 'Are you sure you want to resend this proposal to the assigned contact? This will send them another email with a link to view the proposal.'
-                : 'Are you sure you want to send this proposal to the assigned contact? This will send them an email with a link to view the proposal.'
-        "
-        :confirm-text="
-            props.proposal.sent_at ? 'Resend Proposal' : 'Send Proposal'
-        "
-        cancel-text="Cancel"
-        variant="default"
-        @confirm="sendProposal"
-        @cancel="showSendDialog = false"
-    />
 </template>

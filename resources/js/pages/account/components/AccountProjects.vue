@@ -16,23 +16,26 @@ const props = defineProps<{
 
 const formatDate = (value: string | null): string => {
     if (!value) {
-return '-';
-}
+        return '-';
+    }
 
     return new Date(value).toLocaleDateString();
 };
 
 const progress = (project: Project): number => {
     if (!project.tasks_total) {
-return 0;
-}
+        return 0;
+    }
 
     return Math.round((project.tasks_completed / project.tasks_total) * 100);
 };
 </script>
 
 <template>
-    <div v-if="props.projects.length === 0" class="py-8 text-center text-sm text-muted-foreground">
+    <div
+        v-if="props.projects.length === 0"
+        class="py-8 text-center text-sm text-muted-foreground"
+    >
         No projects yet.
     </div>
     <Table v-else>
@@ -63,7 +66,9 @@ return 0;
                 <TableCell>{{ formatDate(project.due_date) }}</TableCell>
                 <TableCell>
                     <div class="flex items-center gap-2">
-                        <div class="h-2 w-24 overflow-hidden rounded-full bg-muted">
+                        <div
+                            class="h-2 w-24 overflow-hidden rounded-full bg-muted"
+                        >
                             <div
                                 class="h-full bg-primary"
                                 :style="{ width: `${progress(project)}%` }"

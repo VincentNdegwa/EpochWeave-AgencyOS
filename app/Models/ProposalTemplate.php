@@ -32,6 +32,6 @@ class ProposalTemplate extends Model
 
     public function proposals(): HasMany
     {
-        return $this->hasMany(Proposal::class);
+        return $this->hasMany(Proposal::class, 'template_id');
     }
 }

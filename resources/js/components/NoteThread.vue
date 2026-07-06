@@ -154,17 +154,12 @@ const deleteNote = (noteId: number) => {
         <div class="space-y-2">
             <Textarea
                 v-model="body"
-                :placeholder="
-                    editingNoteId ? 'Edit note...' : 'Add a note...'
-                "
+                :placeholder="editingNoteId ? 'Edit note...' : 'Add a note...'"
                 rows="3"
             />
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
-                    <Checkbox
-                        id="internal-note"
-                        v-model="isInternal"
-                    />
+                    <Checkbox id="internal-note" v-model="isInternal" />
                     <label
                         for="internal-note"
                         class="text-sm text-muted-foreground"

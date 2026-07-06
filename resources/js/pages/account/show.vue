@@ -29,7 +29,12 @@ import { useAccountStatuses } from '@/composables/useEnums';
 import { dashboard } from '@/routes';
 import { index as accountIndex } from '@/routes/accounts';
 import { destroy as destroyEngagement } from '@/routes/engagements';
-import type { Account, AccountContact, Address, Engagement } from '@/types/models/account';
+import type {
+    Account,
+    AccountContact,
+    Address,
+    Engagement,
+} from '@/types/models/account';
 import AccountActions from './components/AccountActions.vue';
 import AccountCustomFields from './components/AccountCustomFields.vue';
 import AccountEngagements from './components/AccountEngagements.vue';
@@ -101,7 +106,8 @@ const openEditAddressDialog = (address: Address) => {
 const deleteAddress = async (addressId: number) => {
     const confirmed = await confirm({
         title: 'Delete Address',
-        description: 'Are you sure you want to delete this address? This action cannot be undone.',
+        description:
+            'Are you sure you want to delete this address? This action cannot be undone.',
         confirmText: 'Delete',
         cancelText: 'Cancel',
         variant: 'destructive',
@@ -130,7 +136,8 @@ const openEditEngagementDialog = (engagement: Engagement) => {
 const deleteEngagement = async (engagement: Engagement) => {
     const confirmed = await confirm({
         title: 'Delete Engagement',
-        description: 'Are you sure you want to delete this engagement? This action cannot be undone.',
+        description:
+            'Are you sure you want to delete this engagement? This action cannot be undone.',
         confirmText: 'Delete',
         cancelText: 'Cancel',
         variant: 'destructive',
@@ -140,7 +147,6 @@ const deleteEngagement = async (engagement: Engagement) => {
         router.delete(destroyEngagement(engagement).url);
     }
 };
-
 
 defineOptions({
     layout: {
@@ -183,13 +189,18 @@ defineOptions({
                         <span
                             class="inline-flex items-center gap-1 rounded-md border border-border bg-muted/50 px-2 py-0.5 font-mono text-[11px] text-muted-foreground"
                         >
-                            <HashIcon class="h-2.5 w-2.5" />{{ props.account.id }}
+                            <HashIcon class="h-2.5 w-2.5" />{{
+                                props.account.id
+                            }}
                         </span>
                     </div>
                     <h1 class="text-base font-semibold text-foreground">
                         {{ props.account.company_name }}
                         <span class="font-normal text-muted-foreground"
-                            >· {{ formatCurrency(props.account.lifetime_value) }}</span
+                            >·
+                            {{
+                                formatCurrency(props.account.lifetime_value)
+                            }}</span
                         >
                     </h1>
                 </div>
@@ -255,36 +266,71 @@ defineOptions({
                             </h3>
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Status</span>
-                                    <span class="font-medium">{{ getLabel(props.account.status) }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Status</span
+                                    >
+                                    <span class="font-medium">{{
+                                        getLabel(props.account.status)
+                                    }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Industry</span>
-                                    <span class="font-medium">{{ props.account.industry?.name ?? '—' }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Industry</span
+                                    >
+                                    <span class="font-medium">{{
+                                        props.account.industry?.name ?? '—'
+                                    }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Lead Source</span>
-                                    <span class="font-medium">{{ props.account.leadSource?.name ?? '—' }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Lead Source</span
+                                    >
+                                    <span class="font-medium">{{
+                                        props.account.leadSource?.name ?? '—'
+                                    }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Company Size</span>
-                                    <span class="font-medium">{{ props.account.companySize?.label ?? '—' }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Company Size</span
+                                    >
+                                    <span class="font-medium">{{
+                                        props.account.companySize?.label ?? '—'
+                                    }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Employees</span>
-                                    <span class="font-medium">{{ props.account.employee_count?.toLocaleString() ?? '—' }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Employees</span
+                                    >
+                                    <span class="font-medium">{{
+                                        props.account.employee_count?.toLocaleString() ??
+                                        '—'
+                                    }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Founded</span>
-                                    <span class="font-medium">{{ formatDate(props.account.founded_at) }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Founded</span
+                                    >
+                                    <span class="font-medium">{{
+                                        formatDate(props.account.founded_at)
+                                    }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Annual Revenue</span>
-                                    <span class="font-medium">{{ formatCurrency(props.account.annual_revenue ?? 0) }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Annual Revenue</span
+                                    >
+                                    <span class="font-medium">{{
+                                        formatCurrency(
+                                            props.account.annual_revenue ?? 0,
+                                        )
+                                    }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-muted-foreground">Created</span>
-                                    <span class="font-medium">{{ formatDate(props.account.created_at) }}</span>
+                                    <span class="text-muted-foreground"
+                                        >Created</span
+                                    >
+                                    <span class="font-medium">{{
+                                        formatDate(props.account.created_at)
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
@@ -299,10 +345,12 @@ defineOptions({
                             <p
                                 class="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90"
                             >
-                                {{ props.account.description || 'No description provided.' }}
+                                {{
+                                    props.account.description ||
+                                    'No description provided.'
+                                }}
                             </p>
                         </div>
-
 
                         <!-- Addresses -->
                         <div class="space-y-4 border-b p-5">
@@ -321,7 +369,10 @@ defineOptions({
                                     Add Address
                                 </Button>
                             </div>
-                            <div v-if="props.account.addresses?.length" class="space-y-2">
+                            <div
+                                v-if="props.account.addresses?.length"
+                                class="space-y-2"
+                            >
                                 <div
                                     v-for="address in props.account.addresses"
                                     :key="address.id"
@@ -329,15 +380,32 @@ defineOptions({
                                 >
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <MapPin class="h-4 w-4 text-muted-foreground" />
-                                            <span class="font-medium capitalize">{{ address.type }}</span>
-                                            <Badge v-if="address.is_primary" variant="outline" class="text-[10px]">Primary</Badge>
+                                            <MapPin
+                                                class="h-4 w-4 text-muted-foreground"
+                                            />
+                                            <span
+                                                class="font-medium capitalize"
+                                                >{{ address.type }}</span
+                                            >
+                                            <Badge
+                                                v-if="address.is_primary"
+                                                variant="outline"
+                                                class="text-[10px]"
+                                                >Primary</Badge
+                                            >
                                         </div>
                                         <div class="mt-1 text-muted-foreground">
                                             {{ address.street_1 }}
-                                            <span v-if="address.street_2">, {{ address.street_2 }}</span><br />
-                                            {{ address.city }}<span v-if="address.state">, {{ address.state }}</span>
-                                            <span v-if="address.postal_code"> {{ address.postal_code }}</span><br />
+                                            <span v-if="address.street_2"
+                                                >, {{ address.street_2 }}</span
+                                            ><br />
+                                            {{ address.city
+                                            }}<span v-if="address.state"
+                                                >, {{ address.state }}</span
+                                            >
+                                            <span v-if="address.postal_code">
+                                                {{ address.postal_code }}</span
+                                            ><br />
                                             {{ address.country }}
                                         </div>
                                     </div>
@@ -345,7 +413,9 @@ defineOptions({
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            @click="openEditAddressDialog(address)"
+                                            @click="
+                                                openEditAddressDialog(address)
+                                            "
                                         >
                                             Edit
                                         </Button>
@@ -372,17 +442,28 @@ defineOptions({
                             >
                                 Social Profiles
                             </h3>
-                            <div v-if="props.account.socialProfiles?.length" class="flex flex-wrap gap-2">
+                            <div
+                                v-if="props.account.socialProfiles?.length"
+                                class="flex flex-wrap gap-2"
+                            >
                                 <a
-                                    v-for="profile in props.account.socialProfiles"
+                                    v-for="profile in props.account
+                                        .socialProfiles"
                                     :key="profile.id"
                                     :href="profile.url"
                                     target="_blank"
                                     class="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors hover:bg-muted"
                                 >
-                                    <Share2 class="h-3.5 w-3.5 text-muted-foreground" />
+                                    <Share2
+                                        class="h-3.5 w-3.5 text-muted-foreground"
+                                    />
                                     {{ profile.platform }}
-                                    <Badge v-if="profile.is_verified" variant="outline" class="text-[10px]">Verified</Badge>
+                                    <Badge
+                                        v-if="profile.is_verified"
+                                        variant="outline"
+                                        class="text-[10px]"
+                                        >Verified</Badge
+                                    >
                                 </a>
                             </div>
                             <div v-else class="text-sm text-muted-foreground">
@@ -416,10 +497,16 @@ defineOptions({
                                     <div
                                         class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-muted"
                                     >
-                                        <Phone class="h-4 w-4 text-muted-foreground" />
+                                        <Phone
+                                            class="h-4 w-4 text-muted-foreground"
+                                        />
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="text-xs text-muted-foreground">Phone</p>
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Phone
+                                        </p>
                                         <p class="truncate text-sm font-medium">
                                             {{ props.account.phone ?? '—' }}
                                         </p>
@@ -430,19 +517,35 @@ defineOptions({
                                     <div
                                         class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-muted"
                                     >
-                                        <Building2 class="h-4 w-4 text-muted-foreground" />
+                                        <Building2
+                                            class="h-4 w-4 text-muted-foreground"
+                                        />
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="text-xs text-muted-foreground">Website</p>
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Website
+                                        </p>
                                         <a
                                             v-if="props.account.website"
                                             :href="props.account.website"
                                             target="_blank"
                                             class="truncate text-sm font-medium text-primary hover:underline"
                                         >
-                                            {{ props.account.website.replace(/^https?:\/\//, '') }}
+                                            {{
+                                                props.account.website.replace(
+                                                    /^https?:\/\//,
+                                                    '',
+                                                )
+                                            }}
                                         </a>
-                                        <p v-else class="truncate text-sm font-medium">—</p>
+                                        <p
+                                            v-else
+                                            class="truncate text-sm font-medium"
+                                        >
+                                            —
+                                        </p>
                                     </div>
                                 </div>
 
@@ -450,12 +553,22 @@ defineOptions({
                                     <div
                                         class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-muted"
                                     >
-                                        <Mail class="h-4 w-4 text-muted-foreground" />
+                                        <Mail
+                                            class="h-4 w-4 text-muted-foreground"
+                                        />
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="text-xs text-muted-foreground">Primary Email</p>
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Primary Email
+                                        </p>
                                         <p class="truncate text-sm font-medium">
-                                            {{ props.account.contacts?.find((c) => c.is_primary)?.email ?? '—' }}
+                                            {{
+                                                props.account.contacts?.find(
+                                                    (c) => c.is_primary,
+                                                )?.email ?? '—'
+                                            }}
                                         </p>
                                     </div>
                                 </div>
@@ -476,16 +589,26 @@ defineOptions({
                                     :href="`/proposals/${props.account.proposals[0].id}`"
                                     class="group flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted"
                                 >
-                                    <FileText class="h-4 w-4 text-muted-foreground" />
+                                    <FileText
+                                        class="h-4 w-4 text-muted-foreground"
+                                    />
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-xs text-muted-foreground">Latest Proposal</p>
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Latest Proposal
+                                        </p>
                                         <p
                                             class="truncate text-sm font-medium transition-colors group-hover:text-primary"
                                         >
-                                            {{ props.account.proposals[0].title }}
+                                            {{
+                                                props.account.proposals[0].title
+                                            }}
                                         </p>
                                     </div>
-                                    <ExternalLinkIcon class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground/50" />
+                                    <ExternalLinkIcon
+                                        class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground/50"
+                                    />
                                 </Link>
 
                                 <Link
@@ -493,16 +616,24 @@ defineOptions({
                                     :href="`/projects/${props.account.projects[0].id}`"
                                     class="group flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted"
                                 >
-                                    <FolderOpen class="h-4 w-4 text-muted-foreground" />
+                                    <FolderOpen
+                                        class="h-4 w-4 text-muted-foreground"
+                                    />
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-xs text-muted-foreground">Latest Project</p>
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Latest Project
+                                        </p>
                                         <p
                                             class="truncate text-sm font-medium transition-colors group-hover:text-primary"
                                         >
                                             {{ props.account.projects[0].name }}
                                         </p>
                                     </div>
-                                    <ExternalLinkIcon class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground/50" />
+                                    <ExternalLinkIcon
+                                        class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground/50"
+                                    />
                                 </Link>
 
                                 <Link
@@ -510,16 +641,28 @@ defineOptions({
                                     :href="`/invoices/${props.account.invoices[0].id}`"
                                     class="group flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted"
                                 >
-                                    <Receipt class="h-4 w-4 text-muted-foreground" />
+                                    <Receipt
+                                        class="h-4 w-4 text-muted-foreground"
+                                    />
                                     <div class="min-w-0 flex-1">
-                                        <p class="text-xs text-muted-foreground">Latest Invoice</p>
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            Latest Invoice
+                                        </p>
                                         <p
                                             class="truncate text-sm font-medium transition-colors group-hover:text-primary"
                                         >
-                                            {{ props.account.invoices[0].invoice_number ?? `#${props.account.invoices[0].id}` }}
+                                            {{
+                                                props.account.invoices[0]
+                                                    .invoice_number ??
+                                                `#${props.account.invoices[0].id}`
+                                            }}
                                         </p>
                                     </div>
-                                    <ExternalLinkIcon class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground/50" />
+                                    <ExternalLinkIcon
+                                        class="h-3.5 w-3.5 flex-shrink-0 text-muted-foreground/50"
+                                    />
                                 </Link>
                             </div>
                         </div>
@@ -565,7 +708,9 @@ defineOptions({
                         <Users class="h-5 w-5" />
                     </div>
                     <p class="text-sm font-medium">No contacts yet</p>
-                    <p class="text-xs">Add the first contact for this account.</p>
+                    <p class="text-xs">
+                        Add the first contact for this account.
+                    </p>
                 </div>
             </div>
 
@@ -577,7 +722,9 @@ defineOptions({
                     >
                         Proposals
                     </h3>
-                    <AccountProposals :proposals="props.account.proposals ?? []" />
+                    <AccountProposals
+                        :proposals="props.account.proposals ?? []"
+                    />
                 </div>
             </div>
 

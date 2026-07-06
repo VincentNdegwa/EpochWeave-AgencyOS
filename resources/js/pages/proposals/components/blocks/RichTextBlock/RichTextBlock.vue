@@ -77,7 +77,7 @@ const toolbarOptions = [
         <!-- ── Edit mode ──────────────────────────────────────────── -->
         <div
             v-if="!isLocked"
-            class="richtext-editor-wrap relative rounded-md outline-none transition-colors duration-150"
+            class="richtext-editor-wrap relative rounded-md transition-colors duration-150 outline-none"
             :class="isFocused ? '' : 'hover:bg-muted/30'"
         >
             <QuillEditor
@@ -110,7 +110,6 @@ const toolbarOptions = [
 </template>
 
 <style scoped>
-
 :deep(.ql-editor) {
     padding: 0;
 }

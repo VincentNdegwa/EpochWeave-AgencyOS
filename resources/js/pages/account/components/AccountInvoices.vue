@@ -19,8 +19,8 @@ const { format: formatCurrency } = useCurrency();
 
 const formatDate = (value: string | null): string => {
     if (!value) {
-return '-';
-}
+        return '-';
+    }
 
     return new Date(value).toLocaleDateString();
 };
@@ -31,7 +31,10 @@ const balance = (invoice: Invoice): number => {
 </script>
 
 <template>
-    <div v-if="props.invoices.length === 0" class="py-8 text-center text-sm text-muted-foreground">
+    <div
+        v-if="props.invoices.length === 0"
+        class="py-8 text-center text-sm text-muted-foreground"
+    >
         No invoices yet.
     </div>
     <Table v-else>
@@ -74,7 +77,11 @@ const balance = (invoice: Invoice): number => {
                                 : 'text-emerald-600'
                         "
                     >
-                        {{ balance(invoice) > 0 ? formatCurrency(balance(invoice)) + ' due' : 'Paid' }}
+                        {{
+                            balance(invoice) > 0
+                                ? formatCurrency(balance(invoice)) + ' due'
+                                : 'Paid'
+                        }}
                     </span>
                 </TableCell>
             </TableRow>

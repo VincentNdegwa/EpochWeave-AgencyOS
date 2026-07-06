@@ -13,7 +13,7 @@ import {
     Undo2,
     XCircle,
 } from '@lucide/vue';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { toast } from 'vue-sonner';
 import ProposalController from '@/actions/App/Http/Controllers/ProposalController';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Proposal } from '@/types/models/proposal';
 import type { ProposalStatusModel } from '@/types/models/proposal';
-import ProposalFormDialog from '../dialogs/ProposalFormDialog.vue';
 
 interface Props {
     proposal: Proposal;
@@ -39,8 +38,6 @@ const props = withDefaults(defineProps<Props>(), {
     variant: 'dropdown',
     size: 'sm',
 });
-
-const isEditDialogOpen = ref(false);
 
 interface ActionItem {
     label: string;
@@ -96,7 +93,7 @@ const editAction: ActionItem = {
     label: 'Edit',
     icon: Edit,
     handler: () => {
-        isEditDialogOpen.value = true;
+        router.visit(ProposalController.edit(props.proposal.id).url);
     },
 };
 
@@ -441,11 +438,4 @@ const splitDropdownItems = computed((): ActionItem[] => {
             </template>
         </DropdownMenuContent>
     </DropdownMenu>
-
-    <ProposalFormDialog
-        :open="isEditDialogOpen"
-        :proposal="props.proposal"
-        @update:open="isEditDialogOpen = $event"
-        @success="isEditDialogOpen = false"
-    />
 </template>

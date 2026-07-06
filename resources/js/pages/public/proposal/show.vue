@@ -6,10 +6,11 @@ import ProposalCanvas from '@/pages/proposals/components/canvas/ProposalCanvas.v
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import { useWorkspaceStore } from '@/stores/workspace';
 import type { Proposal } from '@/types/models/proposal';
+import type { Workspace } from '@/types/models/workspace';
 
 const props = defineProps<{
     proposal: Proposal;
-    workspace: any;
+    workspace: Workspace;
 }>();
 
 const builderStore = useProposalBuilderStore();
@@ -41,7 +42,7 @@ const openSignatureModal = (mode: 'sign' | 'reject') => {
 };
 
 onMounted(() => {
-    workspaceStore.setWorkspace(workspace);
+    workspaceStore.setWorkspace(props.workspace);
     builderStore.setPortalMode(true);
     builderStore.hydrateProposal(props.proposal, { mode: 'proposal' });
 });

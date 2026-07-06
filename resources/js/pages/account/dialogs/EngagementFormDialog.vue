@@ -86,8 +86,8 @@ const engagementOutcomes = useEngagementOutcomes();
 
 const toDateTimeLocal = (value?: string | null): string => {
     if (!value) {
-return '';
-}
+        return '';
+    }
 
     return new Date(value).toISOString().slice(0, 16);
 };
@@ -119,7 +119,9 @@ watch(
 
         if (engagement) {
             form.value = {
-                account_id: engagement.account_id?.toString() ?? props.account.id.toString(),
+                account_id:
+                    engagement.account_id?.toString() ??
+                    props.account.id.toString(),
                 type: engagement.type,
                 direction: engagement.direction,
                 status: engagement.status,
@@ -171,7 +173,13 @@ const formAction = computed(() => {
                     {{ isEditing ? 'Edit Engagement' : 'Log Engagement' }}
                 </DialogTitle>
                 <DialogDescription>
-                    {{ isEditing ? 'Update the engagement details.' : 'Record a touchpoint with ' + account.company_name + '.' }}
+                    {{
+                        isEditing
+                            ? 'Update the engagement details.'
+                            : 'Record a touchpoint with ' +
+                              account.company_name +
+                              '.'
+                    }}
                 </DialogDescription>
             </DialogHeader>
 

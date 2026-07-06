@@ -3,6 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Enums\BlockType;
+use App\Enums\BillingType;
+use App\Enums\BillingFrequency;
+use App\Enums\DiscountType;
+use App\Enums\TaxType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Validation\Rule;
 
@@ -66,13 +70,25 @@ class StoreProposalRequest extends FormRequest
             'line_items.*.quantity' => 'required|numeric|min:0',
             'line_items.*.unit_price' => 'required|numeric|min:0',
             'line_items.*.subtotal' => 'required|numeric|min:0',
-            'line_items.*.billing_type' => 'required|in:one_time,recurring',
-            'line_items.*.billing_frequency' => 'required|in:none,monthly,quarterly,yearly',
+            'line_items.*.billing_type' => [
+                'required',
+                Rule::in(array_column(BillingType::cases(), 'value')),
+            ],
+            'line_items.*.billing_frequency' => [
+                'required',
+                Rule::in(array_column(BillingFrequency::cases(), 'value')),
+            ],
             'line_items.*.is_optional' => 'required|boolean',
             'line_items.*.product_id' => 'nullable|integer|exists:products,id',
-            'line_items.*.discount_type' => 'nullable|in:none,percentage,fixed',
+            'line_items.*.discount_type' => [
+                'nullable',
+                Rule::in(array_column(DiscountType::cases(), 'value')),
+            ],
             'line_items.*.discount_value' => 'nullable|numeric|min:0',
-            'line_items.*.tax_type' => 'nullable|in:none,percentage,fixed',
+            'line_items.*.tax_type' => [
+                'nullable',
+                Rule::in(array_column(TaxType::cases(), 'value')),
+            ],
             'line_items.*.tax_value' => 'nullable|numeric|min:0',
         ];
     }

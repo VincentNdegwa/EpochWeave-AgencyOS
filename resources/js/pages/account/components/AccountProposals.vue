@@ -19,15 +19,18 @@ const { format: formatCurrency } = useCurrency();
 
 const formatDate = (value: string | null): string => {
     if (!value) {
-return '-';
-}
+        return '-';
+    }
 
     return new Date(value).toLocaleDateString();
 };
 </script>
 
 <template>
-    <div v-if="props.proposals.length === 0" class="py-8 text-center text-sm text-muted-foreground">
+    <div
+        v-if="props.proposals.length === 0"
+        class="py-8 text-center text-sm text-muted-foreground"
+    >
         No proposals yet.
     </div>
     <Table v-else>

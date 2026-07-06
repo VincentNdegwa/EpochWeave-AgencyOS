@@ -31,11 +31,6 @@ class ProposalTemplateService
     public function deleteTemplate(ProposalTemplate $template): void
     {
         try {
-            // Check if template is being used by any proposals
-            if ($template->proposals()->count() > 0) {
-                throw new Exception('Cannot delete template that is being used by proposals.');
-            }
-
             $template->delete();
         } catch (Exception $e) {
             throw new Exception('Failed to delete proposal template: '.$e->getMessage());

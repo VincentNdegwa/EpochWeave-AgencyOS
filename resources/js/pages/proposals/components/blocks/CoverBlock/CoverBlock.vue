@@ -42,8 +42,7 @@ const accentStyle = computed(() => ({
 
 const hasImage = computed(
     () =>
-        props.data.background_type === 'image' &&
-        !!props.data.background_value,
+        props.data.background_type === 'image' && !!props.data.background_value,
 );
 
 const today = computed(() =>
