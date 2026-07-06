@@ -111,11 +111,11 @@ defineExpose({
 });
 
 setLayoutProps({
-    title: 'edit template',
+    title: 'Edit Template',
     description: 'Modify your reusable proposal template.',
     breadcrumbs: [
-        { title: 'dashboard', href: dashboard() },
-        { title: 'templates', href: proposalTemplates.index() },
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Templates', href: proposalTemplates.index() },
         {
             title: props.template.name,
             href: proposalTemplates.show(props.template.id),

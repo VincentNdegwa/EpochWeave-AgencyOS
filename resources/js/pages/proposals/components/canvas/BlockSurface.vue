@@ -2,10 +2,16 @@
 import { computed } from 'vue';
 import type { BlockMeta } from '@/types/proposal-builder';
 
-const props = defineProps<{
-    meta: BlockMeta;
-    isLocked: boolean;
-}>();
+const props = withDefaults(
+    defineProps<{
+        meta: BlockMeta;
+        isLocked: boolean;
+        fullBleed?: boolean;
+    }>(),
+    {
+        fullBleed: false,
+    },
+);
 
 const paddingScale: Record<BlockMeta['padding_top'], number> = {
     none: 0,
@@ -23,19 +29,26 @@ const backgroundColor = computed(
     () => props.meta.background_color ?? 'transparent',
 );
 
-const surfaceStyle = computed(() => ({
-    backgroundColor: backgroundColor.value,
-    paddingTop: paddingTop.value,
-    paddingBottom: paddingBottom.value,
-    '--block-meta-padding-top': paddingTop.value,
-    '--block-meta-padding-bottom': paddingBottom.value,
-    '--block-meta-background': backgroundColor.value,
-}));
+const surfaceStyle = computed(() => {
+    if (props.fullBleed) {
+        return {};
+    }
+
+    return {
+        backgroundColor: backgroundColor.value,
+        paddingTop: paddingTop.value,
+        paddingBottom: paddingBottom.value,
+        '--block-meta-padding-top': paddingTop.value,
+        '--block-meta-padding-bottom': paddingBottom.value,
+        '--block-meta-background': backgroundColor.value,
+    };
+});
 
 const surfaceClasses = computed(() => [
-    'relative bg-background transition-all',
-    props.meta.border_top ? 'border-t border-border' : '',
-    props.meta.border_bottom ? 'border-b border-border' : '',
+    !props.fullBleed && props.meta.border_top ? 'border-t border-border' : '',
+    !props.fullBleed && props.meta.border_bottom
+        ? 'border-b border-border'
+        : '',
 ]);
 
 const isHiddenInPreview = computed(

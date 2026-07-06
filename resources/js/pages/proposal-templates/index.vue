@@ -66,11 +66,11 @@ const handleDelete = async (templateId: number) => {
 
 defineOptions({
     layout: {
-        title: 'templates',
+        title: 'Templates',
         description: 'Manage reusable proposal templates and content blocks.',
         breadcrumbs: [
-            { title: 'dashboard', href: dashboard() },
-            { title: 'templates' },
+            { title: 'Dashboard', href: dashboard() },
+            { title: 'Templates' },
         ],
     },
 });

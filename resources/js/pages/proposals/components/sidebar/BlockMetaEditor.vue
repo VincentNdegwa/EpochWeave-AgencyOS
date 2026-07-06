@@ -25,6 +25,7 @@ const store = useProposalBuilderStore();
 const block = computed(() =>
     store.selectedBlockId === props.blockId ? store.selectedBlock : null,
 );
+const isFullBleed = computed(() => block.value?.type === 'cover');
 const meta = computed<BlockMeta>(
     () =>
         block.value?.meta ?? {
@@ -75,9 +76,19 @@ const notesOpen = ref(!!meta.value.notes?.length);
 <template>
     <div v-if="block" class="flex flex-col gap-0 text-sm">
         <!-- ══════════════════════════════════════════════
+         COVER BLOCK NOTICE
+    ══════════════════════════════════════════════ -->
+        <div v-if="isFullBleed" class="border-b border-border py-3">
+            <p class="text-xs text-muted-foreground">
+                The Cover block manages its own full-bleed background and
+                spacing. Edit those in the block's settings above.
+            </p>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
          SECTION 1 — SPACING
     ══════════════════════════════════════════════ -->
-        <div class="border-b border-border py-3">
+        <div v-if="!isFullBleed" class="border-b border-border py-3">
             <p
                 class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
             >
@@ -210,7 +221,7 @@ const notesOpen = ref(!!meta.value.notes?.length);
         <!-- ══════════════════════════════════════════════
          SECTION 2 — BACKGROUND
     ══════════════════════════════════════════════ -->
-        <div class="border-b border-border py-3">
+        <div v-if="!isFullBleed" class="border-b border-border py-3">
             <p
                 class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
             >
@@ -228,7 +239,7 @@ const notesOpen = ref(!!meta.value.notes?.length);
         <!-- ══════════════════════════════════════════════
          SECTION 3 — DIVIDERS
     ══════════════════════════════════════════════ -->
-        <div class="border-b border-border py-3">
+        <div v-if="!isFullBleed" class="border-b border-border py-3">
             <p
                 class="mb-3 flex items-center gap-1.5 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"
             >

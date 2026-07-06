@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { QuillEditor } from '@vueup/vue-quill';
 import { ref, watch } from 'vue';
-import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import '@vueup/vue-quill/dist/vue-quill.bubble.css';
 import BlockTitle from '@/pages/proposals/components/blocks/shared/BlockTitle.vue';
 import { useProposalBuilderStore } from '@/stores/proposalBuilder';
 import type { BaseBlock, TermsBlockData } from '@/types/proposal-builder';
@@ -33,7 +33,7 @@ const toolbarOptions = [
     ['bold', 'italic', 'underline'],
     [{ list: 'ordered' }, { list: 'bullet' }],
     [{ header: [1, 2, 3, false] }],
-    ['clean'],
+    ['clean']
 ];
 </script>
 
@@ -51,16 +51,12 @@ const toolbarOptions = [
         <!-- Edit mode -->
         <div
             v-if="!isLocked"
-            class="richtext-editor-wrap rounded-md transition-all duration-150"
-            :class="
-                isFocused
-                    ? 'ring-2 ring-primary ring-offset-1 ring-offset-background'
-                    : 'ring-1 ring-transparent hover:ring-border'
-            "
+            class="richtext-editor-wrap relative rounded-md outline-none transition-colors duration-150"
+            :class="isFocused ? '' : 'hover:bg-muted/30'"
         >
             <QuillEditor
                 v-model:content="editorContent"
-                theme="snow"
+                theme="bubble"
                 content-type="html"
                 :options="{
                     modules: { toolbar: toolbarOptions },
@@ -83,3 +79,9 @@ const toolbarOptions = [
         />
     </section>
 </template>
+
+<style scoped>
+:deep(.ql-editor) {
+    padding: 0;
+}
+</style>

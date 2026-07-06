@@ -265,6 +265,7 @@ export interface FileAttachment {
 // Replaces the need for "tip box", "warning box", "quote block" etc.
 
 export interface CalloutBlockData {
+    title: string | null;
     content: string; // HTML from Quill
     icon: string | null; // Emoji or null
     background_color: string | null; // hex or null (transparent)

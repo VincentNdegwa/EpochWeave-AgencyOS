@@ -52,12 +52,12 @@ defineExpose({
 });
 
 setLayoutProps({
-    title: 'create template',
+    title: 'Create Template',
     description: 'Launch a new reusable proposal template.',
     breadcrumbs: [
-        { title: 'dashboard', href: dashboard() },
-        { title: 'templates', href: proposalTemplates.index() },
-        { title: 'create' },
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Templates', href: proposalTemplates.index() },
+        { title: 'Create' },
     ],
 });
 </script>

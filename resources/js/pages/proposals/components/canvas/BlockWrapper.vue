@@ -18,6 +18,10 @@ const store = useProposalBuilderStore();
 const { selectedBlockId } = storeToRefs(store);
 const isSelected = computed(() => selectedBlockId.value === props.block.id);
 
+// The Cover block renders its own full-bleed background and padding, so the
+// surrounding surface's padding/background/border styling is skipped for it.
+const isFullBleed = computed(() => props.block.type === 'cover');
+
 const meta = computed<BlockMeta>(() => ({
     ...defaultBlockMeta,
     ...props.block.meta,
@@ -76,7 +80,11 @@ const isNestedElement = (target: Element, wrapper: Element): boolean => {
             :block="props.block"
             :is-selected="isSelected"
         />
-        <BlockSurface :meta="meta" :is-locked="props.isLocked">
+        <BlockSurface
+            :meta="meta"
+            :is-locked="props.isLocked"
+            :full-bleed="isFullBleed"
+        >
             <slot />
         </BlockSurface>
         <BlockLockedOverlay v-if="props.block.is_locked && props.isLocked" />

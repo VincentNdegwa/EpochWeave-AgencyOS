@@ -2,6 +2,7 @@
 import { Head, setLayoutProps } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import ActivityTimeline from '@/components/ActivityTimeline.vue';
+import CommentThread from '@/components/CommentThread.vue';
 import { Badge } from '@/components/ui/badge';
 import { StatBar } from '@/components/ui/stat-bar';
 import { useDateFormat } from '@/composables/useDateFormat';
@@ -11,7 +12,6 @@ import tasks from '@/routes/tasks';
 import type { Task } from '@/types/models/task';
 import type { TaskStatus } from '@/types/models/task_status';
 import AttachmentList from './components/AttachmentList.vue';
-import CommentThread from '@/components/CommentThread.vue';
 import SubtaskList from './components/SubtaskList.vue';
 import TaskActions from './components/TaskActions.vue';
 import TimeEntriesPanel from './components/TimeEntriesPanel.vue';

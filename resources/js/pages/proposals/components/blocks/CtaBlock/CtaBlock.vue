@@ -97,7 +97,7 @@ const alignClass = computed(
                     <input
                         type="text"
                         :value="data.button_text"
-                        class="min-w-16 border-none bg-transparent text-sm font-semibold text-primary-foreground outline-none placeholder:text-primary-foreground/70"
+                        class="border-none bg-transparent max-w-fit text-sm text-center font-semibold text-primary-foreground outline-none placeholder:text-primary-foreground/70"
                         placeholder="Button text"
                         @input="
                             updateData({

@@ -33,7 +33,7 @@ const emit = defineEmits<{
             "
             :class="
                 cn(
-                    '-mx-2 h-auto cursor-text border-none bg-transparent text-lg font-semibold hover:bg-muted/50',
+                    '-mx-3 h-auto cursor-text border-none bg-transparent text-lg font-semibold hover:bg-muted/50',
                     props.color ? { color: props.color } : undefined,
                 )
             "

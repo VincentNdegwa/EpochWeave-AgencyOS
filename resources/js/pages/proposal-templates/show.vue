@@ -71,11 +71,11 @@ onMounted(() => {
 });
 
 setLayoutProps({
-    title: 'view template',
+    title: 'View Template',
     description: 'Preview your reusable proposal template.',
     breadcrumbs: [
-        { title: 'dashboard', href: dashboard() },
-        { title: 'templates', href: proposalTemplates.index() },
+        { title: 'Dashboard', href: dashboard() },
+        { title: 'Templates', href: proposalTemplates.index() },
         { title: props.template.name },
     ],
 });

@@ -30,12 +30,21 @@ const containerStyle = computed(() => {
     }
 
     return {
-        backgroundColor: props.data.background_value,
-        color: props.data.text_color,
+        backgroundColor: props.data.background_value || '#0F172A',
+        color: props.data.text_color || '#FFFFFF',
     } as Record<string, string>;
 });
 
-const overlayVisible = computed(() => props.data.background_type === 'image');
+const accentStyle = computed(() => ({
+    backgroundColor: props.data.text_color || '#FFFFFF',
+    opacity: '0.4',
+}));
+
+const hasImage = computed(
+    () =>
+        props.data.background_type === 'image' &&
+        !!props.data.background_value,
+);
 
 const today = computed(() =>
     new Date().toLocaleDateString('en-GB', {
@@ -50,49 +59,57 @@ const shortId = computed(() => props.block.id.slice(-6).toUpperCase());
 
 <template>
     <section
-        class="relative flex min-h-[400px] w-full flex-col overflow-hidden px-6"
+        class="group/cover relative flex min-h-[420px] w-full flex-col overflow-hidden px-8 select-none"
         :style="containerStyle"
     >
         <div
-            v-if="overlayVisible"
-            class="pointer-events-none absolute inset-0 bg-black/40"
+            v-if="hasImage"
+            class="pointer-events-none absolute inset-0 bg-black/50"
+        />
+
+        <div
+            class="pointer-events-none absolute -top-16 -right-16 h-64 w-64 rounded-full opacity-10"
+            :style="{ background: data.text_color || '#FFFFFF' }"
+        />
+        <div
+            class="pointer-events-none absolute -top-8 -right-8 h-40 w-40 rounded-full opacity-[0.07]"
+            :style="{ background: data.text_color || '#FFFFFF' }"
         />
 
         <header class="relative z-10 flex items-start justify-between pt-10">
-            <div v-if="data.show_logo" class="flex items-center gap-3">
+            <div v-if="data.show_logo" class="flex items-center gap-2.5">
                 <img
                     v-if="workspaceStore.logoUrl"
                     :src="workspaceStore.logoUrl"
                     alt="Workspace logo"
-                    class="h-24 w-auto object-contain"
+                    class="h-8 w-auto object-contain"
                 />
                 <span
                     v-else
-                    class="text-sm font-semibold tracking-wide opacity-90"
+                    class="text-sm font-semibold tracking-wide"
+                    style="opacity: 0.85"
                 >
                     {{ workspaceStore.name ?? 'Your Company' }}
                 </span>
             </div>
             <div v-else />
 
-            <div class="space-y-0.5 text-right text-xs opacity-70">
-                <p
-                    v-if="data.show_proposal_number"
-                    class="font-mono tracking-wider uppercase"
-                >
+            <div
+                class="space-y-0.5 text-right font-mono text-[11px] tracking-wider"
+                style="opacity: 0.55"
+            >
+                <p v-if="data.show_proposal_number" class="uppercase">
                     Proposal #{{ shortId }}
                 </p>
                 <p v-if="data.show_date">{{ today }}</p>
             </div>
         </header>
 
-        <div
-            class="relative z-10 flex flex-1 flex-col items-start justify-center pb-14"
-        >
+        <div class="relative z-10 mt-auto pb-14">
             <h1
                 :contenteditable="!isLocked"
                 :class="[
-                    'max-w-2xl text-5xl leading-tight font-bold tracking-tight outline-none',
+                    'max-w-2xl text-5xl leading-[1.1] font-bold tracking-tight outline-none',
                     !isLocked
                         ? 'cursor-text rounded focus:ring-2 focus:ring-white/30 focus:ring-offset-0'
                         : '',
@@ -132,10 +149,14 @@ const shortId = computed(() => props.block.id.slice(-6).toUpperCase());
                 {{ data.subheading || (!isLocked ? '' : '') }}
             </p>
 
-            <div
-                class="mt-8 h-[3px] w-16 rounded-full opacity-60"
-                style="background: currentColor"
-            />
+            <div class="mt-8 h-1 w-14 rounded-full" :style="accentStyle" />
+        </div>
+
+        <div
+            v-if="!isLocked"
+            class="pointer-events-none absolute right-4 bottom-14 rounded-md bg-black/30 px-2 py-1 text-[10px] text-white/60 opacity-0 transition-opacity group-hover/cover:opacity-100"
+        >
+            Click text to edit
         </div>
     </section>
 </template>

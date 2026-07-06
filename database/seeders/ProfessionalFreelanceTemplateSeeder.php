@@ -120,7 +120,8 @@ class ProfessionalFreelanceTemplateSeeder extends Seeder
                 'sort_order' => 3,
                 'is_locked' => false,
                 'data' => [
-                    'content' => '<h3>Why Choose Us?</h3><ul><li>✓ 5+ years of industry experience</li><li>✓ 100+ successful projects delivered</li><li>✓ 24/7 dedicated support</li><li>✓ Agile development methodology</li><li>✓ Post-launch maintenance included</li></ul>',
+                    'title' => 'Why Choose Us?',
+                    'content' => '<p>5+ years of industry experience</p><p>100+ successful projects delivered</p><p>24/7 dedicated support</p><p>Agile development methodology</p><p>Post-launch maintenance included</p>',
                     'background_color' => '#f0f9ff',
                     'accent_color' => '#0ea5e9',
                     'border_left' => true,
