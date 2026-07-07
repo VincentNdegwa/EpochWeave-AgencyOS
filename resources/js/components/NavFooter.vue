@@ -7,6 +7,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useCurrentUrl } from '@/composables/useCurrentUrl';
 import { toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
 
@@ -17,36 +18,45 @@ type Props = {
 
 defineProps<Props>();
 
-const isExternalUrl = (href: NavItem['href']): boolean => {
-    return toUrl(href).startsWith('http');
-};
+const { isCurrentUrl } = useCurrentUrl();
+
+const isExternalUrl = (href: NavItem['href']): boolean =>
+    toUrl(href).startsWith('http');
 </script>
 
 <template>
     <SidebarGroup
-        :class="`group-data-[collapsible=icon]:p-0 ${$props.class || ''}`"
+        :class="`px-0 py-0 group-data-[collapsible=icon]:p-0 ${$props.class ?? ''}`"
     >
         <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu class="gap-0.5">
                 <SidebarMenuItem v-for="item in items" :key="item.title">
                     <SidebarMenuButton
-                        class="text-neutral-600 hover:text-neutral-800 dark:text-neutral-300 dark:hover:text-neutral-100"
                         as-child
+                        :is-active="isCurrentUrl(toUrl(item.href))"
+                        :tooltip="item.title"
+                        class="group/footbtn relative h-8 rounded-md px-2
+                               text-[13px] font-medium
+                               text-sidebar-foreground/60
+                               hover:bg-sidebar-accent hover:text-sidebar-accent-foreground
+                               data-[active=true]:bg-sidebar-accent
+                               data-[active=true]:text-sidebar-accent-foreground
+                               transition-colors duration-100"
                     >
                         <component
                             :is="isExternalUrl(item.href) ? 'a' : Link"
                             :href="toUrl(item.href)"
-                            :target="
-                                isExternalUrl(item.href) ? '_blank' : undefined
-                            "
-                            :rel="
-                                isExternalUrl(item.href)
-                                    ? 'noopener noreferrer'
-                                    : undefined
-                            "
+                            :target="isExternalUrl(item.href) ? '_blank' : undefined"
+                            :rel="isExternalUrl(item.href) ? 'noopener noreferrer' : undefined"
+                            class="flex items-center gap-2.5"
                         >
-                            <component :is="item.icon" />
-                            <span>{{ item.title }}</span>
+                            <component
+                                :is="item.icon"
+                                class="h-[15px] w-[15px] flex-shrink-0 stroke-[1.6]"
+                            />
+                            <span class="group-data-[collapsible=icon]:hidden">
+                                {{ item.title }}
+                            </span>
                         </component>
                     </SidebarMenuButton>
                 </SidebarMenuItem>

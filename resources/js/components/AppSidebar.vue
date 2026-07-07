@@ -40,114 +40,91 @@ import { index as workspaceSettings } from '@/routes/workspace-settings';
 import type { NavItem } from '@/types';
 
 const overviewNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutDashboard,
-    },
+    { title: 'Dashboard', href: dashboard(), icon: LayoutDashboard },
 ];
 
 const crmNavItems: NavItem[] = [
-    {
-        title: 'Accounts',
-        href: accounts.index().url,
-        icon: Building2,
-    },
-    {
-        title: 'Catalog',
-        href: products.index().url,
-        icon: Package,
-    },
+    { title: 'Accounts', href: accounts.index().url, icon: Building2 },
+    { title: 'Catalog',  href: products.index().url, icon: Package    },
 ];
 
 const salesNavItems: NavItem[] = [
-    {
-        title: 'Proposal',
-        href: proposals.index().url,
-        icon: FileText,
-    },
-    {
-        title: 'Templates',
-        href: proposalTemplates.index().url,
-        icon: LayoutTemplate,
-    },
+    { title: 'Proposals',  href: proposals.index().url,         icon: FileText       },
+    { title: 'Templates',  href: proposalTemplates.index().url, icon: LayoutTemplate },
 ];
 
 const projectNavItems: NavItem[] = [
-    {
-        title: 'Projects',
-        href: ProjectController.index().url,
-        icon: FolderKanban,
-    },
-    {
-        title: 'Tasks',
-        href: TaskController.index().url,
-        icon: CheckSquare,
-    },
+    { title: 'Projects', href: ProjectController.index().url, icon: FolderKanban },
+    { title: 'Tasks',    href: TaskController.index().url,    icon: CheckSquare  },
 ];
 
 const financeNavItems: NavItem[] = [
-    {
-        title: 'Invoices',
-        href: invoices.index().url,
-        icon: ReceiptText,
-    },
+    { title: 'Invoices', href: invoices.index().url, icon: ReceiptText },
 ];
 
 const reportsNavItems: NavItem[] = [
-    {
-        title: 'Reports',
-        href: reports.index().url,
-        icon: BarChart3,
-    },
+    { title: 'Reports', href: reports.index().url, icon: BarChart3 },
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Business Setup',
-        href: '/setup/industries',
-        icon: Wrench,
-    },
-    {
-        title: 'Business settings',
-        href: workspaceSettings(),
-        icon: Settings2,
-    },
+    { title: 'Business Setup',     href: '/setup/industries', icon: Wrench   },
+    { title: 'Business settings',  href: workspaceSettings(), icon: Settings2 },
 ];
 </script>
 
 <template>
-    <Sidebar
-        collapsible="icon"
-        variant="inset"
-        class="epochweave-sidebar border-r-0"
-    >
-        <SidebarHeader class="p-0 ps-2">
+    <Sidebar collapsible="icon" variant="inset">
+
+        <!-- ── Logo / brand header ──────────────────────── -->
+        <SidebarHeader class="p-0">
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton size="lg" as-child>
+                    <SidebarMenuButton
+                        size="lg"
+                        as-child
+                        class="h-auto px-3 py-3.5 hover:bg-transparent
+                               focus-visible:ring-0 active:bg-transparent"
+                    >
                         <Link :href="dashboard()">
                             <AppLogo />
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
-
-            <div class="mx-3 border-b border-border/60" />
+            <!-- Hairline separator below brand -->
+            <div class="mx-3 border-b border-sidebar-border/50" />
         </SidebarHeader>
 
-        <SidebarContent class="py-3">
-            <NavMain :items="overviewNavItems" group-label="Overview" />
-            <NavMain :items="crmNavItems" group-label="CRM & Inventory" />
-            <NavMain :items="salesNavItems" group-label="Sales Pipeline" />
-            <NavMain :items="projectNavItems" group-label="Project Delivery" />
-            <NavMain :items="financeNavItems" group-label="Finance" />
-            <NavMain :items="reportsNavItems" group-label="Reports" />
+        <!-- ── Navigation ───────────────────────────────── -->
+        <SidebarContent class="px-2 py-3 gap-0">
+            <NavMain :items="overviewNavItems" />
+
+            <NavMain
+                :items="crmNavItems"
+                group-label="CRM & Inventory"
+            />
+            <NavMain
+                :items="salesNavItems"
+                group-label="Sales"
+            />
+            <NavMain
+                :items="projectNavItems"
+                group-label="Delivery"
+            />
+            <NavMain
+                :items="financeNavItems"
+                group-label="Finance"
+            />
+            <NavMain
+                :items="reportsNavItems"
+                group-label="Reports"
+            />
         </SidebarContent>
 
+        <!-- ── Footer ────────────────────────────────────── -->
         <SidebarFooter class="p-0">
-            <div class="mx-3 mb-2 border-t border-border/60" />
-            <NavFooter :items="footerNavItems" class="px-2 pb-1" />
+            <div class="mx-3 border-t border-sidebar-border/50" />
+            <NavFooter :items="footerNavItems" class="px-2 pt-1 pb-1" />
             <div class="px-2 pb-3">
                 <NavUser />
             </div>
